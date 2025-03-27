@@ -365,7 +365,6 @@ function Registro() {
 
         {!registroExitoso && (
           <p className="volver-inicio" onClick={() => navigate('/login')}>
-            Volver a iniciar sesión
           </p>
         )}
       </div>
