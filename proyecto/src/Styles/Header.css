@@ -1,0 +1,71 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  background: linear-gradient(135deg, #1a1a2e, #2b547e); /* Azul oscuro con negro azulado */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3); /* Sombra más marcada */
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  color: #ffffff;
+}
+
+.header__logo img {
+  height: 60px;
+  transition: transform 0.3s ease, filter 0.3s ease;
+  filter: brightness(0.9); /* Reduce el brillo para que combine mejor */
+}
+
+.header__logo img:hover {
+  transform: scale(1.1);
+  filter: brightness(1);
+}
+
+.header__menu {
+  list-style: none;
+  display: flex;
+  margin: 0;
+  padding: 0;
+}
+
+.header__menu-item {
+  margin-left: 25px;
+}
+
+.header__menu-link {
+  text-decoration: none;
+  color: #63b3ed; /* Azul claro para resaltar */
+  font-weight: 600;
+  font-size: 1.1em;
+  padding: 10px 15px;
+  border-radius: 5px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.header__menu-link:hover,
+.header__menu-link:focus {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: #ffdd57; /* Amarillo suave para destacar */
+}
+
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+  }
+  
+  .header__logo {
+    margin-bottom: 15px;
+  }
+  
+  .header__menu {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .header__menu-item {
+    margin: 10px 0;
+  }
+}

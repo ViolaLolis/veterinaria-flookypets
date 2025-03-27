@@ -1,0 +1,65 @@
+.cita-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: linear-gradient(135deg, #000428, #004e92);
+    color: white;
+  }
+  
+  .cita-box {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    width: 350px;
+  }
+  
+  .cita-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .cita-form label {
+    font-size: 16px;
+    text-align: left;
+    display: block;
+  }
+  
+  .cita-form input,
+  .cita-form textarea {
+    width: 100%;
+    padding: 8px;
+    border-radius: 5px;
+    border: none;
+    margin-top: 5px;
+  }
+  
+  .cita-button {
+    margin-top: 15px;
+    padding: 10px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  
+  .cita-button:hover {
+    background-color: #0056b3;
+  }
+  
+  .volver-button {
+    display: block;
+    margin-top: 10px;
+    color: white;
+    text-decoration: none;
+    font-size: 14px;
+  }
+  
+  .volver-button:hover {
+    text-decoration: underline;
+  }
+  
