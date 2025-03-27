@@ -244,7 +244,6 @@ function Registro() {
               <select name="tipoDocumento" value={formData.tipoDocumento} onChange={handleInputChange} required>
                 <option value="">Tipo de Documento</option>
                 <option value="CC">Cédula de Ciudadanía</option>
-                <option value="TI">Tarjeta de Identidad</option>
                 <option value="Pasaporte">Pasaporte</option>
               </select>
             </div>
