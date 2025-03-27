@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import '../Styles/Propietario.css';
 import { Link } from 'react-router-dom';
-import catImage from '../Imagenes/LogoSena.png';
+import catImage from '../Imagenes/flooty.png';
 
 function Propietario() {
   const [catImages, setCatImages] = useState(null);

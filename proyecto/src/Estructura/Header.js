@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import logo from '../Imagenes/LogoSena.png';
+import logo from '../Imagenes/flooty.png';
 
 function Header() {
   return (

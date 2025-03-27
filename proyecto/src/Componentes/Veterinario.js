@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import '../Styles/Veterinario.css';
-import vetImage from '../Imagenes/LogoSena.png';
+import vetImage from '../Imagenes/flooty.png';
 
 function Veterinario() {
   const [catImages, setCatImages] = useState([]);
