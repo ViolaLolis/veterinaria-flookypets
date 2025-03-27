@@ -360,7 +360,7 @@ function Registro() {
         )}
 
         {registroExitoso && (
-          <p className="volver-inicio">Redirigiendo a la página de inicio de sesión...</p>
+          <p className="volver-inicio"></p>
         )}
 
         {!registroExitoso && (
