@@ -5,16 +5,14 @@ const mysql = require('mysql2');
 const app = express();
 const PORT = 3001;
 
-// Middleware
 app.use(cors());
-app.use(express.json()); // Permite recibir JSON en las peticiones
+app.use(express.json());
 
-// Conexión a MySQL
 const db = mysql.createConnection({
   host: '127.0.0.1',
   user: 'root',
   password: '',
-  database: 'BocanegraDB' // Asegúrate de que esta BD exista
+  database: 'BocanegraDB'
 });
 
 db.connect((err) => {
@@ -25,14 +23,12 @@ db.connect((err) => {
   console.log('✅ Conectado a la base de datos MySQL');
 });
 
-// Ruta de prueba
 app.get('/', (req, res) => {
   res.send('🚀 Servidor funcionando correctamente 🚀');
 });
 
-// Ruta para registrar usuario
 app.post('/api/registro', (req, res) => {
-  console.log('📥 Datos recibidos:', req.body); // Verificar datos en consola
+  console.log('📥 Datos recibidos:', req.body);
 
   const { nombre, fecha_nacimiento, ciudad, correo, contrasena } = req.body;
 
@@ -50,7 +46,6 @@ app.post('/api/registro', (req, res) => {
   });
 });
 
-// Iniciar servidor
 app.listen(PORT, () => {
   console.log(`✅ Servidor corriendo en http://localhost:${PORT}`);
 });
