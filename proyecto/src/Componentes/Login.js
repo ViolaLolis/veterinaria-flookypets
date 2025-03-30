@@ -3,16 +3,16 @@ import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import "../Styles/Login.css";
 
-function Login() {
+function Login({ setUser }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const users = [
-    { email: 'admin@example.com', password: '1234', role: 'admin' },
-    { email: 'vet@example.com', password: '5678', role: 'veterinario' },
-    { email: 'user@example.com', password: 'abcd', role: 'usuario' }
+    { email: 'admin@example.com', password: '1234', role: 'admin', name: 'Administrador' },
+    { email: 'vet@example.com', password: '5678', role: 'veterinario', name: 'Dr. Veterinario' },
+    { email: 'user@example.com', password: 'abcd', role: 'usuario', name: 'Juan Pérez' }
   ];
 
   const validateInputs = () => {
@@ -33,7 +33,18 @@ function Login() {
     const foundUser = users.find(user => user.email === email && user.password === password);
     
     if (foundUser) {
-      navigate(`/${foundUser.role}`);
+      // Guardar el usuario en el estado global y en localStorage
+      setUser(foundUser);
+      localStorage.setItem('user', JSON.stringify(foundUser));
+      
+      // Redirigir según el rol
+      if (foundUser.role === 'admin') {
+        navigate('/admin');
+      } else if (foundUser.role === 'veterinario') {
+        navigate('/veterinario');
+      } else {
+        navigate('/usuario');
+      }
     } else {
       setError('⚠ Correo electrónico o contraseña incorrectos');
     }
@@ -82,7 +93,6 @@ function Login() {
         </div>
       </div>
 
-      {/* Nuevo footer con botón para volver al main */}
       <div className="login-footer">
         <button className="btn-back" onClick={() => navigate('/')}>🔙 Volver al inicio</button>
       </div>

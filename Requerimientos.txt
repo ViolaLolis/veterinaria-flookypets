@@ -1,1 +1,2 @@
 npm i react-scripts 
+npm install @emailjs/browser

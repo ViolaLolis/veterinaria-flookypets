@@ -16,30 +16,45 @@ import RegistroVeterinario from './Componentes/RegistrarVeterinario';
 import AgendarCita from './Componentes/AgendarCita'; 
 import EliminarUsuario from "./Componentes/EliminarUsuario.js";
 import EliminarMascota from "./Componentes/EliminarMascota.js";
+import { Protegida } from "./Seguridad/Protegidos.js";
 
 function App() {
+  const [user, setUser] = React.useState(null);
+
   return (
     <Router>
       <Routes>
         <Route path="/" element={<Main />} />
-        <Route path="/login" element={<Login />} />
+        <Route path="/login" element={<Login setUser={setUser} />} />
         <Route path="/olvide-contraseña" element={<ForgotPassword />} />
-        <Route path="/admin" element={<Admin />} />
-        <Route path="/registrar-mascota" element={<RegistrarMascota />} />
+        
+        {/* Rutas protegidas para admin */}
+        <Route element={<Protegida user={user} allowedRoles={['admin']} />}>
+          <Route path="/admin" element={<Admin />} />
+          <Route path="/registrar-veterinario" element={<RegistroVeterinario />} />
+          <Route path="/eliminar-usuario" element={<EliminarUsuario />} />
+          <Route path="/eliminar-mascotas" element={<EliminarMascota />} />
+        </Route>
+        
+        {/* Rutas protegidas para veterinario */}
+        <Route element={<Protegida user={user} allowedRoles={['veterinario', 'admin']} />}>
+          <Route path="/veterinario" element={<Veterinario />} />
+          <Route path="/registrar-mascota" element={<RegistrarMascota />} />
+          <Route path="/agendar" element={<AgendarCita />} />
+          <Route path="/historial-medico" element={<HistorialMedico />} />
+        </Route>
+        
+        {/* Rutas protegidas para usuario */}
+        <Route element={<Protegida user={user} allowedRoles={['usuario', 'admin', 'veterinario']} />}>
+          <Route path="/usuario" element={<UserMenu />} />
+          <Route path="/ver-citas" element={<VerCitas />} />
+          <Route path="/ver-mascotas" element={<VerMascotas />} />
+        </Route>
+        
         <Route path="/register" element={<Registro />} />
-        <Route path="/usuario" element={<UserMenu />} />
-        <Route path="/veterinario" element={<Veterinario />} />
-        <Route path="/ver-citas" element={<VerCitas />} />
-        <Route path="/historial-medico" element={<HistorialMedico />} />
-        <Route path="/ver-mascotas" element={<VerMascotas />} />
-        <Route path="/agendar" element={<AgendarCita />} />
-        <Route path="/eliminar-usuario" element={<EliminarUsuario />} />
-        <Route path="/eliminar-mascotas" element={<EliminarMascota />} />
-        <Route path="/registrar-veterinario" element={<RegistroVeterinario/>} />
       </Routes>
     </Router>
   );
 }
 
 export default App;
-
