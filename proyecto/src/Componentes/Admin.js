@@ -43,6 +43,7 @@ const AdminPanel = () => {
           <option value="admin">Administradores</option>
           <option value="vet">Veterinarios</option>
           <option value="client">Clientes</option>
+
         </select>
       </div>
 

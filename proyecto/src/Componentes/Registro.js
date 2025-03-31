@@ -25,6 +25,20 @@ function Registro() {
         verificarContrasena: '',
         codigoIngresado: '',
     });
+    const [fieldErrors, setFieldErrors] = useState({
+        nombre: '',
+        apellido: '',
+        telefono: '',
+        telefonoFijo: '',
+        direccion: '',
+        tipoDocumento: '',
+        numeroDocumento: '',
+        fechaNacimiento: '',
+        correo: '',
+        contrasena: '',
+        verificarContrasena: '',
+        codigoIngresado: '',
+    });
     const [codigoGenerado, setCodigoGenerado] = useState('');
     const [tiempoRestante, setTiempoRestante] = useState(60);
     const [codigoEnviado, setCodigoEnviado] = useState(false);
@@ -105,130 +119,194 @@ function Registro() {
         }
     };
 
-    // Manejar cambios en los inputs
+    // Validar un campo individual en tiempo real
+    const validateField = (name, value) => {
+        let error = '';
+        
+        switch (name) {
+            case 'nombre':
+            case 'apellido':
+                if (!value.trim()) {
+                    error = 'Este campo es obligatorio';
+                } else if (!/^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+$/.test(value)) {
+                    error = 'Solo se permiten letras y espacios';
+                } else if (value.length > 50) {
+                    error = 'Máximo 50 caracteres';
+                }
+                break;
+                
+            case 'telefono':
+                if (!value.trim()) {
+                    error = 'Este campo es obligatorio';
+                } else if (!/^\d{10}$/.test(value)) {
+                    error = 'Debe tener 10 dígitos numéricos';
+                }
+                break;
+                
+            case 'telefonoFijo':
+                if (value && !/^\d{7,10}$/.test(value)) {
+                    error = 'Debe tener entre 7 y 10 dígitos';
+                }
+                break;
+                
+            case 'direccion':
+                if (!value.trim()) {
+                    error = 'Este campo es obligatorio';
+                } else if (value.length > 100) {
+                    error = 'Máximo 100 caracteres';
+                }
+                break;
+                
+            case 'tipoDocumento':
+                if (!value) {
+                    error = 'Seleccione un tipo de documento';
+                }
+                break;
+                
+            case 'numeroDocumento':
+                if (!value.trim()) {
+                    error = 'Este campo es obligatorio';
+                } else if (!/^\d{6,12}$/.test(value)) {
+                    error = 'Debe tener entre 6 y 12 dígitos';
+                }
+                break;
+                
+            case 'fechaNacimiento':
+                if (!value) {
+                    error = 'Este campo es obligatorio';
+                } else {
+                    const fechaNac = new Date(value);
+                    const hoy = new Date();
+                    let edad = hoy.getFullYear() - fechaNac.getFullYear();
+                    const m = hoy.getMonth() - fechaNac.getMonth();
+                    if (m < 0 || (m === 0 && hoy.getDate() < fechaNac.getDate())) {
+                        edad--;
+                    }
+                    if (edad < 18) {
+                        error = 'Debes tener al menos 18 años';
+                    } else if (edad > 120) {
+                        error = 'Fecha de nacimiento no válida';
+                    }
+                }
+                break;
+                
+            case 'correo':
+                if (!value.trim()) {
+                    error = 'Este campo es obligatorio';
+                } else {
+                    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                    if (!emailRegex.test(value)) {
+                        error = 'Correo electrónico no válido';
+                    } else if (value.length > 100) {
+                        error = 'Máximo 100 caracteres';
+                    }
+                }
+                break;
+                
+            case 'contrasena':
+                if (!value.trim()) {
+                    error = 'Este campo es obligatorio';
+                } else if (value.length < 8) {
+                    error = 'Mínimo 8 caracteres';
+                } else if (!/(?=.*[a-z])/.test(value)) {
+                    error = 'Debe contener al menos una minúscula';
+                } else if (!/(?=.*[A-Z])/.test(value)) {
+                    error = 'Debe contener al menos una mayúscula';
+                } else if (!/(?=.*\d)/.test(value)) {
+                    error = 'Debe contener al menos un número';
+                } else if (!/(?=.*[@$!%*?&])/.test(value)) {
+                    error = 'Debe contener al menos un carácter especial (@$!%*?&)';
+                } else if (value.length > 30) {
+                    error = 'Máximo 30 caracteres';
+                }
+                break;
+                
+            case 'verificarContrasena':
+                if (!value.trim()) {
+                    error = 'Este campo es obligatorio';
+                } else if (value !== formData.contrasena) {
+                    error = 'Las contraseñas no coinciden';
+                }
+                break;
+                
+            case 'codigoIngresado':
+                if (!value.trim()) {
+                    error = 'Ingrese el código de verificación';
+                } else if (value.length !== 6) {
+                    error = 'El código debe tener 6 caracteres';
+                }
+                break;
+                
+            default:
+                break;
+        }
+        
+        return error;
+    };
+
+    // Manejar cambios en los inputs con validación en tiempo real
     const handleInputChange = (e) => {
         const { name, value } = e.target;
+        
+        // Validación en tiempo real
+        const error = validateField(name, value);
+        
+        setFieldErrors(prevErrors => ({
+            ...prevErrors,
+            [name]: error
+        }));
+        
         setFormData(prevData => ({
             ...prevData,
             [name]: value
         }));
     };
 
-    // Validar paso 1 (información personal)
-    const validateStep1 = () => {
-        setError('');
-        const { nombre, apellido, telefono, direccion, tipoDocumento, numeroDocumento, fechaNacimiento } = formData;
-
-        if (!nombre.trim()) {
-            setError('Por favor, ingrese su nombre.');
-            return false;
-        }
-        if (!apellido.trim()) {
-            setError('Por favor, ingrese su apellido.');
-            return false;
-        }
-        if (!telefono.trim()) {
-            setError('Por favor, ingrese su número de teléfono.');
-            return false;
-        }
-        if (!/^\d{10}$/.test(telefono)) {
-            setError('El número de teléfono debe tener 10 dígitos numéricos.');
-            return false;
-        }
-        if (!direccion.trim()) {
-            setError('Por favor, ingrese su dirección.');
-            return false;
-        }
-        if (!tipoDocumento) {
-            setError('Por favor, seleccione un tipo de documento.');
-            return false;
-        }
-        if (!numeroDocumento.trim()) {
-            setError('Por favor, ingrese su número de documento.');
-            return false;
-        }
-        if (!/^\d+$/.test(numeroDocumento)) {
-            setError('El número de documento solo debe contener números.');
-            return false;
-        }
-        if (!fechaNacimiento) {
-            setError('Por favor, ingrese su fecha de nacimiento.');
-            return false;
-        }
-
-        const fechaNac = new Date(fechaNacimiento);
-        const hoy = new Date();
-        let edad = hoy.getFullYear() - fechaNac.getFullYear();
-        const m = hoy.getMonth() - fechaNac.getMonth();
-        if (m < 0 || (m === 0 && hoy.getDate() < fechaNac.getDate())) {
-            edad--;
-        }
-        if (edad < 18) {
-            setError('Debe tener 18 años o más para registrarse.');
-            return false;
-        }
-
-        return true;
-    };
-
-    // Validar paso 2 (información de cuenta)
-    const validateStep2 = () => {
-        setError('');
-        const { correo, contrasena, verificarContrasena } = formData;
-
-        if (!correo.trim()) {
-            setError('Por favor, ingrese su correo electrónico.');
-            return false;
+    // Validar todos los campos del paso actual
+    const validateCurrentStep = () => {
+        let isValid = true;
+        const newErrors = {...fieldErrors};
+        
+        if (step === 1) {
+            const fieldsToValidate = ['nombre', 'apellido', 'telefono', 'direccion', 'tipoDocumento', 'numeroDocumento', 'fechaNacimiento'];
+            fieldsToValidate.forEach(field => {
+                const error = validateField(field, formData[field]);
+                newErrors[field] = error;
+                if (error) isValid = false;
+            });
+        } else if (step === 2) {
+            const fieldsToValidate = ['correo', 'contrasena', 'verificarContrasena'];
+            fieldsToValidate.forEach(field => {
+                const error = validateField(field, formData[field]);
+                newErrors[field] = error;
+                if (error) isValid = false;
+            });
+        } else if (step === 3) {
+            if (!codigoEnviado) {
+                const error = validateField('correo', formData.correo);
+                newErrors.correo = error;
+                if (error) isValid = false;
+            } else {
+                const error = validateField('codigoIngresado', formData.codigoIngresado);
+                newErrors.codigoIngresado = error;
+                if (error) isValid = false;
+            }
         }
         
-        // Expresión regular mejorada para validar emails
-        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-        if (!emailRegex.test(correo)) {
-            setError('Por favor, ingrese un correo electrónico válido (ejemplo: usuario@dominio.com).');
-            return false;
-        }
-        
-        // Lista de dominios permitidos
-        const dominiosPermitidos = ['.com', '.co', '.net', '.org', '.edu', '.gov', '.mil'];
-        const dominioValido = dominiosPermitidos.some(dominio => correo.toLowerCase().endsWith(dominio));
-        
-        if (!dominioValido) {
-            setError('El correo electrónico debe terminar en un dominio válido (.com, .co, .net, etc.)');
-            return false;
-        }
-
-        if (!contrasena.trim()) {
-            setError('Por favor, ingrese su contraseña.');
-            return false;
-        }
-        if (contrasena.length < 8) {
-            setError('La contraseña debe tener al menos 8 caracteres.');
-            return false;
-        }
-        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-        if (!passwordRegex.test(contrasena)) {
-            setError('La contraseña debe contener al menos: una mayúscula, una minúscula, un número y un carácter especial (@$!%*?&).');
-            return false;
-        }
-        if (!verificarContrasena.trim()) {
-            setError('Por favor, verifique su contraseña.');
-            return false;
-        }
-        if (contrasena !== verificarContrasena) {
-            setError('Las contraseñas no coinciden.');
-            return false;
-        }
-        return true;
+        setFieldErrors(newErrors);
+        return isValid;
     };
 
     // Avanzar al siguiente paso
     const nextStep = async () => {
         setError('');
-        if (step === 1 && validateStep1()) {
+        if (validateCurrentStep()) {
+            if (step === 2) {
+                await generarCodigo();
+            }
             setStep(prevStep => prevStep + 1);
-        } else if (step === 2 && validateStep2()) {
-            await generarCodigo();
-            setStep(prevStep => prevStep + 1);
+        } else {
+            setError('Por favor, corrige los errores en el formulario antes de continuar.');
         }
     };
 
@@ -241,10 +319,10 @@ function Registro() {
     // Verificar el código ingresado
     const verificarCodigo = () => {
         setError('');
-        if (!formData.codigoIngresado.trim()) {
-            setError('Por favor, ingrese el código de verificación.');
+        if (fieldErrors.codigoIngresado) {
             return;
         }
+        
         if (formData.codigoIngresado.toUpperCase() === codigoGenerado) {
             setCodigoVerificado(true);
             setError('Código verificado correctamente.');
@@ -257,6 +335,7 @@ function Registro() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
+        
         if (!codigoVerificado) {
             setError('Por favor, verifique el código antes de enviar.');
             return;
@@ -303,8 +382,11 @@ function Registro() {
                                 placeholder="Nombre" 
                                 value={formData.nombre} 
                                 onChange={handleInputChange} 
+                                maxLength="50"
+                                className={fieldErrors.nombre ? 'input-error' : ''}
                                 required 
                             />
+                            {fieldErrors.nombre && <span className="error-text">{fieldErrors.nombre}</span>}
                         </div>
                         <div className="input-group">
                             <label>Apellido:</label>
@@ -314,8 +396,11 @@ function Registro() {
                                 placeholder="Apellido" 
                                 value={formData.apellido} 
                                 onChange={handleInputChange} 
+                                maxLength="50"
+                                className={fieldErrors.apellido ? 'input-error' : ''}
                                 required 
                             />
+                            {fieldErrors.apellido && <span className="error-text">{fieldErrors.apellido}</span>}
                         </div>
                         <div className="input-group">
                             <label>Teléfono:</label>
@@ -325,9 +410,11 @@ function Registro() {
                                 placeholder="Teléfono" 
                                 value={formData.telefono} 
                                 onChange={handleInputChange} 
-                                required 
                                 maxLength="10"
+                                className={fieldErrors.telefono ? 'input-error' : ''}
+                                required 
                             />
+                            {fieldErrors.telefono && <span className="error-text">{fieldErrors.telefono}</span>}
                         </div>
                         <div className="input-group">
                             <label>Teléfono Fijo (Opcional):</label>
@@ -337,7 +424,10 @@ function Registro() {
                                 placeholder="Teléfono Fijo (Opcional)" 
                                 value={formData.telefonoFijo} 
                                 onChange={handleInputChange} 
+                                maxLength="10"
+                                className={fieldErrors.telefonoFijo ? 'input-error' : ''}
                             />
+                            {fieldErrors.telefonoFijo && <span className="error-text">{fieldErrors.telefonoFijo}</span>}
                         </div>
                         <div className="input-group">
                             <label>Dirección:</label>
@@ -347,8 +437,11 @@ function Registro() {
                                 placeholder="Dirección" 
                                 value={formData.direccion} 
                                 onChange={handleInputChange} 
+                                maxLength="100"
+                                className={fieldErrors.direccion ? 'input-error' : ''}
                                 required 
                             />
+                            {fieldErrors.direccion && <span className="error-text">{fieldErrors.direccion}</span>}
                         </div>
                         <div className="input-group">
                             <label>Tipo de Documento:</label>
@@ -356,12 +449,14 @@ function Registro() {
                                 name="tipoDocumento" 
                                 value={formData.tipoDocumento} 
                                 onChange={handleInputChange} 
+                                className={fieldErrors.tipoDocumento ? 'input-error' : ''}
                                 required
                             >
-                                <option value="">Tipo de Documento</option>
+                                <option value="">Seleccione un tipo</option>
                                 <option value="CC">Cédula de Ciudadanía</option>
                                 <option value="Pasaporte">Pasaporte</option>
                             </select>
+                            {fieldErrors.tipoDocumento && <span className="error-text">{fieldErrors.tipoDocumento}</span>}
                         </div>
                         <div className="input-group">
                             <label>Número de Documento:</label>
@@ -371,8 +466,11 @@ function Registro() {
                                 placeholder="Número de Documento" 
                                 value={formData.numeroDocumento} 
                                 onChange={handleInputChange} 
+                                maxLength="12"
+                                className={fieldErrors.numeroDocumento ? 'input-error' : ''}
                                 required 
                             />
+                            {fieldErrors.numeroDocumento && <span className="error-text">{fieldErrors.numeroDocumento}</span>}
                         </div>
                         <div className="input-group">
                             <label>Fecha de Nacimiento:</label>
@@ -382,9 +480,11 @@ function Registro() {
                                 placeholder="Fecha de Nacimiento" 
                                 value={formData.fechaNacimiento} 
                                 onChange={handleInputChange} 
+                                className={fieldErrors.fechaNacimiento ? 'input-error' : ''}
                                 required 
                                 max={new Date().toISOString().split('T')[0]}
                             />
+                            {fieldErrors.fechaNacimiento && <span className="error-text">{fieldErrors.fechaNacimiento}</span>}
                         </div>
                     </div>
                 );
@@ -400,8 +500,11 @@ function Registro() {
                                 placeholder="Correo Electrónico" 
                                 value={formData.correo} 
                                 onChange={handleInputChange} 
+                                maxLength="100"
+                                className={fieldErrors.correo ? 'input-error' : ''}
                                 required 
                             />
+                            {fieldErrors.correo && <span className="error-text">{fieldErrors.correo}</span>}
                         </div>
                         <div className="input-group">
                             <label>Contraseña:</label>
@@ -411,9 +514,15 @@ function Registro() {
                                 placeholder="Contraseña" 
                                 value={formData.contrasena} 
                                 onChange={handleInputChange} 
+                                maxLength="30"
+                                className={fieldErrors.contrasena ? 'input-error' : ''}
                                 required 
                             />
-                            <small>Debe contener al menos 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial (@$!%*?&)</small>
+                            {fieldErrors.contrasena ? (
+                                <span className="error-text">{fieldErrors.contrasena}</span>
+                            ) : (
+                                <small>Debe contener al menos: 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial (@$!%*?&)</small>
+                            )}
                         </div>
                         <div className="input-group">
                             <label>Verificar Contraseña:</label>
@@ -423,8 +532,11 @@ function Registro() {
                                 placeholder="Verificar Contraseña" 
                                 value={formData.verificarContrasena} 
                                 onChange={handleInputChange} 
+                                maxLength="30"
+                                className={fieldErrors.verificarContrasena ? 'input-error' : ''}
                                 required 
                             />
+                            {fieldErrors.verificarContrasena && <span className="error-text">{fieldErrors.verificarContrasena}</span>}
                         </div>
                     </div>
                 );
@@ -433,17 +545,32 @@ function Registro() {
                     <div className="step-container">
                         <h2>Verificación de Código</h2>
                         {!codigoEnviado && (
-                            <button 
-                                type="button" 
-                                onClick={nextStep} 
-                                className="btn-generar-codigo"
-                            >
-                                Generar y Enviar Código de Verificación
-                            </button>
+                            <div className="input-group">
+                                <label>Correo Electrónico:</label>
+                                <input 
+                                    type="email" 
+                                    name="correo" 
+                                    placeholder="Correo Electrónico" 
+                                    value={formData.correo} 
+                                    onChange={handleInputChange} 
+                                    maxLength="100"
+                                    className={fieldErrors.correo ? 'input-error' : ''}
+                                    required 
+                                />
+                                {fieldErrors.correo && <span className="error-text">{fieldErrors.correo}</span>}
+                                <button 
+                                    type="button" 
+                                    onClick={nextStep} 
+                                    className="btn-generar-codigo"
+                                    disabled={!!fieldErrors.correo}
+                                >
+                                    Generar y Enviar Código de Verificación
+                                </button>
+                            </div>
                         )}
                         {codigoEnviado && (
                             <div id="verification-section">
-                                <p>Se ha enviado un código de verificación a tu correo electrónico.</p>
+                                <p>Se ha enviado un código de verificación a <strong>{formData.correo}</strong></p>
                                 <div className="input-group">
                                     <label>Ingresa el código de verificación:</label>
                                     <input
@@ -452,14 +579,16 @@ function Registro() {
                                         placeholder="Ingresa el código de verificación"
                                         value={formData.codigoIngresado}
                                         onChange={handleInputChange}
-                                        required
                                         maxLength="6"
+                                        className={fieldErrors.codigoIngresado ? 'input-error' : ''}
+                                        required
                                     />
+                                    {fieldErrors.codigoIngresado && <span className="error-text">{fieldErrors.codigoIngresado}</span>}
                                 </div>
                                 <button 
                                     type="button" 
                                     onClick={verificarCodigo} 
-                                    disabled={codigoVerificado}
+                                    disabled={codigoVerificado || !!fieldErrors.codigoIngresado}
                                     className={codigoVerificado ? 'btn-verified' : 'btn-verify'}
                                 >
                                     {codigoVerificado ? '✓ Código Verificado' : 'Verificar Código'}
@@ -538,6 +667,7 @@ function Registro() {
                                     type="button" 
                                     onClick={nextStep}
                                     className="btn-next"
+                                    disabled={Object.values(fieldErrors).some(error => error)}
                                 >
                                     Siguiente
                                 </button>
