@@ -1,2 +1,10 @@
+//Modulos para que funcione el proyecto
 npm i react-scripts 
 npm install @emailjs/browser
+
+Usuarios de prueba
+Admin: admin@example.com | 1234
+
+Veterinario: vet@example.com | 5678
+
+Usuario: user@example.com | abcd
