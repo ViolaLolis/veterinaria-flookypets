@@ -1,51 +1,34 @@
-const express = require('express');
-const cors = require('cors');
-const mysql = require('mysql2');
+const express = require("express");
+const cors = require("cors");
+const db = require("./db");
 
 const app = express();
-const PORT = 3001;
-
 app.use(cors());
 app.use(express.json());
 
-const db = mysql.createConnection({
-  host: '127.0.0.1',
-  user: 'root',
-  password: '',
-  database: 'BocanegraDB'
-});
-
-db.connect((err) => {
-  if (err) {
-    console.error('❌ Error al conectar a MySQL:', err);
-    return;
-  }
-  console.log('✅ Conectado a la base de datos MySQL');
-});
-
-app.get('/', (req, res) => {
-  res.send('🚀 Servidor funcionando correctamente 🚀');
-});
-
-app.post('/api/registro', (req, res) => {
-  console.log('📥 Datos recibidos:', req.body);
-
-  const { nombre, fecha_nacimiento, ciudad, correo, contrasena } = req.body;
-
-  if (!nombre || !fecha_nacimiento || !ciudad || !correo || !contrasena) {
-    return res.status(400).json({ error: 'Todos los campos son obligatorios' });
-  }
-
-  const sql = 'INSERT INTO usuarios (nombre, fecha_nacimiento, ciudad, correo, contrasena) VALUES (?, ?, ?, ?, ?)';
-  db.query(sql, [nombre, fecha_nacimiento, ciudad, correo, contrasena], (err, result) => {
+app.get("/api/users", (req, res) => {
+  db.query("SELECT * FROM users", (err, results) => {
     if (err) {
-      console.error('❌ Error al registrar usuario:', err);
-      return res.status(500).json({ error: 'Error interno del servidor' });
+      console.error("Error obteniendo usuarios:", err);
+      return res.status(500).json({ error: "Error obteniendo datos" });
     }
-    res.status(201).json({ mensaje: '✅ Usuario registrado correctamente' });
+    res.json(results);
   });
 });
 
+// Ruta para actualizar estado de usuario
+app.put("/api/users/:id", (req, res) => {
+  const { id } = req.params;
+  db.query("UPDATE users SET active = !active WHERE id = ?", [id], (err) => {
+    if (err) {
+      console.error("Error actualizando usuario:", err);
+      return res.status(500).json({ error: "Error actualizando usuario" });
+    }
+    res.json({ success: true });
+  });
+});
+
+const PORT = 5000;
 app.listen(PORT, () => {
-  console.log(`✅ Servidor corriendo en http://localhost:${PORT}`);
+  console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });

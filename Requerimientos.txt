@@ -22,3 +22,8 @@ git pull origin main
 //Ahora para lanzazr el proyecto debemos poner
 git push origin main
 
+// ahora vamos a instalar sus dependencias del server
+npm init -y
+npm install express mysql cors dotenv
+
+
