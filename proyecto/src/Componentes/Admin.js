@@ -1,45 +1,101 @@
-import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import "../Styles/Admin.css";
+import React, { useState, useEffect } from 'react';
 
-function Admin() {
-  const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem('user'));
+const AdminPanel = () => {
+  const [users, setUsers] = useState([]);
+  const [filter, setFilter] = useState('');
+  const [selectedUser, setSelectedUser] = useState(null);
 
-  const handleLogout = () => {
-    localStorage.removeItem('user');
-    navigate('/login');
+  useEffect(() => {
+    const fetchUsers = async () => {
+      const response = await fetch("http://localhost:5000/api/users");
+      const data = await response.json();
+      setUsers(data);
+    };
+    
+    fetchUsers();
+  }, []);
+  
+
+  const handleFilterChange = (event) => {
+    setFilter(event.target.value);
   };
 
+  const toggleUserStatus = async (userId) => {
+    await fetch(`http://localhost:5000/api/users/${userId}`, { method: "PUT" });
+    setUsers(users.map(user => 
+      user.id === userId ? { ...user, active: !user.active } : user
+    ));
+  };
+  
+  const filteredUsers = users.filter(user => 
+    filter === '' || user.role === filter
+  );
+
   return (
-    <div className="admin-container">
-      <header className="admin-header">
-        <nav className="admin-navbar">
-          <button className="logout-button" onClick={handleLogout}>
-            Cerrar Sesión
-          </button>
-        </nav>
-      </header>
+    <div>
+      <h1>Panel de Administración</h1>
 
-      <section className="admin-welcome">
-        <div className="profile-info">
-          <img src='' alt="Foto de perfil" className="profile-pic" />
-          <h2>Bienvenido, {user?.name || 'Administrador'}</h2>
-        </div>
-      </section>
+      {/* Filtros */}
+      <div>
+        <label htmlFor="roleFilter">Filtrar por rol: </label>
+        <select id="roleFilter" onChange={handleFilterChange} aria-label="Filtrar usuarios por rol">
+          <option value="">Todos</option>
+          <option value="admin">Administradores</option>
+          <option value="vet">Veterinarios</option>
+          <option value="client">Clientes</option>
 
-      <section className="admin-menu">
-        <h3>Gestión del Sistema</h3>
-        <div className="admin-options">
-          <Link to="/registrar-mascota" className="admin-button">Registrar Mascota</Link>
-          <Link to="/registrar-veterinario" className="admin-button">Registrar Veterinario</Link>
-          <Link to="/eliminar-usuario" className="admin-button">Eliminar Usuario</Link>
-          <Link to="/eliminar-mascotas" className="admin-button">Eliminar Mascota</Link>
-          <Link to="/agendar" className="admin-button">Agendar Cita</Link>
+        </select>
+      </div>
+
+      {/* Lista de usuarios */}
+      <table>
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Correo</th>
+            <th>Rol</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {filteredUsers.map(user => (
+            <tr key={user.id}>
+              <td>{user.name}</td>
+              <td>{user.email}</td>
+              <td>{user.role}</td>
+              <td>
+                {/* Lupa para detalles */}
+                <button 
+                  onClick={() => setSelectedUser(user)} 
+                  aria-label={`Ver detalles de ${user.name}`}
+                >
+                  🔍
+                </button>
+                {/* Botón de activar/desactivar */}
+                <button 
+                  onClick={() => toggleUserStatus(user.id)} 
+                  aria-label={`Cambiar estado de ${user.name}`}
+                >
+                  {user.active ? 'Desactivar' : 'Activar'}
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      {/* Detalle de usuario seleccionado */}
+      {selectedUser && (
+        <div aria-live="polite">
+          <h2>Detalles de {selectedUser.name}</h2>
+          <p><strong>Correo:</strong> {selectedUser.email}</p>
+          <p><strong>Rol:</strong> {selectedUser.role}</p>
+          <p><strong>Estado:</strong> {selectedUser.active ? 'Activo' : 'Desactivado'}</p>
+          {/* Aquí podrías poner un botón para activar/desactivar */}
         </div>
-      </section>
+      )}
     </div>
   );
-}
+};
 
-export default Admin;
+export default AdminPanel;

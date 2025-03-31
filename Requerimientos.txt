@@ -8,3 +8,22 @@ Admin: admin@example.com | 1234
 Veterinario: vet@example.com | 5678
 
 Usuario: user@example.com | abcd
+
+
+//Para agregar todos los archivos que tenemos y los de mi compañero
+git add .
+
+//Para aregar comentario debemos poner
+git commit -m "el comentario que vayas hacer entre comillas"
+
+//Para actualizar el proyecto que haya echos los otros compañeros si o si se debe hacer
+git pull origin main
+
+//Ahora para lanzazr el proyecto debemos poner
+git push origin main
+
+// ahora vamos a instalar sus dependencias del server
+npm init -y
+npm install express mysql cors dotenv
+
+

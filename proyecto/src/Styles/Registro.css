@@ -19,11 +19,13 @@
   border-radius: 5px;
   font-size: 16px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
 }
 
 .btn-regresar:hover {
   background-color: #c13b48;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
 .registro-box {
@@ -72,6 +74,7 @@
   display: flex;
   flex-direction: column;
   text-align: left;
+  position: relative;
 }
 
 .input-group label {
@@ -79,41 +82,80 @@
   margin-bottom: 5px;
   color: #eee;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  transition: color 0.3s ease;
 }
 
 .input-group input,
 .input-group select {
   padding: 10px;
-  border: none;
+  border: 2px solid transparent;
   border-radius: 5px;
   font-size: 16px;
   background-color: rgba(255, 255, 255, 0.8);
   color: #333;
-  transition: background-color 0.2s ease;
+  transition: all 0.3s ease;
 }
 
 .input-group input:focus,
 .input-group select:focus {
-  outline: 2px solid #007bff;
+  outline: none;
   background-color: white;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
+/* Estilos para campos con error */
+.input-error {
+  border-color: #ff3860 !important;
+  background-color: rgba(255, 56, 96, 0.05) !important;
+  animation: shake 0.5s ease-in-out;
+}
+
+.input-error:focus {
+  box-shadow: 0 0 0 3px rgba(255, 56, 96, 0.25) !important;
+}
+
+.input-group.error label {
+  color: #ff3860;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-5px); }
+  40%, 80% { transform: translateX(5px); }
+}
+
+.error-text {
+  color: #ff3860;
+  font-size: 14px;
+  margin-top: 5px;
+  padding: 5px 8px;
+  background-color: rgba(255, 56, 96, 0.1);
+  border-radius: 4px;
+  display: inline-block;
+  max-width: 100%;
+  word-wrap: break-word;
+  animation: slideIn 0.3s ease-out forwards;
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+@keyframes slideIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .error-message {
-  color: #ff4b5c;
-  font-size: 14px;
-  margin-top: 5px;
-  animation: slideDown 0.3s ease-out;
-}
-
-@keyframes slideDown {
-  from {
-      opacity: 0;
-      transform: translateY(-10px);
-  }
-  to {
-      opacity: 1;
-      transform: translateY(0);
-  }
+  color: #ff3860;
+  font-size: 15px;
+  margin: 10px 0;
+  padding: 10px;
+  background-color: rgba(255, 56, 96, 0.1);
+  border-left: 4px solid #ff3860;
+  border-radius: 0 4px 4px 0;
+  animation: slideIn 0.4s ease-out forwards;
 }
 
 .form-navigation {
@@ -128,7 +170,7 @@
   border-radius: 5px;
   font-size: 16px;
   cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
+  transition: all 0.3s ease;
 }
 
 .form-navigation button:first-child {
@@ -138,6 +180,8 @@
 
 .form-navigation button:first-child:hover {
   background-color: #5a6268;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
 .form-navigation button:last-child {
@@ -147,10 +191,15 @@
 
 .form-navigation button:last-child:hover {
   background-color: #0056b3;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
-.form-navigation button:active {
-  transform: scale(0.95);
+.form-navigation button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
 }
 
 .btn-submit {
@@ -161,12 +210,14 @@
   border-radius: 5px;
   font-size: 18px;
   cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
+  transition: all 0.3s ease;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .btn-submit:hover {
   background-color: #1e7e34;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .btn-submit:active {
@@ -179,12 +230,13 @@
   color: #ffffff;
   cursor: pointer;
   text-decoration: none;
-  transition: color 0.3s ease;
+  transition: all 0.3s ease;
 }
 
 .volver-inicio:hover {
   text-decoration: underline;
   color: #ddd;
+  transform: translateX(3px);
 }
 
 #verification-section {
@@ -194,6 +246,11 @@
   border-radius: 5px;
   background-color: rgba(255, 255, 255, 0.05);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+#verification-section:hover {
+  background-color: rgba(255, 255, 255, 0.08);
 }
 
 #verification-section p {
@@ -214,11 +271,13 @@
   cursor: pointer;
   background-color: #f44336;
   color: white;
-  transition: background-color 0.3s ease, transform 0.2s ease;
+  transition: all 0.3s ease;
 }
 
 #verification-section button:hover {
   background-color: #d32f2f;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
 #verification-section button:active {
@@ -228,37 +287,68 @@
 .timer-text {
   font-size: 0.9em;
   color: orange;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.6; }
+  100% { opacity: 1; }
 }
 
 .success-message {
   color: #4caf50;
   font-weight: bold;
   margin-top: 15px;
-  animation: fadeIn 0.5s ease-out;
+  padding: 10px;
+  background-color: rgba(76, 175, 80, 0.1);
+  border-left: 4px solid #4caf50;
+  border-radius: 0 4px 4px 0;
+  animation: slideIn 0.4s ease-out forwards;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .progress-container {
   display: flex;
   justify-content: center;
+  align-items: center;
   margin-bottom: 20px;
 }
 
 .progress-circle {
-  width: 20px;
-  height: 20px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   background-color: #ddd;
   margin: 0 10px;
-  display: inline-block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   opacity: 0.7;
-  transition: background-color 0.3s ease, transform 0.2s ease;
+  transition: all 0.3s ease;
+  position: relative;
 }
 
 .progress-circle.active {
   background-color: #007bff;
   opacity: 1;
   transform: scale(1.1);
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
+}
+
+.progress-circle.completed {
+  background-color: #28a745;
+}
+
+.progress-line {
+  height: 2px;
+  width: 30px;
+  background-color: #ddd;
+  transition: background-color 0.3s ease;
+}
+
+.progress-line.active {
+  background-color: #007bff;
 }
 
 .btn-generar-codigo {
@@ -269,14 +359,44 @@
   cursor: pointer;
   background-color: #007bff;
   color: white;
-  transition: background-color 0.3s ease, transform 0.2s ease;
+  transition: all 0.3s ease;
   margin-top: 10px;
 }
 
 .btn-generar-codigo:hover {
   background-color: #0056b3;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
-.btn-generar-codigo:active {
-  transform: scale(0.95);
+.btn-generar-codigo:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.btn-verify {
+  background-color: #ff9800;
+}
+
+.btn-verify:hover {
+  background-color: #e68a00;
+}
+
+.btn-verified {
+  background-color: #4caf50;
+  cursor: default !important;
+}
+
+.btn-verified:hover {
+  background-color: #4caf50;
+}
+
+.btn-resend {
+  background-color: #9c27b0;
+}
+
+.btn-resend:hover {
+  background-color: #7b1fa2;
 }
