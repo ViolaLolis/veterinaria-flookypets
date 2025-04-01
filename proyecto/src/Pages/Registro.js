@@ -380,7 +380,7 @@ function Registro() {
                             <input 
                                 type="text" 
                                 name="nombre" 
-                                placeholder="Nombre" 
+                                placeholder="Nombre"
                                 value={formData.nombre} 
                                 onChange={handleInputChange} 
                                 maxLength="50"
@@ -607,7 +607,7 @@ function Registro() {
                                     </button>
                                 )}
                                 {codigoVerificado && (
-                                    <p className="success-message">✓ Código verificado. Puedes continuar.</p>
+                                    <p className="success-message">✓ Puedes continuar.</p>
                                 )}
                             </div>
                         )}

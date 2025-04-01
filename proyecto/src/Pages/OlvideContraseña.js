@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import '../Styles/OlvideContraseña';
+import '../Styles/OlvidarContraseña.css';
 
 function OlvideContraseña() {
   const [step, setStep] = useState(1);
@@ -39,9 +39,7 @@ function OlvideContraseña() {
             {step > 1 ? '✓' : '1'}
           </span>
           <span className="progress-line"></span>
-          <span className={`progress-circle ${step === 2 ? 'active' : ''}`}>
-            2
-          </span>
+          <span className={`progress-circle ${step === 2 ? 'active' : ''}`}>2</span>
         </div>
 
         {step === 1 && (
@@ -62,9 +60,7 @@ function OlvideContraseña() {
               {errors.correo && <p className="error-message">{errors.correo.message}</p>}
             </div>
 
-            <button type="submit" className="btn-submit">
-              Verificar Correo
-            </button>
+            <button type="submit" className="btn-submit">Verificar Correo</button>
           </form>
         )}
 
@@ -106,28 +102,17 @@ function OlvideContraseña() {
             </div>
 
             <div className="form-navigation">
-              <button 
-                type="button" 
-                className="btn-prev"
-                onClick={() => setStep(1)}
-              >
-                Anterior
-              </button>
-              <button type="submit" className="btn-submit">
-                Cambiar Contraseña
-              </button>
+              <button type="button" className="btn-prev"onClick={() => setStep(1)}>Anterior</button>
+              <button type="submit" className="btn-submit">Cambiar Contraseña</button>
             </div>
           </form>
         )}
 
         <div className="login-links">
-          <Link to="/login" className="volver-inicio">
-            Volver a Iniciar Sesión
-          </Link>
+          <Link to="/login" className="volver-inicio">Volver a Iniciar Sesión</Link>
         </div>
       </div>
     </div>
   );
 }
-
 export default OlvideContraseña;

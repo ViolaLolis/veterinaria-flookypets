@@ -1,6 +1,5 @@
 import React from 'react';
 import '../Styles/Hero.css';
-import Carrusel from '../Estructura/Carrusel';
 
 function Hero() {
   return (
@@ -16,7 +15,6 @@ function Hero() {
           </div>
         </div>
       </div>
-      <Carrusel />
     </section>
   );
 }

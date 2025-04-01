@@ -1,49 +1,126 @@
+/* Footer.css - Estilo Cálido y Vibrante para Veterinaria */
+
 footer {
-  background: linear-gradient(135deg, #2b547e, #1a1a2e); /* Azul oscuro con negro azulado */
-  padding: 15px 20px;
-  text-align: center;
-  border-top: 1px solid #444; /* Borde más sutil */
-  position: sticky;
-  bottom: 0;
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  background: linear-gradient(135deg, #FF7E5F, #FEB47B); /* Degradado naranja cálido */
+  color: #fff;
+  padding: 3rem 0;
+  font-family: 'Montserrat', sans-serif;
+  box-shadow: 0 -5px 15px rgba(254, 180, 123, 0.3);
 }
 
 .footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
   display: flex;
-  justify-content: space-around;
-  align-items: center;
-  width: 100%;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 0 2rem;
 }
 
 .footer-container p {
-  margin: 0 15px;
-  font-size: 0.9em;
-  color: #d3d3d3; /* Texto en gris claro para mejor contraste */
-  white-space: nowrap;
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 500;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
 }
 
 .footer-container a {
-  color: #63b3ed; /* Azul claro para resaltar los enlaces */
+  color: #fff;
   text-decoration: none;
-  font-weight: bold;
-  transition: color 0.3s ease;
+  transition: all 0.3s ease;
+  font-weight: 600;
+  padding: 0.2rem 0.5rem;
+  border-radius: 20px;
 }
 
 .footer-container a:hover {
-  text-decoration: underline;
-  color: #fff; /* Cambio a blanco al pasar el mouse */
+  background-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+  text-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
+/* Estilo especial para iconos */
+.footer-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: rgba(255, 255, 255, 0.15);
+  padding: 0.5rem 1rem;
+  border-radius: 30px;
+  transition: all 0.3s ease;
+}
+
+.footer-icon:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
+.social-links {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.social-links a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.social-links a:hover {
+  background-color: #fff;
+  color: #FF7E5F;
+  transform: scale(1.1) rotate(5deg);
+}
+
+/* Efecto de ola decorativo */
+.footer-wave {
+  position: relative;
+  top: -1px;
+  width: 100%;
+  overflow: hidden;
+  line-height: 0;
+}
+
+.footer-wave svg {
+  position: relative;
+  display: block;
+  width: calc(100% + 1.3px);
+  height: 50px;
+}
+
+.footer-wave .shape-fill {
+  fill: #FFFFFF;
+}
+
+/* Responsive */
 @media (max-width: 768px) {
-  .footer-container {
-    flex-direction: column;
-    text-align: center;
+  footer {
+    padding: 2.5rem 0;
   }
+  
+  .footer-container {
+    gap: 0.8rem;
+  }
+  
   .footer-container p {
-    margin: 5px 0;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .social-links {
+    gap: 1rem;
+  }
+  
+  .footer-icon {
+    padding: 0.3rem 0.8rem;
   }
 }
