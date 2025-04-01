@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import '../Styles/Registro.css';
 import { send } from '@emailjs/browser';
 
@@ -685,9 +686,10 @@ function Registro() {
                     </form>
                 )}
 
-                <p className="login-link">
-                    ¿Ya tienes una cuenta? <span onClick={() => navigate('/login')}>Inicia sesión aquí</span>
-                </p>
+            <div className="login-links">
+              <Link to="/login" className="link">¿Ya tienes una cuenta?</Link>
+            </div>
+
             </div>
         </div>
     );

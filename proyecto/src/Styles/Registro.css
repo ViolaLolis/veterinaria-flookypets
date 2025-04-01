@@ -107,7 +107,6 @@
 /* Estilos para campos con error */
 .input-error {
   border-color: #ff3860 !important;
-  background-color: rgba(255, 56, 96, 0.05) !important;
   animation: shake 0.5s ease-in-out;
 }
 
