@@ -11,10 +11,10 @@ function Main() {
   return (
     <div>
       <Header />
+      <ImageCarousel />
       <Hero />
       <Servicios />
       <AboutUs />
-      <ImageCarousel />
       <ContactInfo />
       <Footer />
     </div> 

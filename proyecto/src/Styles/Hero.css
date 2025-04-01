@@ -15,7 +15,6 @@
   left: 0;
   right: 0;
   height: 8px;
-  background: linear-gradient(to right, #ffd700, #ffcc00, #ffd700);
 }
 
 .hero__content {
@@ -96,21 +95,6 @@
   position: absolute;
   opacity: 0.05;
   z-index: 1;
-}
-
-.hero__paw--1 {
-  top: 20%;
-  left: 10%;
-  width: 100px;
-  color: #ffaa00;
-}
-
-.hero__paw--2 {
-  bottom: 15%;
-  right: 8%;
-  width: 120px;
-  color: #ffaa00;
-  transform: rotate(20deg);
 }
 
 /* Animaciones */
