@@ -26,4 +26,11 @@ git push origin main
 npm init -y
 npm install express mysql cors dotenv
 
+Luego seleccionamos la carpeta del servidor//
+cd servidor.js
+npm install
+
+Para luego ejecutar el servidor para que quede activo
+node server.js
+
 

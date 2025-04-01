@@ -1,21 +1,21 @@
 import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import Main from "./Componentes/Main";
-import Login from "./Componentes/Login";
-import Admin from "./Componentes/Admin"; 
-import RegistrarMascota from "./Componentes/RegistrarMascota";
-import Registro from "./Componentes/Registro";
-import ForgotPassword from "./Componentes/OlvideContraseña";
-import UserMenu from "./Componentes/Usuario";  
+import Main from "./Pages/Main.js";
+import Login from "./Pages/Login.js";
+import Admin from "./Pages/Admin.js"; 
+import RegistrarMascota from "./Pages/RegistrarMascota.js";
+import Registro from "./Pages/Registro.js";
+import ForgotPassword from "./Pages/OlvideContraseña.js";
+import UserMenu from "./Pages/Usuario.js";  
 import "./Styles/Header.css";
-import Veterinario from "./Componentes/Veterinario";
-import VerCitas from "./Componentes/VerCitas";
-import HistorialMedico from "./Componentes/HistorialMedico";
-import VerMascotas from "./Componentes/VerMascotas";
-import RegistroVeterinario from './Componentes/RegistrarVeterinario';
-import AgendarCita from './Componentes/AgendarCita'; 
-import EliminarUsuario from "./Componentes/EliminarUsuario.js";
-import EliminarMascota from "./Componentes/EliminarMascota.js";
+import Veterinario from "./Pages/Veterinario.js";
+import VerCitas from "./Pages/VerCitas.js";
+import HistorialMedico from "./Pages/HistorialMedico.js";
+import VerMascotas from "./Pages/VerMascotas.js";
+import RegistroVeterinario from './Pages/RegistrarVeterinario.js';
+import AgendarCita from './Pages/AgendarCita.js'; 
+import EliminarUsuario from "./Pages/EliminarUsuario.js";
+import EliminarMascota from "./Pages/EliminarMascota.js";
 import { Protegida } from "./Seguridad/Protegidos.js";
 
 function App() {
