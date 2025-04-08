@@ -13,6 +13,7 @@ Usuario: user@example.com | abcd
 //Para agregar todos los archivos que tenemos y los de mi compañero
 git add .
 
+
 //Para aregar comentario debemos poner
 git commit -m "el comentario que vayas hacer entre comillas"
 
@@ -33,4 +34,4 @@ npm install
 Para luego ejecutar el servidor para que quede activo
 node server.js
 
-
+T
