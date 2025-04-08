@@ -1,0 +1,285 @@
+.container {
+  font-family: 'Montserrat', sans-serif; /* Fuente moderna y elegante */
+  background-color: #f9faff; /* Fondo aún más suave */
+  padding: 45px; /* Un poco más de espacio */
+  border-radius: 15px; /* Bordes más redondeados */
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); /* Sombra más intensa y suave */
+  width: 90%;
+  max-width: 750px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 35px; /* Más espacio entre secciones */
+  animation: fadeInUp 0.7s ease-out forwards;
+  margin: 40px auto;
+  text-align: center;
+  position: relative; /* Para posicionar el botón de volver */
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(25px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 30px;
+  width: 100%;
+}
+
+h3 {
+  color: #2c3e50; /* Azul oscuro elegante */
+  font-size: 2.3em;
+  font-weight: 700;
+  margin-bottom: 20px; /* Reducido el margen inferior */
+  letter-spacing: 0.8px;
+}
+
+.calendarContainer {
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.07);
+  transition: transform 0.25s ease-in-out;
+  width: 100%;
+}
+
+.calendarContainer:hover {
+  transform: scale(1.03);
+}
+
+/* Estilos para react-calendar (mejorados) */
+.react-calendar {
+  width: 100%;
+  background: #fff;
+  border: none;
+  border-radius: 10px;
+  font-family: inherit;
+  line-height: 1.2em;
+}
+
+.react-calendar__navigation {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1.2em;
+  padding: 0 1em;
+}
+
+.react-calendar__navigation button {
+  color: #34495e;
+  font-weight: 600;
+  background: none;
+  border: none;
+  padding: 12px;
+  border-radius: 6px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  min-width: 90px;
+}
+
+.react-calendar__navigation button:hover {
+  background-color: #e0f2f7; /* Azul claro al hover */
+  color: #2c3e50;
+}
+
+.react-calendar__month-view__weekdays {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 0.7em;
+  padding: 0 1em;
+}
+
+.react-calendar__month-view__weekdays__weekday {
+  text-align: center;
+  color: #555;
+  font-size: 0.95em;
+  font-weight: 500;
+}
+
+.react-calendar__month-view__days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-gap: 0.3em;
+  padding: 0 1em;
+}
+
+.react-calendar__month-view__days__day {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0.7em;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.react-calendar__month-view__days__day:hover {
+  background-color: #f0f0f0;
+  color: #2c3e50;
+}
+
+.react-calendar__month-view__days__day--weekend {
+  color: #e67e22; /* Naranja más cálido para fines de semana */
+}
+
+.react-calendar__tile--now {
+  background: #2ecc71; /* Verde esmeralda para hoy */
+  color: white;
+  font-weight: bold;
+}
+
+.react-calendar__tile--active {
+  background: #3498db; /* Azul vibrante para seleccionado */
+  color: white;
+  font-weight: bold;
+}
+
+.react-calendar__tile:disabled {
+  color: #ccc;
+  background: #f5f5f5;
+  cursor: default;
+}
+
+.horariosContainer {
+  width: 100%;
+  padding: 25px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.07);
+}
+
+.horariosContainer h4 {
+  color: #34495e;
+  font-size: 1.6em;
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+
+.horariosLista {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+
+.horariosLista li button {
+  padding: 14px 22px;
+  border: none;
+  border-radius: 10px;
+  background-color: #2ecc71; /* Verde esmeralda */
+  color: white;
+  cursor: pointer;
+  font-size: 1.05em;
+  font-weight: 500;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, background-color 0.3s ease;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+  min-width: 90px;
+  text-align: center;
+}
+
+.horariosLista li button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+  background-color: #27ae60; /* Verde ligeramente más oscuro */
+}
+
+.horariosLista li.selected button {
+  background-color: #f39c12; /* Amarillo dorado para seleccionado */
+  color: white;
+  font-weight: bold;
+  transform: scale(1.08);
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+}
+
+.error {
+  color: #c0392b; /* Rojo para mensajes de error */
+  margin-top: 20px;
+  font-size: 1em;
+  font-weight: bold;
+  opacity: 0;
+  transform: translateY(10px);
+  animation: fadeInUp 0.4s ease-out forwards 0.3s;
+}
+
+.exito {
+  color: #27ae60; /* Verde para mensajes de éxito */
+  margin-top: 20px;
+  font-size: 1.1em;
+  font-weight: bold;
+  opacity: 0;
+  transform: translateY(10px);
+  animation: fadeInUp 0.4s ease-out forwards 0.3s;
+}
+
+.agendarBtn {
+  padding: 16px 35px;
+  border: none;
+  border-radius: 12px;
+  background-color: #3498db; /* Azul vibrante */
+  color: white;
+  cursor: pointer;
+  font-size: 1.15em;
+  font-weight: 600;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, background-color 0.3s ease;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+  animation: pulse 1.6s infinite alternate;
+  margin-top: 30px;
+}
+
+@keyframes pulse {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.04);
+  }
+}
+
+.agendarBtn:hover:enabled {
+  transform: translateY(-3px) scale(1.06);
+  box-shadow: 0 7px 15px rgba(0, 0, 0, 0.2);
+  background-color: #2980b9; /* Azul ligeramente más oscuro */
+}
+
+.agendarBtn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  transform: scale(1);
+  box-shadow: none;
+  animation: none;
+}
+
+/* Estilos para el Botón de Volver */
+.volverBtn {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: none;
+  border: none;
+  color: #555;
+  cursor: pointer;
+  font-size: 1em;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: color 0.3s ease;
+  padding: 8px 12px;
+  border-radius: 5px;
+}
+
+.volverBtn:hover {
+  color: #333;
+  background-color: #f0f0f0;
+}
+
+.volverIcon {
+  font-size: 1.1em;
+}

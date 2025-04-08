@@ -1,0 +1,68 @@
+.navbar {
+  background-color: #f8f9fa; /* Fondo gris muy claro */
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 15px 0;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.05); /* Sombra más suave */
+  z-index: 100; /* Asegura que esté por encima de otros elementos */
+  border-top: 1px solid #eee; /* Borde superior sutil */
+}
+
+.navLink {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  color: #6c757d; /* Gris más suave */
+  font-size: 0.9em;
+  transition: color 0.3s ease, transform 0.2s ease-in-out;
+}
+
+.navLink:hover {
+  color: #007bff; /* Azul brillante al hacer hover */
+  transform: translateY(-2px); /* Ligera elevación al hacer hover */
+}
+
+.navLink.active {
+  color: #28a745; /* Verde para el enlace activo */
+  font-weight: 500; /* Ligeramente más grueso el texto activo */
+}
+
+.navIcon {
+  font-size: 1.3em;
+  margin-bottom: 8px;
+  transition: transform 0.2s ease-in-out;
+}
+
+.navLink:hover .navIcon {
+  transform: scale(1.1); /* Ligeramente más grande el icono al hacer hover */
+}
+
+/* Estilos para el Botón de Volver */
+.botonVolver {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: none;
+  border: none;
+  color: #6c757d; /* Gris más suave */
+  font-size: 0.9em;
+  cursor: pointer;
+  transition: color 0.3s ease, transform 0.2s ease-in-out;
+  padding: 5px; /* Ajusta el padding según necesites */
+}
+
+.botonVolver:hover {
+  color: #dc3545; /* Rojo al hacer hover para indicar acción de volver */
+  transform: translateY(-2px);
+}
+
+.iconoVolver {
+  font-size: 1.3em;
+  margin-bottom: 8px;
+}

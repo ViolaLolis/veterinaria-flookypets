@@ -25,7 +25,6 @@ function OlvideContraseña() {
     formState: { errors }, 
     getValues, 
     watch,
-    reset
   } = useForm();
   
   const navigate = useNavigate();

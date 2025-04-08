@@ -34,4 +34,7 @@ npm install
 Para luego ejecutar el servidor para que quede activo
 node server.js
 
-T
+npm install framer-motion
+npm install react-calendar
+npm install @fortawesome/react-fontawesome @fortawesome/free-solid-svg-icons
+npm install @fortawesome/free-brands-svg-icons

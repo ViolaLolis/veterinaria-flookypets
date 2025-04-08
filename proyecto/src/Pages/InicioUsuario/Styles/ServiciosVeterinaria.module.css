@@ -1,0 +1,141 @@
+.container {
+  font-family: 'Nunito Sans', sans-serif;
+  background-color: #f6f9fc;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+  width: 95%;
+  max-width: 800px;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  animation: fadeInUp 0.5s ease-out forwards;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.icon {
+  font-size: 3em;
+  color: #28a745; /* Verde */
+  margin-bottom: 15px;
+}
+
+h3 {
+  color: #333;
+  font-size: 2.8em;
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  color: #6c757d;
+  font-size: 1.1em;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.listaServicios {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 25px;
+  padding-top: 15px;
+}
+
+.servicioItem {
+  display: flex;
+  flex-direction: column;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  background-color: white;
+}
+
+.servicioItem:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.servicioActions {
+  display: flex;
+  padding: 15px;
+  gap: 10px;
+  justify-content: flex-end;
+  background-color: #f8f9fa;
+  border-top: 1px solid #eee;
+}
+
+.verDetallesBtn,
+.agendarBtn {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.95em;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.verDetallesBtn {
+  background-color: #007bff; /* Azul */
+  color: white;
+}
+
+.verDetallesBtn:hover {
+  background-color: #0056b3;
+}
+
+.agendarBtn {
+  background-color: #28a745; /* Verde */
+  color: white;
+  text-decoration: none;
+}
+
+.agendarBtn:hover {
+  background-color: #1e7e34;
+}
+
+.actionIcon {
+  font-size: 1em;
+}
+
+.verTodosContainer {
+  display: flex;
+  justify-content: center;
+  margin-top: 30px;
+}
+
+.verTodosBtn {
+  background-color: #6c757d; /* Gris */
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 15px 30px;
+  font-size: 1.1em;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.verTodosBtn:hover {
+  background-color: #545b62;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+  

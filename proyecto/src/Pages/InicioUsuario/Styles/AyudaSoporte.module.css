@@ -1,0 +1,253 @@
+.container {
+  font-family: 'Montserrat', sans-serif; /* Fuente moderna y legible */
+  background-color: #f9f9f9; /* Fondo gris claro */
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.07); /* Sombra suave */
+  width: 90%;
+  max-width: 700px;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Centra los elementos horizontalmente */
+  gap: 30px;
+  animation: fadeIn 0.5s ease-out forwards;
+  margin: 20px auto; /* Centra el contenedor principal en la página */
+  text-align: center; /* Centra el texto dentro del contenedor por defecto */
+  position: relative; /* Para posicionar el botón de volver */
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 25px;
+  justify-content: center; /* Centra el contenido del header */
+  width: 100%; /* Asegura que el header ocupe el ancho del contenedor */
+}
+
+.icon {
+  font-size: 2em;
+  color: #5cb85c; /* Verde alegre */
+}
+
+h3 {
+  color: #34495e; /* Gris azulado oscuro */
+  font-size: 2.2em;
+  font-weight: 600;
+  margin: 0;
+}
+
+.seccion {
+  margin-bottom: 30px;
+  width: 100%;
+}
+
+.seccion h4 {
+  color: #2c3e50; /* Azul oscuro */
+  font-size: 1.8em;
+  margin-bottom: 15px;
+  border-bottom: 2px solid #ddd;
+  padding-bottom: 10px;
+  text-align: left; /* Alinea el título de la sección a la izquierda */
+}
+
+.faqList {
+  list-style: none;
+  padding: 0;
+  width: 100%; /* Asegura que la lista ocupe el ancho del contenedor */
+}
+
+.faqItem {
+  margin-bottom: 15px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: box-shadow 0.3s ease;
+}
+
+.faqItem:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+}
+
+.questionButton {
+  background-color: #f7f7f7;
+  color: #333;
+  padding: 15px;
+  width: 100%;
+  text-align: left;
+  border: none;
+  cursor: pointer;
+  font-size: 1em;
+  font-weight: 500;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background-color 0.3s ease;
+}
+
+.questionButton:hover {
+  background-color: #eee;
+}
+
+.arrow {
+  font-size: 1.2em;
+  color: #777;
+  transition: transform 0.2s ease-in-out;
+}
+
+.answer {
+  padding: 15px;
+  background-color: #fff;
+  color: #555;
+  font-size: 0.95em;
+  border-top: 1px solid #e0e0e0;
+  animation: slideDown 0.3s ease-out;
+  text-align: left; /* Alinea la respuesta a la izquierda */
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.contactList {
+  list-style: none;
+  padding: 0;
+  width: 100%; /* Asegura que la lista ocupe el ancho del contenedor */
+}
+
+.contactList li {
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #555;
+  text-align: left; /* Alinea los elementos de la lista a la izquierda */
+}
+
+.contactIcon {
+  font-size: 1.2em;
+  color: #007bff; /* Azul */
+}
+
+.contactList a {
+  color: #007bff;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.contactList a:hover {
+  color: #0056b3;
+}
+
+.socialList {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  gap: 20px;
+  justify-content: center; /* Centra los iconos de redes sociales */
+  width: 100%; /* Asegura que la lista ocupe el ancho del contenedor */
+}
+
+.socialList a {
+  color: #666;
+  font-size: 1.5em;
+  text-decoration: none;
+  transition: color 0.3s ease, transform 0.2s ease-in-out;
+}
+
+.socialList a:hover {
+  color: #333;
+  transform: scale(1.1);
+}
+
+/* Estilos para el formulario de contacto (opcional) */
+.contactForm {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f7f7f7;
+  width: 100%; /* Asegura que el formulario ocupe el ancho del contenedor */
+}
+
+.contactForm .formGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.contactForm label {
+  color: #333;
+  margin-bottom: 5px;
+  font-weight: bold;
+  text-align: left; /* Alinea las etiquetas del formulario a la izquierda */
+}
+
+.contactForm input[type="text"],
+.contactForm input[type="email"],
+.contactForm textarea {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1em;
+}
+
+.contactForm .submitButton {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  background-color: #007bff; /* Azul */
+  color: white;
+  font-size: 1.1em;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  align-self: center; /* Centra el botón de enviar */
+}
+
+.contactForm .submitButton:hover {
+  background-color: #0056b3;
+}
+
+/* Estilos para el Botón de Volver */
+.volverBtn {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: none;
+  border: none;
+  color: #555;
+  cursor: pointer;
+  font-size: 1em;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: color 0.3s ease;
+  padding: 8px 12px;
+  border-radius: 5px;
+}
+
+.volverBtn:hover {
+  color: #333;
+  background-color: #f0f0f0;
+}
+
+.volverIcon {
+  font-size: 1.1em;
+}

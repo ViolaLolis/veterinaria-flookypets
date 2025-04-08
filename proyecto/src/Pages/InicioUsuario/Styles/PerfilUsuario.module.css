@@ -1,0 +1,159 @@
+.container {
+  font-family: 'Nunito Sans', sans-serif; /* Fuente moderna y amigable */
+  background-color: #f7f9fc; /* Fondo gris muy claro y suave */
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06); /* Sombra más suave y sutil */
+  width: 95%;
+  max-width: 650px;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Centra los elementos horizontalmente */
+  gap: 35px; /* Increased gap for better spacing */
+  margin: 40px auto; /* More top/bottom margin for better visual separation */
+  position: relative; /* For the "Volver" button positioning */
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 25px; /* Increased gap for better spacing */
+  margin-bottom: 35px; /* Increased margin-bottom */
+  justify-content: center; /* Centra the header content */
+  width: 100%; /* Ensure full width */
+}
+
+.userIcon {
+  font-size: 3.5em; /* Slightly larger user icon */
+  color: #3498db; /* A brighter, more engaging blue */
+}
+
+h3 {
+  color: #2c3e50; /* Darker, more professional heading color */
+  font-size: 2.8em;
+  margin: 0;
+  font-weight: 700; /* Stronger heading weight */
+}
+
+.info {
+  margin-bottom: 40px; /* Increased margin-bottom */
+  width: 100%;
+  padding: 30px; /* Increased padding */
+  border: 1px solid #e6e9ed; /* Lighter border */
+  border-radius: 10px;
+  background-color: #fff;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03); /* Softer shadow for info section */
+}
+
+.info p {
+  margin-bottom: 20px; /* Increased margin-bottom for better spacing */
+  color: #34495e; /* Darker text color */
+  display: flex;
+  align-items: center;
+  gap: 20px; /* Increased gap */
+  font-size: 1.15em; /* Slightly larger font size */
+}
+
+.info p:last-child {
+  margin-bottom: 0; /* Remove margin from the last paragraph */
+}
+
+.info strong {
+  font-weight: 600; /* Slightly bolder label */
+  color: #2c3e50; /* Darker label color */
+  width: 110px; /* Adjust width for better alignment */
+  display: inline-block; /* Ensure consistent width */
+}
+
+.infoIcon {
+  font-size: 1.4em;
+  color: #7f8c8d; /* Medium gray for icons */
+}
+
+.editIcon {
+  font-size: 1em;
+  color: #95a5a6;
+  margin-left: auto;
+  cursor: pointer;
+  transition: color 0.2s ease-in-out;
+}
+
+.editIcon:hover {
+  color: #3498db; /* Brighter blue on hover */
+}
+
+.opciones {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 18px; /* Adjusted gap */
+}
+
+.link,
+.link button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px; /* Adjusted gap */
+  padding: 16px 28px; /* Adjusted padding */
+  text-decoration: none;
+  color: #3498db;
+  border: 1px solid #3498db;
+  border-radius: 10px;
+  text-align: center;
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, box-shadow 0.15s ease-in-out;
+  width: 100%;
+  font-size: 1.15em;
+  font-weight: 500;
+  background-color: transparent;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(52, 152, 219, 0.2); /* Subtle shadow */
+}
+
+.link:hover,
+.link button:hover {
+  background-color: #3498db;
+  color: white;
+  box-shadow: 0 4px 8px rgba(52, 152, 219, 0.4); /* Slightly stronger shadow on hover */
+}
+
+.link:active,
+.link button:active {
+  transform: scale(0.98); /* Subtle press effect */
+  box-shadow: 0 1px 3px rgba(52, 152, 219, 0.3);
+}
+
+.linkIcon {
+  font-size: 1.5em;
+}
+
+/* Styles for the "Volver" Button */
+.volverBtn {
+  position: absolute;
+  top: 20px; /* Increased top spacing */
+  left: 20px; /* Increased left spacing */
+  background: none;
+  border: none;
+  color: #7f8c8d;
+  cursor: pointer;
+  font-size: 1em;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: color 0.2s ease-in-out, transform 0.15s ease-in-out;
+  padding: 10px 15px;
+  border-radius: 8px;
+}
+
+.volverBtn:hover {
+  color: #2c3e50;
+  transform: translateX(-2px);
+}
+
+.volverBtn:active {
+  transform: translateX(0);
+}
+
+.volverIcon {
+  font-size: 1.2em;
+}

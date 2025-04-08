@@ -1,0 +1,131 @@
+.container {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f8f9fa;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  width: 95%;
+  max-width: 900px; /* Aumentamos el ancho máximo para más contenido */
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Centra el contenido horizontalmente */
+  gap: 25px;
+  animation: fadeInUp 0.5s ease-out forwards;
+  margin: 20px auto; /* Centra el contenedor principal en la página */
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+  width: 100%; /* Asegura que el header ocupe el ancho del contenedor */
+  justify-content: center; /* Centra el icono y el título */
+}
+
+.icon {
+  font-size: 1.8em;
+  color: #28a745; /* Verde */
+}
+
+h3 {
+  color: #333;
+  font-size: 2.2em;
+  margin: 0;
+}
+
+.tableContainer {
+  overflow-x: auto; /* Permite desplazamiento horizontal en tablas grandes */
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
+  width: 100%; /* Asegura que la tabla ocupe el ancho del contenedor */
+}
+
+.historialTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95em;
+}
+
+.tableHead th {
+  background-color: #f2f2f2;
+  color: #555;
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 2px solid #ddd;
+}
+
+.tableBody td {
+  border-bottom: 1px solid #eee;
+  padding: 10px 15px;
+}
+
+.tableBody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.tableBody tr:last-child td {
+  border-bottom: none;
+}
+
+.notasColumn {
+  white-space: pre-line; /* Permite múltiples líneas en la columna de notas */
+}
+
+.noHistorial {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  padding: 30px;
+  background-color: #f8f8f8;
+  border-radius: 8px;
+  color: #777;
+  text-align: center;
+  width: 80%; /* Limita el ancho del mensaje de no historial */
+}
+
+.noHistorialIcon {
+  font-size: 2.5em;
+  color: #ccc;
+}
+
+.actions {
+  display: flex;
+  gap: 15px;
+  justify-content: center; /* Centra los botones de acción */
+  width: 100%; /* Asegura que los botones se centren en el ancho del contenedor */
+}
+
+.actionButton {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  background-color: #007bff; /* Azul */
+  color: white;
+  font-size: 0.9em;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.actionButton:hover {
+  background-color: #0056b3;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.actionButton svg {
+  margin-right: 5px;
+}

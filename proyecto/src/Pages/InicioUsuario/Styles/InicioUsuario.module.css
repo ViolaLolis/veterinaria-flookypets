@@ -1,0 +1,84 @@
+.container {
+  font-family: 'Nunito Sans', sans-serif; /* Fuente moderna y amigable */
+  background-color: #f9f9f9; /* Fondo blanco suave */
+  min-height: 100vh;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Mantiene el centrado vertical de los elementos directos */
+  gap: 30px; /* Espacio entre secciones principales */
+  transition: background-color 0.3s ease;
+}
+
+.container:hover {
+  background-color: #f0f0f0; /* Ligerísima variación al pasar el mouse */
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 30px;
+  opacity: 0;
+  transform: translateY(-30px);
+  animation: fadeInDownHeader 0.7s ease-out forwards 0.3s;
+  width: 90%; /* Asegura que el header no se extienda más allá del ancho del contenido */
+  max-width: 900px;
+  justify-content: center; /* Centra el logo y el texto dentro del header */
+}
+
+@keyframes fadeInDownHeader {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.logo {
+  height: 60px; /* Ajusta el tamaño del logo según necesites */
+  width: auto;
+  border-radius: 8px; /* Un pequeño redondeo para suavizar */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Sutil sombra */
+  transition: transform 0.2s ease-in-out;
+}
+
+.logo:hover {
+  transform: scale(1.05);
+}
+
+.welcome {
+  color: #34495e; /* Color de texto principal más sofisticado */
+  font-size: 2.5em;
+  font-weight: 700;
+  text-align: left; /* Mantenemos la alineación a la izquierda junto al logo */
+  margin: 0; /* Elimina el margen predeterminado para controlar el espaciado con gap */
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 90%;
+  max-width: 900px; /* Ancho máximo para el contenido principal */
+  align-items: center; /* Centra los elementos hijos (MisMascotas, etc.) */
+}
+
+/* Puedes agregar estilos específicos para MisMascotas, CitasUsuario, ServiciosVeterinaria aquí */
+
+/* Ejemplo de animación sutil para los componentes dentro de content */
+.content > * {
+  width: 100%; /* Asegura que los componentes hijos ocupen el ancho del contenedor content para que align-items: center funcione */
+  opacity: 0;
+  transform: translateY(15px);
+  animation: fadeInUpContent 0.5s ease-out forwards;
+  animation-delay: calc(0.2s * var(--index)); /* Animación escalonada */
+}
+
+@keyframes fadeInUpContent {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Pasaremos el estilo de la barra de navegación en su propio archivo CSS */

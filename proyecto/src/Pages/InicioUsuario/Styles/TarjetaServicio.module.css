@@ -1,0 +1,74 @@
+.tarjeta {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  }
+  
+  .tarjeta:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
+  }
+  
+  .header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    gap: 10px;
+  }
+  
+  .iconoServicio {
+    font-size: 1.5em;
+    color: #28a745; /* Verde */
+  }
+  
+  .nombreServicio {
+    margin: 0;
+    color: #333;
+    font-size: 1.2em;
+  }
+  
+  .descripcion {
+    color: #6c757d; /* Gris */
+    font-size: 0.95em;
+    line-height: 1.5;
+    margin-bottom: 15px;
+  }
+  
+  .footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .precio {
+    color: #007bff; /* Azul */
+    font-weight: bold;
+    font-size: 1.1em;
+    margin: 0;
+  }
+  
+  .agendar {
+    background-color: #007bff; /* Azul */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 15px;
+    font-size: 0.9em;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  
+  .agendar:hover {
+    background-color: #0056b3;
+  }
+  
+  .iconoAgendar {
+    font-size: 1em;
+  }
