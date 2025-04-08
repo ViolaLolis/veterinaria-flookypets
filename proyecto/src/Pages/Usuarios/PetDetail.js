@@ -94,9 +94,7 @@ function PetDetail({ pets, onDeletePet, onEditPet }) {
           )}
           <button 
             className="schedule-button"
-            onClick={() => navigate('/nueva-cita', { state: { petId: pet.id } })}
-          >
-            Agendar Nueva Cita
+            onClick={() => navigate('/nueva-cita', { state: { petId: pet.id } })}>Agendar Nueva Cita
           </button>
         </div>
       </div>

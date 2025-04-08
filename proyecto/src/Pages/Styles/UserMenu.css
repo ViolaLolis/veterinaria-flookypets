@@ -140,6 +140,22 @@
   transition: transform 0.3s;
 }
 
+.services-section h2{
+  color: #111010;
+}
+
+.services-section h3{
+  color: #111010;
+}
+
+.appointments-section h2{
+  color: #111010;
+}
+
+.pets-section h2{
+  color: #111010;
+}
+
 .pet-card:hover {
   transform: translateY(-5px);
 }

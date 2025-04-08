@@ -10,31 +10,43 @@ function UserMenu({ user }) {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showRequestModal, setShowRequestModal] = useState(false);
+  const [requestType, setRequestType] = useState('');
+  const [requestPetId, setRequestPetId] = useState(null);
+  const [requestNote, setRequestNote] = useState('');
 
+  // Datos de ejemplo
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        // Simular retraso de red
         await new Promise(resolve => setTimeout(resolve, 800));
         
-        // Datos simulados
         const petsData = [
           { 
             id: 1, 
             name: "Max", 
             type: "Perro", 
-            age: 3,
             breed: "Labrador",
-            lastVisit: "2023-05-15"
+            age: 3,
+            weight: "28 kg",
+            lastVisit: "2023-05-15",
+            medicalHistory: [
+              { date: "2023-05-15", description: "Consulta anual", vet: "Dra. Rodríguez" },
+              { date: "2023-03-10", description: "Vacuna antirrábica", vet: "Dra. Rodríguez" }
+            ]
           },
           { 
             id: 2, 
             name: "Luna", 
             type: "Gato", 
-            age: 2,
             breed: "Siamés",
-            lastVisit: "2023-04-20"
+            age: 2,
+            weight: "4 kg",
+            lastVisit: "2023-04-20",
+            medicalHistory: [
+              { date: "2023-04-20", description: "Control postoperatorio", vet: "Dr. Pérez" }
+            ]
           }
         ];
 
@@ -46,7 +58,8 @@ function UserMenu({ user }) {
             date: "15 Mayo 2023", 
             time: "10:00 AM", 
             service: "Consulta General",
-            status: "confirmada"
+            status: "confirmada",
+            notes: "Control de peso"
           },
           { 
             id: 2, 
@@ -55,7 +68,17 @@ function UserMenu({ user }) {
             date: "20 Mayo 2023", 
             time: "3:30 PM", 
             service: "Vacunación",
-            status: "confirmada"
+            status: "confirmada",
+            notes: "Refuerzo anual"
+          },
+          {
+            id: 3,
+            petId: 1,
+            petName: "Max",
+            date: "10 Abril 2023",
+            time: "11:00 AM",
+            service: "Estética",
+            status: "completada"
           }
         ];
 
@@ -65,21 +88,24 @@ function UserMenu({ user }) {
             name: "Consulta General", 
             description: "Revisión básica de salud", 
             price: "$50",
-            duration: "30 min"
+            duration: "30 min",
+            category: "Salud"
           },
           { 
             id: 2, 
             name: "Vacunación", 
             description: "Aplicación de vacunas", 
             price: "$30",
-            duration: "20 min"
+            duration: "20 min",
+            category: "Prevención"
           },
           { 
             id: 3, 
             name: "Estética", 
             description: "Corte de pelo y cuidados", 
             price: "$40",
-            duration: "45 min"
+            duration: "45 min",
+            category: "Belleza"
           }
         ];
 
@@ -102,17 +128,30 @@ function UserMenu({ user }) {
     navigate('/');
   };
 
-  const handleDeletePet = (petId) => {
-    if (window.confirm("¿Está seguro que desea eliminar esta mascota?")) {
-      setPets(pets.filter(pet => pet.id !== petId));
+  const handleRequest = (type, petId = null) => {
+    setRequestType(type);
+    setRequestPetId(petId);
+    setShowRequestModal(true);
+  };
+
+  const submitRequest = () => {
+    // Aquí iría la lógica para enviar la solicitud al administrador
+    alert(`Solicitud de ${getRequestText()} enviada para revisión`);
+    setShowRequestModal(false);
+    setRequestNote('');
+  };
+
+  const getRequestText = () => {
+    switch(requestType) {
+      case 'agregar': return 'nueva mascota';
+      case 'editar': return `edición de ${pets.find(p => p.id === requestPetId)?.name}`;
+      case 'eliminar': return `eliminación de ${pets.find(p => p.id === requestPetId)?.name}`;
+      default: return '';
     }
   };
 
-  const handleCancelAppointment = (appointmentId) => {
-    if (window.confirm("¿Está seguro que desea cancelar esta cita?")) {
-      setAppointments(appointments.filter(app => app.id !== appointmentId));
-    }
-  };
+  const upcomingAppointments = appointments.filter(app => app.status === 'confirmada');
+  const pastAppointments = appointments.filter(app => app.status === 'completada');
 
   const renderContent = () => {
     if (loading) {
@@ -130,7 +169,9 @@ function UserMenu({ user }) {
           <p className="error-message">{error}</p>
           <button 
             className="retry-button"
-            onClick={() => window.location.reload()}>Reintentar
+            onClick={() => window.location.reload()}
+          >
+            Reintentar
           </button>
         </div>
       );
@@ -144,7 +185,9 @@ function UserMenu({ user }) {
               <h2>Mis Mascotas</h2>
               <button 
                 className="add-button"
-                onClick={() => navigate('/agregar-mascota')}>+ Agregar Mascota
+                onClick={() => handleRequest('agregar')}
+              >
+                + Solicitar nueva mascota
               </button>
             </div>
             
@@ -153,7 +196,9 @@ function UserMenu({ user }) {
                 <p>No tienes mascotas registradas</p>
                 <button 
                   className="action-button"
-                  onClick={() => navigate('/agregar-mascota')}>Registrar mi primera mascota
+                  onClick={() => handleRequest('agregar')}
+                >
+                  Solicitar registro de mascota
                 </button>
               </div>
             ) : (
@@ -172,15 +217,21 @@ function UserMenu({ user }) {
                     <div className="pet-actions">
                       <button 
                         className="action-button"
-                        onClick={() => navigate(`/mascota/${pet.id}`)}>Ver detalles
+                        onClick={() => navigate(`/mascota/${pet.id}`, { state: { pet } })}
+                      >
+                        Ver detalles
                       </button>
                       <button 
                         className="action-button secondary"
-                        onClick={() => navigate(`/editar-mascota/${pet.id}`)}>Editar
+                        onClick={() => handleRequest('editar', pet.id)}
+                      >
+                        Solicitar edición
                       </button>
                       <button 
                         className="action-button danger"
-                        onClick={() => handleDeletePet(pet.id)}>Eliminar
+                        onClick={() => handleRequest('eliminar', pet.id)}
+                      >
+                        Solicitar eliminación
                       </button>
                     </div>
                   </div>
@@ -196,22 +247,26 @@ function UserMenu({ user }) {
               <h2>Próximas Citas</h2>
               <button 
                 className="add-button"
-                onClick={() => navigate('/nueva-cita')}>+ Nueva Cita
+                onClick={() => navigate('/nueva-cita', { state: { pets } })}
+              >
+                + Nueva Cita
               </button>
             </div>
             
-            {appointments.length === 0 ? (
+            {upcomingAppointments.length === 0 ? (
               <div className="empty-state">
                 <p>No tienes citas programadas</p>
                 <button 
                   className="action-button"
-                  onClick={() => navigate('/nueva-cita')}>Agendar mi primera cita
+                  onClick={() => navigate('/nueva-cita', { state: { pets } })}
+                >
+                  Agendar mi primera cita
                 </button>
               </div>
             ) : (
               <>
                 <div className="appointments-list">
-                  {appointments.map(app => (
+                  {upcomingAppointments.map(app => (
                     <div key={app.id} className={`appointment-card ${app.status}`}>
                       <div className="appointment-date">
                         <span className="date">{app.date}</span>
@@ -221,17 +276,32 @@ function UserMenu({ user }) {
                         <h3>{app.service}</h3>
                         <p>Para: {app.petName}</p>
                         <span className={`status-badge ${app.status}`}>
-                          {app.status === 'confirmada' ? 'Confirmada' : 'Completada'}
+                          Confirmada
                         </span>
                       </div>
                       <div className="appointment-actions">
                         <button 
                           className="action-button small"
-                          onClick={() => navigate(`/reagendar-cita/${app.id}`)}>Reagendar
+                          onClick={() => navigate(`/reagendar-cita/${app.id}`, { 
+                            state: { 
+                              appointment: app,
+                              pets 
+                            } 
+                          })}
+                        >
+                          Reagendar
                         </button>
                         <button 
                           className="action-button small danger"
-                          onClick={() => handleCancelAppointment(app.id)}>Cancelar
+                          onClick={() => {
+                            if (window.confirm("¿Estás seguro de cancelar esta cita?")) {
+                              setAppointments(appointments.map(a => 
+                                a.id === app.id ? { ...a, status: 'cancelada' } : a
+                              ));
+                            }
+                          }}
+                        >
+                          Cancelar
                         </button>
                       </div>
                     </div>
@@ -240,7 +310,9 @@ function UserMenu({ user }) {
                 
                 <button 
                   className="view-all"
-                  onClick={() => navigate('/todas-citas')}>Ver historial de citas →
+                  onClick={() => navigate('/todas-citas', { state: { appointments, pets } })}
+                >
+                  Ver historial de citas →
                 </button>
               </>
             )}
@@ -256,20 +328,25 @@ function UserMenu({ user }) {
                 <div key={service.id} className="service-card">
                   <div className="service-header">
                     <h3>{service.name}</h3>
-                    <span className="duration">{service.duration}</span>
+                    <span className="service-category">{service.category}</span>
                   </div>
                   <p>{service.description}</p>
-                  <div className="service-footer">
-                    <span className="price">{service.price}</span>
-                    <button 
-                      className="action-button small"
-                      onClick={() => navigate('/nueva-cita', { 
-                        state: { 
-                          service: service.name,
-                          duration: service.duration
-                        }})}>Agendar
-                    </button>
+                  <div className="service-meta">
+                    <span>⏱️ {service.duration}</span>
+                    <span>💵 {service.price}</span>
                   </div>
+                  <button 
+                    className="action-button small"
+                    onClick={() => navigate('/nueva-cita', { 
+                      state: { 
+                        service: service.name,
+                        duration: service.duration,
+                        pets 
+                      } 
+                    })}
+                  >
+                    Agendar
+                  </button>
                 </div>
               ))}
             </div>
@@ -318,7 +395,9 @@ function UserMenu({ user }) {
                 </button>
                 <button 
                   className="action-button secondary"
-                  onClick={() => navigate('/cambiar-contrasena')}>Cambiar Contraseña
+                  onClick={() => navigate('/cambiar-contrasena')}
+                >
+                  Cambiar Contraseña
                 </button>
               </div>
             </div>
@@ -356,8 +435,8 @@ function UserMenu({ user }) {
           >
             <span className="nav-icon">📅</span>
             <span>Mis Citas</span>
-            {appointments.length > 0 && (
-              <span className="badge">{appointments.length}</span>
+            {upcomingAppointments.length > 0 && (
+              <span className="badge">{upcomingAppointments.length}</span>
             )}
           </button>
           
@@ -387,6 +466,42 @@ function UserMenu({ user }) {
       <div className="main-content">
         {renderContent()}
       </div>
+
+      {/* Modal de solicitud */}
+      {showRequestModal && (
+        <div className="request-modal">
+          <div className="modal-content">
+            <h3>Solicitud de {getRequestText()}</h3>
+            
+            {requestType !== 'agregar' && (
+              <p>Mascota: {pets.find(p => p.id === requestPetId)?.name}</p>
+            )}
+            
+            <textarea
+              placeholder={`Explique el motivo de su solicitud...`}
+              value={requestNote}
+              onChange={(e) => setRequestNote(e.target.value)}
+              rows="4"
+            />
+            
+            <div className="modal-actions">
+              <button 
+                className="modal-button cancel"
+                onClick={() => setShowRequestModal(false)}
+              >
+                Cancelar
+              </button>
+              <button 
+                className="modal-button confirm"
+                onClick={submitRequest}
+                disabled={!requestNote}
+              >
+                Enviar Solicitud
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

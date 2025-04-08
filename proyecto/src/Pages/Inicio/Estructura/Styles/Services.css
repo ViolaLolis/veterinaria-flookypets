@@ -1,159 +1,298 @@
 /* Services.css */
 
 .services {
-  padding: 4rem 2rem;
-  background-color: #f9f9f9;
+  padding: 5rem 2rem;
+  background-color: #f4f6f8; /* Fondo gris claro */
   text-align: center;
+  overflow: hidden; /* Para contener animaciones */
 }
 
 .services__title {
-  font-size: 2.5rem;
-  color: #2c3e50;
-  margin-bottom: 1rem;
+  font-size: 3rem;
+  color: #333;
+  margin-bottom: 1.5rem;
   font-weight: 700;
   position: relative;
   display: inline-block;
+  transform: translateY(-10px);
+  opacity: 0;
+  animation: slideInDown 0.7s ease-out forwards;
 }
+
+.services__title::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 20%;
+  border-radius: 2px;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 4px;
+  background: linear-gradient(90deg, #3498db, #2ecc71);
+  border-radius: 2px;
+  opacity: 0;
+  transform: scaleX(0); /* Animación de entrada desde el centro */
+  transition: transform 0.5s cubic-bezier(0.215, 0.61, 0.355, 1), opacity 0.5s cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+
 
 .services__title::after {
   content: '';
   position: absolute;
   width: 60%;
   height: 4px;
-  background: linear-gradient(90deg, #3498db, #2ecc71);
-  bottom: -10px;
+  background: linear-gradient(to right, #ffd700, #ffaa00);
+  bottom: -15px;
   left: 20%;
   border-radius: 2px;
 }
 
 .services__subtitle {
-  font-size: 1.2rem;
-  color: #7f8c8d;
-  margin-bottom: 3rem;
+  font-size: 1.25rem;
+  color: #777;
+  margin-bottom: 3.5rem;
   font-weight: 400;
+  transform: translateY(10px);
+  opacity: 0;
+  animation: slideInUp 0.7s ease-out 0.2s forwards;
 }
 
 .services__list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 3rem;
   max-width: 1400px;
   margin: 0 auto;
+  padding: 2rem;
+  border-radius: 15px;
 }
 
 .services__item {
-  background-color: white;
-  border-radius: 12px;
+  background-color: var(--white);
+  border-radius: 15px;
   overflow: hidden;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
   display: flex;
   flex-direction: column;
   height: 100%;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeIn 0.6s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
+}
+
+/* Animación secuencial de las cartas */
+.services__item:nth-child(1) { animation-delay: 0.3s; }
+.services__item:nth-child(2) { animation-delay: 0.4s; }
+.services__item:nth-child(3) { animation-delay: 0.5s; }
+.services__item:nth-child(4) { animation-delay: 0.6s; }
+.services__item:nth-child(5) { animation-delay: 0.7s; }
+.services__item:nth-child(6) { animation-delay: 0.8s; }
+.services__item:nth-child(7) { animation-delay: 0.9s; }
+.services__item:nth-child(8) { animation-delay: 1.0s; }
+.services__item:nth-child(9) { animation-delay: 1.1s; }
+.services__item:nth-child(10) { animation-delay: 1.2s; }
+
+.services__item.expanded {
+  z-index: 2; /* Asegura que esté por encima de otras cartas */
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
 }
 
 .services__item:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+  transform: translateY(-8px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
 }
 
 .services__image-container {
   width: 100%;
-  height: 200px;
+  height: 220px;
   overflow: hidden;
   position: relative;
+  border-bottom: 1px solid #eee;
 }
 
 .services__image {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.5s ease;
+  transition: transform 0.4s ease-in-out;
 }
 
 .services__item:hover .services__image {
-  transform: scale(1.05);
+  transform: scale(1.08);
+}
+
+.services__item-info {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
 }
 
 .services__item-title {
-  font-size: 1.4rem;
-  color: #2c3e50;
-  margin: 1.5rem 1rem 0.5rem;
+  font-size: 1.6rem;
+  color: #333;
+  margin-bottom: 1rem;
   font-weight: 600;
+  transition: color 0.3s ease-in-out;
 }
 
+.services__item:hover .services__item-title {
+  color: var(--orange);
+}
 .services__item-description {
   color: #555;
-  font-size: 0.95rem;
-  line-height: 1.6;
-  padding: 0 1.5rem 1.5rem;
-  margin-top: auto;
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+  flex-grow: 1;
+}
+
+.services__show-more,
+.services__show-less {
+  background-color: var(--orange);
+  color: var(--white);
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: background-color 0.3s ease-in-out, transform 0.2s ease-in-out;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  align-self: flex-start; /* Alinear a la izquierda */
+}
+
+.services__show-more:hover,
+.services__show-less:hover {
+  background-color: #e08a00;
+  transform: scale(1.05);
+}
+
+.services__full-description {
+  padding-top: 1.5rem;
+  color: #666;
+  font-size: 1rem;
+  line-height: 1.7;
+  border-top: 1px solid #eee;
+  margin-top: 1rem;
+}
+
+.services__full-description p {
+  margin-bottom: 1rem;
+}
+
+.services__full-description .services__show-less {
+  background-color: var(--light-blue);
+}
+
+.services__full-description .services__show-less:hover {
+  background-color: #2979ff;
+}
+
+.services__item.expanded .services__image-container {
+  height: auto; /* Ajustar altura de la imagen si el contenido es más largo */
+}
+
+/* Animaciones de entrada */
+@keyframes slideInDown {
+  from { opacity: 0; transform: translateY(-30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* Responsive Design */
 @media (max-width: 1024px) {
   .services__list {
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  }
+
+  .services__item-title {
+    font-size: 1.5rem;
+  }
+
+  .services__item-description {
+    font-size: 0.95rem;
   }
 }
 
 @media (max-width: 768px) {
   .services {
-    padding: 3rem 1.5rem;
+    padding: 4rem 1.5rem;
   }
-  
+
   .services__title {
-    font-size: 2rem;
+    font-size: 2.2rem;
+    margin-bottom: 1rem;
   }
-  
+
   .services__subtitle {
-    font-size: 1rem;
+    font-size: 1.1rem;
+    margin-bottom: 3rem;
+  }
+
+  .services__list {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+
+  .services__item-title {
+    font-size: 1.4rem;
+  }
+
+  .services__item-description {
+    font-size: 0.9rem;
+  }
+
+  .services__show-more,
+  .services__show-less {
+    font-size: 0.9rem;
+    padding: 0.6rem 1.2rem;
   }
 }
 
 @media (max-width: 480px) {
   .services {
-    padding: 2rem 1rem;
+    padding: 3rem 1rem;
   }
-  
-  .services__list {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
+
+  .services__title {
+    font-size: 2rem;
   }
-  
-  .services__image-container {
-    height: 180px;
+
+  .services__subtitle {
+    font-size: 1rem;
+    margin-bottom: 2.5rem;
   }
-  
+
   .services__item-title {
     font-size: 1.3rem;
   }
-}
 
-/* Animation */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
+  .services__item-description {
+    font-size: 0.85rem;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+
+  .services__show-more,
+  .services__show-less {
+    font-size: 0.85rem;
+    padding: 0.5rem 1rem;
   }
 }
 
-.services__item {
-  animation: fadeIn 0.5s ease forwards;
-  opacity: 0;
+.icon {
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.125em;
 }
-
-.services__item:nth-child(1) { animation-delay: 0.1s; }
-.services__item:nth-child(2) { animation-delay: 0.2s; }
-.services__item:nth-child(3) { animation-delay: 0.3s; }
-.services__item:nth-child(4) { animation-delay: 0.4s; }
-.services__item:nth-child(5) { animation-delay: 0.5s; }
-.services__item:nth-child(6) { animation-delay: 0.6s; }
-.services__item:nth-child(7) { animation-delay: 0.7s; }
-.services__item:nth-child(8) { animation-delay: 0.8s; }
-.services__item:nth-child(9) { animation-delay: 0.9s; }
-.services__item:nth-child(10) { animation-delay: 1.0s; }
