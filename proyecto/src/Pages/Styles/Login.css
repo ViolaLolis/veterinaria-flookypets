@@ -5,7 +5,7 @@
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #f5a700, #9b793b);
+  background: linear-gradient(135deg, #f5971d, #ece7e7a2);
   padding: 20px;
 }
 
@@ -17,8 +17,9 @@
 /* Contenedor principal del login */
 .login-box {
   display: flex;
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(209, 205, 205, 0.342);
   backdrop-filter: blur(10px);
+
   border-radius: 15px;
   overflow: hidden;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
@@ -108,7 +109,7 @@
   border: none;
   font-size: 1rem;
   background: rgba(255, 255, 255, 0.2);
-  color: #fff;
+  color: #0f0f0f;
   outline: none;
   transition: 0.3s;
 }
@@ -150,7 +151,7 @@
 }
 
 .login-links .link {
-  color: #ffffff;
+  color: #0c0c0c;
   font-size: 0.9rem;
   text-decoration: none;
   transition: 0.3s;
@@ -181,7 +182,7 @@
 
 .btn-back {
   background: #f39201;
-  color: #fff;
+  color: #3f3c3c;
   padding: 12px 20px;
   font-size: 1rem;
   font-weight: bold;
