@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import "../Styles/Login.css";
 
 function Login({ setUser }) {
@@ -17,12 +16,6 @@ function Login({ setUser }) {
   });
   const navigate = useNavigate();
 
-  const users = [
-    { email: 'admin@example.com', password: '1234', role: 'admin', name: 'Administrador' },
-    { email: 'vet@example.com', password: '5678', role: 'veterinario', name: 'Dr. Veterinario' },
-    { email: 'user@example.com', password: 'abcd', role: 'usuario', name: 'Juan Pérez' }
-  ];
-
   // Validación en tiempo real
   useEffect(() => {
     const newErrors = {
@@ -37,6 +30,7 @@ function Login({ setUser }) {
         newErrors.email = 'Ingrese un correo válido';
       }
     }
+    
 
     setErrors(prev => ({ ...prev, ...newErrors }));
   }, [email, password, touched]);
@@ -45,42 +39,59 @@ function Login({ setUser }) {
     setTouched(prev => ({ ...prev, [field]: true }));
   };
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
 
-    // Validar todos los campos al enviar
     setTouched({
       email: true,
       password: true
     });
 
-    // Verificar si hay errores
     const hasErrors = Object.values(errors).some(error => error !== '');
     if (!email || !password || hasErrors) {
       setErrors(prev => ({
         ...prev,
-        form: '⚠Correo o contraseña son incorrectas⚠'
+        form: '⚠ Correo o contraseña son incorrectas ⚠'
       }));
       return;
     }
 
-    const foundUser = users.find(user => user.email === email && user.password === password);
-    
-    if (foundUser) {
-      setUser(foundUser);
-      localStorage.setItem('user', JSON.stringify(foundUser));
-      
-      if (foundUser.role === 'admin') {
+    try {
+      const response = await fetch('http://localhost:5000/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setErrors(prev => ({
+          ...prev,
+          form: data.message || '⚠ Error al iniciar sesión ⚠'
+        }));
+        return;
+      }
+
+      // Login exitoso
+      setUser(data);
+      localStorage.setItem('user', JSON.stringify(data));
+
+      if (data.role === 'admin') {
         navigate('/admin');
-      } else if (foundUser.role === 'veterinario') {
+      } else if (data.role === 'veterinario') {
         navigate('/veterinario');
       } else {
         navigate('/usuario');
       }
-    } else {
+
+    } catch (error) {
+      console.error('Error al conectar con el servidor:', error);
       setErrors(prev => ({
         ...prev,
-        form: '⚠Correo electrónico o contraseña incorrectos⚠'
+        form: '⚠ Error al conectar con el servidor ⚠'
       }));
     }
   };
@@ -89,10 +100,9 @@ function Login({ setUser }) {
     <div className="login-container">
       <div className="login-wrapper">
         <div className="login-box">
-          
           <div className="logo-section">
             <img 
-              src={require ('../Inicio/Imagenes/flooty.png')}  
+              src={require('../Inicio/Imagenes/flooty.png')}  
               alt="Logo de la empresa" 
               className="login-logo"
             />
@@ -109,7 +119,6 @@ function Login({ setUser }) {
                 <label>Correo Electrónico:</label>
                 <input 
                   type="email" 
-                  
                   value={email} 
                   onChange={(e) => setEmail(e.target.value.slice(0, 63))}
                   onBlur={() => handleBlur('email')}
@@ -122,7 +131,6 @@ function Login({ setUser }) {
                 <label>Contraseña:</label>
                 <input 
                   type="password" 
-                 
                   value={password} 
                   onChange={(e) => setPassword(e.target.value.slice(0, 63))}
                   onBlur={() => handleBlur('password')}
@@ -154,5 +162,7 @@ function Login({ setUser }) {
     </div>
   );
 }
+
+
 
 export default Login;
