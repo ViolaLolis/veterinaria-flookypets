@@ -3,36 +3,40 @@ import './Styles/ImageCarousel.css';
 
 function ImageCarousel() {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [catImages, setCatImages] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
   const carouselRef = useRef(null);
 
-  useEffect(() => {
-    setIsLoading(true);
-    fetch('https://api.thecatapi.com/v1/images/search?limit=20')
-      .then(response => response.json())
-      .then(data => {
-        setCatImages(data);
-        setIsLoading(false);
-      })
-      .catch(error => {
-        console.error("Error fetching cat images:", error);
-        setIsLoading(false);
-      });
-  }, []);
+  // Array de imágenes con URLs externas (puedes reemplazarlas con las que prefieras)
+  const images = [
+    {
+      id: 1,
+      url: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80",
+      alt: "Gato 1"
+    },
+    {
+      id: 2,
+      url: "https://images.unsplash.com/photo-1533738363-b7f9aef128ce?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80",
+      alt: "Gato 2"
+    },
+    {
+      id: 3,
+      url: "https://images.unsplash.com/photo-1526336024174-e58f5cdd8e13?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80",
+      alt: "Gato 3"
+    },
+    {
+      id: 4,
+      url: "https://images.unsplash.com/photo-1596854407944-bf87f6fdd49e?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80",
+      alt: "Gato 4"
+    }
+  ];
 
   const nextSlide = useCallback(() => {
-    if (catImages.length > 0) {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % catImages.length);
-    }
-  }, [catImages]);
+    setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
+  }, [images.length]);
 
   const prevSlide = () => {
-    if (catImages.length > 0) {
-      setCurrentIndex((prevIndex) => 
-        prevIndex === 0 ? catImages.length - 1 : prevIndex - 1
-      );
-    }
+    setCurrentIndex((prevIndex) => 
+      prevIndex === 0 ? images.length - 1 : prevIndex - 1
+    );
   };
 
   const goToSlide = (slideIndex) => {
@@ -44,64 +48,51 @@ function ImageCarousel() {
       nextSlide();
     }, 5000);
     return () => clearInterval(interval);
-  }, [catImages, nextSlide]);
+  }, [nextSlide]);
 
   return (
     <div className="image-carousel-container">
-      {isLoading ? (
-        <div className="loading-overlay">
-          <div className="spinner"></div>
-          <p>Cargando imágenes de mascotas...</p>
+      <h2 className="carousel-title">
+        <span>Bienvenido a</span>
+        <span className="highlight">Flooky Pets</span>
+        
+      </h2>
+      <div className="full-page-carousel" ref={carouselRef}>
+        <div className="carousel-inner">
+          {images.map((img, index) => (
+            <div 
+              key={img.id}
+              className={`carousel-item ${index === currentIndex ? 'active' : ''}`}
+            >
+              <img 
+                src={img.url} 
+                alt={img.alt}
+                className="carousel-image"
+                loading="lazy"
+              />
+              <div className="image-overlay"></div>
+            </div>
+          ))}
         </div>
-      ) : (
-        <>
-          <h2 className="carousel-title">
-            <span>Bienvenido a</span>
-            <span className="highlight">Flooky Pets</span>
-          </h2>
-          
-          <div className="full-page-carousel" ref={carouselRef}>
-            {catImages.length > 0 && (
-              <>
-                <div className="carousel-inner">
-                  {catImages.map((img, index) => (
-                    <div 
-                      key={img.id}
-                      className={`carousel-item ${index === currentIndex ? 'active' : ''}`}
-                    >
-                      <img 
-                        src={img.url} 
-                        alt={`Cat ${index}`} 
-                        className="carousel-image"
-                        loading="lazy"
-                      />
-                      <div className="image-overlay"></div>
-                    </div>
-                  ))}
-                </div>
-                
-                <button className="carousel-control prev" onClick={prevSlide}>
-                  <span className="carousel-control-icon">&#10094;</span>
-                </button>
-                <button className="carousel-control next" onClick={nextSlide}>
-                  <span className="carousel-control-icon">&#10095;</span>
-                </button>
-                
-                <div className="carousel-indicators">
-                  {catImages.map((_, index) => (
-                    <button
-                      key={index}
-                      className={`indicator ${index === currentIndex ? 'active' : ''}`}
-                      onClick={() => goToSlide(index)}
-                      aria-label={`Ir a imagen ${index + 1}`}
-                    />
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
-        </>
-      )}
+        
+        <button className="carousel-control prev" onClick={prevSlide}>
+          <span className="carousel-control-icon">&#10094;</span>
+        </button>
+        <button className="carousel-control next" onClick={nextSlide}>
+          <span className="carousel-control-icon">&#10095;</span>
+        </button>
+        
+        <div className="carousel-indicators">
+          {images.map((_, index) => (
+            <button
+              key={index}
+              className={`indicator ${index === currentIndex ? 'active' : ''}`}
+              onClick={() => goToSlide(index)}
+              aria-label={`Ir a imagen ${index + 1}`}
+            />
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

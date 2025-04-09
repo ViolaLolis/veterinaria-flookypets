@@ -5,7 +5,7 @@
     align-items: center;
     justify-content: center;
     min-height: 100vh;
-    background: linear-gradient(135deg, #000428, #004e92);
+    background: linear-gradient(135deg, #f5a700, #9b953b);
     color: white;
     padding: 20px;
   }
@@ -36,7 +36,7 @@
   .registro-box h2 {
     margin-bottom: 20px;
     font-size: 24px;
-    color: #fff;
+    color: #000000;
   }
   
   .input-group {
@@ -64,12 +64,12 @@
   .input-group input:focus {
     outline: none;
     background-color: white;
-    border-color: #007bff;
+    border-color: #e5ff00;
     box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
   }
   
   .error-message {
-    color: #ff3860;
+    color: #ff0000;
     font-size: 14px;
     margin-top: 5px;
     animation: slideIn 0.3s ease-out;
@@ -87,7 +87,7 @@
   }
   
   .btn-submit {
-    background-color: #0e70f1;
+    background-color: #f39201;
     color: white;
     padding: 12px 20px;
     border: none;
@@ -98,7 +98,7 @@
   }
   
   .btn-submit:hover {
-    background-color: #218838;
+    background-color: #72683d;
     transform: translateY(-2px);
   }
   

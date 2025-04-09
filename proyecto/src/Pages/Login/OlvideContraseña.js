@@ -188,7 +188,7 @@ function OlvideContraseña() {
               <label>Correo Electrónico</label>
               <input
                 type="email"
-                placeholder="tucorreo@ejemplo.com"
+               
                 {...register('correo', {
                   required: 'El correo es obligatorio',
                   pattern: {

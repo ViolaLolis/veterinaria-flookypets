@@ -109,7 +109,7 @@ function Login({ setUser }) {
                 <label>Correo Electrónico:</label>
                 <input 
                   type="email" 
-                  placeholder="Ingrese su correo electrónico" 
+                  
                   value={email} 
                   onChange={(e) => setEmail(e.target.value.slice(0, 63))}
                   onBlur={() => handleBlur('email')}
@@ -122,7 +122,7 @@ function Login({ setUser }) {
                 <label>Contraseña:</label>
                 <input 
                   type="password" 
-                  placeholder="Ingrese su contraseña" 
+                 
                   value={password} 
                   onChange={(e) => setPassword(e.target.value.slice(0, 63))}
                   onBlur={() => handleBlur('password')}

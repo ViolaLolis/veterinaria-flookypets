@@ -167,8 +167,8 @@ function Registro() {
             case 'numeroDocumento':
                 if (!value.trim()) {
                     error = 'Este campo es obligatorio';
-                } else if (!/^\d{6,12}$/.test(value)) {
-                    error = 'Debe tener entre 6 y 12 dígitos';
+                } else if (!/^\d{9,11}$/.test(value)) {
+                    error = 'Debe tener 10 digitos';
                 }
                 break;
                 
@@ -380,7 +380,7 @@ function Registro() {
                             <input 
                                 type="text" 
                                 name="nombre" 
-                                placeholder="Nombre"
+                                
                                 value={formData.nombre} 
                                 onChange={handleInputChange} 
                                 maxLength="50"
@@ -394,7 +394,7 @@ function Registro() {
                             <input 
                                 type="text" 
                                 name="apellido" 
-                                placeholder="Apellido" 
+                                
                                 value={formData.apellido} 
                                 onChange={handleInputChange} 
                                 maxLength="50"
@@ -408,7 +408,7 @@ function Registro() {
                             <input 
                                 type="tel" 
                                 name="telefono" 
-                                placeholder="Teléfono" 
+                                
                                 value={formData.telefono} 
                                 onChange={handleInputChange} 
                                 maxLength="10"
@@ -422,7 +422,7 @@ function Registro() {
                             <input 
                                 type="tel" 
                                 name="telefonoFijo" 
-                                placeholder="Teléfono Fijo (Opcional)" 
+                                
                                 value={formData.telefonoFijo} 
                                 onChange={handleInputChange} 
                                 maxLength="10"
@@ -435,7 +435,7 @@ function Registro() {
                             <input 
                                 type="text" 
                                 name="direccion" 
-                                placeholder="Dirección" 
+                                 
                                 value={formData.direccion} 
                                 onChange={handleInputChange} 
                                 maxLength="100"
@@ -464,7 +464,7 @@ function Registro() {
                             <input 
                                 type="text" 
                                 name="numeroDocumento" 
-                                placeholder="Número de Documento" 
+                                
                                 value={formData.numeroDocumento} 
                                 onChange={handleInputChange} 
                                 maxLength="12"
@@ -478,7 +478,7 @@ function Registro() {
                             <input 
                                 type="date" 
                                 name="fechaNacimiento" 
-                                placeholder="Fecha de Nacimiento" 
+                                
                                 value={formData.fechaNacimiento} 
                                 onChange={handleInputChange} 
                                 className={fieldErrors.fechaNacimiento ? 'input-error' : ''}
@@ -498,7 +498,7 @@ function Registro() {
                             <input 
                                 type="email" 
                                 name="correo" 
-                                placeholder="Correo Electrónico" 
+                                
                                 value={formData.correo} 
                                 onChange={handleInputChange} 
                                 maxLength="100"
@@ -530,7 +530,7 @@ function Registro() {
                             <input 
                                 type="password" 
                                 name="verificarContrasena" 
-                                placeholder="Verificar Contraseña" 
+                                
                                 value={formData.verificarContrasena} 
                                 onChange={handleInputChange} 
                                 maxLength="30"
@@ -551,7 +551,7 @@ function Registro() {
                                 <input 
                                     type="email" 
                                     name="correo" 
-                                    placeholder="Correo Electrónico" 
+                                     
                                     value={formData.correo} 
                                     onChange={handleInputChange} 
                                     maxLength="100"

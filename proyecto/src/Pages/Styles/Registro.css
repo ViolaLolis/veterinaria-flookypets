@@ -149,12 +149,12 @@
 }
 
 .error-message {
-  color: #ff3860;
+  color: #fa0505;
   font-size: 15px;
   margin: 10px 0;
   padding: 10px;
   background-color: rgba(255, 56, 96, 0.1);
-  border-left: 4px solid #ff3860;
+  border-left: 4px solid #fa0000;
   border-radius: 0 4px 4px 0;
   animation: slideIn 0.4s ease-out forwards;
 }
@@ -186,12 +186,12 @@
 }
 
 .form-navigation button:last-child {
-  background-color: #007bff;
+  background-color: #fdae04;
   color: white;
 }
 
 .form-navigation button:last-child:hover {
-  background-color: #0056b3;
+  background-color: #7c580a;
   transform: translateY(-2px);
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
@@ -204,7 +204,7 @@
 }
 
 .btn-submit {
-  background-color: #28a745;
+  background-color: #2894a7;
   color: white;
   padding: 12px 20px;
   border: none;
@@ -298,7 +298,7 @@
 }
 
 .success-message {
-  color: #4caf50;
+  color: #00cf07;
   font-weight: bold;
   margin-top: 15px;
   padding: 10px;

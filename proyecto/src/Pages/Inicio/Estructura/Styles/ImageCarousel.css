@@ -1,7 +1,6 @@
-/* Variables de colores */
 :root {
-  --primary-color: #ff6b6b;
-  --secondary-color: #4ecdc4;
+  --primary-color: #f0ac1a;
+  --secondary-color: #3f3737;
   --text-color: #ffffff;
   --overlay-color: rgba(0, 0, 0, 0.4);
   --shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
@@ -16,46 +15,16 @@
   background: #000;
 }
 
-/* Loading overlay */
-.loading-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background: var(--overlay-color);
-  z-index: 20;
-  color: var(--text-color);
-}
-
-.spinner {
-  width: 50px;
-  height: 50px;
-  border: 5px solid rgba(255, 255, 255, 0.3);
-  border-radius: 50%;
-  border-top-color: var(--primary-color);
-  animation: spin 1s ease-in-out infinite;
-  margin-bottom: 20px;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
 /* Título del carrusel */
 .carousel-title {
   position: absolute;
-  top: 5%;
+  top: 24%;
   left: 0;
   right: 0;
   text-align: center;
   color: var(--text-color);
   z-index: 10;
-  font-size: 3rem;
+  font-size: 5rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 2px;
@@ -115,13 +84,15 @@
   width: 100%;
   height: 100%;
   opacity: 0;
-  transition: opacity 1.5s ease-in-out, transform 1.5s ease-in-out;
-  transform: scale(0.95);
+  transition: opacity 1.5s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
 }
 
 .carousel-item.active {
   opacity: 1;
-  transform: scale(1);
   z-index: 1;
 }
 
@@ -130,11 +101,6 @@
   height: 100%;
   object-fit: cover;
   object-position: center;
-  transition: transform 8s ease-out;
-}
-
-.carousel-item.active .carousel-image {
-  transform: scale(1.05);
 }
 
 .image-overlay {
@@ -143,7 +109,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0) 100%);
+  background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0) 70%);
   z-index: 2;
 }
 
@@ -226,29 +192,6 @@
   border-color: var(--primary-color);
   transform: scale(1.3);
   box-shadow: 0 0 10px rgba(255, 107, 107, 0.7);
-}
-
-/* Efectos de transición entre slides */
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateX(100%);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes slideOut {
-  from {
-    opacity: 1;
-    transform: translateX(0);
-  }
-  to {
-    opacity: 0;
-    transform: translateX(-100%);
-  }
 }
 
 /* Responsive */
