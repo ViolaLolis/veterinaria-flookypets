@@ -5,13 +5,13 @@
     align-items: center;
     justify-content: center;
     min-height: 100vh;
-    background: linear-gradient(135deg, #f5a700, #9b953b);
+    background: linear-gradient(135deg, #ff9900, #fc000046);
     color: white;
     padding: 20px;
   }
   
   .registro-box {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(252, 250, 250, 0.192);
     padding: 30px;
     border-radius: 10px;
     backdrop-filter: blur(5px);
@@ -49,7 +49,7 @@
   .input-group label {
     font-weight: bold;
     margin-bottom: 5px;
-    color: #eee;
+    color: #131313;
   }
   
   .input-group input {

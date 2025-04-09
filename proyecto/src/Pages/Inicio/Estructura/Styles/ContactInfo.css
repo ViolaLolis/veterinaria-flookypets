@@ -1,6 +1,6 @@
 :root {
   --pastel-yellow: #FFF9C4;
-  --pastel-yellow-light: #FFFDE7;
+  --pastel-yellow-light: #ffffff;
   --pastel-yellow-dark: #FFF59D;
   --accent-orange: #ff9900;
   --text-dark: #55372e;
@@ -108,7 +108,7 @@ body {
   animation: cardEntrance 0.8s var(--transition-bounce) forwards;
   position: relative;
   overflow: hidden;
-  border: 1px solid rgba(255, 245, 157, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.5);
 }
 
 @keyframes cardEntrance {
@@ -218,7 +218,7 @@ body {
 .map-container {
   margin-top: 80px;
   text-align: center;
-  background-color: white;
+  background-color: #f8ef9fc4;
   padding: 40px;
   border-radius: 20px;
   box-shadow: var(--shadow-light);
