@@ -30,7 +30,6 @@ function Login({ setUser }) {
         newErrors.email = 'Ingrese un correo válido';
       }
     }
-    
 
     setErrors(prev => ({ ...prev, ...newErrors }));
   }, [email, password, touched]);
@@ -47,7 +46,10 @@ function Login({ setUser }) {
       password: true
     });
 
-    const hasErrors = Object.values(errors).some(error => error !== '');
+    const hasErrors = Object.entries(errors)
+      .filter(([key]) => key !== 'form')
+      .some(([, error]) => error !== '');
+
     if (!email || !password || hasErrors) {
       setErrors(prev => ({
         ...prev,
@@ -120,7 +122,10 @@ function Login({ setUser }) {
                 <input 
                   type="email" 
                   value={email} 
-                  onChange={(e) => setEmail(e.target.value.slice(0, 63))}
+                  onChange={(e) => {
+                    setEmail(e.target.value.slice(0, 63));
+                    setErrors(prev => ({ ...prev, form: '' }));
+                  }}
                   onBlur={() => handleBlur('email')}
                   className={errors.email ? 'input-error' : ''}
                 />
@@ -132,7 +137,10 @@ function Login({ setUser }) {
                 <input 
                   type="password" 
                   value={password} 
-                  onChange={(e) => setPassword(e.target.value.slice(0, 63))}
+                  onChange={(e) => {
+                    setPassword(e.target.value.slice(0, 63));
+                    setErrors(prev => ({ ...prev, form: '' }));
+                  }}
                   onBlur={() => handleBlur('password')}
                   className={errors.password ? 'input-error' : ''}
                 />
@@ -163,6 +171,5 @@ function Login({ setUser }) {
   );
 }
 
-
-
 export default Login;
+

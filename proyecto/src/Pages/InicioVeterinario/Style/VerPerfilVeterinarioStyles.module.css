@@ -1,0 +1,133 @@
+.perfilContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px;
+  background-color: #f4f6f8;
+  border-radius: 12px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  width: 90%;
+  max-width: 700px;
+  margin: 20px auto; /* Centrar en la página */
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 30px;
+  width: 100%;
+}
+
+.userIcon {
+  font-size: 3em;
+  margin-right: 25px;
+  color: #5a67d8; /* Un color primario moderno */
+}
+
+.header h2 {
+  font-size: 2.5em;
+  color: #374151;
+  margin: 0 auto 0 0; /* Empujar los botones a la derecha */
+}
+
+.header div {
+  display: flex;
+  gap: 15px;
+}
+
+.headerButton,
+.editButton,
+.cerrarSesionBtn {
+  background-color: #ffffff;
+  color: #374151;
+  border: 1px solid #cbd5e0;
+  padding: 10px 18px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  font-size: 1em;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, border-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+
+.headerButton svg,
+.editButton svg,
+.cerrarSesionBtn svg {
+  margin-right: 8px;
+}
+
+.headerButton:hover,
+.editButton:hover,
+.cerrarSesionBtn:hover {
+  background-color: #e2e8f0;
+  border-color: #94a3b8;
+  transform: scale(1.02);
+}
+
+.editButton {
+  background-color: #4299e1; /* Otro color primario */
+  color: white;
+  border-color: #4299e1;
+}
+
+.editButton:hover {
+  background-color: #3182ce;
+  border-color: #3182ce;
+}
+
+.cerrarSesionBtn {
+  background-color: #e53e3e; /* Color de advertencia */
+  color: white;
+  border-color: #e53e3e;
+}
+
+.cerrarSesionBtn:hover {
+  background-color: #c53030;
+  border-color: #c53030;
+}
+
+.infoSection {
+  background-color: #ffffff;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  line-height: 1.7;
+  width: 100%;
+}
+
+.infoSection h3 {
+  font-size: 1.8em;
+  color: #374151;
+  border-bottom: 2px solid #e0e7ff; /* Un tono del primario */
+  padding-bottom: 15px;
+  margin-bottom: 20px;
+}
+
+.infoSection strong {
+  font-weight: 600;
+  color: #4a5568;
+}
+
+.infoSection p {
+  margin-bottom: 15px;
+  color: #4a5568;
+}
+
+/* Animaciones sutiles */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.perfilContainer {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+.header,
+.infoSection {
+  opacity: 0;
+  transform: translateY(10px);
+  animation: fadeIn 0.5s ease-out 0.2s forwards;
+}

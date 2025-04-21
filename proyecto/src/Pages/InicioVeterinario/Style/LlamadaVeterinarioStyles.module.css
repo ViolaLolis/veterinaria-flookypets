@@ -1,0 +1,140 @@
+.llamadaContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px;
+    background-color: #e9ecef;
+    border-radius: 15px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    width: 90%;
+    max-width: 700px;
+    margin: 20px auto;
+  }
+  
+  .header {
+    color: #333;
+    margin-bottom: 30px;
+    text-align: center;
+  }
+  
+  .header h2 {
+    font-size: 2.2em;
+    margin-bottom: 10px;
+    color: #007bff;
+  }
+  
+  .header svg {
+    margin-right: 10px;
+  }
+  
+  .llamadaPanel {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 20px;
+  }
+  
+  .localVideoContainer,
+  .remoteVideoContainer {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background-color: #333;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .localVideo,
+  .remoteVideo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: opacity 0.3s ease;
+  }
+  
+  .inputContacto {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding: 15px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+  
+  .inputContacto input[type="text"] {
+    flex-grow: 1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1em;
+  }
+  
+  .iniciarLlamadaBtn {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1em;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+  }
+  
+  .iniciarLlamadaBtn:hover {
+    background-color: #0056b3;
+    transform: scale(1.02);
+  }
+  
+  .controlesLlamada {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+  
+  .controlBtn,
+  .finalizarLlamadaBtn {
+    padding: 12px;
+    border: none;
+    border-radius: 50%;
+    font-size: 1.2em;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+  }
+  
+  .controlBtn {
+    background-color: #6c757d;
+    color: white;
+  }
+  
+  .controlBtn:hover {
+    background-color: #545b62;
+    transform: scale(1.05);
+  }
+  
+  .finalizarLlamadaBtn {
+    background-color: #dc3545;
+    color: white;
+  }
+  
+  .finalizarLlamadaBtn:hover {
+    background-color: #c82333;
+    transform: scale(1.05);
+  }
+  
+  .error {
+    color: #dc3545;
+    font-weight: bold;
+    margin-top: 10px;
+    text-align: center;
+  }

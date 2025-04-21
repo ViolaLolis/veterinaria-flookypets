@@ -1,0 +1,97 @@
+.detalle-servicio-container {
+    max-width: 900px;
+    margin: 3rem auto;
+    padding: 2rem;
+    background-color: var(--white);
+    border-radius: 12px;
+    box-shadow: var(--shadow-medium);
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInSlideUp 0.5s ease-out forwards;
+  }
+  
+  .detalle-servicio-title {
+    font-size: 2.5rem;
+    color: var(--primary-color);
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+  
+  .detalle-servicio-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: start;
+  }
+  
+  .detalle-servicio-image {
+    width: 100%;
+    border-radius: 8px;
+    box-shadow: var(--shadow-light);
+    object-fit: cover;
+    height: auto; /* Ajustar altura automáticamente */
+  }
+  
+  .detalle-servicio-info {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .detalle-servicio-precio {
+    font-size: 1.3rem;
+    color: var(--accent-color);
+    margin-bottom: 1rem;
+  }
+  
+  .detalle-servicio-precio strong {
+    font-weight: bold;
+  }
+  
+  .detalle-servicio-descripcion-larga {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    line-height: 1.8;
+    margin-bottom: 2rem;
+  }
+  
+  .detalle-servicio-back,
+  .detalle-servicio-agendar {
+    display: inline-block;
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--white);
+    background-color: var(--accent-color);
+    font-size: 1rem;
+    font-weight: 500;
+    transition: background-color 0.3s ease-in-out, transform 0.2s ease-in-out;
+    margin-top: 1rem;
+    text-align: center;
+  }
+  
+  .detalle-servicio-detalle-servicio-back:hover,
+  .detalle-servicio-agendar:hover {
+    background-color: var(--accent-hover-color);
+    transform: scale(1.03);
+  }
+  
+  .detalle-servicio-back {
+    background-color: var(--secondary-color);
+    margin-right: 1rem;
+  }
+  
+  @keyframes fadeInSlideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  /* Responsive */
+  @media (max-width: 768px) {
+    .detalle-servicio-content {
+      grid-template-columns: 1fr;
+    }
+  
+    .detalle-servicio-image {
+      margin-bottom: 1.5rem;
+    }
+  }

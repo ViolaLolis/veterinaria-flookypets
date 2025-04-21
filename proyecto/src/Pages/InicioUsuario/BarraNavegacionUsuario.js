@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom'; // Importa useNavigate
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPaw, faCalendarCheck, faList, faUser, faQuestionCircle, faArrowLeft } from '@fortawesome/free-solid-svg-icons'; // Importa faArrowLeft
+import { faPaw, faCalendarCheck, faList, faUser, faQuestionCircle } from '@fortawesome/free-solid-svg-icons'; // Importa faArrowLeft
 import styles from './Styles/BarraNavegacionUsuario.module.css';
 
 const BarraNavegacionUsuario = () => {

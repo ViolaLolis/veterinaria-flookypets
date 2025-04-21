@@ -1,47 +1,48 @@
+<<<<<<< HEAD
 .container {
   font-family: 'Nunito Sans', sans-serif; /* Fuente moderna y amigable */
   background-color: #ffffffa4; /* Fondo gris muy claro y suave */
   padding: 40px;
+=======
+.perfilContainer {
+  max-width: 600px;
+  margin: 3rem auto;
+  padding: 2rem;
+  background-color: #f9f9f9;
+>>>>>>> 3bfd72cb023d4a899a52cb9e41d4260b91b2ee37
   border-radius: 12px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06); /* Sombra más suave y sutil */
-  width: 95%;
-  max-width: 650px;
-  display: flex;
-  flex-direction: column;
-  align-items: center; /* Centra los elementos horizontalmente */
-  gap: 35px; /* Increased gap for better spacing */
-  margin: 40px auto; /* More top/bottom margin for better visual separation */
-  position: relative; /* For the "Volver" button positioning */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
 }
 
 .header {
   display: flex;
   align-items: center;
-  gap: 25px; /* Increased gap for better spacing */
-  margin-bottom: 35px; /* Increased margin-bottom */
-  justify-content: center; /* Centra the header content */
-  width: 100%; /* Ensure full width */
+  justify-content: center;
+  margin-bottom: 2rem;
 }
 
 .userIcon {
+<<<<<<< HEAD
   font-size: 3.5em; /* Slightly larger user icon */
   color: #f3a005; /* A brighter, more engaging blue */
+=======
+  font-size: 2.5rem;
+  color: #5cb85c; /* Verde veterinaria */
+  margin-right: 1rem;
+>>>>>>> 3bfd72cb023d4a899a52cb9e41d4260b91b2ee37
 }
 
-h3 {
-  color: #2c3e50; /* Darker, more professional heading color */
-  font-size: 2.8em;
+.title {
+  font-size: 2.2rem;
+  color: #333;
   margin: 0;
-  font-weight: 700; /* Stronger heading weight */
 }
 
-.info {
-  margin-bottom: 40px; /* Increased margin-bottom */
-  width: 100%;
-  padding: 30px; /* Increased padding */
-  border: 1px solid #e6e9ed; /* Lighter border */
-  border-radius: 10px;
+.infoSection {
   background-color: #fff;
+<<<<<<< HEAD
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03); /* Softer shadow for info section */
 }
 
@@ -129,18 +130,96 @@ h3 {
   gap: 10px;
   transition: color 0.2s ease-in-out, transform 0.15s ease-in-out;
   padding: 10px 10px;
+=======
+  padding: 1.5rem;
+>>>>>>> 3bfd72cb023d4a899a52cb9e41d4260b91b2ee37
   border-radius: 8px;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
-.volverBtn:hover {
-  color: #2c3e50;
-  transform: translateX(-2px);
+.infoTitle {
+  font-size: 1.5rem;
+  color: #337ab7; /* Azul veterinaria */
+  margin-top: 0;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 0.5rem;
 }
 
-.volverBtn:active {
-  transform: translateX(0);
+.infoSection p {
+  margin-bottom: 0.8rem;
+  line-height: 1.6;
+  color: #555;
 }
 
-.volverIcon {
-  font-size: 1.2em;
+.strong {
+  font-weight: bold;
+  color: #333;
+}
+
+.optionsSection {
+  padding: 1.5rem;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.optionsTitle {
+  font-size: 1.5rem;
+  color: #337ab7; /* Azul veterinaria */
+  margin-top: 0;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 0.5rem;
+}
+
+.optionLink {
+  display: flex;
+  align-items: center;
+  padding: 0.8rem 1rem;
+  margin-bottom: 0.8rem;
+  border-radius: 6px;
+  text-decoration: none;
+  color: #333;
+  background-color: transparent;
+  border: 1px solid #ddd;
+  transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.optionLink:hover {
+  background-color: #f0f8ff; /* Un azul muy claro al pasar el ratón */
+  transform: scale(1.02);
+}
+
+.optionIcon {
+  margin-right: 1rem;
+  color: #337ab7; /* Azul veterinaria */
+  font-size: 1.2rem;
+}
+
+.logoutButton {
+  display: flex;
+  align-items: center;
+  padding: 0.8rem 1rem;
+  margin-top: 1rem;
+  border-radius: 6px;
+  text-decoration: none;
+  color: #fff;
+  background-color: #d9534f; /* Rojo para cerrar sesión */
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+  font-size: 1rem;
+}
+
+.logoutButton:hover {
+  background-color: #c9302c;
+  transform: scale(1.02);
+}
+
+.logoutIcon {
+  margin-right: 1rem;
+  font-size: 1.2rem;
 }

@@ -1,0 +1,65 @@
+.eliminar-pago-container {
+    max-width: 500px;
+    margin: 3rem auto;
+    padding: 2rem;
+    background-color: var(--white);
+    border-radius: 12px;
+    box-shadow: var(--shadow-medium);
+    text-align: center;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInSlideUp 0.5s ease-out forwards;
+  }
+  
+  .eliminar-pago-title {
+    font-size: 2rem;
+    color: var(--primary-color);
+    margin-bottom: 1.5rem;
+  }
+  
+  .eliminar-pago-confirmacion {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+    line-height: 1.6;
+  }
+  
+  .eliminar-pago-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+  }
+  
+  .eliminar-pago-button {
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s ease-in-out, transform 0.2s ease-in-out;
+    text-decoration: none;
+    color: var(--white);
+  }
+  
+  .eliminar-pago-button.eliminar {
+    background-color: #dc3545;
+  }
+  
+  .eliminar-pago-button.eliminar:hover {
+    background-color: #c82333;
+    transform: scale(1.03);
+  }
+  
+  .eliminar-pago-button.cancelar {
+    background-color: var(--secondary-color);
+  }
+  
+  .eliminar-pago-button.cancelar:hover {
+    background-color: #2c3e50;
+    transform: scale(1.03);
+  }
+  
+  @keyframes fadeInSlideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }

@@ -1,6 +1,5 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom'; // Importa useNavigate
-import TarjetaCita from './TarjetaCita';
+import { Link, useNavigate } from 'react-router-dom';
 import styles from './Styles/CitasUsuario.module.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendarAlt, faPlusCircle, faArrowLeft, faClock, faMapMarkerAlt } from '@fortawesome/free-solid-svg-icons'; // Importa más iconos
@@ -12,7 +11,6 @@ const CitasUsuario = () => {
   const citas = [
     { id: 1, fecha: '15 de Mayo', hora: '10:00 AM', servicio: 'Consulta General para Max', veterinario: 'Dra. Ana Pérez', lugar: 'Consultorio Principal' },
     { id: 2, fecha: '20 de Mayo', hora: '03:30 PM', servicio: 'Vacunación de Luna', veterinario: 'Dr. Carlos López', lugar: 'Sucursal Norte' },
-    // Puedes añadir más citas de ejemplo para ver el estilo
     { id: 3, fecha: '25 de Mayo', hora: '11:15 AM', servicio: 'Revisión Dental de Toby', veterinario: 'Dra. Sofía Gómez', lugar: 'Consultorio Principal' },
   ];
 
@@ -53,7 +51,6 @@ const CitasUsuario = () => {
                   <span>{cita.lugar}</span>
                 </div>
               </div>
-              {/* Aquí podrías añadir botones de "Cancelar", "Ver Detalles", etc. */}
               <div className={styles.citaActions}>
                 <button className={styles.accionBtn}>Ver Detalles</button>
                 <button className={styles.accionBtn}>Cancelar</button>
