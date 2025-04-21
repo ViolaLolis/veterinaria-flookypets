@@ -1,24 +1,29 @@
 .container {
-  font-family: 'Quicksand', sans-serif; /* Fuente más viva y moderna */
-  background-color: #f4f9f8; /* Fondo suave con un toque de verde */
+  font-family: 'Quicksand', sans-serif;
+  background: linear-gradient(135deg, #fff8e6, #fff0d8);
   padding: 40px;
-  border-radius: 12px;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06); /* Sombra más definida */
+  border-radius: 16px;
+  box-shadow: 
+    0 10px 25px rgba(0, 0, 0, 0.08),
+    0 0 0 1px rgba(255, 179, 71, 0.1);
   width: 95%;
-  max-width: 800px; /* Aumenta el ancho máximo */
+  max-width: 800px;
   display: flex;
   flex-direction: column;
-  align-items: center; /* Centra los elementos horizontalmente */
-  gap: 30px; /* Más espacio entre secciones */
-  animation: slideInDown 0.6s ease-out forwards; /* Nueva animación */
-  margin: 30px auto; /* Más margen superior e inferior */
-  position: relative; /* Para el botón de volver */
+  align-items: center;
+  gap: 35px;
+  animation: slideInBounce 0.8s cubic-bezier(0.68, -0.6, 0.32, 1.6) forwards;
+  margin: 40px auto;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 179, 71, 0.15);
+  text-align: center; /* Centraliza todo el texto */
 }
 
-@keyframes slideInDown {
+@keyframes slideInBounce {
   from {
     opacity: 0;
-    transform: translateY(-20px);
+    transform: translateY(-30px);
   }
   to {
     opacity: 1;
@@ -28,33 +33,49 @@
 
 .header {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 20px; /* Más espacio entre icono y título */
+  gap: 15px;
   margin-bottom: 30px;
-  justify-content: center; /* Centra el contenido del header */
-  width: 100%; /* Asegura el ancho completo */
+  width: 100%;
 }
 
 .icon {
-  font-size: 2.2em; /* Icono más grande */
-  color: #2ecc71; /* Verde esmeralda, más vibrante */
-  animation: pulseIcon 1.5s infinite alternate; /* Animación sutil del icono */
+  font-size: 3em;
+  color: #ff9500;
+  animation: pulseIcon 2s infinite alternate;
+  text-shadow: 0 2px 8px rgba(255, 149, 0, 0.3);
 }
 
 @keyframes pulseIcon {
-  from {
-    transform: scale(1);
-  }
-  to {
-    transform: scale(1.05);
-  }
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
 }
 
 h3 {
-  color: #34495e; /* Azul oscuro, elegante */
-  font-size: 2.5em; /* Título más grande */
+  color: #5a4a3a;
+  font-size: 2.5em;
   margin: 0;
-  font-weight: 600;
+  font-weight: 700;
+  position: relative;
+  display: inline-block;
+}
+
+h3::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 4px;
+  background: linear-gradient(to right, #ff9500, #ffb347);
+  border-radius: 2px;
+  transition: width 0.6s ease;
+}
+
+.container:hover h3::after {
+  width: 80%;
 }
 
 .listaCitas {
@@ -62,168 +83,160 @@ h3 {
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 20px; /* Más espacio entre tarjetas de cita */
+  align-items: center; /* Centraliza las tarjetas */
+  gap: 25px;
   width: 100%;
 }
 
 .citaItem {
   background-color: #fff;
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08); /* Sombra más pronunciada */
-  overflow: hidden;
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-  width: 100%;
-  display: flex; /* Para alinear info y acciones */
-  justify-content: space-between; /* Espacio entre info y acciones */
-  align-items: center;
-  padding: 20px; /* Más espacio dentro de la tarjeta */
-  border-left: 5px solid #2ecc71; /* Línea verde lateral para destacar */
+  border-radius: 12px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+  width: 90%;
+  max-width: 650px; /* Ancho máximo para las tarjetas */
+  padding: 25px;
+  border-left: 6px solid #ffb347;
+  transition: all 0.4s ease;
+  text-align: left; /* Alinea el texto a la izquierda dentro de la tarjeta */
 }
 
 .citaItem:hover {
-  transform: translateY(-3px); /* Ligero levantamiento al hover */
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+  transform: translateY(-5px);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.12);
+  border-left-width: 8px;
 }
 
 .citaInfo {
-  flex-grow: 1; /* Ocupa el espacio disponible */
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
 }
 
-.citaFecha,
-.citaHora,
-.citaLugar {
+.citaFecha, .citaHora, .citaLugar {
   display: flex;
   align-items: center;
-  gap: 8px;
-  color: #555;
-  font-weight: 500;
-}
-
-.citaServicio,
-.citaVeterinario {
-  color: #666;
-}
-
-.servicioLabel,
-.veterinarioLabel {
-  font-weight: bold;
-  color: #444;
-  margin-right: 5px;
+  gap: 10px;
+  color: #5a4a3a;
+  font-weight: 600;
 }
 
 .citaIcon {
-  color: #3498db; /* Azul para iconos de fecha/hora/lugar */
+  color: #ff9500;
+  font-size: 1.2em;
+}
+
+.citaServicio, .citaVeterinario {
+  color: #7a6a5a;
+}
+
+.servicioLabel, .veterinarioLabel {
+  font-weight: bold;
+  color: #5a4a3a;
 }
 
 .citaActions {
   display: flex;
-  gap: 10px;
+  justify-content: center; /* Centraliza los botones */
+  gap: 15px;
+  margin-top: 20px;
 }
 
 .accionBtn {
-  padding: 10px 15px;
+  padding: 12px 25px;
   border: none;
-  border-radius: 6px;
-  font-size: 0.95em;
+  border-radius: 8px;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .accionBtn:first-child {
-  background-color: #3498db; /* Azul para "Ver Detalles" */
+  background: linear-gradient(to right, #ff9500, #ffb347);
   color: white;
-}
-
-.accionBtn:first-child:hover {
-  background-color: #2980b9;
 }
 
 .accionBtn:last-child {
-  background-color: #e74c3c; /* Rojo para "Cancelar" */
+  background: linear-gradient(to right, #5a4a3a, #7a6a5a);
   color: white;
 }
 
-.accionBtn:last-child:hover {
-  background-color: #c0392b;
+.accionBtn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
 
 .noCitas {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 15px;
+  background: linear-gradient(135deg, #fff0d8, #ffe8c5);
+  color: #7a6a5a;
   padding: 30px;
-  background-color: #f9e79f; /* Amarillo suave para alerta */
-  border-radius: 10px;
-  color: #867000; /* Marrón oscuro para el texto de alerta */
-  text-align: center;
-  width: 85%;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+  border-radius: 12px;
+  width: 80%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .noCitasIcon {
   font-size: 3em;
-  color: #d4ac0d; /* Amarillo más oscuro para el icono */
-}
-
-.noCitas p {
-  font-size: 1.1em;
-  font-weight: bold;
-  margin: 0;
+  color: #ffb347;
+  margin-bottom: 15px;
 }
 
 .verTodas {
+  background: linear-gradient(to right, #ff9500, #ffb347);
+  color: white;
+  padding: 15px 30px;
+  border-radius: 8px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  padding: 15px 25px;
-  background-color: #2ecc71; /* Verde esmeralda, más llamativo */
-  color: white;
-  text-decoration: none;
-  border-radius: 8px;
-  font-size: 1.1em;
-  margin-top: 30px;
-  transition: background-color 0.3s ease, transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-  align-self: center;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
 }
 
 .verTodas:hover {
-  background-color: #27ae60; /* Verde más oscuro al hover */
-  transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 15px rgba(255, 149, 0, 0.3);
 }
 
-.plusIcon {
-  font-size: 1.2em;
-}
-
-/* Estilos para el Botón de Volver */
 .volverBtn {
   position: absolute;
-  top: 10px;
-  left: 10px;
-  background: none;
+  top: 20px;
+  left: 20px;
+  background: rgba(255, 255, 255, 0.8);
   border: none;
-  color: #777;
-  cursor: pointer;
-  font-size: 1em;
+  border-radius: 6px;
+  padding: 8px 15px;
   display: flex;
   align-items: center;
   gap: 5px;
-  transition: color 0.3s ease;
-  padding: 8px 12px;
-  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 .volverBtn:hover {
-  color: #333;
-  background-color: #f0f0f0;
+  background: white;
+  transform: translateX(-3px);
 }
 
-.volverIcon {
-  font-size: 1.1em;
+/* Efecto de brillo al pasar el mouse */
+@keyframes shine {
+  to {
+    background-position: 200% center;
+  }
+}
+
+.container:hover {
+  background-image: linear-gradient(
+    110deg,
+    #fff8e6 0%,
+    #fff0d8 20%,
+    rgba(255, 255, 255, 0.8) 40%,
+    #fff0d8 60%,
+    #fff8e6 100%
+  );
+  background-size: 200% auto;
+  animation: shine 2s linear infinite;
 }

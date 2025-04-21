@@ -1,6 +1,6 @@
 .container {
   font-family: 'Comfortaa', cursive; /* Fuente más amigable y redondeada */
-  background-color: #f8f9fa; /* Fondo muy claro */
+  background-color: #ffffffa9; /* Fondo muy claro */
   padding: 40px;
   border-radius: 15px; /* Bordes más redondeados */
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.06); /* Sombra suave */
@@ -49,15 +49,14 @@ h3 {
   gap: 10px;
   padding: 12px 20px;
   text-decoration: none;
-  background-color: #f39c12; /* Amarillo dorado */
+  background-color: #5b615b9d; /* Amarillo dorado */
   color: white;
   border-radius: 10px; /* Bordes más redondeados */
-  transition: background-color 0.3s ease, transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
   font-weight: 500;
   box-shadow: 0 2px 5px rgba(243, 156, 18, 0.3);
   width: fit-content; /* Ajusta el ancho al contenido */
   margin-top: 15px; /* Espacio desde las tarjetas */
-  align-self: center; /* Centra el botón */
+ 
 }
 
 .agregarMascota:hover {

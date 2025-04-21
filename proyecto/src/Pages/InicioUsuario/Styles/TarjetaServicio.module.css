@@ -1,5 +1,5 @@
 .tarjeta {
-    background-color: #fff;
+    background-color: #ff950b65;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
     padding: 20px;
@@ -22,17 +22,17 @@
   
   .iconoServicio {
     font-size: 1.5em;
-    color: #28a745; /* Verde */
+    color: #000000; /* Verde */
   }
   
   .nombreServicio {
     margin: 0;
-    color: #333;
+    color: #000000;
     font-size: 1.2em;
   }
   
   .descripcion {
-    color: #6c757d; /* Gris */
+    color: #000000; /* Gris */
     font-size: 0.95em;
     line-height: 1.5;
     margin-bottom: 15px;
@@ -45,14 +45,14 @@
   }
   
   .precio {
-    color: #007bff; /* Azul */
+    color: #ff0000ec; /* Azul */
     font-weight: bold;
     font-size: 1.1em;
     margin: 0;
   }
   
   .agendar {
-    background-color: #007bff; /* Azul */
+    background-color: #f58504cc; /* Azul */
     color: white;
     border: none;
     border-radius: 8px;
@@ -66,7 +66,7 @@
   }
   
   .agendar:hover {
-    background-color: #0056b3;
+    background-color: #ff8b07;
   }
   
   .iconoAgendar {

@@ -1,6 +1,6 @@
 .container {
   font-family: 'Nunito Sans', sans-serif; /* Fuente moderna y amigable */
-  background-color: #f7f9fc; /* Fondo gris muy claro y suave */
+  background-color: #ffffffa4; /* Fondo gris muy claro y suave */
   padding: 40px;
   border-radius: 12px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06); /* Sombra más suave y sutil */
@@ -25,7 +25,7 @@
 
 .userIcon {
   font-size: 3.5em; /* Slightly larger user icon */
-  color: #3498db; /* A brighter, more engaging blue */
+  color: #f3a005; /* A brighter, more engaging blue */
 }
 
 h3 {
@@ -75,18 +75,17 @@ h3 {
   color: #95a5a6;
   margin-left: auto;
   cursor: pointer;
-  transition: color 0.2s ease-in-out;
 }
 
 .editIcon:hover {
-  color: #3498db; /* Brighter blue on hover */
+  color: #f0a607; /* Brighter blue on hover */
 }
 
 .opciones {
   display: flex;
   flex-direction: column;
   width: 100%;
-  gap: 18px; /* Adjusted gap */
+  gap: 15px; /* Adjusted gap */
 }
 
 .link,
@@ -95,37 +94,25 @@ h3 {
   align-items: center;
   justify-content: center;
   gap: 18px; /* Adjusted gap */
-  padding: 16px 28px; /* Adjusted padding */
-  text-decoration: none;
-  color: #3498db;
-  border: 1px solid #3498db;
+  padding: 14px 5px; /* Adjusted padding */
+ 
+  color: #000000;
+  border: 1px solid #f8a306;
   border-radius: 10px;
   text-align: center;
-  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, box-shadow 0.15s ease-in-out;
   width: 100%;
   font-size: 1.15em;
   font-weight: 500;
   background-color: transparent;
-  cursor: pointer;
-  box-shadow: 0 2px 5px rgba(52, 152, 219, 0.2); /* Subtle shadow */
 }
 
 .link:hover,
 .link button:hover {
-  background-color: #3498db;
+  background-color: #fda605;
   color: white;
-  box-shadow: 0 4px 8px rgba(52, 152, 219, 0.4); /* Slightly stronger shadow on hover */
 }
 
-.link:active,
-.link button:active {
-  transform: scale(0.98); /* Subtle press effect */
-  box-shadow: 0 1px 3px rgba(52, 152, 219, 0.3);
-}
 
-.linkIcon {
-  font-size: 1.5em;
-}
 
 /* Styles for the "Volver" Button */
 .volverBtn {
@@ -141,7 +128,7 @@ h3 {
   align-items: center;
   gap: 10px;
   transition: color 0.2s ease-in-out, transform 0.15s ease-in-out;
-  padding: 10px 15px;
+  padding: 10px 10px;
   border-radius: 8px;
 }
 

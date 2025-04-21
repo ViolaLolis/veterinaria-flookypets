@@ -67,9 +67,9 @@
 }
 
 .registro-form {
-  display: flex;
+ display: grid ;
   flex-direction: column;
-  gap: 15px;
+  gap: 15px 20px;
 }
 
 .input-group {
