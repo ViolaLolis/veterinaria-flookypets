@@ -1,0 +1,162 @@
+.mainContainer {
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #f7f7f7;
+}
+
+.header {
+  margin-bottom: 30px;
+  border-bottom: 2px solid #e0e0e0;
+  padding-bottom: 15px;
+}
+
+.header h2 {
+  margin: 0;
+  color: #333;
+  font-size: 2em;
+}
+
+.citasLista {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 30px;
+}
+
+.citaItem {
+  background-color: white;
+  padding: 20px;
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease-in-out;
+  display: flex;
+  flex-direction: column; /* Cambia a columna para el detalle desplegable */
+}
+
+.citaItem:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+}
+
+.citaHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px; /* Espacio para el botón de detalle */
+}
+
+.citaInfo {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  color: #555;
+}
+
+.citaIcon {
+  color: #007bff;
+  font-size: 1.1em;
+}
+
+.hora {
+  font-weight: bold;
+  color: #28a745;
+}
+
+.mascota {
+  font-weight: 500;
+}
+
+.propietario {
+  color: #777;
+  font-size: 0.95em;
+}
+
+.detalleButton {
+  background: none;
+  border: none;
+  color: #6c757d;
+  cursor: pointer;
+  font-size: 1.2em;
+  transition: transform 0.2s ease-in-out;
+}
+
+.detalleButton:hover {
+  transform: scale(1.1);
+}
+
+.citaDetalleCompleto {
+  padding: 15px;
+  margin-top: 10px;
+  border-top: 1px solid #eee;
+  color: #4a5568;
+}
+
+.citaDetalleCompleto p {
+  margin-bottom: 8px;
+}
+
+.citaDetalleCompleto strong {
+  font-weight: bold;
+}
+
+.botonesConfirmacion {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.confirmarButton,
+.rechazarButton {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9em;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.rechazarButton {
+  background-color: #dc3545;
+}
+
+.confirmarButton:hover {
+  background-color: #218838;
+}
+
+.rechazarButton:hover {
+  background-color: #c82333;
+}
+
+.noCitas {
+  text-align: center;
+  color: #777;
+  padding: 30px;
+  background-color: white;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+.mensajeEstado {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #28a745;
+  color: white;
+  padding: 15px 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+}
+
+.mensajeEstado.rechazado {
+  background-color: #dc3545;
+}
