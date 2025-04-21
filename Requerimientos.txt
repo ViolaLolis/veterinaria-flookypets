@@ -44,7 +44,7 @@ Debera aparecerte Servidor backen corriendo, eso significa que ya esta corriendo
 
 npm install axios (Vamos a usar axios para hacer solicitudes HTTP)
 
-npm install bcryptjs (para que las contraseñas no se muestren)
+npm install bcrypt (para que las contraseñas no se muestren)
 
 npm install framer-motion
 npm install react-calendar

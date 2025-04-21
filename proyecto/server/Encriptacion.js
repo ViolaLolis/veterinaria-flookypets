@@ -3,10 +3,10 @@ const mysql = require('mysql2/promise'); // o tu conexión actual
 
 async function migrarContraseñas() {
   const connection = await mysql.createConnection({
-    host: 'localhost',
+    host: '127.0.0.1',
     user: 'root',
-    password: '',
-    database: 'bocanegra_bd'
+    password: '12345678',
+    database: 'veterinaria'
   });
 
   const [usuarios] = await connection.execute('SELECT id, password FROM usuarios');

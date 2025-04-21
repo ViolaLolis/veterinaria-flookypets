@@ -1,0 +1,98 @@
+.detalle-cita-container {
+    max-width: 700px;
+    margin: 3rem auto;
+    padding: 2rem;
+    background-color: var(--white);
+    border-radius: 12px;
+    box-shadow: var(--shadow-medium);
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInSlideUp 0.5s ease-out forwards;
+  }
+  
+  .detalle-cita-title {
+    font-size: 2.5rem;
+    color: var(--primary-color);
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+  
+  .detalle-cita-info {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    border: 1px solid #eee;
+    border-radius: 8px;
+  }
+  
+  .detalle-cita-info p {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    line-height: 1.8;
+    margin-bottom: 0.8rem;
+  }
+  
+  .detalle-cita-info strong {
+    color: var(--text-dark);
+    font-weight: 600;
+  }
+  
+  .detalle-cita-info .estado-confirmada {
+    color: var(--green);
+    font-weight: bold;
+  }
+  
+  .detalle-cita-info .estado-cancelada {
+    color: #dc3545;
+    font-weight: bold;
+  }
+  
+  .detalle-cita-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+    justify-content: center;
+  }
+  
+  .detalle-cita-button,
+  .detalle-cita-back {
+    display: inline-block;
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--white);
+    background-color: var(--accent-color);
+    font-size: 1rem;
+    font-weight: 500;
+    transition: background-color 0.3s ease-in-out, transform 0.2s ease-in-out;
+  }
+  
+  .detalle-cita-button:hover,
+  .detalle-cita-back:hover {
+    background-color: var(--accent-hover-color);
+    transform: scale(1.03);
+  }
+  
+  .detalle-cita-button.editar {
+    background-color: var(--light-blue);
+  }
+  
+  .detalle-cita-button.editar:hover {
+    background-color: #2979ff;
+  }
+  
+  .detalle-cita-button.cancelar {
+    background-color: #dc3545;
+  }
+  
+  .detalle-cita-button.cancelar:hover {
+    background-color: #c82333;
+  }
+  
+  .detalle-cita-back {
+    background-color: var(--secondary-color);
+  }
+  
+  @keyframes fadeInSlideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
