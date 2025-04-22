@@ -28,10 +28,6 @@ const ServiciosVeterinaria = () => {
         <FontAwesomeIcon icon={faBriefcaseMedical} className={styles.icon} />
         <h3>Nuestros Servicios</h3>
         <p className={styles.subtitle}>Cuidamos la salud y el bienestar de tus mascotas.</p>
-        {/* Botón de Volver */}
-        <button onClick={handleVolverInicio} className={styles.volverBtn}>
-          <FontAwesomeIcon icon={faArrowLeft} className={styles.volverIcon} /> Volver
-        </button>
       </div>
       <div className={styles.listaServicios}>
         {servicios.map(servicio => (

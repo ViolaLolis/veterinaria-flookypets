@@ -5,6 +5,7 @@ import ServiciosVeterinaria from './ServiciosVeterinaria';
 import styles from './Styles/InicioUsuario.module.css';
 import logo from '../Inicio/Imagenes/flooty.png';
 import { FaPaw, FaCalendarPlus, FaShoppingCart, FaBell, FaClipboardList, FaHeart, FaQuestionCircle, FaUserCog } from 'react-icons/fa';
+import BarraNavegacionUsuario from './BarraNavegacionUsuario';
 
 const InicioUsuario = () => {
   const [activeTab, setActiveTab] = useState('mascotas');
@@ -66,7 +67,7 @@ const InicioUsuario = () => {
         
         <div className={styles.userActions}>
           <button className={styles.helpButton}>
-            <FaQuestionCircle /> Ayuda
+            <BarraNavegacionUsuario/> Ayuda
           </button>
           
           <div className={styles.profileContainer}>
@@ -138,7 +139,7 @@ const InicioUsuario = () => {
       {/* Sidebar con recordatorios y más información */}
       <div className={styles.sidebar}>
         <div className={styles.remindersCard}>
-          <h3><FaBell /> Recordatorios importantes</h3>
+          <h3><FaBell />Recordatorios importantes</h3>
           <ul className={styles.remindersList}>
             {recordatorios.filter(r => r.importante).map(item => (
               <li key={item.id} className={styles.importantReminder}>
@@ -149,7 +150,7 @@ const InicioUsuario = () => {
         </div>
 
         <div className={styles.remindersCard}>
-          <h3><FaClipboardList /> tus recordatorios</h3>
+          <h3>tus recordatorio</h3>
           <ul className={styles.remindersList}>
             {recordatorios.map(item => (
               <li key={item.id} className={item.importante ? styles.importantReminder : ''}>

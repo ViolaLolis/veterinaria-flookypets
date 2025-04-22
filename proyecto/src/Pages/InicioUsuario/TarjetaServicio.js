@@ -13,10 +13,6 @@ const TarjetaServicio = ({ servicio }) => {
       <p className={styles.descripcion}>{servicio.descripcion}</p>
       <div className={styles.footer}>
         <p className={styles.precio}>{servicio.precio}</p>
-        <button className={styles.agendar}>
-          <FontAwesomeIcon icon={faCalendarPlus} className={styles.iconoAgendar} />
-          Agendar
-        </button>
       </div>
     </div>
   );

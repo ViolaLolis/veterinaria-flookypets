@@ -1,146 +1,243 @@
-.container {
-  font-family: 'Nunito Sans', sans-serif; /* Fuente moderna y amigable */
-  background-color: #ffffffa4; /* Fondo gris muy claro y suave */
-  padding: 40px;
-  border-radius: 12px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06); /* Sombra más suave y sutil */
-  width: 95%;
-  max-width: 650px;
-  display: flex;
-  flex-direction: column;
-  align-items: center; /* Centra los elementos horizontalmente */
-  gap: 35px; /* Increased gap for better spacing */
-  margin: 40px auto; /* More top/bottom margin for better visual separation */
-  position: relative; /* For the "Volver" button positioning */
+/* Variables de color y animación */
+:root {
+  --yellow-light: #fff8e1;
+  --yellow-primary: #ffecb3;
+  --yellow-dark: #ffd54f;
+  --yellow-accent: #ffb300;
+  --text-primary: #5d4037;
+  --text-secondary: #8d6e63;
+  --shadow-sm: 0 2px 10px rgba(255, 213, 79, 0.15);
+  --shadow-md: 0 4px 20px rgba(255, 213, 79, 0.2);
+  --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
+/* Animaciones */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+}
+
+@keyframes gradientBG {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Estilos base */
+.perfilContainer {
+  max-width: 600px;
+  margin: 2rem auto;
+  padding: 2.5rem;
+  background: linear-gradient(135deg, #fffaf0 0%, #fff3e0 100%);
+  border-radius: 20px;
+  box-shadow: var(--shadow-md);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  overflow: hidden;
+  position: relative;
+  border: 1px solid rgba(255, 213, 79, 0.3);
+}
+
+.perfilContainer::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255, 236, 179, 0.1) 0%, transparent 70%);
+  animation: gradientBG 15s ease infinite;
+  z-index: 0;
+}
+
+/* Header */
 .header {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 25px; /* Increased gap for better spacing */
-  margin-bottom: 35px; /* Increased margin-bottom */
-  justify-content: center; /* Centra the header content */
-  width: 100%; /* Ensure full width */
+  margin-bottom: 2rem;
+  position: relative;
+  z-index: 1;
 }
 
 .userIcon {
-  font-size: 3.5em; /* Slightly larger user icon */
-  color: #f3a005; /* A brighter, more engaging blue */
+  font-size: 5rem;
+  color: var(--yellow-accent);
+  margin-bottom: 1rem;
+  filter: drop-shadow(0 4px 6px rgba(255, 179, 0, 0.2));
+  transition: var(--transition);
+  animation: float 4s ease-in-out infinite;
 }
 
-h3 {
-  color: #2c3e50; /* Darker, more professional heading color */
-  font-size: 2.8em;
+.userIcon:hover {
+  transform: scale(1.1) rotate(10deg);
+  filter: drop-shadow(0 6px 10px rgba(255, 179, 0, 0.3));
+}
+
+.title {
+  color: var(--text-primary);
+  font-size: 2.2rem;
+  font-weight: 700;
   margin: 0;
-  font-weight: 700; /* Stronger heading weight */
+  background: linear-gradient(to right, var(--yellow-accent), #ff8f00);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.05);
 }
 
-.info {
-  margin-bottom: 40px; /* Increased margin-bottom */
-  width: 100%;
-  padding: 30px; /* Increased padding */
-  border: 1px solid #e6e9ed; /* Lighter border */
-  border-radius: 10px;
-  background-color: #fff;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03); /* Softer shadow for info section */
+/* Sección de información */
+.infoSection {
+  background: rgba(255, 255, 255, 0.7);
+  padding: 1.8rem;
+  border-radius: 15px;
+  margin-bottom: 2rem;
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 213, 79, 0.2);
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+  position: relative;
+  z-index: 1;
 }
 
-.info p {
-  margin-bottom: 20px; /* Increased margin-bottom for better spacing */
-  color: #34495e; /* Darker text color */
+.infoSection:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(255, 179, 0, 0.2);
+}
+
+.infoTitle {
+  color: var(--yellow-accent);
+  font-size: 1.4rem;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px dashed var(--yellow-primary);
+}
+
+.infoSection p {
+  color: var(--text-primary);
+  font-size: 1.05rem;
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}
+
+.strong {
+  color: var(--text-secondary);
+  font-weight: 600;
+  display: inline-block;
+  min-width: 100px;
+}
+
+/* Sección de opciones */
+.optionsSection {
+  background: rgba(255, 255, 255, 0.7);
+  padding: 1.5rem;
+  border-radius: 15px;
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 213, 79, 0.2);
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  z-index: 1;
+}
+
+.optionsTitle {
+  color: var(--yellow-accent);
+  font-size: 1.4rem;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+}
+
+.optionLink {
   display: flex;
   align-items: center;
-  gap: 20px; /* Increased gap */
-  font-size: 1.15em; /* Slightly larger font size */
-}
-
-.info p:last-child {
-  margin-bottom: 0; /* Remove margin from the last paragraph */
-}
-
-.info strong {
-  font-weight: 600; /* Slightly bolder label */
-  color: #2c3e50; /* Darker label color */
-  width: 110px; /* Adjust width for better alignment */
-  display: inline-block; /* Ensure consistent width */
-}
-
-.infoIcon {
-  font-size: 1.4em;
-  color: #7f8c8d; /* Medium gray for icons */
-}
-
-.editIcon {
-  font-size: 1em;
-  color: #95a5a6;
-  margin-left: auto;
+  padding: 1rem 1.5rem;
+  margin-bottom: 1rem;
+  background: rgba(255, 248, 225, 0.7);
+  border-radius: 12px;
+  color: var(--text-primary);
+  font-weight: 500;
+  font-size: 1.1rem;
   cursor: pointer;
+  transition: var(--transition);
+  border: 1px solid rgba(255, 213, 79, 0.3);
 }
 
-.editIcon:hover {
-  color: #f0a607; /* Brighter blue on hover */
+.optionLink:hover {
+  background: white;
+  box-shadow: 0 5px 15px rgba(255, 179, 0, 0.2);
+  transform: translateX(10px);
 }
 
-.opciones {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  gap: 15px; /* Adjusted gap */
+.optionIcon {
+  color: var(--yellow-accent);
+  margin-right: 1rem;
+  font-size: 1.2rem;
+  transition: var(--transition);
 }
 
-.link,
-.link button {
+.optionLink:hover .optionIcon {
+  transform: rotate(15deg) scale(1.2);
+}
+
+/* Botón de cerrar sesión */
+.logoutButton {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 18px; /* Adjusted gap */
-  padding: 14px 5px; /* Adjusted padding */
- 
-  color: #000000;
-  border: 1px solid #f8a306;
-  border-radius: 10px;
-  text-align: center;
   width: 100%;
-  font-size: 1.15em;
-  font-weight: 500;
-  background-color: transparent;
-}
-
-.link:hover,
-.link button:hover {
-  background-color: #fda605;
-  color: white;
-}
-
-
-
-/* Styles for the "Volver" Button */
-.volverBtn {
-  position: absolute;
-  top: 20px; /* Increased top spacing */
-  left: 20px; /* Increased left spacing */
-  background: none;
+  padding: 1rem;
+  background: linear-gradient(to right, #ffebee, #ffcdd2);
   border: none;
-  color: #7f8c8d;
+  border-radius: 12px;
+  color: #d32f2f;
+  font-weight: 500;
+  font-size: 1.1rem;
   cursor: pointer;
-  font-size: 1em;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  transition: color 0.2s ease-in-out, transform 0.15s ease-in-out;
-  padding: 10px 10px;
-  border-radius: 8px;
+  transition: var(--transition);
+  margin-top: 1.5rem;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.05);
 }
 
-.volverBtn:hover {
-  color: #2c3e50;
-  transform: translateX(-2px);
+.logoutButton:hover {
+  background: linear-gradient(to right, #ffcdd2, #ef9a9a);
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(244, 67, 54, 0.2);
 }
 
-.volverBtn:active {
-  transform: translateX(0);
+.logoutIcon {
+  margin-right: 0.8rem;
+  transition: var(--transition);
 }
 
-.volverIcon {
-  font-size: 1.2em;
+.logoutButton:hover .logoutIcon {
+  transform: rotate(15deg);
+}
+
+/* Efectos responsivos */
+@media (max-width: 768px) {
+  .perfilContainer {
+    padding: 1.8rem;
+    margin: 1rem;
+    border-radius: 15px;
+  }
+  
+  .title {
+    font-size: 1.8rem;
+  }
+  
+  .userIcon {
+    font-size: 4rem;
+  }
+  
+  .infoSection, .optionsSection {
+    padding: 1.3rem;
+  }
+  
+  .optionLink, .logoutButton {
+    padding: 0.9rem;
+    font-size: 1rem;
+  }
 }

@@ -1,285 +1,299 @@
+/* Styles/AgendarCita.module.css */
+
 .container {
-  font-family: 'Montserrat', sans-serif; /* Fuente moderna y elegante */
-  background-color: #f9faff; /* Fondo aún más suave */
-  padding: 45px; /* Un poco más de espacio */
-  border-radius: 15px; /* Bordes más redondeados */
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); /* Sombra más intensa y suave */
-  width: 90%;
-  max-width: 750px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 35px; /* Más espacio entre secciones */
-  animation: fadeInUp 0.7s ease-out forwards;
-  margin: 40px auto;
-  text-align: center;
-  position: relative; /* Para posicionar el botón de volver */
+  max-width: 850px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: linear-gradient(135deg, #ffffffd9, #fff5e6d9);
+  border-radius: 15px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08),
+              0 0 0 1px rgba(255, 179, 71, 0.2);
+  animation: fadeInUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 179, 71, 0.15);
 }
 
 @keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(25px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.container::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    to bottom right,
+    rgba(255, 179, 71, 0) 0%,
+    rgba(255, 179, 71, 0.05) 50%,
+    rgba(255, 179, 71, 0) 100%
+  );
+  transform: rotate(30deg);
+  transition: all 0.8s ease;
+  z-index: 0;
+}
+
+.container:hover::before {
+  left: 100%;
+  top: 100%;
 }
 
 .header {
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
   align-items: center;
-  margin-bottom: 30px;
-  width: 100%;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #fff3bf;
+  position: relative;
+  z-index: 2;
 }
 
-h3 {
-  color: #2c3e50; /* Azul oscuro elegante */
-  font-size: 2.3em;
-  font-weight: 700;
-  margin-bottom: 20px; /* Reducido el margen inferior */
-  letter-spacing: 0.8px;
+.header h3 {
+  margin: 0;
+  color: #5a4a3a;
+  font-size: 1.8rem;
+  font-weight: 600;
+}
+
+.volverBtn {
+  background: #fff9db;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 50px;
+  color: #f59f00;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(255, 212, 59, 0.2);
+}
+
+.volverBtn:hover {
+  background: #ffec99;
+  transform: translateX(-5px);
+  box-shadow: 0 4px 8px rgba(255, 212, 59, 0.3);
+}
+
+.volverIcon {
+  margin-right: 0.5rem;
 }
 
 .calendarContainer {
-  border-radius: 10px;
-  overflow: hidden;
-  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.07);
-  transition: transform 0.25s ease-in-out;
-  width: 100%;
+  margin: 1rem 0;
+  position: relative;
+  z-index: 2;
+  animation: slideIn 0.5s ease-out forwards;
+  opacity: 0;
+  animation-delay: 0.1s;
+
+  display: flex;
+  justify-content: center;
 }
 
-.calendarContainer:hover {
-  transform: scale(1.03);
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
-/* Estilos para react-calendar (mejorados) */
+/* Estilos personalizados para react-calendar */
 .react-calendar {
   width: 100%;
-  background: #fff;
-  border: none;
+  max-width: 500px;
+  margin: 0 auto;
+  border: 1px solid #ffec99;
   border-radius: 10px;
-  font-family: inherit;
-  line-height: 1.2em;
-}
-
-.react-calendar__navigation {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 1.2em;
-  padding: 0 1em;
+  box-shadow: 0 3px 10px rgba(255, 179, 71, 0.1);
+  padding: 1rem;
+  background: white;
+  font-family: 'Nunito Sans', sans-serif;
 }
 
 .react-calendar__navigation button {
-  color: #34495e;
-  font-weight: 600;
-  background: none;
-  border: none;
-  padding: 12px;
-  border-radius: 6px;
-  transition: background-color 0.3s ease, color 0.3s ease;
-  min-width: 90px;
+  background: #fff9db;
+  color: #5a4a3a;
+  border-radius: 5px;
+  min-width: 44px;
+  margin:  0.5rem;
+  transition: all 0.3s ease;
 }
 
 .react-calendar__navigation button:hover {
-  background-color: #e0f2f7; /* Azul claro al hover */
-  color: #2c3e50;
+  background: #ffec99;
 }
 
-.react-calendar__month-view__weekdays {
-  display: flex;
-  justify-content: space-around;
-  margin-bottom: 0.7em;
-  padding: 0 1em;
+.react-calendar__navigation button:disabled {
+  background: #f5f5f5;
 }
 
-.react-calendar__month-view__weekdays__weekday {
-  text-align: center;
-  color: #555;
-  font-size: 0.95em;
-  font-weight: 500;
-}
-
-.react-calendar__month-view__days {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  grid-gap: 0.3em;
-  padding: 0 1em;
-}
-
-.react-calendar__month-view__days__day {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 0.7em;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-.react-calendar__month-view__days__day:hover {
-  background-color: #f0f0f0;
-  color: #2c3e50;
-}
-
-.react-calendar__month-view__days__day--weekend {
-  color: #e67e22; /* Naranja más cálido para fines de semana */
+.react-calendar__tile {
+  padding: 0.75em 0.5em;
+  border-radius: 5px;
+  transition: all 0.3s ease;
 }
 
 .react-calendar__tile--now {
-  background: #2ecc71; /* Verde esmeralda para hoy */
-  color: white;
-  font-weight: bold;
+  background: #ffec99;
 }
 
 .react-calendar__tile--active {
-  background: #3498db; /* Azul vibrante para seleccionado */
+  background: #ff9500;
   color: white;
-  font-weight: bold;
 }
 
-.react-calendar__tile:disabled {
-  color: #ccc;
-  background: #f5f5f5;
-  cursor: default;
+.react-calendar__tile--active:enabled:hover,
+.react-calendar__tile--active:enabled:focus {
+  background: #ff8c00;
+}
+
+.react-calendar__tile:enabled:hover,
+.react-calendar__tile:enabled:focus {
+  background: #ffec99;
 }
 
 .horariosContainer {
-  width: 100%;
-  padding: 25px;
-  background-color: #fff;
-  border-radius: 10px;
-  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.07);
+  margin: 2rem 0;
+  position: relative;
+  z-index: 2;
+  animation: slideIn 0.5s ease-out forwards;
+  opacity: 0;
+  animation-delay: 0.2s;
 }
 
 .horariosContainer h4 {
-  color: #34495e;
-  font-size: 1.6em;
-  margin-bottom: 20px;
-  font-weight: 600;
+  color: #ff9500;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  text-align: center;
 }
 
 .horariosLista {
   list-style: none;
   padding: 0;
-  display: flex;
-  flex-wrap: wrap;
+  margin: 1.5rem 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 1rem;
   justify-content: center;
-  gap: 12px;
 }
 
-.horariosLista li button {
-  padding: 14px 22px;
+.horariosLista li {
+  display: flex;
+  justify-content: center;
+}
+
+.horariosLista button {
+  width: 100%;
+  padding: 0.8rem;
+  background: #fff9db;
   border: none;
-  border-radius: 10px;
-  background-color: #2ecc71; /* Verde esmeralda */
-  color: white;
+  border-radius: 8px;
+  color: #5a4a3a;
+  font-weight: 600;
   cursor: pointer;
-  font-size: 1.05em;
-  font-weight: 500;
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, background-color 0.3s ease;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
-  min-width: 90px;
-  text-align: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(255, 212, 59, 0.1);
 }
 
-.horariosLista li button:hover {
+.horariosLista button:hover {
+  background: #ffec99;
   transform: translateY(-3px);
-  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
-  background-color: #27ae60; /* Verde ligeramente más oscuro */
+  box-shadow: 0 4px 8px rgba(255, 212, 59, 0.2);
 }
 
-.horariosLista li.selected button {
-  background-color: #f39c12; /* Amarillo dorado para seleccionado */
+.horariosLista .selected button {
+  background: linear-gradient(to right, #ff9500, #ffb347);
   color: white;
-  font-weight: bold;
-  transform: scale(1.08);
-  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 8px rgba(255, 149, 0, 0.3);
 }
 
 .error {
-  color: #c0392b; /* Rojo para mensajes de error */
-  margin-top: 20px;
-  font-size: 1em;
-  font-weight: bold;
-  opacity: 0;
-  transform: translateY(10px);
-  animation: fadeInUp 0.4s ease-out forwards 0.3s;
+  color: #ff6b6b;
+  text-align: center;
+  margin: 1rem 0;
+  animation: shake 0.5s ease;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-5px); }
+  40%, 80% { transform: translateX(5px); }
 }
 
 .exito {
-  color: #27ae60; /* Verde para mensajes de éxito */
-  margin-top: 20px;
-  font-size: 1.1em;
-  font-weight: bold;
-  opacity: 0;
-  transform: translateY(10px);
-  animation: fadeInUp 0.4s ease-out forwards 0.3s;
+  color: #51cf66;
+  text-align: center;
+  margin: 1rem 0;
+  animation: bounceIn 0.5s ease;
+}
+
+@keyframes bounceIn {
+  0% { transform: scale(0.9); opacity: 0; }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); opacity: 1; }
 }
 
 .agendarBtn {
-  padding: 16px 35px;
-  border: none;
-  border-radius: 12px;
-  background-color: #3498db; /* Azul vibrante */
+  display: block;
+  width: 100%;
+  max-width: 300px;
+  margin: 2rem auto;
+  padding: 1rem;
+  background: linear-gradient(to right, #ff9500, #ffb347);
   color: white;
-  cursor: pointer;
-  font-size: 1.15em;
+  border: none;
+  border-radius: 50px;
+  font-size: 1.1rem;
   font-weight: 600;
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, background-color 0.3s ease;
-  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
-  animation: pulse 1.6s infinite alternate;
-  margin-top: 30px;
-}
-
-@keyframes pulse {
-  from {
-    transform: scale(1);
-  }
-  to {
-    transform: scale(1.04);
-  }
-}
-
-.agendarBtn:hover:enabled {
-  transform: translateY(-3px) scale(1.06);
-  box-shadow: 0 7px 15px rgba(0, 0, 0, 0.2);
-  background-color: #2980b9; /* Azul ligeramente más oscuro */
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(255, 149, 0, 0.3);
+  position: relative;
+  overflow: hidden;
+  z-index: 2;
 }
 
 .agendarBtn:disabled {
-  background-color: #ccc;
+  background: #ccc;
   cursor: not-allowed;
-  transform: scale(1);
   box-shadow: none;
-  animation: none;
 }
 
-/* Estilos para el Botón de Volver */
-.volverBtn {
+.agendarBtn:not(:disabled):hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(255, 149, 0, 0.4);
+}
+
+.agendarBtn::before {
+  content: '';
   position: absolute;
-  top: 10px;
-  left: 10px;
-  background: none;
-  border: none;
-  color: #555;
-  cursor: pointer;
-  font-size: 1em;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  transition: color 0.3s ease;
-  padding: 8px 12px;
-  border-radius: 5px;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to right, #ffb347, #ff9500);
+  transition: all 0.6s ease;
+  z-index: -1;
 }
 
-.volverBtn:hover {
-  color: #333;
-  background-color: #f0f0f0;
+.agendarBtn:not(:disabled):hover::before {
+  left: 0;
 }
 
-.volverIcon {
-  font-size: 1.1em;
+.container:hover {
+  animation: containerShine 2s infinite alternate;
+  background-image: 
+    linear-gradient(
+      90deg,
+      rgba(255,255,255,0) 0%,
+      rgba(255,255,255,0.2) 50%,
+      rgba(255,255,255,0) 100%
+    ),
+    linear-gradient(135deg, #ffffffd9, #fff5e6d9);
+  background-size: 200px 100%, auto;
+  background-repeat: no-repeat;
 }

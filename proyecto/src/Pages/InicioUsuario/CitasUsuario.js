@@ -23,9 +23,6 @@ const CitasUsuario = () => {
       <div className={styles.header}>
         <FontAwesomeIcon icon={faCalendarAlt} className={styles.icon} />
         <h3>Mis Próximas Citas</h3>
-        <button onClick={handleVolver} className={styles.volverBtn}>
-          <FontAwesomeIcon icon={faArrowLeft} className={styles.volverIcon} /> Volver
-        </button>
       </div>
       {citas.length > 0 ? (
         <ul className={styles.listaCitas}>

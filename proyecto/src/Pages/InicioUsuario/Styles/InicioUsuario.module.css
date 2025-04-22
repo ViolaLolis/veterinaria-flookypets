@@ -80,7 +80,7 @@
 }
 
 .petInfo p {
-  margin: 0 0 10px 0;
+  margin: 0 0 5px 0;
   color: #7f8c8d;
   font-size: 14px;
 }
@@ -206,6 +206,7 @@
   margin-top: 0;
   display: flex;
   align-items: center;
+  margin: center;
   gap: 10px;
   color: #2c3e50;
 }
@@ -236,7 +237,7 @@
 }
 
 .tipCard {
-  background: linear-gradient(135deg, #2ecc71, #27ae60);
+  background: linear-gradient(135deg, #0c2215, #f19e03);
   color: white;
 }
 

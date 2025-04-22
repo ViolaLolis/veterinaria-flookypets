@@ -54,9 +54,6 @@ const MisMascotas = () => {
       animate="visible"
     >
       <motion.div className={styles.header} variants={headerVariants}>
-        <button onClick={handleVolver} className={styles.volverBtn}>
-          <FontAwesomeIcon icon={faArrowLeft} className={styles.volverIcon} /> Volver
-        </button>
         <FontAwesomeIcon icon={faPaw} className={styles.icon} />
         <h3>Mis Mascotas</h3>
       </motion.div>
