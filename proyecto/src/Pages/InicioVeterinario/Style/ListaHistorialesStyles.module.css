@@ -1,67 +1,244 @@
 .listaContainer {
-    padding: 20px;
+  max-width: 1000px;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  border-radius: 15px;
+  background: linear-gradient(135deg, #fff9e6 0%, #fff4d1 100%);
+  box-shadow: 0 8px 20px rgba(255, 215, 0, 0.1);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.header h2 {
+  color: #d4a017;
+  font-size: 1.8rem;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.titleIcon {
+  color: #ffd700;
+}
+
+.searchContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: white;
+  border-radius: 25px;
+  padding: 0.5rem 1rem;
+  box-shadow: 0 2px 10px rgba(255, 215, 0, 0.1);
+}
+
+.searchInput {
+  border: none;
+  outline: none;
+  padding: 0.5rem;
+  width: 250px;
+  background: transparent;
+  font-size: 1rem;
+}
+
+.searchIcon {
+  color: #ffd700;
+  margin-right: 0.5rem;
+}
+
+.lista {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 1rem;
+}
+
+.listItem {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 2fr auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.2rem 1.5rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(255, 215, 0, 0.1);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.listItem::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 5px;
+  height: 100%;
+  background: linear-gradient(to bottom, #ffd700, #f9c12a);
+}
+
+.mascotaInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.mascota {
+  font-weight: 600;
+  color: #333;
+  font-size: 1.1rem;
+}
+
+.especie {
+  font-size: 0.8rem;
+  color: #888;
+  background: #fffae6;
+  padding: 0.2rem 0.5rem;
+  border-radius: 10px;
+  display: inline-block;
+  width: fit-content;
+}
+
+.fecha {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.diagnostico {
+  color: #555;
+  font-style: italic;
+  font-size: 0.95rem;
+}
+
+.verButton {
+  background: linear-gradient(135deg, #ffd700 0%, #f9c12a 100%);
+  color: white;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  text-decoration: none;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.verButton:hover {
+  background: linear-gradient(135deg, #f9c12a 0%, #e6b422 100%);
+}
+
+.tooltip {
+  position: absolute;
+  top: -35px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #333;
+  color: white;
+  padding: 0.3rem 0.6rem;
+  border-radius: 5px;
+  font-size: 0.8rem;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.verButton:hover .tooltip {
+  opacity: 1;
+  visibility: visible;
+  top: -40px;
+}
+
+.emptyMessage {
+  text-align: center;
+  padding: 3rem;
+  color: #666;
+  font-size: 1.1rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(255, 215, 0, 0.1);
+}
+
+.addButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+  padding: 0.7rem 1.5rem;
+  background: linear-gradient(135deg, #ffd700 0%, #f9c12a 100%);
+  color: white;
+  text-decoration: none;
+  border-radius: 25px;
+  font-weight: 500;
+  box-shadow: 0 3px 10px rgba(255, 215, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.addButton:hover {
+  background: linear-gradient(135deg, #f9c12a 0%, #e6b422 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+}
+
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  gap: 1rem;
+}
+
+.loadingSpinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid #fffae6;
+  border-top: 5px solid #ffd700;
+  border-radius: 50%;
+}
+
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: #fff4f4;
+  border-radius: 10px;
+  max-width: 500px;
+  margin: 2rem auto;
+  color: #d9534f;
+}
+
+.errorIcon {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 768px) {
+  .listItem {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+    padding: 1rem;
+  }
+  
+  .searchInput {
+    width: 100%;
   }
   
   .header {
-    margin-bottom: 20px;
+    flex-direction: column;
+    align-items: stretch;
   }
-  
-  .header h2 {
-    margin: 0;
-  }
-  
-  .lista {
-    list-style: none;
-    padding: 0;
-  }
-  
-  .listItem {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px;
-    margin-bottom: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    background-color: white;
-  }
-  
-  .mascota {
-    font-weight: bold;
-    margin-right: 10px;
-    flex-grow: 1;
-  }
-  
-  .fecha {
-    color: #555;
-    margin-right: 10px;
-  }
-  
-  .diagnostico {
-    color: #333;
-    flex-grow: 2;
-  }
-  
-  .verButton {
-    background-color: #28a745;
-    color: white;
-    border: none;
-    padding: 8px 10px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 14px;
-    cursor: pointer;
-    border-radius: 5px;
-    transition: background-color 0.3s ease;
-  }
-  
-  .verButton:hover {
-    opacity: 0.8;
-  }
-  
-  .emptyMessage {
-    text-align: center;
-    color: #777;
-    padding: 20px;
-  }
+}

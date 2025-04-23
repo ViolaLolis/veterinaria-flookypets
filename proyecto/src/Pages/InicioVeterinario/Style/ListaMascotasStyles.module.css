@@ -1,94 +1,196 @@
+/* ListaMascotasStyles.module.css */
+
+/* Contenedor principal */
 .listaContainer {
-    padding: 20px;
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  background-color: #f8f9fa;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+/* Encabezado */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.header h2 {
+  color: #2c3e50;
+  font-size: 2rem;
+  margin: 0;
+  font-weight: 600;
+}
+
+/* Botón de agregar */
+.addButton {
+  background: linear-gradient(135deg, #e7ab06);
+  color: white;
+  padding: 0.7rem 1.5rem;
+  border-radius: 50px;
+  text-decoration: none;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+}
+
+.addButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(230, 161, 13, 0.4);
+}
+
+/* Lista de mascotas */
+.lista {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.listItem {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  border-left: 4px solid #f5be08;
+  position: relative;
+  overflow: hidden;
+}
+
+.listItem::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(52, 152, 219, 0.1), rgba(44, 62, 80, 0.05));
+  z-index: 0;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.listItem:hover::before {
+  opacity: 1;
+}
+
+/* Información de la mascota */
+.nombre {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #000000;
+  display: block;
+  margin-bottom: 0.5rem;
+  position: relative;
+}
+
+.especie {
+  display: block;
+  color: #7f8c8d;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+  position: relative;
+}
+
+.propietario {
+  display: block;
+  color: #34495e;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+  position: relative;
+}
+
+/* Botones de acción */
+.acciones {
+  display: flex;
+  gap: 0.8rem;
+  position: relative;
+}
+
+.acciones a, .acciones button {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+  font-size: 0.9rem;
+  color: white;
+}
+
+.verButton {
+  background-color: #27ae60;
+}
+
+.verButton:hover {
+  background-color: #2ecc71;
+  transform: translateY(-2px);
+}
+
+.editarButton {
+  background-color: #f39c12;
+}
+
+.editarButton:hover {
+  background-color: #f1c40f;
+  transform: translateY(-2px);
+}
+
+.deshabilitarButton {
+  background-color: #e74c3c;
+}
+
+.deshabilitarButton:hover {
+  background-color: #c0392b;
+  transform: translateY(-2px);
+}
+
+/* Mensaje cuando no hay mascotas */
+.emptyMessage {
+  text-align: center;
+  padding: 2rem;
+  background: white;
+  border-radius: 12px;
+  color: #7f8c8d;
+  font-size: 1.1rem;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+/* Efectos de carga */
+@keyframes pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
+.loadingItem {
+  background: #ecf0f1;
+  height: 120px;
+  border-radius: 12px;
+  animation: pulse 1.5s infinite ease-in-out;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .lista {
+    grid-template-columns: 1fr;
   }
   
   .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
+    flex-direction: column;
+    align-items: flex-start;
   }
-  
-  .header h2 {
-    margin: 0;
-  }
-  
-  .addButton {
-    background-color: #008CBA;
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 16px;
-    cursor: pointer;
-    border-radius: 5px;
-    transition: background-color 0.3s ease;
-  }
-  
-  .addButton:hover {
-    background-color: #0077a3;
-  }
-  
-  .lista {
-    list-style: none;
-    padding: 0;
-  }
-  
-  .listItem {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px;
-    margin-bottom: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    background-color: white;
-  }
-  
-  .nombre {
-    font-weight: bold;
-    margin-right: 10px;
-  }
-  
-  .especie,
-  .propietario {
-    color: #555;
-    margin-right: 10px;
-  }
-  
-  .acciones button,
-  .acciones a {
-    background-color: #f44336;
-    color: white;
-    border: none;
-    padding: 8px 10px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 14px;
-    cursor: pointer;
-    border-radius: 5px;
-    margin-left: 5px;
-    transition: background-color 0.3s ease;
-  }
-  
-  .acciones a.verButton {
-    background-color: #2196F3;
-  }
-  
-  .acciones a.editarButton {
-    background-color: #008CBA;
-  }
-  
-  .acciones button:hover,
-  .acciones a:hover {
-    opacity: 0.8;
-  }
-  
-  .emptyMessage {
-    text-align: center;
-    color: #777;
-    padding: 20px;
-  }
+}
