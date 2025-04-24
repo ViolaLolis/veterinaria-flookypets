@@ -335,28 +335,65 @@ function Registro() {
     // Enviar el formulario completo
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError('');
         
+        // Verificar que el código esté verificado
         if (!codigoVerificado) {
-            setError('Por favor, verifique el código antes de enviar.');
-            return;
+          setError('Por favor, verifique el código antes de enviar.');
+          return;
         }
-
-        setIsSubmitting(true);
+      
+        // Preparar datos para enviar
+        const userData = {
+          nombre: formData.nombre,
+          apellido: formData.apellido,
+          email: formData.correo,  // Asegúrate que coincida con el backend
+          password: formData.contrasena,
+          telefono: formData.telefono,
+          direccion: formData.direccion,
+          tipoDocumento: formData.tipoDocumento,
+          numeroDocumento: formData.numeroDocumento,
+          fechaNacimiento: formData.fechaNacimiento
+        };
+      
+        console.log("Enviando datos al backend:", userData);
+      
         try {
-            console.log("Enviando datos del formulario:", formData);
-            // Simulamos el envío al servidor
-            await new Promise(resolve => setTimeout(resolve, 2000));
-
-            console.log("Datos del formulario enviados con éxito:", formData);
-            setRegistroExitoso(true);
+          const response = await fetch('http://localhost:5000/register', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(userData)
+          });
+      
+          const data = await response.json();
+      
+          if (!response.ok) {
+            throw new Error(data.message || 'Error en el registro');
+          }
+      
+          console.log("Registro exitoso:", data);
+          setRegistroExitoso(true);
+          
         } catch (error) {
-            console.error("Error al enviar el formulario:", error);
-            setError('Hubo un error al procesar el registro. Por favor, inténtelo de nuevo más tarde.');
-        } finally {
-            setIsSubmitting(false);
+          console.error("Error en el registro:", error);
+          setError(error.message || 'Hubo un error al registrar. Por favor, inténtalo de nuevo.');
         }
+      };
+  // Función para enviar correo de bienvenida (opcional)
+  const enviarCorreoBienvenida = async (email, nombre) => {
+    const templateParams = {
+      to_email: email,
+      user_name: nombre,
+      from_name: 'Flooky Pets'
     };
+  
+    try {
+      await send(serviceId, 'template_bienvenida', templateParams, publicKey);
+    } catch (emailError) {
+      console.error("Error enviando correo de bienvenida:", emailError);
+    }
+  };
 
     // Redirigir después de registro exitoso
     useEffect(() => {

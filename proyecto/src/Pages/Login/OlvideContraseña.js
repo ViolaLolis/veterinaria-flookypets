@@ -4,7 +4,6 @@ import { useForm } from 'react-hook-form';
 import { send } from '@emailjs/browser';
 import '../Styles/OlvidarContraseña.css';
 
-// Configuración de EmailJS (usando tus credenciales)
 const serviceId = 'Flooky Pets';
 const templateId = 'template_z3izl33';
 const publicKey = 'Glz70TavlG0ANcvrb';
@@ -25,6 +24,7 @@ function OlvideContraseña() {
     formState: { errors }, 
     getValues, 
     watch,
+    reset
   } = useForm();
   
   const navigate = useNavigate();
@@ -48,9 +48,7 @@ function OlvideContraseña() {
   };
 
   // Enviar código por correo electrónico
-  const enviarCodigoPorCorreo = async (codigo) => {
-    const email = getValues('correo');
-    
+  const enviarCodigoPorCorreo = async (codigo, email) => {
     const templateParams = {
       to_email: email,
       from_name: 'Flooky Pets',
@@ -65,6 +63,7 @@ function OlvideContraseña() {
       setTiempoRestante(60);
       setError('');
       setSuccessMessage('Código de verificación enviado a tu correo');
+      return true;
     } catch (err) {
       console.error('Error al enviar correo:', err);
       let errorMsg = 'Error al enviar el código. Intenta nuevamente.';
@@ -76,7 +75,7 @@ function OlvideContraseña() {
       }
       
       setError(errorMsg);
-      throw err;
+      return false;
     }
   };
 
@@ -87,40 +86,87 @@ function OlvideContraseña() {
     setIsSubmitting(true);
     
     try {
-      const codigo = generarCodigo();
-      await enviarCodigoPorCorreo(codigo);
+      const email = getValues('correo');
+      
+      // Verificar si el email existe en el backend
+      const response = await fetch('http://localhost:5000/forgot-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Error al verificar el correo');
+      }
+
+      // Generar y enviar código
+      const codigo = data.resetToken || generarCodigo();
+      const emailEnviado = await enviarCodigoPorCorreo(codigo, email);
+      
+      if (emailEnviado) {
+        setCodigoGenerado(codigo);
+      }
+
     } catch (error) {
-      console.error('Error en handleEnviarCodigo:', error);
+      setError(error.message);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   // Paso 2: Verificar código ingresado
-  const handleVerificarCodigo = () => {
+  const handleVerificarCodigo = async () => {
     const codigoIngresado = getValues('codigoVerificacion')?.toUpperCase();
+    const email = getValues('correo');
     
     if (!codigoIngresado) {
       setError('Ingresa el código de verificación');
       return;
     }
     
-    if (codigoIngresado === codigoGenerado) {
+    setIsSubmitting(true);
+    setError('');
+    
+    try {
+      const response = await fetch('http://localhost:5000/verify-reset-code', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: email,
+          code: codigoIngresado
+        })
+      });
+  
+      const data = await response.json();
+  
+      if (!response.ok) {
+        throw new Error(data.message || 'Error al verificar el código');
+      }
+  
       setCodigoVerificado(true);
-      setError('');
-      setSuccessMessage('Código verificado correctamente');
+      setSuccessMessage(data.message || 'Código verificado correctamente');
       setTimeout(() => {
         setStep(2);
         setSuccessMessage('');
       }, 1500);
-    } else {
-      setError('Código incorrecto. Intenta nuevamente.');
+  
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   // Paso 3: Cambiar contraseña
   const handleCambiarContraseña = async () => {
     const { nuevaContraseña, confirmarContraseña } = getValues();
+    const email = getValues('correo');
     
     if (nuevaContraseña !== confirmarContraseña) {
       setError('Las contraseñas no coinciden');
@@ -131,15 +177,30 @@ function OlvideContraseña() {
     setError('');
     
     try {
-      // Aquí iría la llamada a tu API para cambiar la contraseña
-      console.log('Cambiando contraseña para:', getValues('correo'));
-      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulación
-      
+      const response = await fetch('http://localhost:5000/reset-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: email,
+          token: codigoGenerado,
+          newPassword: nuevaContraseña
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Error al cambiar la contraseña');
+      }
+
       setSuccessMessage('¡Contraseña cambiada con éxito!');
       setTimeout(() => navigate('/login'), 2000);
+      
     } catch (error) {
-      setError('Error al cambiar contraseña. Intenta nuevamente.');
-      console.error('Error en handleCambiarContraseña:', error);
+      setError(error.message);
+      console.error('Error al cambiar contraseña:', error);
     } finally {
       setIsSubmitting(false);
     }
@@ -153,8 +214,13 @@ function OlvideContraseña() {
     setIsSubmitting(true);
     
     try {
+      const email = getValues('correo');
       const codigo = generarCodigo();
-      await enviarCodigoPorCorreo(codigo);
+      const emailEnviado = await enviarCodigoPorCorreo(codigo, email);
+      
+      if (emailEnviado) {
+        setCodigoGenerado(codigo);
+      }
     } catch (error) {
       console.error('Error al reenviar código:', error);
     } finally {
@@ -163,8 +229,8 @@ function OlvideContraseña() {
   };
 
   return (
-    <div className="registro-container">
-      <div className="registro-box">
+    <div className="olvide-container">
+      <div className="olvide-box">
         <h2>Recuperar Contraseña</h2>
         
         {/* Barra de progreso */}
@@ -188,7 +254,6 @@ function OlvideContraseña() {
               <label>Correo Electrónico</label>
               <input
                 type="email"
-               
                 {...register('correo', {
                   required: 'El correo es obligatorio',
                   pattern: {
