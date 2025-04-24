@@ -254,6 +254,54 @@ app.post('/verify-reset-code', async (req, res) => {
     });
   }
 });
+// En point de olvide contraseña 
+// Ruta: Restablecer la contraseña
+app.post('/reset-password', async (req, res) => {
+  const { email, token, newPassword } = req.body;
+
+  if (!email || !token || !newPassword) {
+    return res.status(400).json({ 
+      success: false,
+      message: 'Email, token y nueva contraseña son requeridos' 
+    });
+  }
+
+  try {
+    // Buscar usuario con el token válido y no expirado
+    const [user] = await db.promise().query(
+      'SELECT * FROM usuarios WHERE email = ? AND reset_token = ? AND reset_token_expires > NOW()',
+      [email, token]
+    );
+
+    if (user.length === 0) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Token inválido o expirado' 
+      });
+    }
+
+    // Hashear la nueva contraseña
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Actualizar la contraseña y limpiar el token
+    await db.promise().query(
+      'UPDATE usuarios SET password = ?, reset_token = NULL, reset_token_expires = NULL WHERE email = ?',
+      [hashedPassword, email]
+    );
+
+    res.json({ 
+      success: true,
+      message: 'Contraseña actualizada correctamente' 
+    });
+
+  } catch (error) {
+    console.error('Error en reset-password:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Error al cambiar la contraseña' 
+    });
+  }
+});
 
 // Ruta: Obtener todos los clientes
 app.get("/clientes", (req, res) => {
