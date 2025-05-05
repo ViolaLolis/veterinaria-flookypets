@@ -105,6 +105,7 @@ function OlvideContraseña() {
 
       // Generar y enviar código
       const codigo = data.resetToken || generarCodigo();
+      console.log('Código generado/enviado:', codigo);
       const emailEnviado = await enviarCodigoPorCorreo(codigo, email);
       
       if (emailEnviado) {
