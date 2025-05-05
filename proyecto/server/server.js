@@ -337,8 +337,77 @@ app.post("/register", async (req, res) => {
     return res.status(400).json({ message: mensajeError });
   }
 
-  // Resto de tu lógica de registro...
+  try {
+    // Verificar si el correo ya existe
+    const [existingUser] = await db.promise().query(
+      "SELECT * FROM clientes WHERE email = ?", 
+      [email]
+    );
+
+    if (existingUser.length > 0) {
+      return res.status(409).json({ message: "El correo ya está registrado" });
+    }
+
+    // Hashear la contraseña
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Insertar nuevo cliente con todos los campos
+    const [result] = await db.promise().query(
+      `INSERT INTO clientes 
+      (email, password, nombre, apellido, telefono, direccion, tipo_documento, numero_documento, fecha_nacimiento) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        email, 
+        hashedPassword, 
+        nombre, 
+        apellido, 
+        telefono, 
+        direccion || null, 
+        tipoDocumento || null, 
+        numeroDocumento || null, 
+        fechaNacimiento || null
+      ]
+    );
+
+    res.status(201).json({
+      id: result.insertId,
+      email,
+      nombre,
+      apellido,
+      telefono
+    });
+
+  } catch (err) {
+    console.error("Error en el registro:", err);
+    res.status(500).json({ 
+      message: "Error al registrar el cliente", 
+      error: err.message 
+    });
+  }
 });
+
+// Ruta: Obtener citas del día
+app.get("/api/citas/hoy", (req, res) => {
+  const hoy = new Date().toISOString().split('T')[0];
+
+  db.query(`
+    SELECT c.id, c.fecha, cl.nombre AS propietario, 
+           c.nombre_mascota AS mascota, cl.direccion AS direccion, 
+           c.servicio, c.tipo_mascota, c.estado
+    FROM citas c
+    JOIN clientes cl ON c.id_cliente = cl.id_cliente
+    WHERE DATE(c.fecha) = ?
+    ORDER BY c.fecha ASC
+  `, [hoy], (err, results) => {
+    if (err) {
+      console.error("Error obteniendo citas:", err);
+      return res.status(500).json({ error: "Error al obtener citas" });
+    }
+    res.json(results);
+  });
+});
+
+
 // Iniciar servidor
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);

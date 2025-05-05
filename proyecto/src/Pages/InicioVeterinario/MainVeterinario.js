@@ -27,46 +27,19 @@ const MainVeterinario = () => {
   });
 
   useEffect(() => {
-    // Simulación de llamada a la API para obtener las citas del veterinario
-    const hoy = new Date().toISOString().split('T')[0];
-    setTimeout(() => {
-      const citasData = [
-        {
-          id: 1,
-          fecha: hoy + 'T09:00:00Z',
-          propietario: 'Laura Vargas',
-          mascota: 'Rocky',
-          direccion: 'Calle 12 # 34-56, Soacha',
-          servicio: 'Consulta General',
-          tipoMascota: 'Perro',
-          estado: 'pendiente'
-        },
-        {
-          id: 2,
-          fecha: hoy + 'T11:30:00Z',
-          propietario: 'Pedro Jiménez',
-          mascota: 'Misha',
-          direccion: 'Avenida Principal # 78-90, Soacha',
-          servicio: 'Vacunación',
-          tipoMascota: 'Gato',
-          estado: 'pendiente'
-        },
-        {
-          id: 3,
-          fecha: hoy + 'T14:00:00Z',
-          propietario: 'Ana Pérez',
-          mascota: 'Luna',
-          direccion: 'Carrera 5 # 11-12, Soacha',
-          servicio: 'Desparasitación',
-          tipoMascota: 'Perro',
-          estado: 'pendiente'
-        },
-      ];
-      setCitasAgendadas(citasData);
-      setLoading(false);
-    }, 1000);
+    fetch("http://localhost:5000/api/citas/hoy")
+      .then((res) => res.json())
+      .then((data) => {
+        setCitasAgendadas(data);
+        setLoading(false);
+      })
+      .catch((error) => {
+        setError(error.message);
+        setLoading(false);
+      });
   }, []);
-
+  
+    
   const handleCompleteAppointment = (id) => {
     setCitasAgendadas(citasAgendadas.map(cita => 
       cita.id === id ? {...cita, estado: 'completada'} : cita
