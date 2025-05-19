@@ -412,3 +412,150 @@ app.get("/api/citas/hoy", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
+// Obtener estadísticas
+app.get('/api/stats', async (req, res) => {
+  try {
+    // Veterinarios
+    const [vets] = await db.promise().query(
+      "SELECT COUNT(*) as count FROM usuarios WHERE role = 'veterinario'"
+    );
+    
+    // Clientes
+    const [clients] = await db.promise().query(
+      "SELECT COUNT(*) as count FROM clientes"
+    );
+    
+    // Mascotas (asumiendo que hay una tabla mascotas)
+    const [pets] = await db.promise().query(
+      "SELECT COUNT(*) as count FROM mascotas"
+    );
+    
+    // Citas hoy
+    const today = new Date().toISOString().split('T')[0];
+    const [appointments] = await db.promise().query(
+      "SELECT COUNT(*) as count FROM citas WHERE DATE(fecha) = ?",
+      [today]
+    );
+    
+    res.json({
+      veterinarios: vets[0].count,
+      clientes: clients[0].count,
+      mascotas: pets[0].count,
+      citasHoy: appointments[0].count
+    });
+    
+  } catch (error) {
+    console.error('Error al obtener estadísticas:', error);
+    res.status(500).json({ error: 'Error al obtener estadísticas' });
+  }
+});
+
+// Obtener citas de la semana para el gráfico
+app.get('/api/citas/semana', async (req, res) => {
+  try {
+    const [results] = await db.promise().query(`
+      SELECT 
+        DAYNAME(fecha) as dia, 
+        COUNT(*) as citas
+      FROM citas
+      WHERE fecha BETWEEN DATE_SUB(NOW(), INTERVAL 6 DAY) AND NOW()
+      GROUP BY DAYNAME(fecha)
+      ORDER BY fecha
+    `);
+    
+    // Formatear para recharts
+    const daysOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    const formattedData = daysOrder.map(day => {
+      const found = results.find(r => r.dia === day);
+      return {
+        dia: day.substring(0, 3), // Lun, Mar, etc.
+        citas: found ? found.citas : 0
+      };
+    });
+    
+    res.json(formattedData);
+  } catch (error) {
+    console.error('Error al obtener citas semanales:', error);
+    res.status(500).json({ error: 'Error al obtener citas semanales' });
+  }
+});
+
+// CRUD para personal
+app.get('/api/staff', async (req, res) => {
+  try {
+    const [results] = await db.promise().query(
+      "SELECT * FROM usuarios WHERE role IN ('admin', 'veterinario')"
+    );
+    res.json(results);
+  } catch (error) {
+    console.error('Error al obtener personal:', error);
+    res.status(500).json({ error: 'Error al obtener personal' });
+  }
+});
+
+app.post('/api/staff', async (req, res) => {
+  const { nombre, apellido, email, telefono, role } = req.body;
+  
+  try {
+    // Generar contraseña temporal
+    const tempPassword = Math.random().toString(36).slice(-8);
+    const hashedPassword = await bcrypt.hash(tempPassword, 10);
+    
+    const [result] = await db.promise().query(
+      `INSERT INTO usuarios 
+      (email, password, nombre, apellido, telefono, role) 
+      VALUES (?, ?, ?, ?, ?, ?)`,
+      [email, hashedPassword, nombre, apellido, telefono, role]
+    );
+    
+    // Enviar email con credenciales (simulado)
+    console.log(`Credenciales para ${email}: contraseña temporal ${tempPassword}`);
+    
+    res.status(201).json({
+      id: result.insertId,
+      email,
+      nombre,
+      apellido,
+      telefono,
+      role
+    });
+  } catch (error) {
+    console.error('Error al agregar personal:', error);
+    res.status(500).json({ error: 'Error al agregar personal' });
+  }
+});
+
+app.put('/api/staff/:id', async (req, res) => {
+  const { id } = req.params;
+  const { nombre, apellido, email, telefono, role } = req.body;
+  
+  try {
+    await db.promise().query(
+      `UPDATE usuarios SET 
+      nombre = ?, apellido = ?, email = ?, telefono = ?, role = ?
+      WHERE id = ?`,
+      [nombre, apellido, email, telefono, role, id]
+    );
+    
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error al actualizar personal:', error);
+    res.status(500).json({ error: 'Error al actualizar personal' });
+  }
+});
+
+app.delete('/api/staff/:id', async (req, res) => {
+  const { id } = req.params;
+  
+  try {
+    await db.promise().query(
+      "DELETE FROM usuarios WHERE id = ?",
+      [id]
+    );
+    
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error al eliminar personal:', error);
+    res.status(500).json({ error: 'Error al eliminar personal' });
+  }
+});

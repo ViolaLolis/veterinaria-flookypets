@@ -380,20 +380,6 @@ function Registro() {
           setError(error.message || 'Hubo un error al registrar. Por favor, inténtalo de nuevo.');
         }
       };
-  // Función para enviar correo de bienvenida (opcional)
-  const enviarCorreoBienvenida = async (email, nombre) => {
-    const templateParams = {
-      to_email: email,
-      user_name: nombre,
-      from_name: 'Flooky Pets'
-    };
-  
-    try {
-      await send(serviceId, 'template_bienvenida', templateParams, publicKey);
-    } catch (emailError) {
-      console.error("Error enviando correo de bienvenida:", emailError);
-    }
-  };
 
     // Redirigir después de registro exitoso
     useEffect(() => {
