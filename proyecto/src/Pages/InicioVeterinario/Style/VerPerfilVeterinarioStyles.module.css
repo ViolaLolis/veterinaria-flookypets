@@ -1,35 +1,60 @@
+:root {
+  --color-primary: #5a67d8; /* Un color primario moderno */
+  --color-primary-dark: #4299e1; /* Azul más oscuro */
+  --color-primary-light: #3182ce; /* Azul aún más oscuro */
+  --color-danger: #e53e3e; /* Rojo de advertencia */
+  --color-danger-dark: #c53030; /* Rojo más oscuro */
+  --color-dark: #374151; /* Gris oscuro */
+  --color-muted: #4a5568; /* Gris suave */
+  --color-light: #ffffff; /* Blanco */
+  --color-border: #cbd5e0; /* Gris claro */
+  --color-border-hover: #94a3b8; /* Gris claro al pasar el ratón */
+  --color-background: #f4f6f8; /* Fondo gris claro */
+  --color-box-shadow: rgba(0, 0, 0, 0.15); /* Sombra suave */
+  --color-box-shadow-hover: rgba(0, 0, 0, 0.1); /* Sombra suave al pasar el ratón */
+  --color-primary-lighter: #e2e8f0; /* Ligeramente más claro */
+  --color-heading-border: #e0e7ff; /* Color de la línea en el encabezado */
+}
+
+/* Perfil Container */
 .perfilContainer {
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 40px;
-  background-color: #f4f6f8;
+  background-color: var(--color-background);
   border-radius: 12px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 16px var(--color-box-shadow);
   width: 90%;
   max-width: 700px;
-  margin: 20px auto; /* Centrar en la página */
+  margin: 20px auto;
+  animation: fadeIn 0.5s ease-out forwards;
 }
 
+/* Header */
 .header {
   display: flex;
   align-items: center;
   margin-bottom: 30px;
   width: 100%;
+  opacity: 0;
+  transform: translateY(10px);
+  animation: fadeIn 0.5s ease-out 0.2s forwards;
 }
 
 .userIcon {
   font-size: 3em;
   margin-right: 25px;
-  color: #5a67d8; /* Un color primario moderno */
+  color: var(--color-primary);
 }
 
 .header h2 {
   font-size: 2.5em;
-  color: #374151;
-  margin: 0 auto 0 0; /* Empujar los botones a la derecha */
+  color: var(--color-dark);
+  margin: 0 auto 0 0;
 }
 
+/* Header buttons */
 .header div {
   display: flex;
   gap: 15px;
@@ -38,9 +63,9 @@
 .headerButton,
 .editButton,
 .cerrarSesionBtn {
-  background-color: #ffffff;
-  color: #374151;
-  border: 1px solid #cbd5e0;
+  background-color: var(--color-light);
+  color: var(--color-dark);
+  border: 1px solid var(--color-border);
   padding: 10px 18px;
   text-align: center;
   text-decoration: none;
@@ -61,58 +86,61 @@
 .headerButton:hover,
 .editButton:hover,
 .cerrarSesionBtn:hover {
-  background-color: #e2e8f0;
-  border-color: #94a3b8;
+  background-color: var(--color-primary-lighter);
+  border-color: var(--color-border-hover);
   transform: scale(1.02);
 }
 
+/* Edit Button */
 .editButton {
-  background-color: #4299e1; /* Otro color primario */
-  color: white;
-  border-color: #4299e1;
+  background-color: var(--color-primary);
+  color: var(--color-light);
+  border-color: var(--color-primary);
 }
 
 .editButton:hover {
-  background-color: #3182ce;
-  border-color: #3182ce;
+  background-color: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
 }
 
+/* Cerrar sesión button */
 .cerrarSesionBtn {
-  background-color: #e53e3e; /* Color de advertencia */
-  color: white;
-  border-color: #e53e3e;
+  background-color: var(--color-danger);
+  color: var(--color-light);
+  border-color: var(--color-danger);
 }
 
 .cerrarSesionBtn:hover {
-  background-color: #c53030;
-  border-color: #c53030;
+  background-color: var(--color-danger-dark);
+  border-color: var(--color-danger-dark);
 }
 
+/* Info Section */
 .infoSection {
-  background-color: #ffffff;
+  background-color: var(--color-light);
   padding: 30px;
   border-radius: 12px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 8px var(--color-box-shadow-hover);
   line-height: 1.7;
   width: 100%;
 }
 
 .infoSection h3 {
   font-size: 1.8em;
-  color: #374151;
-  border-bottom: 2px solid #e0e7ff; /* Un tono del primario */
+  color: var(--color-dark);
+  border-bottom: 2px solid var(--color-heading-border);
   padding-bottom: 15px;
   margin-bottom: 20px;
 }
 
 .infoSection strong {
   font-weight: 600;
-  color: #4a5568;
+  color: var(--color-muted);
 }
 
 .infoSection p {
   margin-bottom: 15px;
-  color: #4a5568;
+  color: var(--color-muted);
 }
 
 /* Animaciones sutiles */

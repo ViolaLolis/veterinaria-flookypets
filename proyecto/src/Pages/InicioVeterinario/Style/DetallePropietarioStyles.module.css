@@ -1,67 +1,82 @@
+:root {
+  --color-primary: #007bff;
+  --color-primary-dark: #0056b3;
+  --color-text-dark: #333;
+  --color-text-muted: #666;
+  --color-bg-light: #f4f7ff;
+  --color-white: #ffffff;
+  --color-border: #eee;
+  --color-box-shadow: rgba(0, 0, 0, 0.1);
+}
+
 .detalleContainer {
-    padding: 20px;
-  }
-  
-  .header {
-    display: flex;
-    align-items: center;
-    margin-bottom: 20px;
-  }
-  
-  .volverBtn {
-    background: none;
-    border: none;
-    color: #007bff;
-    cursor: pointer;
-    font-size: 16px;
-    margin-right: 15px;
-    transition: color 0.3s ease;
-  }
-  
-  .volverBtn:hover {
-    color: #0056b3;
-  }
-  
-  .header h2 {
-    margin: 0;
-    display: flex;
-    align-items: center;
-  }
-  
-  .header h2 svg {
-    margin-right: 10px;
-  }
-  
-  .detalleInfo {
-    background-color: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    line-height: 1.6;
-  }
-  
-  .detalleInfo strong {
-    font-weight: bold;
-    color: #333;
-  }
-  
-  .detalleInfo p {
-    margin-bottom: 10px;
-  }
-  
-  .detalleInfo h3 {
-    margin-top: 15px;
-    color: #333;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 10px;
-    margin-bottom: 10px;
-  }
-  
-  .detalleInfo ul {
-    list-style: disc;
-    margin-left: 20px;
-  }
-  
-  .detalleInfo li {
-    margin-bottom: 5px;
-  }
+  padding: 20px;
+  background-color: var(--color-bg-light);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.volverBtn {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  cursor: pointer;
+  font-size: 16px;
+  margin-right: 15px;
+  transition: color 0.3s ease;
+}
+
+.volverBtn:hover {
+  color: var(--color-primary-dark);
+}
+
+.header h2 {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  color: var(--color-text-dark);
+  font-size: 1.6rem;
+}
+
+.header h2 svg {
+  margin-right: 10px;
+  color: var(--color-primary);
+}
+
+.detalleInfo {
+  background-color: var(--color-white);
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px var(--color-box-shadow);
+  line-height: 1.6;
+}
+
+.detalleInfo strong {
+  font-weight: bold;
+  color: var(--color-text-dark);
+}
+
+.detalleInfo p {
+  margin-bottom: 10px;
+}
+
+.detalleInfo h3 {
+  margin-top: 15px;
+  color: var(--color-text-dark);
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+}
+
+.detalleInfo ul {
+  list-style: disc;
+  margin-left: 20px;
+}
+
+.detalleInfo li {
+  margin-bottom: 5px;
+}

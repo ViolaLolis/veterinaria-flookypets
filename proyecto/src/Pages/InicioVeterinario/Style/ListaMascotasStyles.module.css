@@ -1,16 +1,35 @@
-/* ListaMascotasStyles.module.css */
+:root {
+  --color-primary: #00bcd4; /* Azul claro */
+  --color-secondary: #00acc1; /* Azul más oscuro */
+  --color-success: #4CAF50; /* Verde de éxito */
+  --color-warning: #ffce54; /* Amarillo de advertencia */
+  --color-white: #ffffff; /* Blanco */
+  --color-light: #e0f7fa; /* Fondo azul claro */
+  --color-dark: #333; /* Gris oscuro */
+  --color-muted: #666; /* Gris suave */
+  --color-border: #b2ebf2; /* Azul suave */
+  --color-tab-active: #00bcd4; /* Azul claro */
+  --color-tab-border: #00acc1; /* Azul más oscuro */
+  --color-primary-dark: #3a63d1; /* Azul oscuro */
+  --color-danger: #ff5252; /* Rojo de peligro */
+  --color-danger-dark: #e03e3e; /* Rojo oscuro para hover */
+  --color-success-dark: #28a745; /* Verde oscuro para hover */
+  --color-text-dark: #333; /* Gris oscuro para texto */
+  --color-bg-light: #f4f7ff; /* Fondo claro */
+  --color-accent: #d4a017; /* Color de acento (amarillo dorado) */
+  --color-accent-light: #f0c14b; /* Color de acento claro */
+  --color-muted: #7a6a56; /* Color para texto secundario */
+}
 
-/* Contenedor principal */
 .listaContainer {
   max-width: 1200px;
   margin: 2rem auto;
   padding: 1.5rem;
-  background-color: #f8f9fa;
+  background-color: var(--color-bg-light); /* Fondo claro */
   border-radius: 15px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
 }
 
-/* Encabezado */
 .header {
   display: flex;
   justify-content: space-between;
@@ -21,16 +40,15 @@
 }
 
 .header h2 {
-  color: #2c3e50;
+  color: var(--color-text-dark); /* Texto oscuro */
   font-size: 2rem;
   margin: 0;
   font-weight: 600;
 }
 
-/* Botón de agregar */
 .addButton {
-  background: linear-gradient(135deg, #e7ab06);
-  color: white;
+  background: linear-gradient(135deg, var(--color-accent));
+  color: var(--color-white);
   padding: 0.7rem 1.5rem;
   border-radius: 50px;
   text-decoration: none;
@@ -47,7 +65,6 @@
   box-shadow: 0 6px 20px rgba(230, 161, 13, 0.4);
 }
 
-/* Lista de mascotas */
 .lista {
   list-style: none;
   padding: 0;
@@ -57,12 +74,12 @@
 }
 
 .listItem {
-  background: white;
+  background: var(--color-white); /* Fondo blanco */
   border-radius: 12px;
   padding: 1.5rem;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
   transition: all 0.3s ease;
-  border-left: 4px solid #f5be08;
+  border-left: 4px solid var(--color-accent); /* Borde izquierdo dorado */
   position: relative;
   overflow: hidden;
 }
@@ -84,11 +101,10 @@
   opacity: 1;
 }
 
-/* Información de la mascota */
 .nombre {
   font-size: 1.4rem;
   font-weight: 600;
-  color: #000000;
+  color: var(--color-text-dark); /* Texto oscuro */
   display: block;
   margin-bottom: 0.5rem;
   position: relative;
@@ -96,7 +112,7 @@
 
 .especie {
   display: block;
-  color: #7f8c8d;
+  color: var(--color-muted); /* Texto secundario */
   margin-bottom: 0.5rem;
   font-size: 0.95rem;
   position: relative;
@@ -104,13 +120,12 @@
 
 .propietario {
   display: block;
-  color: #34495e;
+  color: #34495e; /* Color más oscuro para propietario */
   font-size: 0.9rem;
   margin-bottom: 1rem;
   position: relative;
 }
 
-/* Botones de acción */
 .acciones {
   display: flex;
   gap: 0.8rem;
@@ -128,48 +143,46 @@
   transition: all 0.3s ease;
   border: none;
   font-size: 0.9rem;
-  color: white;
+  color: var(--color-white);
 }
 
 .verButton {
-  background-color: #27ae60;
+  background-color: var(--color-success);
 }
 
 .verButton:hover {
-  background-color: #2ecc71;
+  background-color: var(--color-success-dark);
   transform: translateY(-2px);
 }
 
 .editarButton {
-  background-color: #f39c12;
+  background-color: var(--color-accent); /* Color dorado */
 }
 
 .editarButton:hover {
-  background-color: #f1c40f;
+  background-color: var(--color-accent-light);
   transform: translateY(-2px);
 }
 
 .deshabilitarButton {
-  background-color: #e74c3c;
+  background-color: var(--color-danger);
 }
 
 .deshabilitarButton:hover {
-  background-color: #c0392b;
+  background-color: var(--color-danger-dark);
   transform: translateY(-2px);
 }
 
-/* Mensaje cuando no hay mascotas */
 .emptyMessage {
   text-align: center;
   padding: 2rem;
-  background: white;
+  background: var(--color-white); /* Fondo blanco */
   border-radius: 12px;
-  color: #7f8c8d;
+  color: var(--color-muted); /* Texto secundario */
   font-size: 1.1rem;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
 }
 
-/* Efectos de carga */
 @keyframes pulse {
   0% { opacity: 0.6; }
   50% { opacity: 1; }
@@ -183,12 +196,11 @@
   animation: pulse 1.5s infinite ease-in-out;
 }
 
-/* Responsive */
 @media (max-width: 768px) {
   .lista {
     grid-template-columns: 1fr;
   }
-  
+
   .header {
     flex-direction: column;
     align-items: flex-start;

@@ -1,148 +1,164 @@
+:root {
+  --color-primary: #00bcd4; /* Azul claro */
+  --color-secondary: #00acc1; /* Azul más oscuro */
+  --color-success: #4CAF50;
+  --color-warning: #ffce54;
+  --color-white: #ffffff;
+  --color-light: #e0f7fa; /* Fondo azul claro */
+  --color-dark: #333;
+  --color-muted: #666;
+  --color-border: #b2ebf2; /* Azul suave */
+  --color-tab-active: #00bcd4; /* Azul claro */
+  --color-tab-border: #00acc1; /* Azul más oscuro */
+  --color-error: #ff5252; /* Rojo error */
+  --color-light-bg: #f0f9ff; /* Fondo suave azul para la configuración */
+}
+
 .configuracionContainer {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 30px;
-    background-color: #f7f7f7;
-    border-radius: 15px;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-    width: 90%;
-    max-width: 600px;
-    margin: 20px auto;
-  }
-  
-  .header {
-    color: #333;
-    margin-bottom: 30px;
-    text-align: center;
-  }
-  
-  .header h2 {
-    font-size: 2.2em;
-    margin-bottom: 10px;
-    color: #007bff;
-  }
-  
-  .header svg {
-    margin-right: 10px;
-  }
-  
-  .configForm {
-    width: 100%;
-  }
-  
-  .formGroup {
-    margin-bottom: 25px;
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .formGroup label {
-    font-weight: bold;
-    color: #555;
-    margin-bottom: 8px;
-    display: flex;
-    align-items: center;
-  }
-  
-  .formGroup label svg {
-    margin-right: 8px;
-    color: #007bff;
-  }
-  
-  .formGroup input[type="checkbox"] {
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 1em;
-    color: #333;
-    margin-top: 5px;
-    cursor: pointer;
-    width: auto;
-  }
-  
-  .formGroup select {
-    padding: 12px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    font-size: 1em;
-    color: #333;
-    background-color: #fff;
-    appearance: none; /* Quita las flechas por defecto en algunos navegadores */
-    background-image: url('data:image/svg+xml;charset=UTF-8,<svg fill="%23333" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>');
-    background-repeat: no-repeat;
-    background-position: right 10px center;
-    background-size: 1.2em;
-    cursor: pointer;
-  }
-  
-  .formGroup select:focus {
-    outline: none;
-    border-color: #007bff;
-    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-  }
-  
-  .buttonGroup {
-    display: flex;
-    gap: 15px;
-    margin-top: 30px;
-  }
-  
-  .guardarBtn,
-  .cancelarBtn {
-    padding: 12px 20px;
-    border: none;
-    border-radius: 8px;
-    font-size: 1em;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .guardarBtn {
-    background-color: #28a745;
-    color: white;
-  }
-  
-  .guardarBtn:hover {
-    background-color: #218838;
-    transform: scale(1.02);
-  }
-  
-  .guardarBtn:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
-    transform: none;
-  }
-  
-  .cancelarBtn {
-    background-color: #dc3545;
-    color: white;
-  }
-  
-  .cancelarBtn:hover {
-    background-color: #c82333;
-    transform: scale(1.02);
-  }
-  
-  .mensajeExito,
-  .mensajeError {
-    margin-top: 20px;
-    padding: 15px;
-    border-radius: 8px;
-    font-weight: bold;
-  }
-  
-  .mensajeExito {
-    background-color: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
-  }
-  
-  .mensajeError {
-    background-color: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
-  }
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30px;
+  background-color: var(--color-light-bg);
+  border-radius: 15px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+  width: 90%;
+  max-width: 600px;
+  margin: 20px auto;
+}
+
+.header {
+  color: var(--color-dark);
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.header h2 {
+  font-size: 2.2em;
+  margin-bottom: 10px;
+  color: var(--color-primary);
+}
+
+.header svg {
+  margin-right: 10px;
+}
+
+.configForm {
+  width: 100%;
+}
+
+.formGroup {
+  margin-bottom: 25px;
+  display: flex;
+  flex-direction: column;
+}
+
+.formGroup label {
+  font-weight: bold;
+  color: var(--color-muted);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+}
+
+.formGroup label svg {
+  margin-right: 8px;
+  color: var(--color-primary);
+}
+
+.formGroup input[type="checkbox"] {
+  padding: 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 5px;
+  font-size: 1em;
+  color: var(--color-dark);
+  margin-top: 5px;
+  cursor: pointer;
+  width: auto;
+}
+
+.formGroup select {
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  font-size: 1em;
+  color: var(--color-dark);
+  background-color: var(--color-white);
+  appearance: none;
+  background-image: url('data:image/svg+xml;charset=UTF-8,<svg fill="%23333" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 1.2em;
+  cursor: pointer;
+}
+
+.formGroup select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 0.2rem rgba(85, 128, 245, 0.25);
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 15px;
+  margin-top: 30px;
+}
+
+.guardarBtn,
+.cancelarBtn {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.guardarBtn {
+  background-color: var(--color-success);
+  color: var(--color-white);
+}
+
+.guardarBtn:hover {
+  background-color: #3fae46;
+  transform: scale(1.02);
+}
+
+.guardarBtn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.cancelarBtn {
+  background-color: var(--color-error);
+  color: var(--color-white);
+}
+
+.cancelarBtn:hover {
+  background-color: #c82333;
+  transform: scale(1.02);
+}
+
+.mensajeExito,
+.mensajeError {
+  margin-top: 20px;
+  padding: 15px;
+  border-radius: 8px;
+  font-weight: bold;
+}
+
+.mensajeExito {
+  background-color: #e6f9ed;
+  color: #1c7c47;
+  border: 1px solid #b4e0c2;
+}
+
+.mensajeError {
+  background-color: #fdecea;
+  color: #b22222;
+  border: 1px solid #f5c6cb;
+}
