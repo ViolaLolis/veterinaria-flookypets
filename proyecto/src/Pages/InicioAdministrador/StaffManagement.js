@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './Styles/InicioAdministrador.css';
 import { useNavigate } from 'react-router-dom';
-import EditStaffModal from './EditStaffModal';
 import ConfirmationModal from './ConfirmationModal';
 
 const StaffManagement = () => {
