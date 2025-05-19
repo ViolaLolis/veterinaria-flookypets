@@ -1,8 +1,29 @@
+:root {
+  --color-primary: #00bcd4; /* Azul claro */
+  --color-secondary: #00acc1; /* Azul más oscuro */
+  --color-success: #4CAF50;
+  --color-warning: #ffce54;
+  --color-white: #ffffff;
+  --color-light: #e0f7fa; /* Fondo azul claro */
+  --color-dark: #333;
+  --color-muted: #666;
+  --color-border: #b2ebf2; /* Azul suave */
+  --color-tab-active: #00bcd4; /* Azul claro */
+  --color-tab-border: #00acc1; /* Azul más oscuro */
+}
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: var(--color-light);
+  color: var(--color-dark);
+}
+
 .mainContainer {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
-  background-color: #ffffff;
+  background-color: var(--color-white);
   min-height: 100vh;
 }
 
@@ -10,19 +31,19 @@
   text-align: center;
   margin-bottom: 30px;
   padding: 20px;
-  background-color: #5580f5;
+  background-color: var(--color-primary);
   border-radius: 15px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
 }
 
 .header h1 {
-  color: #ffffff;
+  color: var(--color-white);
   margin-bottom: 10px;
   font-size: 2rem;
 }
 
 .subtitle {
-  color: #f5f4f4;
+  color: #e0e7ff;
   font-size: 1.1rem;
 }
 
@@ -34,13 +55,14 @@
 }
 
 .statCard {
-  background: white;
+  background: var(--color-white);
   border-radius: 12px;
   padding: 20px;
   display: flex;
   align-items: center;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
   cursor: pointer;
+  border-left: 4px solid var(--color-secondary);
 }
 
 .statIcon {
@@ -52,16 +74,18 @@
   justify-content: center;
   margin-right: 15px;
   font-size: 1.2rem;
+  background-color: var(--color-light);
+  color: var(--color-primary);
 }
 
 .statContent h3 {
   font-size: 1.8rem;
-  color: #333;
+  color: var(--color-primary);
   margin: 0;
 }
 
 .statContent p {
-  color: #666;
+  color: var(--color-muted);
   margin: 5px 0 0;
   font-size: 0.9rem;
 }
@@ -69,7 +93,7 @@
 .tabsContainer {
   display: flex;
   margin: 25px 0;
-  border-bottom: 2px solid #FFE8B3;
+  border-bottom: 2px solid var(--color-tab-border);
 }
 
 .tabButton {
@@ -78,13 +102,13 @@
   border: none;
   cursor: pointer;
   font-size: 1rem;
-  color: #7A6F5B;
+  color: var(--color-muted);
   position: relative;
   margin-right: 5px;
 }
 
 .activeTab {
-  color: #FF8C00;
+  color: var(--color-tab-active);
   font-weight: bold;
 }
 
@@ -95,28 +119,28 @@
   left: 0;
   width: 100%;
   height: 3px;
-  background-color: #FF8C00;
+  background-color: var(--color-tab-active);
 }
 
 .citasHeader {
   margin: 30px 0 20px;
   padding-bottom: 10px;
-  border-bottom: 1px solid #FFE8B3;
+  border-bottom: 1px solid var(--color-tab-border);
 }
 
 .citasHeader h2 {
-  color: #5A4A3A;
+  color: var(--color-primary);
   display: flex;
   align-items: center;
 }
 
 .sectionIcon {
   margin-right: 10px;
-  color: #FF8C00;
+  color: var(--color-secondary);
 }
 
 .citasSubtitle {
-  color: #7A6F5B;
+  color: var(--color-muted);
   font-size: 0.9rem;
   margin-top: 5px;
 }
@@ -130,17 +154,18 @@
 }
 
 .citaItem {
-  background: white;
+  background: var(--color-white);
   border-radius: 12px;
   padding: 20px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
-  border-left: 4px solid #FFB347;
+  border-left: 4px solid var(--color-primary);
 }
 
 .citaItem.completed {
-  border-left-color: #4CAF50;
-  opacity: 0.8;
+  border-left-color: var(--color-success);
+  opacity: 0.85;
+  background-color: var(--color-light);
 }
 
 .citaHeader {
@@ -149,7 +174,7 @@
   align-items: center;
   margin-bottom: 15px;
   padding-bottom: 10px;
-  border-bottom: 1px dashed #FFE8B3;
+  border-bottom: 1px dashed var(--color-tab-border);
 }
 
 .citaDetalle {
@@ -160,28 +185,29 @@
 
 .citaIcon {
   margin-right: 10px;
-  color: #FF8C00;
+  color: var(--color-secondary);
   width: 16px;
   text-align: center;
 }
 
 .hora {
   font-weight: bold;
-  color: #333;
+  color: var(--color-dark);
 }
 
 .mascota {
   font-weight: bold;
-  color: #5A4A3A;
+  color: var(--color-primary);
 }
 
-.propietario, .direccion {
-  color: #666;
+.propietario,
+.direccion {
+  color: var(--color-muted);
   font-size: 0.9rem;
 }
 
 .petIcon {
-  color: #7A6F5B;
+  color: var(--color-secondary);
   font-size: 1.2rem;
 }
 
@@ -191,12 +217,12 @@
   align-items: center;
   margin-top: 15px;
   padding-top: 10px;
-  border-top: 1px dashed #FFE8B3;
+  border-top: 1px dashed var(--color-tab-border);
 }
 
 .servicio {
-  background-color: #FFF4D6;
-  color: #FF8C00;
+  background-color: #e8edff;
+  color: var(--color-primary);
   padding: 3px 8px;
   border-radius: 4px;
   font-size: 0.8rem;
@@ -204,8 +230,8 @@
 }
 
 .completeButton {
-  background-color: #FFB347;
-  color: white;
+  background-color: var(--color-secondary);
+  color: var(--color-white);
   border: none;
   padding: 5px 10px;
   border-radius: 4px;
@@ -215,11 +241,11 @@
 }
 
 .completeButton:hover {
-  background-color: #FF8C00;
+  background-color: var(--color-primary);
 }
 
 .completedLabel {
-  color: #4CAF50;
+  color: var(--color-success);
   font-weight: bold;
   font-size: 0.8rem;
 }
@@ -227,23 +253,23 @@
 .noCitas {
   text-align: center;
   padding: 40px 20px;
-  background: white;
+  background: var(--color-white);
   border-radius: 12px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
 }
 
 .noCitasIcon {
-  color: #FFE8B3;
+  color: var(--color-secondary);
   margin-bottom: 15px;
 }
 
 .noCitas h3 {
-  color: #5A4A3A;
+  color: var(--color-primary);
   margin-bottom: 10px;
 }
 
 .noCitas p {
-  color: #7A6F5B;
+  color: var(--color-muted);
   max-width: 500px;
   margin: 0 auto;
 }
@@ -253,10 +279,10 @@
 }
 
 .tipsSection h3 {
-  color: #5A4A3A;
+  color: var(--color-primary);
   margin-bottom: 20px;
   padding-bottom: 10px;
-  border-bottom: 1px solid #FFE8B3;
+  border-bottom: 1px solid var(--color-tab-border);
 }
 
 .tipsGrid {
@@ -266,20 +292,20 @@
 }
 
 .tipCard {
-  background: white;
+  background: var(--color-white);
   border-radius: 10px;
   padding: 20px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
-  border-top: 3px solid #FFB347;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+  border-top: 3px solid var(--color-secondary);
 }
 
 .tipCard h4 {
-  color: #FF8C00;
+  color: var(--color-primary);
   margin-top: 0;
 }
 
 .tipCard p {
-  color: #666;
+  color: var(--color-muted);
   font-size: 0.9rem;
 }
 
@@ -289,7 +315,7 @@
   align-items: center;
   justify-content: center;
   height: 100vh;
-  background-color: #FFF9E6;
+  background-color: var(--color-light);
 }
 
 .loadingSpinner {
@@ -300,7 +326,7 @@
   padding: 40px;
   text-align: center;
   color: #FF5252;
-  background-color: #FFF9E6;
+  background-color: var(--color-light);
   height: 100vh;
 }
 
@@ -308,7 +334,7 @@
   .statsContainer {
     grid-template-columns: 1fr 1fr;
   }
-  
+
   .citasLista {
     grid-template-columns: 1fr;
   }

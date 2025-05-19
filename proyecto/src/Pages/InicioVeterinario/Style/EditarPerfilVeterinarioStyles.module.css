@@ -1,82 +1,101 @@
+:root {
+  --color-primary: #5580f5; /* Azul suave */
+  --color-primary-dark: #3a63d1; /* Azul oscuro */
+  --color-success: #28a745; /* Verde de éxito */
+  --color-success-dark: #218838; /* Verde oscuro para hover */
+  --color-danger: #ff5252; /* Rojo de peligro */
+  --color-danger-dark: #e03e3e; /* Rojo oscuro para hover */
+  --color-text-dark: #333; /* Gris oscuro para texto */
+  --color-bg-light: #f4f7ff; /* Fondo claro */
+  --color-white: #ffffff; /* Blanco */
+  --color-border: #dfe4ea; /* Gris suave para bordes */
+  --color-box-shadow: rgba(0, 0, 0, 0.1); /* Sombra sutil */
+}
+
 .editarPerfilContainer {
-    padding: 20px;
-  }
-  
-  .header {
-    display: flex;
-    align-items: center;
-    margin-bottom: 20px;
-  }
-  
-  .volverBtn {
-    background: none;
-    border: none;
-    color: #007bff;
-    cursor: pointer;
-    font-size: 16px;
-    margin-right: 15px;
-    transition: color 0.3s ease;
-  }
-  
-  .volverBtn:hover {
-    color: #0056b3;
-  }
-  
-  .header h2 {
-    margin: 0;
-    display: flex;
-    align-items: center;
-  }
-  
-  .header h2 svg {
-    margin-right: 10px;
-  }
-  
-  .formulario {
-    background-color: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    width: 400px;
-    max-width: 100%;
-  }
-  
-  .formGroup {
-    margin-bottom: 15px;
-  }
-  
-  .formGroup label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-    color: #333;
-  }
-  
-  .formGroup input[type="text"],
-  .formGroup input[type="tel"],
-  .formGroup input[type="email"] {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 16px;
-  }
-  
-  .guardarBtn {
-    background-color: #28a745;
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 16px;
-    cursor: pointer;
-    border-radius: 5px;
-    transition: background-color 0.3s ease;
-    margin-top: 15px;
-  }
-  
-  .guardarBtn:hover {
-    background-color: #218838;
-  }
+  padding: 20px;
+  background-color: var(--color-bg-light);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.volverBtn {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  cursor: pointer;
+  font-size: 16px;
+  margin-right: 15px;
+  transition: color 0.3s ease;
+}
+
+.volverBtn:hover {
+  color: var(--color-primary-dark); /* Hover con color primario oscuro */
+}
+
+.header h2 {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  color: var(--color-text-dark);
+  font-size: 1.6rem;
+}
+
+.header h2 svg {
+  margin-right: 10px;
+  color: var(--color-primary); /* Color del icono de la cabecera */
+}
+
+.formulario {
+  background-color: var(--color-white);
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px var(--color-box-shadow);
+  width: 400px;
+  max-width: 100%;
+}
+
+.formGroup {
+  margin-bottom: 15px;
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: var(--color-text-dark); /* Color de las etiquetas */
+}
+
+.formGroup input[type="text"],
+.formGroup input[type="tel"],
+.formGroup input[type="email"] {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--color-border); /* Bordes suaves */
+  border-radius: 4px;
+  font-size: 16px;
+  color: var(--color-text-dark); /* Color del texto dentro de los inputs */
+}
+
+.guardarBtn {
+  background-color: var(--color-success); /* Botón verde de éxito */
+  color: var(--color-white); /* Texto blanco */
+  border: none;
+  padding: 10px 15px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+  margin-top: 15px;
+}
+
+.guardarBtn:hover {
+  background-color: var(--color-success-dark); /* Hover con verde más oscuro */
+}
