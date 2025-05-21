@@ -1,23 +1,15 @@
 :root {
-  --pastel-yellow: #FFF9C4;
-  --pastel-yellow-light: #ffffff;
-  --pastel-yellow-dark: #FFF59D;
-  --accent-orange: #ff9900;
-  --text-dark: #55372e;
-  --text-medium: #000000;
-  --shadow-light: 0 4px 12px rgba(248, 5, 5, 0.08);
-  --shadow-medium: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --color-primary: #00bcd4;
+  --color-secondary: #00acc1;
+  --color-light: #e0f7fa;
+  --color-white: #ffffff;
+  --color-dark: #333;
+  --color-muted: #666;
+  --color-border: #b2ebf2;
+  --shadow-light: 0 4px 12px rgba(0, 188, 212, 0.1);
+  --shadow-medium: 0 8px 24px rgba(0, 188, 212, 0.15);
   --transition-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
   --transition-smooth: cubic-bezier(0.25, 0.8, 0.25, 1);
-}
-
-body {
-  background-color: var(--pastel-yellow-light);
-  color: var(--text-dark);
-  margin: 0;
-  padding: 0;
-  line-height: 1.7;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 /* Animación de entrada para la sección */
@@ -38,13 +30,14 @@ body {
   margin: 0 auto;
   animation: fadeInSlideUp 0.8s var(--transition-smooth) forwards;
   opacity: 0;
+  background-color: var(--color-light);
 }
 
 /* Título con efecto especial */
 .section-title {
   font-size: 3.2rem;
   margin-bottom: 60px;
-  color: var(--text-dark);
+  color: var(--color-primary);
   text-align: center;
   position: relative;
   display: inline-block;
@@ -75,7 +68,7 @@ body {
   transform: translateX(-50%);
   width: 120px;
   height: 5px;
-  background: linear-gradient(90deg, var(--accent-orange), var(--pastel-yellow-dark));
+  background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
   border-radius: 3px;
   animation: lineExpand 0.8s 0.5s var(--transition-smooth) forwards;
   transform-origin: center;
@@ -97,7 +90,7 @@ body {
 
 /* Tarjetas de contacto dinámicas */
 .contact-card {
-  background-color: var(--pastel-yellow);
+  background-color: var(--color-white);
   padding: 40px;
   border-radius: 20px;
   box-shadow: var(--shadow-light);
@@ -108,7 +101,7 @@ body {
   animation: cardEntrance 0.8s var(--transition-bounce) forwards;
   position: relative;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  border: 1px solid var(--color-border);
 }
 
 @keyframes cardEntrance {
@@ -133,7 +126,7 @@ body {
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, var(--accent-orange), var(--pastel-yellow-dark));
+  background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
   transform: scaleX(0);
   transform-origin: left;
   transition: transform 0.6s var(--transition-smooth);
@@ -147,7 +140,7 @@ body {
 .contact-card h3 {
   font-size: 2rem;
   margin-bottom: 25px;
-  color: var(--text-dark);
+  color: var(--color-primary);
   position: relative;
   padding-bottom: 15px;
   transform: translateX(-20px);
@@ -162,13 +155,13 @@ body {
   left: 0;
   width: 60px;
   height: 3px;
-  background-color: var(--accent-orange);
+  background-color: var(--color-secondary);
   border-radius: 3px;
 }
 
 .contact-card p, 
 .contact-card li {
-  color: var(--text-medium);
+  color: var(--color-dark);
   font-size: 1.1rem;
   line-height: 1.8;
   transform: translateY(20px);
@@ -202,7 +195,7 @@ body {
   content: '→';
   position: absolute;
   left: 0;
-  color: var(--accent-orange);
+  color: var(--color-secondary);
   font-weight: bold;
   transform: translateX(-10px);
   opacity: 0;
@@ -214,11 +207,11 @@ body {
   opacity: 1;
 }
 
-/* Sección del mapa minimalista */
+/* Sección del mapa */
 .map-container {
   margin-top: 80px;
   text-align: center;
-  background-color: #f8ef9fc4;
+  background-color: var(--color-white);
   padding: 40px;
   border-radius: 20px;
   box-shadow: var(--shadow-light);
@@ -230,7 +223,7 @@ body {
 .map-title {
   font-size: 2.5rem;
   margin-bottom: 40px;
-  color: var(--text-dark);
+  color: var(--color-primary);
   position: relative;
 }
 
@@ -242,7 +235,7 @@ body {
   transform: translateX(-50%);
   width: 80px;
   height: 4px;
-  background-color: var(--accent-orange);
+  background-color: var(--color-secondary);
   border-radius: 2px;
 }
 
@@ -253,6 +246,7 @@ body {
   overflow: hidden;
   border-radius: 15px;
   transition: transform 0.4s ease;
+  border: 1px solid var(--color-border);
 }
 
 .map-wrapper:hover {
