@@ -559,6 +559,7 @@ app.delete('/api/staff/:id', async (req, res) => {
     res.status(500).json({ error: 'Error al eliminar personal' });
   }
 });
+<<<<<<< HEAD
 
 // Ruta para obtener todos los propietarios (usuarios con rol 'usuario')
 app.get('/api/propietarios', async (req, res) => {
@@ -622,3 +623,109 @@ app.put('/api/propietarios/:id/disable', async (req, res) => {
   }
 });
 
+=======
+// Obtener estadísticas corregidas
+app.get('/api/admin/stats', async (req, res) => {
+  try {
+    const [vets] = await db.promise().query(
+      "SELECT COUNT(*) as count FROM usuarios WHERE role = 'veterinario'"
+    );
+    
+    const [owners] = await db.promise().query(
+      "SELECT COUNT(*) as count FROM clientes"
+    );
+    
+    const [admins] = await db.promise().query(
+      "SELECT COUNT(*) as count FROM usuarios WHERE role = 'admin'"
+    );
+    
+    const today = new Date().toISOString().split('T')[0];
+    const [appointments] = await db.promise().query(
+      "SELECT COUNT(*) as count FROM citas WHERE DATE(fecha) = ?",
+      [today]
+    );
+    
+    res.json({
+      veterinarios: vets[0].count,
+      propietarios: owners[0].count,
+      administradores: admins[0].count,
+      citasHoy: appointments[0].count
+    });
+    
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener estadísticas' });
+  }
+});
+
+// Endpoint para citas mensuales
+app.get('/api/citas/mensuales', async (req, res) => {
+  try {
+    const [results] = await db.promise().query(`
+      SELECT 
+        WEEK(fecha, 1) as semana,
+        COUNT(*) as citas
+      FROM citas
+      WHERE fecha BETWEEN DATE_SUB(NOW(), INTERVAL 1 MONTH) AND NOW()
+      GROUP BY WEEK(fecha, 1)
+    `);
+    
+    res.json(results);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener citas mensuales' });
+  }
+});
+
+// Nuevos endpoints para servicios y citas
+app.get('/api/servicios', (req, res) => {
+  db.query("SELECT * FROM servicios", (err, results) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(results);
+  });
+});
+
+app.post('/api/citas', async (req, res) => {
+  const { id_cliente, id_servicio, fecha } = req.body;
+  
+  try {
+    const [result] = await db.promise().query(
+      "INSERT INTO citas (id_cliente, id_servicio, fecha, estado) VALUES (?, ?, ?, 'pendiente')",
+      [id_cliente, id_servicio, fecha]
+    );
+    
+    res.status(201).json({ id_cita: result.insertId });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.put('/api/citas/:id', async (req, res) => {
+  const { id } = req.params;
+  const { estado, id_veterinario, ubicacion } = req.body;
+  
+  try {
+    await db.promise().query(
+      "UPDATE citas SET estado = ?, id_veterinario = ?, ubicacion = ? WHERE id_cita = ?",
+      [estado, id_veterinario, ubicacion, id]
+    );
+    
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/citas/veterinario/:id', (req, res) => {
+  const { id } = req.params;
+  
+  db.query(`
+    SELECT c.*, s.nombre as servicio, cl.nombre as cliente 
+    FROM citas c
+    JOIN servicios s ON c.id_servicio = s.id_servicio
+    JOIN clientes cl ON c.id_cliente = cl.id_cliente
+    WHERE c.id_veterinario = ? OR c.estado = 'pendiente'
+  `, [id], (err, results) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(results);
+  });
+});
+>>>>>>> 774c8fd396b64a414449d22024e997a7d6a6b101

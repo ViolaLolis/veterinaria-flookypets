@@ -1,34 +1,38 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import DashboardCards from './DashboardCards';
+import RecentActivity from './RecentActivity';
+import MonthlyAppointmentsChart from './MonthlyAppointmentsChart';
 import './Styles/InicioAdministrador.css';
 
 const MainAdmin = () => {
   const [stats, setStats] = useState({
     veterinarios: 0,
-    clientes: 0,
-    mascotas: 0,
+    propietarios: 0,
+    administradores: 0,
     citasHoy: 0
   });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Aquí iría la llamada a la API para obtener las estadísticas
     const fetchStats = async () => {
       try {
-        // Ejemplo de datos simulados
-        setStats({
-          veterinarios: 12,
-          clientes: 245,
-          mascotas: 320,
-          citasHoy: 18
-        });
+        const response = await fetch('http://localhost:5000/api/admin/stats');
+        if (!response.ok) throw new Error('Error al obtener estadísticas');
+        const data = await response.json();
+        setStats(data);
+        setLoading(false);
       } catch (error) {
-        console.error('Error al obtener estadísticas:', error);
+        console.error('Error:', error);
+        setLoading(false);
       }
     };
 
     fetchStats();
   }, []);
+
+  if (loading) {
+    return <div className="loading">Cargando estadísticas...</div>;
+  }
 
   return (
     <div className="dashboard-container">
@@ -37,24 +41,15 @@ const MainAdmin = () => {
       
       <DashboardCards stats={stats} />
       
-      <div className="quick-actions">
-        <h2>Acciones rápidas</h2>
-        <div className="action-buttons">
-          <Link to="/admin/servicios/nuevo" className="action-btn">
-            Agregar Servicio
-          </Link>
-          <Link to="/admin/personal/nuevo" className="action-btn">
-            Registrar Veterinario
-          </Link>
-          <Link to="/admin/reuniones/nueva" className="action-btn">
-            Programar Reunión
-          </Link>
+      <div className="charts-row">
+        <div className="chart-wrapper">
+          <h3>Citas Mensuales</h3>
+          <MonthlyAppointmentsChart />
         </div>
-      </div>
-      
-      <div className="recent-activity">
-        <h2>Actividad Reciente</h2>
-        {/* Aquí iría un componente de lista de actividad reciente */}
+        
+        <div className="recent-activity-wrapper">
+          <RecentActivity />
+        </div>
       </div>
     </div>
   );
