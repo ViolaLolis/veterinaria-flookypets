@@ -4,12 +4,13 @@ import CitasUsuario from './CitasUsuario';
 import ServiciosVeterinaria from './ServiciosVeterinaria';
 import styles from './Styles/InicioUsuario.module.css';
 import logo from '../Inicio/Imagenes/flooty.png';
-import { FaPaw, FaCalendarPlus, FaShoppingCart, FaBell, FaClipboardList, FaHeart, FaQuestionCircle, FaUserCog } from 'react-icons/fa';
+import { FaPaw, FaCalendarPlus, FaShoppingCart, FaBell, FaClipboardList, FaHeart, FaQuestionCircle, FaUserCog, FaChevronDown } from 'react-icons/fa';
 import BarraNavegacionUsuario from './BarraNavegacionUsuario';
 
 const InicioUsuario = () => {
   const [activeTab, setActiveTab] = useState('mascotas');
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [expandedReminders, setExpandedReminders] = useState(false);
   
   // Datos del usuario simulados
   const userData = {
@@ -20,7 +21,8 @@ const InicioUsuario = () => {
       nombre: "Max",
       tipo: "Perro",
       raza: "Golden Retriever",
-      edad: "3 años"
+      edad: "3 años",
+      imagen: "https://images.unsplash.com/photo-1633722715463-d30f4f325e24?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=774&q=80"
     }
   };
 
@@ -58,16 +60,19 @@ const InicioUsuario = () => {
     <div className={styles.container}>
       {/* Header con opciones de perfil y ayuda */}
       <div className={styles.header}>
-        <img src={logo} alt="Logo Flooky Pets" className={styles.logo} />
+        <div className={styles.logoContainer}>
+          <img src={logo} alt="Logo Flooky Pets" className={styles.logo} />
+          <div className={styles.logoText}>Flooky Pets</div>
+        </div>
         
         <div className={styles.userWelcome}>
-          <h1 className={styles.welcome}>¡Hola, {userData.nombre}!</h1>
+          <h1 className={styles.welcome}>¡Hola, <span>{userData.nombre}</span>!</h1>
           <p className={styles.subtitle}>¿Qué vamos a hacer hoy?</p>
         </div>
         
         <div className={styles.userActions}>
           <button className={styles.helpButton}>
-            <BarraNavegacionUsuario/> Ayuda
+            <FaQuestionCircle /> <span>Ayuda</span>
           </button>
           
           <div className={styles.profileContainer}>
@@ -75,8 +80,27 @@ const InicioUsuario = () => {
               className={styles.profileButton}
               onClick={() => setShowProfileMenu(!showProfileMenu)}
             >
-              <FaUserCog />
+              <div className={styles.profileInitial}>{userData.nombre.charAt(0)}</div>
+              <FaChevronDown className={`${styles.profileArrow} ${showProfileMenu ? styles.rotated : ''}`} />
             </button>
+            
+            {showProfileMenu && (
+              <div className={styles.profileMenu}>
+                <div className={styles.profileInfo}>
+                  <div className={styles.profileInitialLarge}>{userData.nombre.charAt(0)}</div>
+                  <div>
+                    <div className={styles.profileName}>{userData.nombre}</div>
+                    <div className={styles.profileEmail}>{userData.email}</div>
+                  </div>
+                </div>
+                <div className={styles.profileStatus}>
+                  <span className={styles.membershipBadge}>{userData.membresia}</span>
+                </div>
+                <button className={styles.menuItem}>Mi perfil</button>
+                <button className={styles.menuItem}>Configuración</button>
+                <button className={styles.menuItem}>Cerrar sesión</button>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -84,23 +108,45 @@ const InicioUsuario = () => {
       {/* Sección de mascota destacada y próxima cita */}
       <div className={styles.highlightSection}>
         <div className={styles.petHighlight}>
-          <img src={userData.mascotaDestacada.imagen} alt={userData.mascotaDestacada.nombre} className={styles.petImage} />
+          <div className={styles.petImageContainer}>
+            <img src={userData.mascotaDestacada.imagen} alt={userData.mascotaDestacada.nombre} className={styles.petImage} />
+            <div className={styles.petImageOverlay}></div>
+          </div>
           <div className={styles.petInfo}>
             <h3>Tu compañero: <span>{userData.mascotaDestacada.nombre}</span></h3>
-            <p>{userData.mascotaDestacada.tipo} • {userData.mascotaDestacada.raza} • {userData.mascotaDestacada.edad}</p>
+            <div className={styles.petDetails}>
+              <span className={styles.petDetail}>{userData.mascotaDestacada.tipo}</span>
+              <span className={styles.petDetail}>{userData.mascotaDestacada.raza}</span>
+              <span className={styles.petDetail}>{userData.mascotaDestacada.edad}</span>
+            </div>
             <button className={styles.careButton}>
-              <FaHeart /> Historial de salud
+              <FaHeart /> <span>Historial de salud</span>
             </button>
           </div>
         </div>
 
         <div className={styles.nextAppointment}>
-          <h3><FaCalendarPlus /> Próxima cita</h3>
+          <div className={styles.appointmentHeader}>
+            <FaCalendarPlus className={styles.appointmentIcon} />
+            <h3>Próxima cita</h3>
+          </div>
           <div className={styles.appointmentDetails}>
-            <p><strong>Fecha:</strong> {proximaCita.fecha} a las {proximaCita.hora}</p>
-            <p><strong>Veterinario:</strong> {proximaCita.veterinario}</p>
-            <p><strong>Motivo:</strong> {proximaCita.motivo}</p>
-            <p><strong>Ubicación:</strong> {proximaCita.ubicacion}</p>
+            <div className={styles.detailRow}>
+              <span className={styles.detailLabel}>Fecha:</span>
+              <span className={styles.detailValue}>{proximaCita.fecha} a las {proximaCita.hora}</span>
+            </div>
+            <div className={styles.detailRow}>
+              <span className={styles.detailLabel}>Veterinario:</span>
+              <span className={styles.detailValue}>{proximaCita.veterinario}</span>
+            </div>
+            <div className={styles.detailRow}>
+              <span className={styles.detailLabel}>Motivo:</span>
+              <span className={styles.detailValue}>{proximaCita.motivo}</span>
+            </div>
+            <div className={styles.detailRow}>
+              <span className={styles.detailLabel}>Ubicación:</span>
+              <span className={styles.detailValue}>{proximaCita.ubicacion}</span>
+            </div>
           </div>
           <div className={styles.appointmentActions}>
             <button className={styles.primaryButton}>Confirmar asistencia</button>
@@ -115,19 +161,25 @@ const InicioUsuario = () => {
           className={`${styles.navButton} ${activeTab === 'mascotas' ? styles.active : ''}`}
           onClick={() => setActiveTab('mascotas')}
         >
-          <FaPaw /> Mis Mascotas
+          <FaPaw className={styles.navIcon} />
+          <span>Mis Mascotas</span>
+          <div className={styles.navIndicator}></div>
         </button>
         <button 
           className={`${styles.navButton} ${activeTab === 'citas' ? styles.active : ''}`}
           onClick={() => setActiveTab('citas')}
         >
-          <FaClipboardList /> Mis Citas
+          <FaClipboardList className={styles.navIcon} />
+          <span>Mis Citas</span>
+          <div className={styles.navIndicator}></div>
         </button>
         <button 
           className={`${styles.navButton} ${activeTab === 'servicios' ? styles.active : ''}`}
           onClick={() => setActiveTab('servicios')}
         >
-          <FaShoppingCart /> Servicios
+          <FaShoppingCart className={styles.navIcon} />
+          <span>Servicios</span>
+          <div className={styles.navIndicator}></div>
         </button>
       </nav>
 
@@ -139,29 +191,40 @@ const InicioUsuario = () => {
       {/* Sidebar con recordatorios y más información */}
       <div className={styles.sidebar}>
         <div className={styles.remindersCard}>
-          <h3><FaBell />Recordatorios importantes</h3>
+          <div className={styles.cardHeader}>
+            <FaBell className={styles.cardIcon} />
+            <h3>Recordatorios importantes</h3>
+          </div>
           <ul className={styles.remindersList}>
             {recordatorios.filter(r => r.importante).map(item => (
               <li key={item.id} className={styles.importantReminder}>
-                {item.texto}
+                <div className={styles.reminderDot}></div>
+                <span>{item.texto}</span>
               </li>
             ))}
           </ul>
         </div>
 
         <div className={styles.remindersCard}>
-          <h3>tus recordatorio</h3>
-          <ul className={styles.remindersList}>
+          <div className={styles.cardHeader} onClick={() => setExpandedReminders(!expandedReminders)}>
+            <h3>Tus recordatorios</h3>
+            <FaChevronDown className={`${styles.expandIcon} ${expandedReminders ? styles.expanded : ''}`} />
+          </div>
+          <ul className={`${styles.remindersList} ${expandedReminders ? styles.expanded : ''}`}>
             {recordatorios.map(item => (
               <li key={item.id} className={item.importante ? styles.importantReminder : ''}>
-                {item.texto}
+                <div className={`${styles.reminderDot} ${item.importante ? styles.importantDot : ''}`}></div>
+                <span>{item.texto}</span>
               </li>
             ))}
           </ul>
         </div>
 
         <div className={styles.tipCard}>
-          <h3>💡 Consejos</h3>
+          <div className={styles.tipHeader}>
+            <div className={styles.tipIcon}>💡</div>
+            <h3>Consejos</h3>
+          </div>
           <p>Los perros de razas grandes necesitan ejercicio regular pero controlado durante su crecimiento para evitar problemas articulares. 30-40 minutos dos veces al día es ideal para Max.</p>
         </div>
       </div>
