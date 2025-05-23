@@ -2,7 +2,7 @@ import React from 'react';
 import TarjetaServicio from './TarjetaServicio';
 import styles from './Styles/ServiciosVeterinaria.module.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBriefcaseMedical, faEye, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import { faBriefcaseMedical, faEye } from '@fortawesome/free-solid-svg-icons';
 import { Link, useNavigate } from 'react-router-dom'; // Importa useNavigate
 
 const ServiciosVeterinaria = () => {

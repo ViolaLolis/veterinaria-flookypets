@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import '../Styles/InicioAdministrador.css';
+import './Styles/InicioAdministrador.css';
 
 const ServiceModal = ({ service, onClose, onSave, isEditing }) => {
   const [editedService, setEditedService] = useState(service || {
