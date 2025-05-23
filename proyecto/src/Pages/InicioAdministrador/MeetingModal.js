@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import '../Styles/InicioAdministrador.css';
+import './Styles/InicioAdministrador.css';
 
 const MeetingModal = ({ meeting, staff, onClose, onSave, isEditing }) => {
   const [editedMeeting, setEditedMeeting] = useState(meeting || {

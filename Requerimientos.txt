@@ -1,6 +1,7 @@
 
 //Modulos para que funcione el proyecto
 npm i react-scripts 
+npm install recharts
 npm install @emailjs/browser
 npm install react-dom
 

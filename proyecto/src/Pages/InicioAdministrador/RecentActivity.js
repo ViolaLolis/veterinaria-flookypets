@@ -1,5 +1,5 @@
 import React from 'react';
-import '../Styles/InicioAdministrador.css';
+import './Styles/InicioAdministrador.css';
 
 const RecentActivity = () => {
   const activities = [
