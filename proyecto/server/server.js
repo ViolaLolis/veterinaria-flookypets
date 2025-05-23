@@ -559,3 +559,66 @@ app.delete('/api/staff/:id', async (req, res) => {
     res.status(500).json({ error: 'Error al eliminar personal' });
   }
 });
+
+// Ruta para obtener todos los propietarios (usuarios con rol 'usuario')
+app.get('/api/propietarios', async (req, res) => {
+  try {
+    const [results] = await db.promise().query(
+      'SELECT id, nombre, apellido, email, telefono, direccion, tipo_documento, numero_documento FROM usuarios WHERE role = "usuario"'
+    );
+    res.json(results);
+  } catch (err) {
+    console.error('Error al obtener propietarios:', err);
+    res.status(500).json({ error: 'Error al obtener propietarios' });
+  }
+});
+
+// Obtener todos los propietarios
+app.get('/api/propietarios', async (req, res) => {
+  try {
+    const [results] = await db.promise().query(
+      'SELECT id, nombre, apellido, email, telefono, direccion, tipo_documento, numero_documento FROM usuarios WHERE role = "usuario"'
+    );
+    res.json(results);
+  } catch (err) {
+    console.error('Error al obtener propietarios:', err);
+    res.status(500).json({ error: 'Error al obtener propietarios' });
+  }
+});
+
+// Deshabilitar propietario
+app.put('/api/propietarios/:id/disable', async (req, res) => {
+  try {
+    await db.promise().query(
+      'UPDATE usuarios SET active = 0 WHERE id = ?',
+      [req.params.id]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Error al deshabilitar propietario:', err);
+    res.status(500).json({ error: 'Error al deshabilitar propietario' });
+  }
+});
+
+// Ruta para deshabilitar propietario
+app.put('/api/propietarios/:id/disable', async (req, res) => {
+  try {
+    const [result] = await db.promise().query(
+      'UPDATE usuarios SET active = 0 WHERE id = ?',
+      [req.params.id]
+    );
+    
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Propietario no encontrado' });
+    }
+    
+    res.json({ success: true, message: 'Propietario deshabilitado correctamente' });
+  } catch (err) {
+    console.error('Error al deshabilitar propietario:', err);
+    res.status(500).json({ 
+      error: 'Error al deshabilitar propietario',
+      details: err.message 
+    });
+  }
+});
+
