@@ -102,7 +102,7 @@ function AboutUs() {
               <div 
                 key={index}
                 className={`carousel-item ${index === currentSlide ? 'active' : ''}`}
-                style={{backgroundImage: `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url(${item.image})`}}
+                style={{backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.5), rgba(0,0,0,0.5)), url(${item.image})`}}
               >
                 <div className="carousel-content">
                   <h4>{item.title}</h4>

@@ -3,17 +3,45 @@ import { useNavigate } from 'react-router-dom';
 import styles from './Style/EditarPerfilVeterinarioStyles.module.css';
 import { motion } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowLeft, faUserCog } from '@fortawesome/free-solid-svg-icons';
+import { faArrowLeft, faUserCog, faSave } from '@fortawesome/free-solid-svg-icons';
 
 const containerVariants = {
   hidden: { opacity: 0, x: '-100vw' },
-  visible: { opacity: 1, x: 0, transition: { type: 'spring', delay: 0.2, damping: 20, stiffness: 100 } },
-  exit: { x: '100vw', transition: { ease: 'easeInOut' } },
+  visible: { 
+    opacity: 1, 
+    x: 0, 
+    transition: { 
+      type: 'spring', 
+      delay: 0.2, 
+      damping: 20, 
+      stiffness: 100 
+    } 
+  },
+  exit: { 
+    x: '100vw', 
+    transition: { 
+      ease: 'easeInOut',
+      duration: 0.3 
+    } 
+  },
 };
 
 const buttonVariants = {
-  hover: { scale: 1.05 },
-  tap: { scale: 0.95 },
+  hover: { 
+    scale: 1.05,
+    boxShadow: "0 5px 15px rgba(0, 172, 193, 0.4)"
+  },
+  tap: { 
+    scale: 0.95,
+    boxShadow: "0 2px 5px rgba(0, 172, 193, 0.2)"
+  },
+};
+
+const inputVariants = {
+  focus: {
+    scale: 1.02,
+    boxShadow: "0 0 0 3px rgba(0, 172, 193, 0.2)"
+  }
 };
 
 const EditarPerfilVeterinario = () => {
@@ -25,15 +53,16 @@ const EditarPerfilVeterinario = () => {
   const [direccion, setDireccion] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    // Simulación de llamada a la API para obtener los datos del perfil a editar
+    // Simulación de llamada a la API
     setTimeout(() => {
       const veterinarioData = {
         nombre: 'Dra. Sofia Vargas',
         especialidad: 'Medicina General Veterinaria',
         email: 'sofia.vargas@example.com',
-        telefono: '300...',
+        telefono: '3001234567',
         direccion: 'Carrera 10 # 20-30',
       };
       setNombre(veterinarioData.nombre);
@@ -42,26 +71,52 @@ const EditarPerfilVeterinario = () => {
       setTelefono(veterinarioData.telefono);
       setDireccion(veterinarioData.direccion);
       setLoading(false);
-    }, 500);
+    }, 800);
   }, []);
 
   const handleVolver = () => {
     navigate(-1);
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    // Simulación de envío de los datos actualizados del perfil a la API
-    console.log('Datos del perfil actualizados:', { nombre, especialidad, email, telefono, direccion });
-    navigate('/veterinario/perfil');
+    setIsSubmitting(true);
+    
+    // Simulación de envío a la API
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      console.log('Datos actualizados:', { nombre, especialidad, email, telefono, direccion });
+      navigate('/veterinario/perfil');
+    } catch (err) {
+      setError('Error al guardar los cambios');
+      setIsSubmitting(false);
+    }
   };
 
   if (loading) {
-    return <div>Cargando datos del perfil...</div>;
+    return (
+      <div className={styles.loadingContainer}>
+        <div className={styles.loadingSpinner}></div>
+        <p>Cargando datos del perfil...</p>
+      </div>
+    );
   }
 
   if (error) {
-    return <div>Error al cargar los datos del perfil: {error}</div>;
+    return (
+      <div className={styles.errorContainer}>
+        <h3>Error</h3>
+        <p>{error}</p>
+        <motion.button 
+          onClick={() => navigate('/veterinario/perfil')} 
+          className={styles.volverBtn}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <FontAwesomeIcon icon={faArrowLeft} /> Volver al perfil
+        </motion.button>
+      </div>
+    );
   }
 
   return (
@@ -73,34 +128,95 @@ const EditarPerfilVeterinario = () => {
       exit="exit"
     >
       <div className={styles.header}>
-        <button onClick={handleVolver} className={styles.volverBtn}>
+        <motion.button 
+          onClick={handleVolver} 
+          className={styles.volverBtn}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
           <FontAwesomeIcon icon={faArrowLeft} /> Volver
-        </button>
+        </motion.button>
         <h2><FontAwesomeIcon icon={faUserCog} /> Editar Perfil</h2>
       </div>
+      
       <form onSubmit={handleSubmit} className={styles.formulario}>
-        <div className={styles.formGroup}>
+        <motion.div className={styles.formGroup}>
           <label htmlFor="nombre">Nombre:</label>
-          <input type="text" id="nombre" value={nombre} onChange={(e) => setNombre(e.target.value)} required />
-        </div>
-        <div className={styles.formGroup}>
+          <motion.input
+            type="text"
+            id="nombre"
+            value={nombre}
+            onChange={(e) => setNombre(e.target.value)}
+            required
+            whileFocus="focus"
+            variants={inputVariants}
+          />
+        </motion.div>
+        
+        <motion.div className={styles.formGroup}>
           <label htmlFor="especialidad">Especialidad:</label>
-          <input type="text" id="especialidad" value={especialidad} onChange={(e) => setEspecialidad(e.target.value)} />
-        </div>
-        <div className={styles.formGroup}>
+          <motion.input
+            type="text"
+            id="especialidad"
+            value={especialidad}
+            onChange={(e) => setEspecialidad(e.target.value)}
+            whileFocus="focus"
+            variants={inputVariants}
+          />
+        </motion.div>
+        
+        <motion.div className={styles.formGroup}>
           <label htmlFor="email">Email:</label>
-          <input type="email" id="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-        </div>
-        <div className={styles.formGroup}>
+          <motion.input
+            type="email"
+            id="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            whileFocus="focus"
+            variants={inputVariants}
+          />
+        </motion.div>
+        
+        <motion.div className={styles.formGroup}>
           <label htmlFor="telefono">Teléfono:</label>
-          <input type="tel" id="telefono" value={telefono} onChange={(e) => setTelefono(e.target.value)} />
-        </div>
-        <div className={styles.formGroup}>
+          <motion.input
+            type="tel"
+            id="telefono"
+            value={telefono}
+            onChange={(e) => setTelefono(e.target.value)}
+            whileFocus="focus"
+            variants={inputVariants}
+          />
+        </motion.div>
+        
+        <motion.div className={styles.formGroup}>
           <label htmlFor="direccion">Dirección:</label>
-          <input type="text" id="direccion" value={direccion} onChange={(e) => setDireccion(e.target.value)} />
-        </div>
-        <motion.button type="submit" className={styles.guardarBtn} variants={buttonVariants} whileHover="hover" whileTap="tap">
-          Guardar Cambios
+          <motion.input
+            type="text"
+            id="direccion"
+            value={direccion}
+            onChange={(e) => setDireccion(e.target.value)}
+            whileFocus="focus"
+            variants={inputVariants}
+          />
+        </motion.div>
+        
+        <motion.button
+          type="submit"
+          className={styles.guardarBtn}
+          variants={buttonVariants}
+          whileHover="hover"
+          whileTap="tap"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? (
+            'Guardando...'
+          ) : (
+            <>
+              <FontAwesomeIcon icon={faSave} /> Guardar Cambios
+            </>
+          )}
         </motion.button>
       </form>
     </motion.div>
