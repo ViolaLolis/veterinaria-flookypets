@@ -64,14 +64,6 @@ CREATE TABLE servicios (
     precio VARCHAR(50) NOT NULL
 );
 
-INSERT INTO servicios (nombre, descripcion, precio) VALUES
-('Consulta General', 'Revisión médica básica para tu mascota.', '$50.000'),
-('Vacunación', 'Programas de vacunación personalizados para proteger a tu compañero.', '$30.000'),
-('Estética Canina y Felina', 'Baño, corte de pelo y otros tratamientos de belleza.', '$40.000'),
-('Cirugía', 'Procedimientos quirúrgicos con equipo moderno y veterinarios especializados.', 'Consultar'),
-('Diagnóstico por Imagen', 'Rayos X, ecografías y otros métodos de diagnóstico avanzado.', 'Consultar'),
-('Laboratorio Clínico', 'Análisis de sangre, orina y otros fluidos corporales.', '25.000');
-
 CREATE TABLE citas (
     id_cita INT AUTO_INCREMENT PRIMARY KEY,
     id_cliente INT NOT NULL,
@@ -84,6 +76,14 @@ CREATE TABLE citas (
     FOREIGN KEY (id_servicio) REFERENCES servicios(id_servicio),
     FOREIGN KEY (id_veterinario) REFERENCES usuarios(id)
 );
+
+INSERT INTO servicios (nombre, descripcion, precio) VALUES
+('Consulta General', 'Revisión médica básica para tu mascota.', '$50.000'),
+('Vacunación', 'Programas de vacunación personalizados para proteger a tu compañero.', '$30.000'),
+('Estética Canina y Felina', 'Baño, corte de pelo y otros tratamientos de belleza.', '$40.000'),
+('Cirugía', 'Procedimientos quirúrgicos con equipo moderno y veterinarios especializados.', 'Consultar'),
+('Diagnóstico por Imagen', 'Rayos X, ecografías y otros métodos de diagnóstico avanzado.', 'Consultar'),
+('Laboratorio Clínico', 'Análisis de sangre, orina y otros fluidos corporales.', '25.000');
 
 INSERT INTO usuarios (email, password, nombre, apellido, telefono, direccion, tipo_documento, numero_documento, fecha_nacimiento, role) VALUES
 ('admin@example.com', '$2a$10$xJwL5v5Jz5U5Z5U5Z5U5Ze', 'Admin', 'Principal', '3001234567', 'Calle Admin 123', 'CC', '123456789', '1980-01-01', 'admin'),
@@ -200,6 +200,6 @@ INSERT INTO historial_medico (id_mascota, veterinario, diagnostico, tratamiento,
 (19, 2, 'Control de crecimiento', 'Alimentación para cachorro grande', 'Desarrollo adecuado', 52.0, 38.8, '2023-11-30'),
 (20, 3, 'Problemas de comportamiento', 'Consulta con etólogo', 'Ansiedad por separación', 50.5, 38.7, '2023-08-15');
 SELECT * FROM clientes;
-SELECT * FROM usuarios;
+SELECT * FROM mascotas;
 SELECT email, nombre, apellido, role FROM usuarios;
 

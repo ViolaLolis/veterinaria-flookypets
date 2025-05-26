@@ -40,9 +40,9 @@ function OlvideContraseña() {
     return () => clearInterval(timer);
   }, [codigoEnviado, tiempoRestante, codigoVerificado]);
 
-  // Generar código aleatorio de 6 caracteres
+  // Generar código aleatorio de 6 dígitos numéricos
   const generarCodigo = () => {
-    const nuevoCodigo = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const nuevoCodigo = Math.floor(100000 + Math.random() * 900000).toString();
     setCodigoGenerado(nuevoCodigo);
     return nuevoCodigo;
   };
@@ -121,11 +121,11 @@ function OlvideContraseña() {
 
   // Paso 2: Verificar código ingresado
   const handleVerificarCodigo = async () => {
-    const codigoIngresado = getValues('codigoVerificacion')?.toUpperCase();
-    const email = getValues('correo');
+    const codigoIngresado = getValues('codigoVerificacion')?.replace(/\D/g,''); // Solo números
+    const email = getValues('correo')?.trim();
     
-    if (!codigoIngresado) {
-      setError('Ingresa el código de verificación');
+    if (!codigoIngresado || codigoIngresado.length !== 6) {
+      setError('Ingresa un código de 6 dígitos');
       return;
     }
     
@@ -133,6 +133,8 @@ function OlvideContraseña() {
     setError('');
     
     try {
+      console.log('Verificando código:', { email, token: codigoIngresado });
+      
       const response = await fetch('http://localhost:5000/verify-reset-code', {
         method: 'POST',
         headers: {
@@ -140,25 +142,31 @@ function OlvideContraseña() {
         },
         body: JSON.stringify({
           email: email,
-          code: codigoIngresado
+          token: codigoIngresado
         })
       });
-  
+
       const data = await response.json();
-  
+    
       if (!response.ok) {
         throw new Error(data.message || 'Error al verificar el código');
       }
-  
+    
       setCodigoVerificado(true);
       setSuccessMessage(data.message || 'Código verificado correctamente');
+      
       setTimeout(() => {
         setStep(2);
         setSuccessMessage('');
       }, 1500);
-  
+    
     } catch (error) {
-      setError(error.message);
+      console.error('Error en verificación:', {
+        error: error,
+        message: error.message,
+        stack: error.stack
+      });
+      setError(error.message || 'Error al verificar el código');
     } finally {
       setIsSubmitting(false);
     }
@@ -273,16 +281,22 @@ function OlvideContraseña() {
                   <label>Código de Verificación</label>
                   <input
                     type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
                     placeholder="Ingresa el código de 6 dígitos"
                     {...register('codigoVerificacion', {
                       required: 'El código es obligatorio',
                       minLength: {
                         value: 6,
-                        message: 'El código debe tener 6 caracteres'
+                        message: 'El código debe tener 6 dígitos'
                       },
                       maxLength: {
                         value: 6,
-                        message: 'El código debe tener 6 caracteres'
+                        message: 'El código debe tener 6 dígitos'
+                      },
+                      pattern: {
+                        value: /^[0-9]{6}$/,
+                        message: 'Solo se permiten números'
                       }
                     })}
                     disabled={codigoVerificado}
@@ -393,7 +407,6 @@ function OlvideContraseña() {
           </Link>
         </div>
       </div>
-      
     </div>
   );
 }
