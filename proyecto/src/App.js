@@ -5,7 +5,6 @@ import Login from "./Pages/Login/Login.js";
 import Registro from "./Pages/Login/Registro.js";
 import ForgotPassword from "./Pages/Login/OlvideContraseña.js";
 import InicioUsuario from "./Pages/InicioUsuario/InicioUsuario.js";
-import MisMascotas from "./Pages/InicioUsuario/MisMascotas.js";
 import CitasUsuario from "./Pages/InicioUsuario/CitasUsuario.js";
 import ServiciosVeterinaria from "./Pages/InicioUsuario/ServiciosVeterinaria.js";
 import PerfilUsuario from "./Pages/InicioUsuario/PerfilUsuario.js";
@@ -157,10 +156,9 @@ function App() {
         {/* Rutas de usuario */}
         <Route element={<Protegida user={user} allowedRoles={['usuario', 'admin', 'veterinario']} />}>
           <Route path="/usuario" element={<InicioUsuario />}>
-            <Route index element={<MisMascotas />} />
+            
             
             {/* Gestión de mascotas */}
-            <Route path="mascotas" element={<MisMascotas />} />
             <Route path="mascotas/agregar" element={<AgregarMascota />} />
             <Route path="mascotas/:id" element={<DetalleMascota />} />
             <Route path="mascotas/editar/:id" element={<EditarMascota />} />

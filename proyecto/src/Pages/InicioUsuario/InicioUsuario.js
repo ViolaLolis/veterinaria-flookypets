@@ -1,29 +1,60 @@
 import React, { useState } from 'react';
-import MisMascotas from './MisMascotas';
 import CitasUsuario from './CitasUsuario';
 import ServiciosVeterinaria from './ServiciosVeterinaria';
 import styles from './Styles/InicioUsuario.module.css';
 import logo from '../Inicio/Imagenes/flooty.png';
-import { FaPaw, FaCalendarPlus, FaShoppingCart, FaBell, FaClipboardList, FaHeart, FaQuestionCircle, FaUserCog, FaChevronDown } from 'react-icons/fa';
-import BarraNavegacionUsuario from './BarraNavegacionUsuario';
+import { FaPaw, FaCalendarPlus, FaShoppingCart, FaBell, FaClipboardList, FaHeart, FaQuestionCircle, FaUserCog, FaChevronDown, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+
+// Añade este componente antes de InicioUsuario
+const MisMascotas = () => {
+  return (
+    <div className={styles.mascotasContainer}>
+      <h2>Mis Mascotas</h2>
+      <p>Aquí puedes ver y gestionar toda la información de tus mascotas.</p>
+      {/* Agrega más contenido según necesites */}
+    </div>
+  );
+};
 
 const InicioUsuario = () => {
+  // ... el resto de tu código permanece igual ...
   const [activeTab, setActiveTab] = useState('mascotas');
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [expandedReminders, setExpandedReminders] = useState(false);
+  const [currentPetIndex, setCurrentPetIndex] = useState(0);
+  const [showPetsDropdown, setShowPetsDropdown] = useState(false);
   
-  // Datos del usuario simulados
+  // Datos del usuario con múltiples mascotas
   const userData = {
     nombre: "Juan Pérez",
     email: "juan.perez@example.com",
     membresia: "Premium",
-    mascotaDestacada: {
-      nombre: "Max",
-      tipo: "Perro",
-      raza: "Golden Retriever",
-      edad: "3 años",
-      imagen: "https://images.unsplash.com/photo-1633722715463-d30f4f325e24?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=774&q=80"
-    }
+    mascotas: [
+      {
+        id: 1,
+        nombre: "Max",
+        tipo: "Perro",
+        raza: "Golden Retriever",
+        edad: "3 años",
+        imagen: "https://images.unsplash.com/photo-1633722715463-d30f4f325e24?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=774&q=80"
+      },
+      {
+        id: 2,
+        nombre: "Luna",
+        tipo: "Gato",
+        raza: "Siamés",
+        edad: "2 años",
+        imagen: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=774&q=80"
+      },
+      {
+        id: 3,
+        nombre: "Rocky",
+        tipo: "Perro",
+        raza: "Bulldog",
+        edad: "5 años",
+        imagen: "https://images.unsplash.com/photo-1586671267731-da2cf3ceeb80?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=774&q=80"
+      }
+    ]
   };
 
   const proximaCita = {
@@ -45,8 +76,7 @@ const InicioUsuario = () => {
 
   const renderContent = () => {
     switch(activeTab) {
-      case 'mascotas':
-        return <MisMascotas />;
+      
       case 'citas':
         return <CitasUsuario />;
       case 'servicios':
@@ -55,6 +85,25 @@ const InicioUsuario = () => {
         return <MisMascotas />;
     }
   };
+
+  const handlePrevPet = () => {
+    setCurrentPetIndex(prev => 
+      prev === 0 ? userData.mascotas.length - 1 : prev - 1
+    );
+  };
+
+  const handleNextPet = () => {
+    setCurrentPetIndex(prev => 
+      prev === userData.mascotas.length - 1 ? 0 : prev + 1
+    );
+  };
+
+  const handlePetSelect = (index) => {
+    setCurrentPetIndex(index);
+    setShowPetsDropdown(false);
+  };
+
+  const currentPet = userData.mascotas[currentPetIndex];
 
   return (
     <div className={styles.container}>
@@ -109,15 +158,47 @@ const InicioUsuario = () => {
       <div className={styles.highlightSection}>
         <div className={styles.petHighlight}>
           <div className={styles.petImageContainer}>
-            <img src={userData.mascotaDestacada.imagen} alt={userData.mascotaDestacada.nombre} className={styles.petImage} />
+            <img src={currentPet.imagen} alt={currentPet.nombre} className={styles.petImage} />
             <div className={styles.petImageOverlay}></div>
+            <div className={styles.petNavigation}>
+              <button className={styles.navArrow} onClick={handlePrevPet}>
+                <FaChevronLeft />
+              </button>
+              <button className={styles.navArrow} onClick={handleNextPet}>
+                <FaChevronRight />
+              </button>
+            </div>
           </div>
           <div className={styles.petInfo}>
-            <h3>Tu compañero: <span>{userData.mascotaDestacada.nombre}</span></h3>
+            <div className={styles.petSelectorContainer}>
+              <h3>Mi compañero:</h3>
+              <div className={styles.petSelectorWrapper}>
+                <button 
+                  className={styles.petSelectorButton}
+                  onClick={() => setShowPetsDropdown(!showPetsDropdown)}
+                >
+                  <span>{currentPet.nombre}</span>
+                  <FaChevronDown className={styles.selectorArrow} />
+                </button>
+                {showPetsDropdown && (
+                  <div className={styles.petsDropdown}>
+                    {userData.mascotas.map((pet, index) => (
+                      <button
+                        key={pet.id}
+                        className={`${styles.petOption} ${index === currentPetIndex ? styles.selectedPet : ''}`}
+                        onClick={() => handlePetSelect(index)}
+                      >
+                        {pet.nombre}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
             <div className={styles.petDetails}>
-              <span className={styles.petDetail}>{userData.mascotaDestacada.tipo}</span>
-              <span className={styles.petDetail}>{userData.mascotaDestacada.raza}</span>
-              <span className={styles.petDetail}>{userData.mascotaDestacada.edad}</span>
+              <span className={styles.petDetail}>{currentPet.tipo}</span>
+              <span className={styles.petDetail}>{currentPet.raza}</span>
+              <span className={styles.petDetail}>{currentPet.edad}</span>
             </div>
             <button className={styles.careButton}>
               <FaHeart /> <span>Historial de salud</span>
@@ -225,7 +306,7 @@ const InicioUsuario = () => {
             <div className={styles.tipIcon}>💡</div>
             <h3>Consejos</h3>
           </div>
-          <p>Los perros de razas grandes necesitan ejercicio regular pero controlado durante su crecimiento para evitar problemas articulares. 30-40 minutos dos veces al día es ideal para Max.</p>
+          <p>Los perros de razas grandes necesitan ejercicio regular pero controlado durante su crecimiento para evitar problemas articulares. 30-40 minutos dos veces al día es ideal para {currentPet.nombre}.</p>
         </div>
       </div>
     </div>
