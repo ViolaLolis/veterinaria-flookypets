@@ -1,85 +1,105 @@
-:root {
-  --color-primary: #00bcd4; /* Azul claro */
-  --color-secondary: #00acc1; /* Azul más oscuro */
-  --color-success: #4CAF50; /* Verde de éxito */
-  --color-warning: #ffce54; /* Amarillo de advertencia */
-  --color-white: #ffffff; /* Blanco */
-  --color-light: #e0f7fa; /* Fondo azul claro */
-  --color-dark: #333; /* Gris oscuro */
-  --color-muted: #666; /* Gris suave */
-  --color-border: #b2ebf2; /* Azul suave */
-  --color-tab-active: #00bcd4; /* Azul claro */
-  --color-tab-border: #00acc1; /* Azul más oscuro */
-  --color-primary-dark: #3a63d1; /* Azul oscuro */
-  --color-danger: #ff5252; /* Rojo de peligro */
-  --color-danger-dark: #e03e3e; /* Rojo oscuro para hover */
-  --color-success-dark: #28a745; /* Verde oscuro para hover */
-  --color-text-dark: #333; /* Gris oscuro para texto */
-  --color-bg-light: #f4f7ff; /* Fondo claro */
-  --color-accent: #d4a017; /* Color de acento (amarillo dorado) */
-  --color-accent-light: #f0c14b; /* Color de acento claro */
-  --color-muted: #7a6a56; /* Color para texto secundario */
-}
+/* ListaMascotasStyles.module.css */
 
+/* Estilos base */
 .listaContainer {
-  max-width: 1200px;
-  margin: 2rem auto;
-  padding: 1.5rem;
-  background-color: var(--color-bg-light); /* Fondo claro */
-  border-radius: 15px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  padding: 2rem;
+  min-height: 100vh;
+  background-color: #f8f4e9; /* Blanco hueso */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
+/* Header */
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 2rem;
-  flex-wrap: wrap;
-  gap: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid rgba(0, 188, 212, 0.2);
 }
 
 .header h2 {
-  color: var(--color-text-dark); /* Texto oscuro */
-  font-size: 2rem;
-  margin: 0;
+  color: #00bcd4;
+  font-size: 1.8rem;
   font-weight: 600;
+  margin: 0;
 }
 
-.addButton {
-  background: linear-gradient(135deg, var(--color-accent));
-  color: var(--color-white);
-  padding: 0.7rem 1.5rem;
-  border-radius: 50px;
-  text-decoration: none;
-  font-weight: 500;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
+/* Barra de búsqueda */
+.searchContainer {
+  position: relative;
+  margin-bottom: 2rem;
+  max-width: 800px;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #00bcd4;
+  opacity: 0.7;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 0.8rem 1rem 0.8rem 3rem;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 188, 212, 0.4);
+  background-color: white;
+  font-size: 1rem;
+  color: #333;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: #00bcd4;
+  box-shadow: 0 2px 12px rgba(0, 188, 212, 0.2);
+}
+
+/* Botones */
+.addButton {
+  padding: 0.7rem 1.2rem;
+  border-radius: 8px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  background-color: #00bcd4;
+  color: white;
+  font-size: 0.95rem;
+  border: none;
 }
 
 .addButton:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(230, 161, 13, 0.4);
+  background-color: #0097a7;
+  color: white;
 }
 
+/* Lista de mascotas */
 .lista {
-  list-style: none;
-  padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   gap: 1.5rem;
+  padding: 0;
+  margin: 0;
+  list-style: none;
 }
 
 .listItem {
-  background: var(--color-white); /* Fondo blanco */
+  background-color: white;
   border-radius: 12px;
   padding: 1.5rem;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
   transition: all 0.3s ease;
-  border-left: 4px solid var(--color-accent); /* Borde izquierdo dorado */
+  border: 1px solid rgba(0, 188, 212, 0.1);
   position: relative;
   overflow: hidden;
 }
@@ -89,50 +109,50 @@
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
+  width: 4px;
   height: 100%;
-  background: linear-gradient(135deg, rgba(52, 152, 219, 0.1), rgba(44, 62, 80, 0.05));
-  z-index: 0;
-  opacity: 0;
-  transition: opacity 0.3s ease;
+  background-color: #00bcd4;
+  transition: all 0.3s ease;
 }
 
 .listItem:hover::before {
-  opacity: 1;
+  width: 6px;
 }
 
 .nombre {
-  font-size: 1.4rem;
+  font-size: 1.3rem;
   font-weight: 600;
-  color: var(--color-text-dark); /* Texto oscuro */
-  display: block;
+  color: #333;
   margin-bottom: 0.5rem;
-  position: relative;
 }
 
 .especie {
-  display: block;
-  color: var(--color-muted); /* Texto secundario */
-  margin-bottom: 0.5rem;
   font-size: 0.95rem;
-  position: relative;
+  color: #666;
+  margin-bottom: 0.5rem;
 }
 
 .propietario {
-  display: block;
-  color: #34495e; /* Color más oscuro para propietario */
   font-size: 0.9rem;
+  color: #666;
   margin-bottom: 1rem;
-  position: relative;
 }
 
+.propietario::before {
+  content: '👤 ';
+}
+
+/* Acciones */
 .acciones {
   display: flex;
+  justify-content: flex-end;
   gap: 0.8rem;
-  position: relative;
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(0, 188, 212, 0.1);
 }
 
-.acciones a, .acciones button {
+.verButton, .editarButton, .deshabilitarButton {
   width: 36px;
   height: 36px;
   border-radius: 50%;
@@ -140,69 +160,103 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   border: none;
-  font-size: 0.9rem;
-  color: var(--color-white);
-}
-
-.verButton {
-  background-color: var(--color-success);
+  background-color: transparent;
+  color: #666;
+  text-decoration: none;
 }
 
 .verButton:hover {
-  background-color: var(--color-success-dark);
-  transform: translateY(-2px);
-}
-
-.editarButton {
-  background-color: var(--color-accent); /* Color dorado */
+  color: #00bcd4;
+  background-color: rgba(0, 188, 212, 0.1);
 }
 
 .editarButton:hover {
-  background-color: var(--color-accent-light);
-  transform: translateY(-2px);
-}
-
-.deshabilitarButton {
-  background-color: var(--color-danger);
+  color: #00bcd4;
+  background-color: rgba(0, 188, 212, 0.1);
 }
 
 .deshabilitarButton:hover {
-  background-color: var(--color-danger-dark);
-  transform: translateY(-2px);
+  color: #e53935;
+  background-color: rgba(229, 57, 53, 0.1);
 }
 
+/* Estados vacíos */
 .emptyMessage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   text-align: center;
-  padding: 2rem;
-  background: var(--color-white); /* Fondo blanco */
+  padding: 3rem 2rem;
+  background-color: white;
   border-radius: 12px;
-  color: var(--color-muted); /* Texto secundario */
-  font-size: 1.1rem;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  margin-top: 2rem;
+  color: #666;
 }
 
-@keyframes pulse {
-  0% { opacity: 0.6; }
-  50% { opacity: 1; }
-  100% { opacity: 0.6; }
+.emptyMessage::before {
+  content: '🐾';
+  font-size: 2rem;
+  margin-bottom: 1rem;
 }
 
-.loadingItem {
-  background: #ecf0f1;
-  height: 120px;
-  border-radius: 12px;
-  animation: pulse 1.5s infinite ease-in-out;
+/* Loading y errores */
+.loadingMessage, .errorMessage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 60vh;
+  text-align: center;
 }
 
+.loadingSpinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(0, 188, 212, 0.2);
+  border-top-color: #00bcd4;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1.5rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.errorMessage {
+  background-color: #ffebee;
+  color: #c62828;
+  padding: 1.5rem;
+  border-radius: 8px;
+  max-width: 500px;
+  margin-bottom: 1.5rem;
+  border-left: 4px solid #e53935;
+}
+
+/* Efectos de hover para tarjetas */
+.listItem:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 15px rgba(0, 188, 212, 0.15);
+}
+
+/* Responsive */
 @media (max-width: 768px) {
-  .lista {
-    grid-template-columns: 1fr;
-  }
-
   .header {
     flex-direction: column;
     align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .addButton {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .lista {
+    grid-template-columns: 1fr;
   }
 }

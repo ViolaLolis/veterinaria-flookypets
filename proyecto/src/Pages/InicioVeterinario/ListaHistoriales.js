@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faPlus, faNotesMedical, faSearch } from '@fortawesome/free-solid-svg-icons';
 
 const containerVariants = {
+ 
   hidden: { opacity: 0, y: 20 },
   visible: { 
     opacity: 1, 

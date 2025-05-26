@@ -1,161 +1,224 @@
+/* Paleta de colores */
 :root {
-  --color-primary: #5a67d8; /* Un color primario moderno */
-  --color-primary-dark: #4299e1; /* Azul más oscuro */
-  --color-primary-light: #3182ce; /* Azul aún más oscuro */
-  --color-danger: #e53e3e; /* Rojo de advertencia */
-  --color-danger-dark: #c53030; /* Rojo más oscuro */
-  --color-dark: #374151; /* Gris oscuro */
-  --color-muted: #4a5568; /* Gris suave */
-  --color-light: #ffffff; /* Blanco */
-  --color-border: #cbd5e0; /* Gris claro */
-  --color-border-hover: #94a3b8; /* Gris claro al pasar el ratón */
-  --color-background: #f4f6f8; /* Fondo gris claro */
-  --color-box-shadow: rgba(0, 0, 0, 0.15); /* Sombra suave */
-  --color-box-shadow-hover: rgba(0, 0, 0, 0.1); /* Sombra suave al pasar el ratón */
-  --color-primary-lighter: #e2e8f0; /* Ligeramente más claro */
-  --color-heading-border: #e0e7ff; /* Color de la línea en el encabezado */
+  --primary-color: #00bcd4;         /* Azul turquesa principal */
+  --primary-light: rgba(0, 188, 212, 0.1); /* Versión clara para fondos */
+  --primary-dark: #008fa1;          /* Versión más oscura para hover */
+  --bg-color: #f8f4e9;             /* Blanco hueso */
+  --card-bg: #ffffff;              /* Fondo de tarjetas */
+  --text-color: #333333;           /* Texto principal */
+  --text-light: #666666;           /* Texto secundario */
+  --border-color: #e0e0e0;         /* Color de bordes */
+  --success-color: #4caf50;        /* Verde para éxito */
+  --error-color: #f44336;          /* Rojo para errores */
+  --warning-color: #ff9800;        /* Amarillo/naranja para advertencias */
 }
 
-/* Perfil Container */
+/* Estilos base */
 .perfilContainer {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 40px;
-  background-color: var(--color-background);
-  border-radius: 12px;
-  box-shadow: 0 8px 16px var(--color-box-shadow);
-  width: 90%;
-  max-width: 700px;
-  margin: 20px auto;
-  animation: fadeIn 0.5s ease-out forwards;
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: var(--bg-color);
+  border-radius: 15px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 /* Header */
 .header {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  margin-bottom: 30px;
-  width: 100%;
-  opacity: 0;
-  transform: translateY(10px);
-  animation: fadeIn 0.5s ease-out 0.2s forwards;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid var(--primary-light);
 }
 
 .userIcon {
-  font-size: 3em;
-  margin-right: 25px;
-  color: var(--color-primary);
+  color: var(--primary-color);
+  margin-right: 1rem;
 }
 
 .header h2 {
-  font-size: 2.5em;
-  color: var(--color-dark);
-  margin: 0 auto 0 0;
+  color: var(--primary-color);
+  font-size: 1.8rem;
+  margin: 0;
+  flex-grow: 1;
 }
 
-/* Header buttons */
-.header div {
+.header > div {
   display: flex;
-  gap: 15px;
-}
-
-.headerButton,
-.editButton,
-.cerrarSesionBtn {
-  background-color: var(--color-light);
-  color: var(--color-dark);
-  border: 1px solid var(--color-border);
-  padding: 10px 18px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-flex;
   align-items: center;
-  font-size: 1em;
-  cursor: pointer;
-  border-radius: 8px;
-  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, border-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+  gap: 1rem;
 }
 
-.headerButton svg,
-.editButton svg,
-.cerrarSesionBtn svg {
-  margin-right: 8px;
+/* Botones del header */
+.headerButton {
+  color: var(--primary-color);
+  background-color: var(--primary-light);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition: all 0.3s ease;
 }
 
-.headerButton:hover,
-.editButton:hover,
-.cerrarSesionBtn:hover {
-  background-color: var(--color-primary-lighter);
-  border-color: var(--color-border-hover);
-  transform: scale(1.02);
+.headerButton:hover {
+  background-color: var(--primary-color);
+  color: white;
+  transform: rotate(15deg);
 }
 
-/* Edit Button */
 .editButton {
-  background-color: var(--color-primary);
-  color: var(--color-light);
-  border-color: var(--color-primary);
+  background-color: var(--primary-color);
+  color: white;
+  padding: 0.6rem 1.2rem;
+  border-radius: 30px;
+  text-decoration: none;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
 }
 
 .editButton:hover {
-  background-color: var(--color-primary-dark);
-  border-color: var(--color-primary-dark);
+  background-color: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 188, 212, 0.3);
 }
 
-/* Cerrar sesión button */
 .cerrarSesionBtn {
-  background-color: var(--color-danger);
-  color: var(--color-light);
-  border-color: var(--color-danger);
+  background-color: transparent;
+  color: var(--text-light);
+  border: 2px solid var(--border-color);
+  padding: 0.6rem 1.2rem;
+  border-radius: 30px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
 }
 
 .cerrarSesionBtn:hover {
-  background-color: var(--color-danger-dark);
-  border-color: var(--color-danger-dark);
+  border-color: var(--error-color);
+  color: var(--error-color);
+  background-color: rgba(244, 67, 54, 0.05);
 }
 
-/* Info Section */
+/* Sección de información */
 .infoSection {
-  background-color: var(--color-light);
-  padding: 30px;
-  border-radius: 12px;
-  box-shadow: 0 4px 8px var(--color-box-shadow-hover);
-  line-height: 1.7;
-  width: 100%;
+  background-color: var(--card-bg);
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 3px 15px rgba(0, 0, 0, 0.05);
 }
 
 .infoSection h3 {
-  font-size: 1.8em;
-  color: var(--color-dark);
-  border-bottom: 2px solid var(--color-heading-border);
-  padding-bottom: 15px;
-  margin-bottom: 20px;
-}
-
-.infoSection strong {
-  font-weight: 600;
-  color: var(--color-muted);
+  color: var(--primary-color);
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--primary-light);
 }
 
 .infoSection p {
-  margin-bottom: 15px;
-  color: var(--color-muted);
+  margin-bottom: 1rem;
+  padding: 0.8rem;
+  border-radius: 8px;
+  transition: all 0.3s ease;
 }
 
-/* Animaciones sutiles */
+.infoSection p:hover {
+  background-color: var(--primary-light);
+  transform: translateX(5px);
+}
+
+.infoSection strong {
+  color: var(--primary-color);
+  margin-right: 0.5rem;
+  min-width: 120px;
+  display: inline-block;
+}
+
+/* Loading y errores */
+.loadingContainer, .errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 50vh;
+  color: var(--primary-color);
+  text-align: center;
+}
+
+.errorContainer {
+  color: var(--error-color);
+}
+
+.loadingSpinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid var(--primary-light);
+  border-top-color: var(--primary-color);
+  border-radius: 50%;
+  margin-bottom: 1rem;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Animaciones */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-.perfilContainer {
-  animation: fadeIn 0.5s ease-out forwards;
+.infoSection p {
+  animation: fadeIn 0.5s ease forwards;
 }
 
-.header,
-.infoSection {
-  opacity: 0;
-  transform: translateY(10px);
-  animation: fadeIn 0.5s ease-out 0.2s forwards;
+.infoSection p:nth-child(1) { animation-delay: 0.1s; }
+.infoSection p:nth-child(2) { animation-delay: 0.2s; }
+.infoSection p:nth-child(3) { animation-delay: 0.3s; }
+.infoSection p:nth-child(4) { animation-delay: 0.4s; }
+.infoSection p:nth-child(5) { animation-delay: 0.5s; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .perfilContainer {
+    padding: 1.5rem;
+    margin: 1rem;
+  }
+  
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+  }
+  
+  .header > div {
+    width: 100%;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  
+  .editButton, .cerrarSesionBtn {
+    width: 100%;
+    justify-content: center;
+    margin-top: 0.5rem;
+  }
+  
+  .infoSection {
+    padding: 1.5rem;
+  }
 }

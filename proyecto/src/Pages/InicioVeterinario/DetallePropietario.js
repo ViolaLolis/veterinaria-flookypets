@@ -3,12 +3,44 @@ import { useNavigate, useParams } from 'react-router-dom';
 import styles from './Style/DetallePropietarioStyles.module.css';
 import { motion } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowLeft, faUser } from '@fortawesome/free-solid-svg-icons';
+import { faArrowLeft, faUser, faPhone, faEnvelope, faMapMarkerAlt, faPaw } from '@fortawesome/free-solid-svg-icons';
 
 const containerVariants = {
   hidden: { opacity: 0, x: '-100vw' },
-  visible: { opacity: 1, x: 0, transition: { type: 'spring', delay: 0.2, damping: 20, stiffness: 100 } },
-  exit: { x: '100vw', transition: { ease: 'easeInOut' } },
+  visible: { 
+    opacity: 1, 
+    x: 0, 
+    transition: { 
+      type: 'spring', 
+      delay: 0.2, 
+      damping: 20, 
+      stiffness: 100,
+      when: "beforeChildren",
+      staggerChildren: 0.1
+    } 
+  },
+  exit: { 
+    x: '100vw', 
+    transition: { 
+      ease: 'easeInOut',
+      duration: 0.3 
+    } 
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, x: -20 },
+  visible: { opacity: 1, x: 0 }
+};
+
+const mascotaVariants = {
+  hover: {
+    y: -5,
+    backgroundColor: 'var(--primary-color)',
+    color: 'white',
+    boxShadow: '0 5px 15px rgba(0, 172, 193, 0.3)'
+  },
+  tap: { scale: 0.95 }
 };
 
 const DetallePropietario = () => {
@@ -20,22 +52,27 @@ const DetallePropietario = () => {
 
   useEffect(() => {
     setTimeout(() => {
-      const propietarioData = {
-        id: parseInt(id),
-        nombre: 'Ana Pérez',
-        telefono: '310...',
-        email: 'ana@...',
-        direccion: 'Calle Falsa 123',
-        mascotas: ['Max', 'Lola'],
-      };
-      if (propietarioData.id === parseInt(id)) {
-        setPropietario(propietarioData);
-        setLoading(false);
-      } else {
-        setError('Propietario no encontrado');
+      try {
+        const propietarioData = {
+          id: parseInt(id),
+          nombre: 'Ana Pérez',
+          telefono: '3101234567',
+          email: 'ana.perez@example.com',
+          direccion: 'Calle Falsa 123, Bogotá',
+          mascotas: ['Max (Labrador)', 'Lola (Siamesa)'],
+          registro: 'Registrado desde: 15/03/2020'
+        };
+        if (propietarioData.id === parseInt(id)) {
+          setPropietario(propietarioData);
+          setLoading(false);
+        } else {
+          throw new Error('Propietario no encontrado');
+        }
+      } catch (err) {
+        setError(err.message);
         setLoading(false);
       }
-    }, 500);
+    }, 800);
   }, [id]);
 
   const handleVolver = () => {
@@ -43,15 +80,45 @@ const DetallePropietario = () => {
   };
 
   if (loading) {
-    return <div>Cargando detalles del propietario...</div>;
+    return (
+      <div className={styles.loadingContainer}>
+        <div className={styles.loadingSpinner}></div>
+        <p>Cargando detalles del propietario...</p>
+      </div>
+    );
   }
 
   if (error) {
-    return <div>Error al cargar los detalles del propietario: {error}</div>;
+    return (
+      <div className={styles.errorContainer}>
+        <h3>Error</h3>
+        <p>{error}</p>
+        <motion.button
+          onClick={handleVolver}
+          className={styles.volverBtn}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <FontAwesomeIcon icon={faArrowLeft} /> Volver
+        </motion.button>
+      </div>
+    );
   }
 
   if (!propietario) {
-    return <div>Propietario no encontrado.</div>;
+    return (
+      <div className={styles.errorContainer}>
+        <p>Propietario no encontrado.</p>
+        <motion.button
+          onClick={handleVolver}
+          className={styles.volverBtn}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <FontAwesomeIcon icon={faArrowLeft} /> Volver
+        </motion.button>
+      </div>
+    );
   }
 
   return (
@@ -63,27 +130,61 @@ const DetallePropietario = () => {
       exit="exit"
     >
       <div className={styles.header}>
-        <button onClick={handleVolver} className={styles.volverBtn}>
+        <motion.button 
+          onClick={handleVolver} 
+          className={styles.volverBtn}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
           <FontAwesomeIcon icon={faArrowLeft} /> Volver
-        </button>
+        </motion.button>
         <h2><FontAwesomeIcon icon={faUser} /> Detalle del Propietario</h2>
       </div>
+      
       <div className={styles.detalleInfo}>
-        <p><strong>Nombre:</strong> {propietario.nombre}</p>
-        <p><strong>Teléfono:</strong> {propietario.telefono}</p>
-        <p><strong>Email:</strong> {propietario.email}</p>
-        <p><strong>Dirección:</strong> {propietario.direccion}</p>
-        {propietario.mascotas && propietario.mascotas.length > 0 && (
-          <div>
-            <h3>Mascotas:</h3>
-            <ul>
-              {propietario.mascotas.map((mascota, index) => (
-                <li key={index}>{mascota}</li>
-              ))}
-            </ul>
-          </div>
+        <motion.p variants={itemVariants}>
+          <strong><FontAwesomeIcon icon={faUser} /> Nombre:</strong> {propietario.nombre}
+        </motion.p>
+        
+        <motion.p variants={itemVariants}>
+          <strong><FontAwesomeIcon icon={faPhone} /> Teléfono:</strong> {propietario.telefono}
+        </motion.p>
+        
+        <motion.p variants={itemVariants}>
+          <strong><FontAwesomeIcon icon={faEnvelope} /> Email:</strong> {propietario.email}
+        </motion.p>
+        
+        <motion.p variants={itemVariants}>
+          <strong><FontAwesomeIcon icon={faMapMarkerAlt} /> Dirección:</strong> {propietario.direccion}
+        </motion.p>
+        
+        {propietario.registro && (
+          <motion.p variants={itemVariants}>
+            <strong>Registro:</strong> {propietario.registro}
+          </motion.p>
         )}
-        {/* Posibles acciones adicionales como editar o deshabilitar */}
+        
+        {propietario.mascotas && propietario.mascotas.length > 0 && (
+          <motion.div 
+            className={styles.mascotasSection}
+            variants={itemVariants}
+          >
+            <h3><FontAwesomeIcon icon={faPaw} /> Mascotas:</h3>
+            <div className={styles.mascotasList}>
+              {propietario.mascotas.map((mascota, index) => (
+                <motion.span
+                  key={index}
+                  className={styles.mascotaItem}
+                  variants={mascotaVariants}
+                  whileHover="hover"
+                  whileTap="tap"
+                >
+                  {mascota}
+                </motion.span>
+              ))}
+            </div>
+          </motion.div>
+        )}
       </div>
     </motion.div>
   );

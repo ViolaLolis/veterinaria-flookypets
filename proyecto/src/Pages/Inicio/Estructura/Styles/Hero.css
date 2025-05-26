@@ -1,6 +1,6 @@
 /* Hero.css - Versión Azul */
 .hero {
-  background: linear-gradient(135deg, var(--color-light) 0%, rgba(224, 247, 250, 0.8) 100%);
+  background: linear-gradient(135deg, rgba(224, 247, 250, 0.8) 100%);
   padding: 5rem 2rem;
   text-align: center;
   position: relative;
