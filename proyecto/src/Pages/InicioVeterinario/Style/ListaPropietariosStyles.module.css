@@ -287,3 +287,48 @@
     justify-content: center;
   }
 }
+
+/* Agrega esto a tu módulo CSS */
+.headerActions {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.refreshButton {
+  padding: 8px 15px;
+  background-color: #f0f0f0;
+  color: #333;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.refreshButton:hover {
+  background-color: #e0e0e0;
+}
+
+.refreshButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.propietarioCard {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.details p {
+  margin: 5px 0;
+  font-size: 14px;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+}
