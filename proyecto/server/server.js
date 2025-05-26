@@ -3,14 +3,16 @@ const cors = require("cors");
 const mysql = require("mysql2/promise"); // Usamos la versión promise-based
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const crypto = require('crypto'); // Aunque no se usa directamente para generar el token numérico, es útil tenerlo
-require('dotenv').config(); // Cargar variables de entorno desde el archivo .env
+require('dotenv').config();
 
 const app = express();
-const PORT = process.env.PORT || 5000; // Usar puerto de .env o 5000 por defecto
+const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  credentials: true
+}));
 app.use(express.json());
 
 // Configuración del pool de conexiones
@@ -24,28 +26,42 @@ const pool = mysql.createPool({
   queueLimit: 0
 });
 
-// Middleware de autenticación
+// Verificar conexión a la base de datos
+pool.getConnection()
+  .then(conn => {
+    console.log('Conectado a la base de datos MySQL');
+    conn.release();
+  })
+  .catch(err => {
+    console.error('Error de conexión a la base de datos:', err);
+    process.exit(1);
+  });
+
+// Middleware de autenticación JWT
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
-
-  if (!token) {
-    return res.status(401).json({ message: "Acceso no autorizado: Token no proporcionado." });
-  }
-
-  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET || 'your_secret_key', (err, user) => {
-    if (err) {
-      console.error("Error al verificar token:", err);
-      return res.status(403).json({ message: "Acceso prohibido: Token inválido o expirado." });
-    }
+  
+  if (!token) return res.sendStatus(401);
+  
+  jwt.verify(token, process.env.JWT_SECRET || 'your_secret_key', (err, user) => {
+    if (err) return res.sendStatus(403);
     req.user = user;
     next();
   });
 };
 
+// Middleware para verificar rol de administrador
+const isAdmin = (req, res, next) => {
+  if (req.user.role !== 'admin') {
+    return res.sendStatus(403);
+  }
+  next();
+};
+
 // Ruta de prueba
 app.get("/", (req, res) => {
-  res.send("Servidor de FlookyPets funcionando correctamente");
+  res.send("Servidor de veterinaria funcionando correctamente");
 });
 
 // Ruta de login
@@ -54,14 +70,14 @@ app.post("/login", async (req, res) => {
 
   try {
     const [users] = await pool.query("SELECT * FROM usuarios WHERE email = ?", [email]);
-
+    
     if (users.length === 0) {
       return res.status(401).json({ message: "Credenciales incorrectas" });
     }
 
     const user = users[0];
     const isMatch = await bcrypt.compare(password, user.password);
-
+    
     if (!isMatch) {
       return res.status(401).json({ message: "Credenciales incorrectas" });
     }
@@ -69,7 +85,7 @@ app.post("/login", async (req, res) => {
     // Crear token JWT
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role },
-      process.env.ACCESS_TOKEN_SECRET || 'your_secret_key',
+      process.env.JWT_SECRET || 'your_secret_key',
       { expiresIn: '24h' }
     );
 
@@ -84,7 +100,7 @@ app.post("/login", async (req, res) => {
 
   } catch (error) {
     console.error("Error en login:", error);
-    res.status(500).json({ message: "Error en el servidor al iniciar sesión." });
+    res.status(500).json({ message: "Error en el servidor" });
   }
 });
 
@@ -94,14 +110,14 @@ app.post("/register", async (req, res) => {
 
   // Validación básica
   if (!email || !password || !nombre || !telefono) {
-    return res.status(400).json({ message: "Datos incompletos: email, password, nombre y teléfono son obligatorios." });
+    return res.status(400).json({ message: "Datos incompletos" });
   }
 
   try {
     // Verificar si el usuario ya existe
     const [existingUsers] = await pool.query("SELECT * FROM usuarios WHERE email = ?", [email]);
     if (existingUsers.length > 0) {
-      return res.status(409).json({ message: "El email ya está registrado." });
+      return res.status(409).json({ message: "El email ya está registrado" });
     }
 
     // Hash de la contraseña
@@ -109,9 +125,9 @@ app.post("/register", async (req, res) => {
 
     // Insertar nuevo usuario
     const [result] = await pool.query(
-      `INSERT INTO usuarios
-         (email, password, nombre, apellido, telefono, direccion, tipo_documento, numero_documento, fecha_nacimiento, role)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'usuario')`,
+      `INSERT INTO usuarios 
+      (email, password, nombre, apellido, telefono, direccion, tipo_documento, numero_documento, fecha_nacimiento, role) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'usuario')`,
       [email, hashedPassword, nombre, apellido, telefono, direccion, tipo_documento, numero_documento, fecha_nacimiento]
     );
 
@@ -125,172 +141,104 @@ app.post("/register", async (req, res) => {
 
   } catch (error) {
     console.error("Error en registro:", error);
-    res.status(500).json({ message: "Error al registrar usuario." });
+    res.status(500).json({ message: "Error al registrar usuario" });
   }
 });
 
-// Ruta para solicitar/generar token de recuperación de contraseña
+// Ruta para recuperación de contraseña
 app.post("/forgot-password", async (req, res) => {
   const { email } = req.body;
-
-  if (!email) {
-    return res.status(400).json({ message: "El correo electrónico es obligatorio." });
-  }
 
   try {
     const [users] = await pool.query("SELECT * FROM usuarios WHERE email = ?", [email]);
     if (users.length === 0) {
-      // Por seguridad, es mejor no revelar si el email existe o no.
-      // Podrías enviar un mensaje genérico como "Si el correo existe, se ha enviado un código."
-      // Pero para fines de depuración y para que el frontend sepa si continuar,
-      // aquí retornamos 404. En un sistema real, se podría enviar un 200 OK
-      // incluso si el usuario no existe, para evitar enumeración.
-      return res.status(404).json({ message: "Usuario no encontrado." });
+      return res.status(404).json({ message: "Usuario no encontrado" });
     }
 
-    // Generar un token de recuperación numérico de 6 dígitos
+    // Generar token de recuperación (6 dígitos)
     const resetToken = Math.floor(100000 + Math.random() * 900000).toString();
-    const resetTokenExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hora de expiración
+    const resetTokenExpires = new Date(Date.now() + 3600000); // 1 hora de expiración
 
     await pool.query(
       "UPDATE usuarios SET reset_token = ?, reset_token_expires = ? WHERE email = ?",
       [resetToken, resetTokenExpires, email]
     );
 
-    // En producción, aquí enviarías un email real con el token
-    console.log(`Token de recuperación para ${email}: ${resetToken}`); // Solo para depuración
+    // En producción, aquí enviarías un email con el token
+    console.log(`Token de recuperación para ${email}: ${resetToken}`);
 
-    res.json({ message: "Token de recuperación generado y enviado (simulado).", resetToken: resetToken });
+    res.json({ message: "Token de recuperación generado" });
 
   } catch (error) {
     console.error("Error en forgot-password:", error);
-    res.status(500).json({ message: "Error en el servidor al generar el token de recuperación." });
+    res.status(500).json({ message: "Error en el servidor" });
   }
 });
 
-// NUEVA RUTA: Para verificar el token de recuperación antes de permitir el cambio de contraseña
-app.post("/verify-reset-code", async (req, res) => {
-  const { email, code } = req.body;
-
-  if (!email || !code) {
-    return res.status(400).json({ message: "Correo y código de verificación son obligatorios." });
-  }
-
-  try {
-    const [users] = await pool.query(
-      "SELECT * FROM usuarios WHERE email = ? AND reset_token = ?",
-      [email, code]
-    );
-
-    if (users.length === 0) {
-      return res.status(400).json({ message: "Código inválido o correo incorrecto." });
-    }
-
-    const user = users[0];
-    const now = new Date();
-    // Convertir la fecha de la base de datos a un objeto Date para comparar
-    if (new Date(user.reset_token_expires) < now) {
-      // Limpiar el token expirado para evitar reusos
-      await pool.query(
-        "UPDATE usuarios SET reset_token = NULL, reset_token_expires = NULL WHERE email = ?",
-        [email]
-      );
-      return res.status(400).json({ message: "El código de verificación ha expirado. Solicita uno nuevo." });
-    }
-
-    res.json({ message: "Código verificado exitosamente." });
-
-  } catch (error) {
-    console.error("Error en verify-reset-code:", error);
-    res.status(500).json({ message: "Error en el servidor al verificar el código." });
-  }
-});
-
-
-// Ruta para resetear la contraseña
+// Ruta para resetear contraseña
 app.post("/reset-password", async (req, res) => {
   const { email, token, newPassword } = req.body;
 
-  if (!email || !token || !newPassword) {
-    return res.status(400).json({ message: "Correo, token y nueva contraseña son obligatorios." });
-  }
-
   try {
-    // Verificar token válido y no expirado
+    // Verificar token válido
     const [users] = await pool.query(
       "SELECT * FROM usuarios WHERE email = ? AND reset_token = ? AND reset_token_expires > NOW()",
       [email, token]
     );
 
     if (users.length === 0) {
-      return res.status(400).json({ message: "Token inválido o expirado. Por favor, solicita uno nuevo." });
+      return res.status(400).json({ message: "Token inválido o expirado" });
     }
 
     // Hashear nueva contraseña
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-    // Actualizar contraseña y limpiar el token de recuperación
-    // CORRECCIÓN: Añadir 'AND reset_token = ?' a la cláusula WHERE
-    const [result] = await pool.query(
-      "UPDATE usuarios SET password = ?, reset_token = NULL, reset_token_expires = NULL WHERE email = ? AND reset_token = ?",
-      [hashedPassword, email, token] // Asegúrate de pasar el token aquí
+    // Actualizar contraseña y limpiar token
+    await pool.query(
+      "UPDATE usuarios SET password = ?, reset_token = NULL, reset_token_expires = NULL WHERE email = ?",
+      [hashedPassword, email]
     );
 
-    // Verificar si se actualizó alguna fila
-    if (result.affectedRows === 0) {
-      return res.status(500).json({ message: "No se pudo actualizar la contraseña. El usuario o token no coinciden." });
-    }
-
-    res.json({ message: "Contraseña actualizada correctamente." });
+    res.json({ message: "Contraseña actualizada correctamente" });
 
   } catch (error) {
     console.error("Error en reset-password:", error);
-    res.status(500).json({ message: "Error en el servidor al resetear la contraseña." });
+    res.status(500).json({ message: "Error en el servidor" });
   }
 });
 
-// ==============================================
-// RUTAS DE ADMINISTRACIÓN (requieren autenticación)
-// ==============================================
+// ================= RUTAS PROTEGIDAS =================
 
-// Middleware para verificar rol de administrador
-const isAdmin = (req, res, next) => {
-  if (!req.user || req.user.role !== 'admin') {
-    return res.status(403).json({ message: "Acceso prohibido: Solo administradores." });
-  }
-  next();
-};
-
-// Obtener estadísticas para el dashboard
+// Obtener estadísticas del dashboard (requiere autenticación y rol admin)
 app.get("/admin/stats", authenticateToken, isAdmin, async (req, res) => {
   try {
     // Consultas a la base de datos
-    const [[{ citas }]] = await pool.query(
-      `SELECT COUNT(*) as citas FROM citas
-        WHERE MONTH(fecha) = MONTH(CURRENT_DATE())`
+    const [[{citas}]] = await pool.query(
+      `SELECT COUNT(*) as citas FROM citas 
+      WHERE MONTH(fecha) = MONTH(CURRENT_DATE())`
     );
-
-    const [[{ veterinarios }]] = await pool.query(
-      `SELECT COUNT(*) as veterinarios FROM usuarios
-        WHERE role = 'veterinario'`
+    
+    const [[{veterinarios}]] = await pool.query(
+      `SELECT COUNT(*) as veterinarios FROM usuarios 
+      WHERE role = 'veterinario'`
     );
-
-    const [[{ admins }]] = await pool.query(
-      `SELECT COUNT(*) as admins FROM usuarios
-        WHERE role = 'admin'`
+    
+    const [[{admins}]] = await pool.query(
+      `SELECT COUNT(*) as admins FROM usuarios 
+      WHERE role = 'admin'`
     );
-
-    const [[{ mascotas }]] = await pool.query(
+    
+    const [[{mascotas}]] = await pool.query(
       `SELECT COUNT(*) as mascotas FROM mascotas`
     );
-
-    const [[{ citasMesPasado }]] = await pool.query(
-      `SELECT COUNT(*) as citasMesPasado FROM citas
-        WHERE MONTH(fecha) = MONTH(CURRENT_DATE() - INTERVAL 1 MONTH)` // Corregido para mes pasado
+    
+    const [[{citasMesPasado}]] = await pool.query(
+      `SELECT COUNT(*) as citasMesPasado FROM citas 
+      WHERE MONTH(fecha) = MONTH(CURRENT_DATE()) - 1`
     );
-
+    
     // Calcular crecimiento porcentual
-    const growth = citasMesPasado > 0
+    const growth = citasMesPasado > 0 
       ? ((citas - citasMesPasado) / citasMesPasado * 100).toFixed(2)
       : 0;
 
@@ -302,36 +250,36 @@ app.get("/admin/stats", authenticateToken, isAdmin, async (req, res) => {
       monthlyGrowth: growth
     });
   } catch (error) {
-    console.error("Error al obtener estadísticas:", error);
-    res.status(500).json({ message: 'Error al obtener estadísticas.' });
+    console.error(error);
+    res.status(500).json({ message: 'Error al obtener estadísticas' });
   }
 });
 
-// Obtener usuarios con filtro por rol
+// Obtener usuarios con filtro por rol (requiere autenticación y rol admin)
 app.get("/admin/users", authenticateToken, isAdmin, async (req, res) => {
   const { role } = req.query;
-
+  
   try {
-    let query = `SELECT id, email, nombre, apellido, telefono, direccion, role,
-                   created_at FROM usuarios`;
+    let query = `SELECT id, email, nombre, apellido, telefono, direccion, role, 
+                created_at FROM usuarios`;
     const params = [];
-
+    
     if (role && role !== 'all') {
       query += ' WHERE role = ?';
       params.push(role);
     }
-
+    
     query += ' ORDER BY created_at DESC';
-
+    
     const [users] = await pool.query(query, params);
     res.json(users);
   } catch (error) {
-    console.error("Error al obtener usuarios:", error);
-    res.status(500).json({ message: 'Error al obtener usuarios.' });
+    console.error(error);
+    res.status(500).json({ message: 'Error al obtener usuarios' });
   }
 });
 
-// Crear nuevo usuario (admin, veterinario, etc.)
+// Crear nuevo usuario (admin, veterinario, etc.) (requiere autenticación y rol admin)
 app.post("/admin/users", authenticateToken, isAdmin, async (req, res) => {
   const {
     email,
@@ -345,21 +293,21 @@ app.post("/admin/users", authenticateToken, isAdmin, async (req, res) => {
     fecha_nacimiento,
     role
   } = req.body;
-
+  
   try {
     // Validación básica
     if (!email || !password || !nombre || !telefono || !role) {
-      return res.status(400).json({ message: 'Datos incompletos para crear usuario.' });
+      return res.status(400).json({ message: 'Datos incompletos' });
     }
 
     // Verificar si el email ya existe
     const [existingUsers] = await pool.query(
-      'SELECT * FROM usuarios WHERE email = ?',
+      'SELECT * FROM usuarios WHERE email = ?', 
       [email]
     );
 
     if (existingUsers.length > 0) {
-      return res.status(409).json({ message: 'El email ya está registrado.' });
+      return res.status(409).json({ message: 'El email ya está registrado' });
     }
 
     // Hashear la contraseña
@@ -367,9 +315,9 @@ app.post("/admin/users", authenticateToken, isAdmin, async (req, res) => {
 
     // Insertar nuevo usuario
     const [result] = await pool.query(
-      `INSERT INTO usuarios
-         (email, password, nombre, apellido, telefono, direccion, tipo_documento, numero_documento, fecha_nacimiento, role)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO usuarios 
+      (email, password, nombre, apellido, telefono, direccion, tipo_documento, numero_documento, fecha_nacimiento, role) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         email,
         hashedPassword,
@@ -393,16 +341,16 @@ app.post("/admin/users", authenticateToken, isAdmin, async (req, res) => {
     });
 
   } catch (error) {
-    console.error("Error al crear usuario:", error);
-    res.status(500).json({ message: 'Error al crear usuario.' });
+    console.error(error);
+    res.status(500).json({ message: 'Error al crear usuario' });
   }
 });
 
-// Actualizar usuario
+// Actualizar usuario (requiere autenticación y rol admin)
 app.put("/admin/users/:id", authenticateToken, isAdmin, async (req, res) => {
   const { id } = req.params;
   const {
-    email, // Aunque no se actualiza el email, puede venir en el body
+    email,
     password,
     nombre,
     apellido,
@@ -413,12 +361,12 @@ app.put("/admin/users/:id", authenticateToken, isAdmin, async (req, res) => {
     fecha_nacimiento,
     role
   } = req.body;
-
+  
   try {
-    let query = `UPDATE usuarios SET
-        nombre = ?, apellido = ?, telefono = ?, direccion = ?,
-        tipo_documento = ?, numero_documento = ?, fecha_nacimiento = ?, role = ?`;
-
+    let query = `UPDATE usuarios SET 
+      nombre = ?, apellido = ?, telefono = ?, direccion = ?, 
+      tipo_documento = ?, numero_documento = ?, fecha_nacimiento = ?, role = ?`;
+    
     const params = [
       nombre,
       apellido,
@@ -429,72 +377,126 @@ app.put("/admin/users/:id", authenticateToken, isAdmin, async (req, res) => {
       fecha_nacimiento,
       role
     ];
-
+    
     // Si se proporciona una nueva contraseña, actualizarla
     if (password) {
       const hashedPassword = await bcrypt.hash(password, 10);
       query += ', password = ?';
       params.push(hashedPassword);
     }
-
+    
     query += ' WHERE id = ?';
     params.push(id);
-
-    const [result] = await pool.query(query, params);
-
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ message: "Usuario no encontrado para actualizar." });
-    }
-
-    res.json({ message: 'Usuario actualizado correctamente.' });
+    
+    await pool.query(query, params);
+    
+    res.json({ message: 'Usuario actualizado correctamente' });
   } catch (error) {
-    console.error("Error al actualizar usuario:", error);
-    res.status(500).json({ message: 'Error al actualizar usuario.' });
+    console.error(error);
+    res.status(500).json({ message: 'Error al actualizar usuario' });
   }
 });
 
-// Eliminar usuario
+// Eliminar usuario (requiere autenticación y rol admin)
 app.delete("/admin/users/:id", authenticateToken, isAdmin, async (req, res) => {
   const { id } = req.params;
-
+  
   try {
-    const [result] = await pool.query('DELETE FROM usuarios WHERE id = ?', [id]);
-
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ message: "Usuario no encontrado para eliminar." });
-    }
-    res.json({ message: 'Usuario eliminado correctamente.' });
+    await pool.query('DELETE FROM usuarios WHERE id = ?', [id]);
+    res.json({ message: 'Usuario eliminado correctamente' });
   } catch (error) {
-    console.error("Error al eliminar usuario:", error);
-    res.status(500).json({ message: 'Error al eliminar usuario.' });
+    console.error(error);
+    res.status(500).json({ message: 'Error al eliminar usuario' });
   }
 });
 
-// CRUD para servicios
+// Obtener todos los clientes (requiere autenticación)
+app.get("/api/clientes", authenticateToken, async (req, res) => {
+  try {
+    const [clientes] = await pool.query("SELECT * FROM clientes");
+    res.json(clientes);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error al obtener clientes' });
+  }
+});
+
+// Obtener citas del día (requiere autenticación)
+app.get("/api/citas/hoy", authenticateToken, async (req, res) => {
+  const hoy = new Date().toISOString().split('T')[0];
+
+  try {
+    const [citas] = await pool.query(`
+      SELECT c.id, c.fecha, cl.nombre AS propietario, 
+             c.nombre_mascota AS mascota, cl.direccion AS direccion, 
+             c.servicio, c.tipo_mascota, c.estado
+      FROM citas c
+      JOIN clientes cl ON c.id_cliente = cl.id_cliente
+      WHERE DATE(c.fecha) = ?
+      ORDER BY c.fecha ASC
+    `, [hoy]);
+    
+    res.json(citas);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error al obtener citas' });
+  }
+});
+
+// Obtener citas de la semana para gráficos (requiere autenticación)
+app.get('/api/citas/semana', authenticateToken, async (req, res) => {
+  try {
+    const [results] = await pool.query(`
+      SELECT 
+        DAYNAME(fecha) as dia, 
+        COUNT(*) as citas
+      FROM citas
+      WHERE fecha BETWEEN DATE_SUB(NOW(), INTERVAL 6 DAY) AND NOW()
+      GROUP BY DAYNAME(fecha)
+      ORDER BY fecha
+    `);
+    
+    // Formatear para recharts
+    const daysOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    const formattedData = daysOrder.map(day => {
+      const found = results.find(r => r.dia === day);
+      return {
+        dia: day.substring(0, 3), // Lun, Mar, etc.
+        citas: found ? found.citas : 0
+      };
+    });
+    
+    res.json(formattedData);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error al obtener citas semanales' });
+  }
+});
+
+// CRUD para servicios (requiere autenticación y rol admin)
 app.get("/admin/services", authenticateToken, isAdmin, async (req, res) => {
   try {
     const [services] = await pool.query('SELECT * FROM servicios ORDER BY nombre');
     res.json(services);
   } catch (error) {
-    console.error("Error al obtener servicios:", error);
-    res.status(500).json({ message: 'Error al obtener servicios.' });
+    console.error(error);
+    res.status(500).json({ message: 'Error al obtener servicios' });
   }
 });
 
 app.post("/admin/services", authenticateToken, isAdmin, async (req, res) => {
   const { nombre, descripcion, precio } = req.body;
-
+  
   try {
-    // Validación básica
     if (!nombre || !descripcion || !precio) {
-      return res.status(400).json({ message: 'Datos incompletos para crear servicio.' });
+      return res.status(400).json({ message: 'Datos incompletos' });
     }
 
     const [result] = await pool.query(
       'INSERT INTO servicios (nombre, descripcion, precio) VALUES (?, ?, ?)',
       [nombre, descripcion, precio]
     );
-
+    
     res.status(201).json({
       id_servicio: result.insertId,
       nombre,
@@ -502,86 +504,71 @@ app.post("/admin/services", authenticateToken, isAdmin, async (req, res) => {
       precio
     });
   } catch (error) {
-    console.error("Error al crear servicio:", error);
-    res.status(500).json({ message: 'Error al crear servicio.' });
+    console.error(error);
+    res.status(500).json({ message: 'Error al crear servicio' });
   }
 });
 
 app.put("/admin/services/:id", authenticateToken, isAdmin, async (req, res) => {
   const { id } = req.params;
   const { nombre, descripcion, precio } = req.body;
-
+  
   try {
-    const [result] = await pool.query(
+    await pool.query(
       'UPDATE servicios SET nombre = ?, descripcion = ?, precio = ? WHERE id_servicio = ?',
       [nombre, descripcion, precio, id]
     );
-
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ message: "Servicio no encontrado para actualizar." });
-    }
-
-    res.json({
+    
+    res.json({ 
       id_servicio: id,
       nombre,
       descripcion,
       precio
     });
   } catch (error) {
-    console.error("Error al actualizar servicio:", error);
-    res.status(500).json({ message: 'Error al actualizar servicio.' });
+    console.error(error);
+    res.status(500).json({ message: 'Error al actualizar servicio' });
   }
 });
 
 app.delete("/admin/services/:id", authenticateToken, isAdmin, async (req, res) => {
   const { id } = req.params;
-
+  
   try {
-    const [result] = await pool.query('DELETE FROM servicios WHERE id_servicio = ?', [id]);
-
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ message: "Servicio no encontrado para eliminar." });
-    }
-    res.json({ message: 'Servicio eliminado correctamente.' });
+    await pool.query('DELETE FROM servicios WHERE id_servicio = ?', [id]);
+    res.json({ message: 'Servicio eliminado correctamente' });
   } catch (error) {
-    console.error("Error al eliminar servicio:", error);
-    res.status(500).json({ message: 'Error al eliminar servicio.' });
+    console.error(error);
+    res.status(500).json({ message: 'Error al eliminar servicio' });
   }
 });
 
-// Ruta para programar reuniones con veterinarios
+// Ruta para programar reuniones con veterinarios (requiere autenticación y rol admin)
 app.post("/admin/meetings", authenticateToken, isAdmin, async (req, res) => {
   const { title, date, time, description, participants } = req.body;
-
+  
   try {
-    // Validación básica
     if (!title || !date || !time || !participants || participants.length === 0) {
-      return res.status(400).json({ message: 'Datos incompletos para programar reunión.' });
+      return res.status(400).json({ message: 'Datos incompletos' });
     }
 
-    const meetingDateTime = new Date(`${date}T${time}:00`);
-
-    // En un sistema real, aquí guardarías la reunión en una tabla específica
-    // Por ejemplo: await pool.query('INSERT INTO reuniones (title, datetime, description) VALUES (?, ?, ?)', [title, meetingDateTime, description]);
-    // Y luego una tabla de relación para los participantes:
-    // await pool.query('INSERT INTO reunion_participantes (reunion_id, user_id) VALUES (?, ?)', [reunionId, participantId]);
-
-    // Obtener información de los veterinarios participantes
+    const meetingDateTime = new Date('${date}T${time}:00');
+    
     const [vets] = await pool.query(
       'SELECT id, nombre, apellido, email FROM usuarios WHERE id IN (?) AND role = "veterinario"',
       [participants]
     );
-
+    
     // En producción, aquí enviarías notificaciones/emails a los veterinarios
-    console.log('Reunión programada (simulada):', {
+    console.log('Reunión programada:', {
       title,
       dateTime: meetingDateTime,
       description,
       participants: vets
     });
-
-    res.json({
-      message: 'Reunión programada correctamente.',
+    
+    res.json({ 
+      message: 'Reunión programada correctamente',
       details: {
         title,
         dateTime: meetingDateTime,
@@ -590,76 +577,11 @@ app.post("/admin/meetings", authenticateToken, isAdmin, async (req, res) => {
       }
     });
   } catch (error) {
-    console.error("Error al programar reunión:", error);
-    res.status(500).json({ message: 'Error al programar reunión.' });
+    console.error(error);
+    res.status(500).json({ message: 'Error al programar reunión' });
   }
 });
 
-// Obtener citas recientes para el dashboard
-app.get("/admin/recent-appointments", authenticateToken, isAdmin, async (req, res) => {
-  try {
-    const [appointments] = await pool.query(`
-      SELECT c.id_cita, c.fecha, c.estado,
-             s.nombre as servicio,
-             cl.nombre as cliente,
-             u.nombre as veterinario
-      FROM citas c
-      LEFT JOIN servicios s ON c.id_servicio = s.id_servicio
-      LEFT JOIN clientes cl ON c.id_cliente = cl.id_cliente
-      LEFT JOIN usuarios u ON c.id_veterinario = u.id
-      ORDER BY c.fecha DESC
-      LIMIT 10
-    `);
-
-    res.json(appointments);
-  } catch (error) {
-    console.error("Error al obtener citas recientes:", error);
-    res.status(500).json({ message: 'Error al obtener citas recientes.' });
-  }
-});
-
-// Ruta para obtener todos los propietarios (usuarios con rol 'usuario')
-app.get('/api/propietarios', async (req, res) => {
-  try {
-    const [results] = await pool.query(
-      'SELECT id, nombre, apellido, email, telefono, direccion, tipo_documento, numero_documento FROM usuarios WHERE role = "usuario"'
-    );
-    res.json(results);
-  } catch (err) {
-    console.error('Error al obtener propietarios:', err);
-    res.status(500).json({ error: 'Error al obtener propietarios.' });
-  }
-});
-
-// Deshabilitar propietario
-// NOTA: Tu esquema de DB no tiene una columna 'active'.
-// Si quieres deshabilitar usuarios, necesitarás añadir 'active BOOLEAN DEFAULT TRUE' a tu tabla 'usuarios'.
-// Por ahora, esta ruta asumirá que 'active' existe o no hará nada si no.
-app.put('/api/propietarios/:id/disable', async (req, res) => {
-  try {
-    // Verifica si la columna 'active' existe en tu tabla 'usuarios'.
-    // Si no existe, esta consulta fallará.
-    // Deberías añadirla con: ALTER TABLE usuarios ADD COLUMN active BOOLEAN DEFAULT TRUE;
-    const [result] = await pool.query(
-      'UPDATE usuarios SET active = 0 WHERE id = ?',
-      [req.params.id]
-    );
-
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ error: 'Propietario no encontrado o ya deshabilitado.' });
-    }
-
-    res.json({ success: true, message: 'Propietario deshabilitado correctamente.' });
-  } catch (err) {
-    console.error('Error al deshabilitar propietario:', err);
-    res.status(500).json({
-      error: 'Error al deshabilitar propietario.',
-      details: err.message
-    });
-  }
-});
-
-// Iniciar servidor
 app.listen(PORT, () => {
-  console.log(`Servidor de FlookyPets corriendo en http://localhost:${PORT}`);
+  console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
