@@ -1,4 +1,3 @@
-
 //Modulos para que funcione el proyecto
 npm i react-scripts 
 npm install recharts
