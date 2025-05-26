@@ -1,102 +1,134 @@
 const express = require("express");
 const cors = require("cors");
-const mysql = require("mysql2");
+const mysql = require("mysql2/promise"); // Usamos la versión promise-based
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+require('dotenv').config();
 
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  credentials: true
+}));
 app.use(express.json());
 
-// Configuración de la base de datos
-const db = mysql.createConnection({
-  host: "127.0.0.1",
-  user: "root",
-  password: "",
-  database: "veterinaria",
+// Configuración del pool de conexiones
+const pool = mysql.createPool({
+  host: process.env.DB_HOST || "127.0.0.1",
+  user: process.env.DB_USER || "root",
+  password: process.env.DB_PASSWORD || "",
+  database: process.env.DB_NAME || "veterinaria",
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
 });
 
-// Conexión
-db.connect((err) => {
-  if (err) {
-    console.error("Error de conexión a la base de datos:", err.stack);
-    return;
+// Verificar conexión a la base de datos
+pool.getConnection()
+  .then(conn => {
+    console.log('Conectado a la base de datos MySQL');
+    conn.release();
+  })
+  .catch(err => {
+    console.error('Error de conexión a la base de datos:', err);
+    process.exit(1);
+  });
+
+// Middleware de autenticación JWT
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+  
+  if (!token) return res.sendStatus(401);
+  
+  jwt.verify(token, process.env.JWT_SECRET || 'your_secret_key', (err, user) => {
+    if (err) return res.sendStatus(403);
+    req.user = user;
+    next();
+  });
+};
+
+// Middleware para verificar rol de administrador
+const isAdmin = (req, res, next) => {
+  if (req.user.role !== 'admin') {
+    return res.sendStatus(403);
   }
-  console.log("Conectado a la base de datos con ID " + db.threadId);
-});
+  next();
+};
 
 // Ruta de prueba
 app.get("/", (req, res) => {
-  res.send("Servidor funcionando correctamente con base de datos.");
+  res.send("Servidor de veterinaria funcionando correctamente");
 });
 
-// Ruta: Obtener usuarios
-app.get("/api/users", (req, res) => {
-  db.query("SELECT * FROM users", (err, results) => {
-    if (err) {
-      console.error("Error obteniendo usuarios:", err);
-      return res.status(500).json({ error: "Error obteniendo datos" });
+// Ruta de login
+app.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const [users] = await pool.query("SELECT * FROM usuarios WHERE email = ?", [email]);
+    
+    if (users.length === 0) {
+      return res.status(401).json({ message: "Credenciales incorrectas" });
     }
-    res.json(results);
-  });
+
+    const user = users[0];
+    const isMatch = await bcrypt.compare(password, user.password);
+    
+    if (!isMatch) {
+      return res.status(401).json({ message: "Credenciales incorrectas" });
+    }
+
+    // Crear token JWT
+    const token = jwt.sign(
+      { id: user.id, email: user.email, role: user.role },
+      process.env.JWT_SECRET || 'your_secret_key',
+      { expiresIn: '24h' }
+    );
+
+    res.json({
+      id: user.id,
+      email: user.email,
+      nombre: user.nombre,
+      apellido: user.apellido,
+      role: user.role,
+      token
+    });
+
+  } catch (error) {
+    console.error("Error en login:", error);
+    res.status(500).json({ message: "Error en el servidor" });
+  }
 });
 
-// Ruta: Registro de usuario
-// Ruta: Registro de usuario (versión corregida)
+// Ruta de registro
 app.post("/register", async (req, res) => {
-  const { 
-    nombre, 
-    apellido, 
-    email, 
-    password, 
-    telefono, 
-    direccion, 
-    tipoDocumento, 
-    numeroDocumento, 
-    fechaNacimiento 
-  } = req.body;
+  const { nombre, apellido, email, password, telefono, direccion, tipo_documento, numero_documento, fecha_nacimiento } = req.body;
 
-  console.log("Datos recibidos en backend:", req.body);
-
-  // Campos obligatorios actualizados
-  if (!email || !password || !nombre || !apellido || !telefono) {
-    return res.status(400).json({ 
-      message: "Email, contraseña, nombre, apellido y teléfono son obligatorios" 
-    });
+  // Validación básica
+  if (!email || !password || !nombre || !telefono) {
+    return res.status(400).json({ message: "Datos incompletos" });
   }
 
   try {
-    // Verificar si el correo ya existe
-    const [existingUser] = await db.promise().query(
-      "SELECT * FROM usuarios WHERE email = ?", 
-      [email]
-    );
-
-    if (existingUser.length > 0) {
-      return res.status(409).json({ message: "El correo ya está registrado" });
+    // Verificar si el usuario ya existe
+    const [existingUsers] = await pool.query("SELECT * FROM usuarios WHERE email = ?", [email]);
+    if (existingUsers.length > 0) {
+      return res.status(409).json({ message: "El email ya está registrado" });
     }
 
-    // Hashear la contraseña
+    // Hash de la contraseña
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Insertar nuevo usuario con todos los campos
-    const [result] = await db.promise().query(
+    // Insertar nuevo usuario
+    const [result] = await pool.query(
       `INSERT INTO usuarios 
-      (email, password, nombre, apellido, telefono, direccion, tipo_documento, numero_documento, fecha_nacimiento) 
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        email, 
-        hashedPassword, 
-        nombre, 
-        apellido, 
-        telefono, 
-        direccion || null, 
-        tipoDocumento || null, 
-        numeroDocumento || null, 
-        fechaNacimiento || null
-      ]
+      (email, password, nombre, apellido, telefono, direccion, tipo_documento, numero_documento, fecha_nacimiento, role) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'usuario')`,
+      [email, hashedPassword, nombre, apellido, telefono, direccion, tipo_documento, numero_documento, fecha_nacimiento]
     );
 
     res.status(201).json({
@@ -104,268 +136,199 @@ app.post("/register", async (req, res) => {
       email,
       nombre,
       apellido,
-      telefono
+      role: 'usuario'
     });
 
-  } catch (err) {
-    console.error("Error en el registro:", err);
-    res.status(500).json({ 
-      message: "Error al registrar el usuario", 
-      error: err.message 
-    });
+  } catch (error) {
+    console.error("Error en registro:", error);
+    res.status(500).json({ message: "Error al registrar usuario" });
   }
 });
 
-// Ruta: Actualizar estado del usuario
-app.put("/api/users/:id", (req, res) => {
-  const { id } = req.params;
-  db.query("UPDATE users SET active = !active WHERE id = ?", [id], (err) => {
-    if (err) {
-      console.error("Error actualizando usuario:", err);
-      return res.status(500).json({ error: "Error actualizando usuario" });
-    }
-    res.json({ success: true });
-  });
-});
-
-// Ruta: Login de usuarios
-app.post("/login", (req, res) => {
-  const { email, password } = req.body;
-
-  db.query("SELECT * FROM usuarios WHERE email = ?", [email], (err, results) => {
-    if (err) {
-      return res.status(500).json({ message: "Error al verificar el usuario", error: err });
-    }
-
-    if (results.length === 0) {
-      return res.status(401).json({ message: "Correo o contraseña incorrectos" });
-    }
-
-    const user = results[0];
-
-    // Verificación con bcrypt
-    bcrypt.compare(password, user.password, (err, isMatch) => {
-      if (err) {
-        return res.status(500).json({ message: "Error en la comparación de contraseñas", error: err });
-      }
-
-      if (!isMatch) {
-        return res.status(401).json({ message: "Correo o contraseña incorrectos" });
-      }
-
-      // Login exitoso
-      res.json({
-        id: user.id,
-        email: user.email,
-        role: user.role,
-        name: user.name,
-      });
-    });
-  });
-});
-
-// Ruta para solicitar restablecimiento de contraseña
-app.post('/forgot-password', async (req, res) => {
+// Ruta para recuperación de contraseña
+app.post("/forgot-password", async (req, res) => {
   const { email } = req.body;
 
-  if (!email) {
-    return res.status(400).json({ 
-      success: false,
-      message: 'El correo electrónico es requerido' 
-    });
+  try {
+    const [users] = await pool.query("SELECT * FROM usuarios WHERE email = ?", [email]);
+    if (users.length === 0) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+
+    // Generar token de recuperación (6 dígitos)
+    const resetToken = Math.floor(100000 + Math.random() * 900000).toString();
+    const resetTokenExpires = new Date(Date.now() + 3600000); // 1 hora de expiración
+
+    await pool.query(
+      "UPDATE usuarios SET reset_token = ?, reset_token_expires = ? WHERE email = ?",
+      [resetToken, resetTokenExpires, email]
+    );
+
+    // En producción, aquí enviarías un email con el token
+    console.log(`Token de recuperación para ${email}: ${resetToken}`);
+
+    res.json({ message: "Token de recuperación generado" });
+
+  } catch (error) {
+    console.error("Error en forgot-password:", error);
+    res.status(500).json({ message: "Error en el servidor" });
   }
+});
+
+// Ruta para resetear contraseña
+app.post("/reset-password", async (req, res) => {
+  const { email, token, newPassword } = req.body;
 
   try {
-    // Verificar si el usuario existe
-    const [user] = await db.promise().query(
+    // Verificar token válido
+    const [users] = await pool.query(
+      "SELECT * FROM usuarios WHERE email = ? AND reset_token = ? AND reset_token_expires > NOW()",
+      [email, token]
+    );
+
+    if (users.length === 0) {
+      return res.status(400).json({ message: "Token inválido o expirado" });
+    }
+
+    // Hashear nueva contraseña
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Actualizar contraseña y limpiar token
+    await pool.query(
+      "UPDATE usuarios SET password = ?, reset_token = NULL, reset_token_expires = NULL WHERE email = ?",
+      [hashedPassword, email]
+    );
+
+    res.json({ message: "Contraseña actualizada correctamente" });
+
+  } catch (error) {
+    console.error("Error en reset-password:", error);
+    res.status(500).json({ message: "Error en el servidor" });
+  }
+});
+
+// ================= RUTAS PROTEGIDAS =================
+
+// Obtener estadísticas del dashboard (requiere autenticación y rol admin)
+app.get("/admin/stats", authenticateToken, isAdmin, async (req, res) => {
+  try {
+    // Consultas a la base de datos
+    const [[{citas}]] = await pool.query(
+      `SELECT COUNT(*) as citas FROM citas 
+      WHERE MONTH(fecha) = MONTH(CURRENT_DATE())`
+    );
+    
+    const [[{veterinarios}]] = await pool.query(
+      `SELECT COUNT(*) as veterinarios FROM usuarios 
+      WHERE role = 'veterinario'`
+    );
+    
+    const [[{admins}]] = await pool.query(
+      `SELECT COUNT(*) as admins FROM usuarios 
+      WHERE role = 'admin'`
+    );
+    
+    const [[{mascotas}]] = await pool.query(
+      `SELECT COUNT(*) as mascotas FROM mascotas`
+    );
+    
+    const [[{citasMesPasado}]] = await pool.query(
+      `SELECT COUNT(*) as citasMesPasado FROM citas 
+      WHERE MONTH(fecha) = MONTH(CURRENT_DATE()) - 1`
+    );
+    
+    // Calcular crecimiento porcentual
+    const growth = citasMesPasado > 0 
+      ? ((citas - citasMesPasado) / citasMesPasado * 100).toFixed(2)
+      : 0;
+
+    res.json({
+      appointments: citas,
+      vets: veterinarios,
+      admins: admins,
+      pets: mascotas,
+      monthlyGrowth: growth
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error al obtener estadísticas' });
+  }
+});
+
+// Obtener usuarios con filtro por rol (requiere autenticación y rol admin)
+app.get("/admin/users", authenticateToken, isAdmin, async (req, res) => {
+  const { role } = req.query;
+  
+  try {
+    let query = `SELECT id, email, nombre, apellido, telefono, direccion, role, 
+                created_at FROM usuarios`;
+    const params = [];
+    
+    if (role && role !== 'all') {
+      query += ' WHERE role = ?';
+      params.push(role);
+    }
+    
+    query += ' ORDER BY created_at DESC';
+    
+    const [users] = await pool.query(query, params);
+    res.json(users);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error al obtener usuarios' });
+  }
+});
+
+// Crear nuevo usuario (admin, veterinario, etc.) (requiere autenticación y rol admin)
+app.post("/admin/users", authenticateToken, isAdmin, async (req, res) => {
+  const {
+    email,
+    password,
+    nombre,
+    apellido,
+    telefono,
+    direccion,
+    tipo_documento,
+    numero_documento,
+    fecha_nacimiento,
+    role
+  } = req.body;
+  
+  try {
+    // Validación básica
+    if (!email || !password || !nombre || !telefono || !role) {
+      return res.status(400).json({ message: 'Datos incompletos' });
+    }
+
+    // Verificar si el email ya existe
+    const [existingUsers] = await pool.query(
       'SELECT * FROM usuarios WHERE email = ?', 
       [email]
     );
 
-    if (user.length === 0) {
-      return res.status(404).json({ 
-        success: false,
-        message: 'No existe un usuario con este correo' 
-      });
-    }
-    
-
-    // Generar token de restablecimiento (6 caracteres)
-    const resetToken = Math.random().toString(36).substring(2, 8).toUpperCase();
-    const expiresAt = new Date(Date.now() + 3600000); // 1 hora de expiración
-
-    // Guardar el token en la base de datos
-    await db.promise().query(
-      'UPDATE usuarios SET reset_token = ?, reset_token_expires = ? WHERE email = ?',
-      [resetToken, expiresAt, email]
-    );
-
-    res.json({ 
-      success: true,
-      resetToken, // En desarrollo podemos devolverlo para pruebas
-      message: 'Se ha enviado un correo con instrucciones' 
-    });
-
-  } catch (error) {
-    console.error('Error en forgot-password:', error);
-    res.status(500).json({ 
-      success: false,
-      message: 'Error al procesar la solicitud' 
-    });
-  }
-});
- 
-// Ruta para actualizar la contraseña
-// Ruta para verificar el código de restablecimiento
-app.post('/verify-reset-code', async (req, res) => {
-  const { email, code } = req.body;
-
-  if (!email || !code) {
-    return res.status(400).json({ 
-      success: false,
-      message: 'Email y código son requeridos' 
-    });
-  }
-
-  try {
-    // Verificar si el código coincide y no ha expirado
-    const [user] = await db.promise().query(
-      'SELECT * FROM usuarios WHERE email = ? AND reset_token = ? AND reset_token_expires > NOW()',
-      [email, code]
-    );
-
-    if (user.length === 0) {
-      return res.status(400).json({ 
-        success: false,
-        message: 'Código inválido o expirado' 
-      });
-    }
-
-    res.json({ 
-      success: true,
-      message: 'Código verificado correctamente' 
-    });
-
-  } catch (error) {
-    console.error('Error en verify-reset-code:', error);
-    res.status(500).json({ 
-      success: false,
-      message: 'Error al verificar el código' 
-    });
-  }
-});
-// En point de olvide contraseña 
-// Ruta: Restablecer la contraseña
-app.post('/reset-password', async (req, res) => {
-  const { email, token, newPassword } = req.body;
-
-  if (!email || !token || !newPassword) {
-    return res.status(400).json({ 
-      success: false,
-      message: 'Email, token y nueva contraseña son requeridos' 
-    });
-  }
-
-  try {
-    // Buscar usuario con el token válido y no expirado
-    const [user] = await db.promise().query(
-      'SELECT * FROM usuarios WHERE email = ? AND reset_token = ? AND reset_token_expires > NOW()',
-      [email, token]
-    );
-
-    if (user.length === 0) {
-      return res.status(400).json({ 
-        success: false,
-        message: 'Token inválido o expirado' 
-      });
-    }
-
-    // Hashear la nueva contraseña
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-    // Actualizar la contraseña y limpiar el token
-    await db.promise().query(
-      'UPDATE usuarios SET password = ?, reset_token = NULL, reset_token_expires = NULL WHERE email = ?',
-      [hashedPassword, email]
-    );
-
-    res.json({ 
-      success: true,
-      message: 'Contraseña actualizada correctamente' 
-    });
-
-  } catch (error) {
-    console.error('Error en reset-password:', error);
-    res.status(500).json({ 
-      success: false,
-      message: 'Error al cambiar la contraseña' 
-    });
-  }
-});
-
-// Ruta: Obtener todos los clientes
-app.get("/clientes", (req, res) => {
-  db.query("SELECT * FROM clientes", (err, results) => {
-    if (err) {
-      return res.status(500).json({ message: "Error al obtener los clientes", error: err });
-    }
-    res.json(results);
-  });
-});
-
-// Ruta: Registrar nuevo cliente
-app.post("/register", async (req, res) => {
-  // Asegúrate de recibir todos los campos necesarios
-  const { nombre, apellido, email, password, telefono, direccion, tipoDocumento, numeroDocumento, fechaNacimiento } = req.body;
-
-  console.log("Datos recibidos:", req.body); // Para depuración
-
-  // Validación actualizada con todos los campos obligatorios
-  const camposObligatorios = [
-    { field: 'nombre', value: nombre, name: 'Nombre' },
-    { field: 'apellido', value: apellido, name: 'Apellido' },
-    { field: 'email', value: email, name: 'Email' },
-    { field: 'password', value: password, name: 'Contraseña' },
-    { field: 'telefono', value: telefono, name: 'Teléfono' }
-  ];
-
-  const camposFaltantes = camposObligatorios.filter(campo => !campo.value);
-  
-  if (camposFaltantes.length > 0) {
-    const mensajeError = `Faltan campos obligatorios: ${camposFaltantes.map(c => c.name).join(', ')}`;
-    console.error("Error de validación:", mensajeError);
-    return res.status(400).json({ message: mensajeError });
-  }
-
-  try {
-    // Verificar si el correo ya existe
-    const [existingUser] = await db.promise().query(
-      "SELECT * FROM clientes WHERE email = ?", 
-      [email]
-    );
-
-    if (existingUser.length > 0) {
-      return res.status(409).json({ message: "El correo ya está registrado" });
+    if (existingUsers.length > 0) {
+      return res.status(409).json({ message: 'El email ya está registrado' });
     }
 
     // Hashear la contraseña
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Insertar nuevo cliente con todos los campos
-    const [result] = await db.promise().query(
-      `INSERT INTO clientes 
-      (email, password, nombre, apellido, telefono, direccion, tipo_documento, numero_documento, fecha_nacimiento) 
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    // Insertar nuevo usuario
+    const [result] = await pool.query(
+      `INSERT INTO usuarios 
+      (email, password, nombre, apellido, telefono, direccion, tipo_documento, numero_documento, fecha_nacimiento, role) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
-        email, 
-        hashedPassword, 
-        nombre, 
-        apellido, 
-        telefono, 
-        direccion || null, 
-        tipoDocumento || null, 
-        numeroDocumento || null, 
-        fechaNacimiento || null
+        email,
+        hashedPassword,
+        nombre,
+        apellido,
+        telefono,
+        direccion,
+        tipo_documento,
+        numero_documento,
+        fecha_nacimiento,
+        role
       ]
     );
 
@@ -374,86 +337,116 @@ app.post("/register", async (req, res) => {
       email,
       nombre,
       apellido,
-      telefono
+      role
     });
 
-  } catch (err) {
-    console.error("Error en el registro:", err);
-    res.status(500).json({ 
-      message: "Error al registrar el cliente", 
-      error: err.message 
-    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error al crear usuario' });
   }
 });
 
-// Ruta: Obtener citas del día
-app.get("/api/citas/hoy", (req, res) => {
+// Actualizar usuario (requiere autenticación y rol admin)
+app.put("/admin/users/:id", authenticateToken, isAdmin, async (req, res) => {
+  const { id } = req.params;
+  const {
+    email,
+    password,
+    nombre,
+    apellido,
+    telefono,
+    direccion,
+    tipo_documento,
+    numero_documento,
+    fecha_nacimiento,
+    role
+  } = req.body;
+  
+  try {
+    let query = `UPDATE usuarios SET 
+      nombre = ?, apellido = ?, telefono = ?, direccion = ?, 
+      tipo_documento = ?, numero_documento = ?, fecha_nacimiento = ?, role = ?`;
+    
+    const params = [
+      nombre,
+      apellido,
+      telefono,
+      direccion,
+      tipo_documento,
+      numero_documento,
+      fecha_nacimiento,
+      role
+    ];
+    
+    // Si se proporciona una nueva contraseña, actualizarla
+    if (password) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      query += ', password = ?';
+      params.push(hashedPassword);
+    }
+    
+    query += ' WHERE id = ?';
+    params.push(id);
+    
+    await pool.query(query, params);
+    
+    res.json({ message: 'Usuario actualizado correctamente' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error al actualizar usuario' });
+  }
+});
+
+// Eliminar usuario (requiere autenticación y rol admin)
+app.delete("/admin/users/:id", authenticateToken, isAdmin, async (req, res) => {
+  const { id } = req.params;
+  
+  try {
+    await pool.query('DELETE FROM usuarios WHERE id = ?', [id]);
+    res.json({ message: 'Usuario eliminado correctamente' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error al eliminar usuario' });
+  }
+});
+
+// Obtener todos los clientes (requiere autenticación)
+app.get("/api/clientes", authenticateToken, async (req, res) => {
+  try {
+    const [clientes] = await pool.query("SELECT * FROM clientes");
+    res.json(clientes);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error al obtener clientes' });
+  }
+});
+
+// Obtener citas del día (requiere autenticación)
+app.get("/api/citas/hoy", authenticateToken, async (req, res) => {
   const hoy = new Date().toISOString().split('T')[0];
 
-  db.query(`
-    SELECT c.id, c.fecha, cl.nombre AS propietario, 
-           c.nombre_mascota AS mascota, cl.direccion AS direccion, 
-           c.servicio, c.tipo_mascota, c.estado
-    FROM citas c
-    JOIN clientes cl ON c.id_cliente = cl.id_cliente
-    WHERE DATE(c.fecha) = ?
-    ORDER BY c.fecha ASC
-  `, [hoy], (err, results) => {
-    if (err) {
-      console.error("Error obteniendo citas:", err);
-      return res.status(500).json({ error: "Error al obtener citas" });
-    }
-    res.json(results);
-  });
-});
-
-
-// Iniciar servidor
-app.listen(PORT, () => {
-  console.log(`Servidor corriendo en http://localhost:${PORT}`);
-});
-// Obtener estadísticas
-app.get('/api/stats', async (req, res) => {
   try {
-    // Veterinarios
-    const [vets] = await db.promise().query(
-      "SELECT COUNT(*) as count FROM usuarios WHERE role = 'veterinario'"
-    );
+    const [citas] = await pool.query(`
+      SELECT c.id, c.fecha, cl.nombre AS propietario, 
+             c.nombre_mascota AS mascota, cl.direccion AS direccion, 
+             c.servicio, c.tipo_mascota, c.estado
+      FROM citas c
+      JOIN clientes cl ON c.id_cliente = cl.id_cliente
+      WHERE DATE(c.fecha) = ?
+      ORDER BY c.fecha ASC
+    `, [hoy]);
     
-    // Clientes
-    const [clients] = await db.promise().query(
-      "SELECT COUNT(*) as count FROM clientes"
-    );
-    
-    // Mascotas (asumiendo que hay una tabla mascotas)
-    const [pets] = await db.promise().query(
-      "SELECT COUNT(*) as count FROM mascotas"
-    );
-    
-    // Citas hoy
-    const today = new Date().toISOString().split('T')[0];
-    const [appointments] = await db.promise().query(
-      "SELECT COUNT(*) as count FROM citas WHERE DATE(fecha) = ?",
-      [today]
-    );
-    
-    res.json({
-      veterinarios: vets[0].count,
-      clientes: clients[0].count,
-      mascotas: pets[0].count,
-      citasHoy: appointments[0].count
-    });
-    
+    res.json(citas);
   } catch (error) {
-    console.error('Error al obtener estadísticas:', error);
-    res.status(500).json({ error: 'Error al obtener estadísticas' });
+    console.error(error);
+    res.status(500).json({ message: 'Error al obtener citas' });
   }
 });
 
-// Obtener citas de la semana para el gráfico
-app.get('/api/citas/semana', async (req, res) => {
+// Obtener citas de la semana para gráficos (requiere autenticación)
+app.get('/api/citas/semana', authenticateToken, async (req, res) => {
   try {
-    const [results] = await db.promise().query(`
+    const [results] = await pool.query(`
       SELECT 
         DAYNAME(fecha) as dia, 
         COUNT(*) as citas
@@ -475,150 +468,120 @@ app.get('/api/citas/semana', async (req, res) => {
     
     res.json(formattedData);
   } catch (error) {
-    console.error('Error al obtener citas semanales:', error);
-    res.status(500).json({ error: 'Error al obtener citas semanales' });
+    console.error(error);
+    res.status(500).json({ message: 'Error al obtener citas semanales' });
   }
 });
 
-// CRUD para personal
-app.get('/api/staff', async (req, res) => {
+// CRUD para servicios (requiere autenticación y rol admin)
+app.get("/admin/services", authenticateToken, isAdmin, async (req, res) => {
   try {
-    const [results] = await db.promise().query(
-      "SELECT * FROM usuarios WHERE role IN ('admin', 'veterinario')"
-    );
-    res.json(results);
+    const [services] = await pool.query('SELECT * FROM servicios ORDER BY nombre');
+    res.json(services);
   } catch (error) {
-    console.error('Error al obtener personal:', error);
-    res.status(500).json({ error: 'Error al obtener personal' });
+    console.error(error);
+    res.status(500).json({ message: 'Error al obtener servicios' });
   }
 });
 
-app.post('/api/staff', async (req, res) => {
-  const { nombre, apellido, email, telefono, role } = req.body;
+app.post("/admin/services", authenticateToken, isAdmin, async (req, res) => {
+  const { nombre, descripcion, precio } = req.body;
   
   try {
-    // Generar contraseña temporal
-    const tempPassword = Math.random().toString(36).slice(-8);
-    const hashedPassword = await bcrypt.hash(tempPassword, 10);
-    
-    const [result] = await db.promise().query(
-      `INSERT INTO usuarios 
-      (email, password, nombre, apellido, telefono, role) 
-      VALUES (?, ?, ?, ?, ?, ?)`,
-      [email, hashedPassword, nombre, apellido, telefono, role]
+    if (!nombre || !descripcion || !precio) {
+      return res.status(400).json({ message: 'Datos incompletos' });
+    }
+
+    const [result] = await pool.query(
+      'INSERT INTO servicios (nombre, descripcion, precio) VALUES (?, ?, ?)',
+      [nombre, descripcion, precio]
     );
-    
-    // Enviar email con credenciales (simulado)
-    console.log(`Credenciales para ${email}: contraseña temporal ${tempPassword}`);
     
     res.status(201).json({
-      id: result.insertId,
-      email,
+      id_servicio: result.insertId,
       nombre,
-      apellido,
-      telefono,
-      role
+      descripcion,
+      precio
     });
   } catch (error) {
-    console.error('Error al agregar personal:', error);
-    res.status(500).json({ error: 'Error al agregar personal' });
+    console.error(error);
+    res.status(500).json({ message: 'Error al crear servicio' });
   }
 });
 
-app.put('/api/staff/:id', async (req, res) => {
+app.put("/admin/services/:id", authenticateToken, isAdmin, async (req, res) => {
   const { id } = req.params;
-  const { nombre, apellido, email, telefono, role } = req.body;
+  const { nombre, descripcion, precio } = req.body;
   
   try {
-    await db.promise().query(
-      `UPDATE usuarios SET 
-      nombre = ?, apellido = ?, email = ?, telefono = ?, role = ?
-      WHERE id = ?`,
-      [nombre, apellido, email, telefono, role, id]
+    await pool.query(
+      'UPDATE servicios SET nombre = ?, descripcion = ?, precio = ? WHERE id_servicio = ?',
+      [nombre, descripcion, precio, id]
     );
     
-    res.json({ success: true });
+    res.json({ 
+      id_servicio: id,
+      nombre,
+      descripcion,
+      precio
+    });
   } catch (error) {
-    console.error('Error al actualizar personal:', error);
-    res.status(500).json({ error: 'Error al actualizar personal' });
+    console.error(error);
+    res.status(500).json({ message: 'Error al actualizar servicio' });
   }
 });
 
-app.delete('/api/staff/:id', async (req, res) => {
+app.delete("/admin/services/:id", authenticateToken, isAdmin, async (req, res) => {
   const { id } = req.params;
   
   try {
-    await db.promise().query(
-      "DELETE FROM usuarios WHERE id = ?",
-      [id]
-    );
-    
-    res.json({ success: true });
+    await pool.query('DELETE FROM servicios WHERE id_servicio = ?', [id]);
+    res.json({ message: 'Servicio eliminado correctamente' });
   } catch (error) {
-    console.error('Error al eliminar personal:', error);
-    res.status(500).json({ error: 'Error al eliminar personal' });
+    console.error(error);
+    res.status(500).json({ message: 'Error al eliminar servicio' });
   }
 });
 
-// Ruta para obtener todos los propietarios (usuarios con rol 'usuario')
-app.get('/api/propietarios', async (req, res) => {
+// Ruta para programar reuniones con veterinarios (requiere autenticación y rol admin)
+app.post("/admin/meetings", authenticateToken, isAdmin, async (req, res) => {
+  const { title, date, time, description, participants } = req.body;
+  
   try {
-    const [results] = await db.promise().query(
-      'SELECT id, nombre, apellido, email, telefono, direccion, tipo_documento, numero_documento FROM usuarios WHERE role = "usuario"'
-    );
-    res.json(results);
-  } catch (err) {
-    console.error('Error al obtener propietarios:', err);
-    res.status(500).json({ error: 'Error al obtener propietarios' });
-  }
-});
-
-// Obtener todos los propietarios
-app.get('/api/propietarios', async (req, res) => {
-  try {
-    const [results] = await db.promise().query(
-      'SELECT id, nombre, apellido, email, telefono, direccion, tipo_documento, numero_documento FROM usuarios WHERE role = "usuario"'
-    );
-    res.json(results);
-  } catch (err) {
-    console.error('Error al obtener propietarios:', err);
-    res.status(500).json({ error: 'Error al obtener propietarios' });
-  }
-});
-
-// Deshabilitar propietario
-app.put('/api/propietarios/:id/disable', async (req, res) => {
-  try {
-    await db.promise().query(
-      'UPDATE usuarios SET active = 0 WHERE id = ?',
-      [req.params.id]
-    );
-    res.json({ success: true });
-  } catch (err) {
-    console.error('Error al deshabilitar propietario:', err);
-    res.status(500).json({ error: 'Error al deshabilitar propietario' });
-  }
-});
-
-// Ruta para deshabilitar propietario
-app.put('/api/propietarios/:id/disable', async (req, res) => {
-  try {
-    const [result] = await db.promise().query(
-      'UPDATE usuarios SET active = 0 WHERE id = ?',
-      [req.params.id]
-    );
-    
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ error: 'Propietario no encontrado' });
+    if (!title || !date || !time || !participants || participants.length === 0) {
+      return res.status(400).json({ message: 'Datos incompletos' });
     }
+
+    const meetingDateTime = new Date('${date}T${time}:00');
     
-    res.json({ success: true, message: 'Propietario deshabilitado correctamente' });
-  } catch (err) {
-    console.error('Error al deshabilitar propietario:', err);
-    res.status(500).json({ 
-      error: 'Error al deshabilitar propietario',
-      details: err.message 
+    const [vets] = await pool.query(
+      'SELECT id, nombre, apellido, email FROM usuarios WHERE id IN (?) AND role = "veterinario"',
+      [participants]
+    );
+    
+    // En producción, aquí enviarías notificaciones/emails a los veterinarios
+    console.log('Reunión programada:', {
+      title,
+      dateTime: meetingDateTime,
+      description,
+      participants: vets
     });
+    
+    res.json({ 
+      message: 'Reunión programada correctamente',
+      details: {
+        title,
+        dateTime: meetingDateTime,
+        description,
+        participants: vets
+      }
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error al programar reunión' });
   }
 });
 
+app.listen(PORT, () => {
+  console.log(`Servidor corriendo en http://localhost:${PORT}`);
+});

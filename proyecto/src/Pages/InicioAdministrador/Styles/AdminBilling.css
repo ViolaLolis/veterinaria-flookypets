@@ -1,0 +1,81 @@
+/* AdminBilling.css */
+.billing-container {
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .billing-container h2 {
+    color: #2c3e50;
+    margin-bottom: 20px;
+    font-size: 24px;
+  }
+  
+  .billing-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .billing-table th {
+    background-color: #8e44ad;
+    color: white;
+    padding: 12px;
+    text-align: left;
+  }
+  
+  .billing-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  
+  .status {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: 500;
+    font-size: 14px;
+  }
+  
+  .status.pagada {
+    background-color: #d5f5e3;
+    color: #28a745;
+  }
+  
+  .status.pendiente {
+    background-color: #fef9e7;
+    color: #f39c12;
+  }
+  
+  .status.cancelada {
+    background-color: #fadbd8;
+    color: #e74c3c;
+  }
+  
+  .view-btn, .edit-btn {
+    padding: 6px 12px;
+    margin-right: 8px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .view-btn {
+    background-color: #3498db;
+    color: white;
+  }
+  
+  .edit-btn {
+    background-color: #f39c12;
+    color: white;
+  }
+  
+  .generate-invoice-btn {
+    background-color: #2ecc71;
+    color: white;
+    padding: 10px 20px;
+    margin-bottom: 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+  }

@@ -66,3 +66,140 @@
   font-size: 1.3em;
   margin-bottom: 8px;
 }
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Arial', sans-serif;
+}
+
+.header {
+  margin-bottom: 30px;
+}
+
+.welcome {
+  font-size: 28px;
+  color: #333;
+}
+
+.welcome span {
+  color: #2c7be5;
+  font-weight: bold;
+}
+
+.subtitle {
+  font-size: 16px;
+  color: #666;
+}
+
+.highlightSection {
+  display: flex;
+  gap: 30px;
+  margin-bottom: 30px;
+}
+
+.petSection, .appointmentSection {
+  flex: 1;
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.petInfo {
+  margin-top: 15px;
+}
+
+.petInfo div {
+  display: flex;
+  gap: 15px;
+  margin-top: 5px;
+  color: #555;
+}
+
+.appointmentDetails p {
+  margin: 8px 0;
+  color: #555;
+}
+
+.appointmentActions {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.confirmButton {
+  background: #2c7be5;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.rescheduleButton {
+  background: white;
+  color: #2c7be5;
+  border: 1px solid #2c7be5;
+  padding: 8px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.navBar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+
+.navButton {
+  flex: 1;
+  padding: 12px;
+  background: #f8f9fa;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.navButton.active {
+  background: #2c7be5;
+  color: white;
+}
+
+.mainContent {
+  margin-bottom: 30px;
+}
+
+.remindersSection {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.importantReminders {
+  margin-bottom: 20px;
+}
+
+.importantReminders h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.importantReminders li {
+  color: #d92550;
+  font-weight: bold;
+}
+
+.allReminders li {
+  padding: 5px 0;
+}
+
+.allReminders li.important {
+  color: #d92550;
+  font-weight: bold;
+}

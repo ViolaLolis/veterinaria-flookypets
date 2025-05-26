@@ -1,0 +1,61 @@
+/* AdminLogs.css */
+.logs-container {
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .logs-container h2 {
+    color: #2c3e50;
+    margin-bottom: 20px;
+    font-size: 24px;
+  }
+  
+  .logs-filter {
+    margin-bottom: 20px;
+  }
+  
+  .logs-filter select {
+    padding: 8px 12px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    background-color: white;
+  }
+  
+  .logs-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .logs-table th {
+    background-color: #34495e;
+    color: white;
+    padding: 12px;
+    text-align: left;
+  }
+  
+  .logs-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  
+  .logs-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  
+  .logs-table tr:hover {
+    background-color: #f1f1f1;
+  }
+  
+  .log-type-info {
+    color: #3498db;
+  }
+  
+  .log-type-warning {
+    color: #f39c12;
+  }
+  
+  .log-type-error {
+    color: #e74c3c;
+  }

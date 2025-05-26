@@ -1,0 +1,65 @@
+/* MeetingManagement.css */
+.meeting-management-container {
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .meeting-management-container h2 {
+    color: #2c3e50;
+    margin-bottom: 20px;
+    font-size: 24px;
+  }
+  
+  .meeting-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+  
+  .meeting-table th {
+    background-color: #3498db;
+    color: white;
+    padding: 12px;
+    text-align: left;
+  }
+  
+  .meeting-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  
+  .meeting-table tr:hover {
+    background-color: #f1f9ff;
+  }
+  
+  .action-buttons button {
+    margin-right: 8px;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  
+  .edit-meeting-btn {
+    background-color: #f39c12;
+    color: white;
+  }
+  
+  .delete-meeting-btn {
+    background-color: #e74c3c;
+    color: white;
+  }
+  
+  .add-meeting-btn {
+    background-color: #2ecc71;
+    color: white;
+    padding: 10px 15px;
+    margin-bottom: 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+  }
