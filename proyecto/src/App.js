@@ -52,18 +52,18 @@ import LlamadaVeterinario from "./Pages/InicioVeterinario/LlamadaVeterinario";
 
 // Componentes de Administrador
 import AdminDashboard from "./Pages/InicioAdministrador/AdminDashboard";
-import ServicesManagement from "./Pages/InicioAdministrador/ServicesManagement";
-import UsersManagement from "./Pages/InicioAdministrador/UsersManagement";
+import ServicesManagement from "./Pages/InicioAdministrador/ServicesManagement.js";
+import UsersManagement from "./Pages/InicioAdministrador/UsersManagement.js";
 import AdminStats from "./Pages/InicioAdministrador/AdminStats";
 import AdminSettings from "./Pages/InicioAdministrador/AdminSettings";
 import AdminProfile from "./Pages/InicioAdministrador/AdminProfile";
 import AdminReports from "./Pages/InicioAdministrador/AdminReports";
-import MeetingManagement from "./Pages/InicioAdministrador/MeetingManagement";
-import AdminCalendar from "./Pages/InicioAdministrador/AdminCalendar";
-import AdminNotifications from "./Pages/InicioAdministrador/AdminNotifications";
-import AdminBackup from "./Pages/InicioAdministrador/AdminBackup";
+import MeetingManagement from "./Pages/InicioAdministrador/MeetingManagement.js";
+import AdminCalendar from "./Pages/InicioAdministrador/AdminCalendar.js";
+import AdminNotifications from "./Pages/InicioAdministrador/AdminNotifications.js";
+import AdminBackup from "./Pages/InicioAdministrador/AdminBackup.js";
 import AdminLogs from "./Pages/InicioAdministrador/AdminLogs";
-import AdminBilling from "./Pages/InicioAdministrador/AdminBilling";
+import AdminBilling from "./Pages/InicioAdministrador/AdminBilling.js";
 import AdminIntegrations from "./Pages/InicioAdministrador/AdminIntegrations";
 
 function App() {
