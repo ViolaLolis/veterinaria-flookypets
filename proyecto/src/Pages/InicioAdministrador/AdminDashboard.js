@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import DashboardCards from './Components/DashboardCards';
 import ServicesManagement from './ServicesManagement';
 import UsersManagement from './UsersManagement';
@@ -9,6 +9,20 @@ import "./Styles/AdminDashboard.css";
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [showMeetingModal, setShowMeetingModal] = useState(false);
+  const navigate = useNavigate();
+
+  // Verificar autenticación al cargar el componente
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!user || user.role !== 'admin') {
+      navigate('/login');
+    }
+  }, [navigate]);
+
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    navigate('/login');
+  };
 
   return (
     <div className="admin-container">
@@ -54,9 +68,9 @@ const AdminDashboard = () => {
         </nav>
         
         <div className="sidebar-footer">
-          <Link to="/" className="logout-btn">
+          <button onClick={handleLogout} className="logout-btn">
             <i className="fas fa-sign-out-alt"></i> Cerrar Sesión
-          </Link>
+          </button>
         </div>
       </div>
 
@@ -66,7 +80,6 @@ const AdminDashboard = () => {
           <>
             <h1>Dashboard de Administración</h1>
             <DashboardCards />
-            {/* Otras secciones del dashboard */}
           </>
         )}
         

@@ -1,13 +1,23 @@
 import React, { useState } from 'react';
-import MisMascotas from './MisMascotas';
 import CitasUsuario from './CitasUsuario';
 import ServiciosVeterinaria from './ServiciosVeterinaria';
 import styles from './Styles/InicioUsuario.module.css';
 import logo from '../Inicio/Imagenes/flooty.png';
 import { FaPaw, FaCalendarPlus, FaShoppingCart, FaBell, FaClipboardList, FaHeart, FaQuestionCircle, FaUserCog, FaChevronDown, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
-import BarraNavegacionUsuario from './BarraNavegacionUsuario';
+
+// Añade este componente antes de InicioUsuario
+const MisMascotas = () => {
+  return (
+    <div className={styles.mascotasContainer}>
+      <h2>Mis Mascotas</h2>
+      <p>Aquí puedes ver y gestionar toda la información de tus mascotas.</p>
+      {/* Agrega más contenido según necesites */}
+    </div>
+  );
+};
 
 const InicioUsuario = () => {
+  // ... el resto de tu código permanece igual ...
   const [activeTab, setActiveTab] = useState('mascotas');
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [expandedReminders, setExpandedReminders] = useState(false);
@@ -66,8 +76,7 @@ const InicioUsuario = () => {
 
   const renderContent = () => {
     switch(activeTab) {
-      case 'mascotas':
-        return <MisMascotas />;
+      
       case 'citas':
         return <CitasUsuario />;
       case 'servicios':

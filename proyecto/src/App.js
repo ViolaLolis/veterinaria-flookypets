@@ -5,7 +5,6 @@ import Login from "./Pages/Login/Login.js";
 import Registro from "./Pages/Login/Registro.js";
 import ForgotPassword from "./Pages/Login/OlvideContraseña.js";
 import InicioUsuario from "./Pages/InicioUsuario/InicioUsuario.js";
-import MisMascotas from "./Pages/InicioUsuario/MisMascotas.js";
 import CitasUsuario from "./Pages/InicioUsuario/CitasUsuario.js";
 import ServiciosVeterinaria from "./Pages/InicioUsuario/ServiciosVeterinaria.js";
 import PerfilUsuario from "./Pages/InicioUsuario/PerfilUsuario.js";
@@ -52,18 +51,18 @@ import LlamadaVeterinario from "./Pages/InicioVeterinario/LlamadaVeterinario";
 
 // Componentes de Administrador
 import AdminDashboard from "./Pages/InicioAdministrador/AdminDashboard";
-import ServicesManagement from "./Pages/InicioAdministrador/ServicesManagement";
-import UsersManagement from "./Pages/InicioAdministrador/UsersManagement";
+import ServicesManagement from "./Pages/InicioAdministrador/ServicesManagement.js";
+import UsersManagement from "./Pages/InicioAdministrador/UsersManagement.js";
 import AdminStats from "./Pages/InicioAdministrador/AdminStats";
 import AdminSettings from "./Pages/InicioAdministrador/AdminSettings";
 import AdminProfile from "./Pages/InicioAdministrador/AdminProfile";
 import AdminReports from "./Pages/InicioAdministrador/AdminReports";
-import MeetingManagement from "./Pages/InicioAdministrador/MeetingManagement";
-import AdminCalendar from "./Pages/InicioAdministrador/AdminCalendar";
-import AdminNotifications from "./Pages/InicioAdministrador/AdminNotifications";
-import AdminBackup from "./Pages/InicioAdministrador/AdminBackup";
+import MeetingManagement from "./Pages/InicioAdministrador/MeetingManagement.js";
+import AdminCalendar from "./Pages/InicioAdministrador/AdminCalendar.js";
+import AdminNotifications from "./Pages/InicioAdministrador/AdminNotifications.js";
+import AdminBackup from "./Pages/InicioAdministrador/AdminBackup.js";
 import AdminLogs from "./Pages/InicioAdministrador/AdminLogs";
-import AdminBilling from "./Pages/InicioAdministrador/AdminBilling";
+import AdminBilling from "./Pages/InicioAdministrador/AdminBilling.js";
 import AdminIntegrations from "./Pages/InicioAdministrador/AdminIntegrations";
 
 function App() {
@@ -157,10 +156,9 @@ function App() {
         {/* Rutas de usuario */}
         <Route element={<Protegida user={user} allowedRoles={['usuario', 'admin', 'veterinario']} />}>
           <Route path="/usuario" element={<InicioUsuario />}>
-            <Route index element={<MisMascotas />} />
+            
             
             {/* Gestión de mascotas */}
-            <Route path="mascotas" element={<MisMascotas />} />
             <Route path="mascotas/agregar" element={<AgregarMascota />} />
             <Route path="mascotas/:id" element={<DetalleMascota />} />
             <Route path="mascotas/editar/:id" element={<EditarMascota />} />
