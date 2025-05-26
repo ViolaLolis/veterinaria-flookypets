@@ -1,0 +1,57 @@
+/* DashboardCards.css */
+.dashboard-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+  }
+  
+  .card {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+  }
+  
+  .card h3 {
+    margin-top: 0;
+    color: #555;
+    font-size: 1rem;
+  }
+  
+  .card p {
+    font-size: 2rem;
+    font-weight: bold;
+    margin: 10px 0;
+    color: #333;
+  }
+  
+  .growth {
+    font-size: 0.9rem;
+    padding: 3px 8px;
+    border-radius: 12px;
+  }
+  
+  .growth.positive {
+    background-color: #e6f7e6;
+    color: #2e7d32;
+  }
+  
+  .growth.negative {
+    background-color: #ffebee;
+    color: #c62828;
+  }
+  
+  .loading, .error {
+    text-align: center;
+    padding: 20px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .error {
+    color: #c62828;
+    background: #ffebee;
+  }

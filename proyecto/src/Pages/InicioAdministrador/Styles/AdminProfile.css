@@ -1,0 +1,144 @@
+.admin-profile-container {
+    padding: 20px;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  
+  .admin-profile-container h2 {
+    color: #1e3a8a;
+    margin-bottom: 25px;
+    font-size: 1.5rem;
+    text-align: center;
+  }
+  
+  .message {
+    padding: 10px 15px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  .message.success {
+    background-color: #ecfdf5;
+    color: #047857;
+  }
+  
+  .message.error {
+    background-color: #fee2e2;
+    color: #b91c1c;
+  }
+  
+  .profile-view {
+    background-color: white;
+    border-radius: 10px;
+    padding: 25px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  }
+  
+  .profile-info {
+    margin-bottom: 20px;
+  }
+  
+  .info-item {
+    display: flex;
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  
+  .info-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+  
+  .label {
+    font-weight: 500;
+    color: #475569;
+    width: 120px;
+  }
+  
+  .value {
+    color: #1e293b;
+    flex-grow: 1;
+  }
+  
+  .edit-btn {
+    background-color: #1e3a8a;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    display: block;
+    margin: 0 auto;
+    transition: background-color 0.3s;
+  }
+  
+  .edit-btn:hover {
+    background-color: #1e40af;
+  }
+  
+  .profile-form {
+    background-color: white;
+    border-radius: 10px;
+    padding: 25px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  }
+  
+  .form-group {
+    margin-bottom: 20px;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #475569;
+    font-weight: 500;
+  }
+  
+  .form-group input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 1rem;
+  }
+  
+  .form-actions {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 25px;
+  }
+  
+  .cancel-btn,
+  .save-btn {
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  
+  .cancel-btn {
+    background-color: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+  }
+  
+  .cancel-btn:hover {
+    background-color: #e2e8f0;
+  }
+  
+  .save-btn {
+    background-color: #1e3a8a;
+    color: white;
+    border: none;
+  }
+  
+  .save-btn:hover {
+    background-color: #1e40af;
+  }

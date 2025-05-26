@@ -53,6 +53,8 @@ npm install framer-motion
 npm install react-calendar
 npm install @fortawesome/react-fontawesome @fortawesome/free-solid-svg-icons
 npm install @fortawesome/free-brands-svg-icons
+npm install react-big-calendar moment
+npm install react-big-calendar moment
 
 Comando para permisos sin perfil
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
