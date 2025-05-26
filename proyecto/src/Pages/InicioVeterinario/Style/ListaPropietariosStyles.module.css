@@ -1,199 +1,188 @@
-:root {
-  --color-primary: #00bcd4; /* Azul claro */
-  --color-secondary: #00acc1; /* Azul más oscuro */
-  --color-success: #4CAF50; /* Verde de éxito */
-  --color-warning: #ffce54; /* Amarillo de advertencia */
-  --color-white: #ffffff; /* Blanco */
-  --color-light: #e0f7fa; /* Fondo azul claro */
-  --color-dark: #333; /* Gris oscuro */
-  --color-muted: #666; /* Gris suave */
-  --color-border: #b2ebf2; /* Azul suave */
-  --color-tab-active: #00bcd4; /* Azul claro */
-  --color-tab-border: #00acc1; /* Azul más oscuro */
-  --color-primary-dark: #3a63d1; /* Azul oscuro */
-  --color-danger: #ff5252; /* Rojo de peligro */
-  --color-danger-dark: #e03e3e; /* Rojo oscuro para hover */
-  --color-success-dark: #28a745; /* Verde oscuro para hover */
-  --color-text-dark: #333; /* Gris oscuro para texto */
-  --color-bg-light: #f4f7ff; /* Fondo claro */
-  --color-accent: #d4a017; /* Color de acento (amarillo dorado) */
-  --color-accent-light: #f0c14b; /* Color de acento claro */
-  --color-muted: #7a6a56; /* Color para texto secundario */
-}
-
 /* ListaPropietariosStyles.module.css */
 
+/* Estilos base */
 .container {
   padding: 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
+  min-height: 100vh;
+  background-color: #f8f4e9; /* Blanco hueso */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* Header styles */
+/* Header */
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 2rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid var(--color-border); /* Usando el borde suave */
+  border-bottom: 2px solid rgba(0, 172, 193, 0.2);
 }
 
 .header h1 {
+  color: #00acc1;
   font-size: 2rem;
-  color: var(--color-text-dark); /* Color oscuro para el título */
+  font-weight: 600;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.8rem;
   margin: 0;
 }
 
 .titleIcon {
-  color: var(--color-primary); /* Icono en azul claro */
+  color: #00acc1;
 }
 
-/* Loading state */
-.loadingContainer {
+.headerActions {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 60vh;
   gap: 1rem;
-}
-
-.spinner {
-  width: 50px;
-  height: 50px;
-  border: 5px solid #f3f3f3;
-  border-top: 5px solid var(--color-primary); /* Azul claro */
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-/* Error state */
-.errorContainer {
-  display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  height: 60vh;
-  gap: 1.5rem;
 }
 
-.errorMessage {
-  background-color: #ffecec;
-  color: var(--color-danger); /* Rojo de error */
-  padding: 1.5rem;
+/* Botones */
+.refreshButton, .addButton, .retryButton {
+  padding: 0.7rem 1.2rem;
   border-radius: 8px;
-  max-width: 500px;
-  text-align: center;
-  box-shadow: 0 2px 10px rgba(231, 76, 60, 0.1);
-}
-
-.retryButton {
-  background-color: var(--color-danger); /* Rojo de peligro */
-  color: var(--color-white);
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: all 0.2s ease;
-}
-
-.retryButton:hover {
-  background-color: var(--color-danger-dark); /* Rojo oscuro para hover */
-  transform: translateY(-2px);
-}
-
-/* Add button */
-.addButton {
-  background-color: var(--color-primary); /* Azul claro */
-  color: var(--color-white);
-  padding: 0.75rem 1.5rem;
-  border-radius: 6px;
-  text-decoration: none;
-  font-weight: 600;
+  font-weight: 500;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  transition: all 0.2s ease;
+  gap: 0.6rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+  font-size: 0.95rem;
+}
+
+.refreshButton {
+  background-color: rgba(0, 172, 193, 0.1);
+  color: #00acc1;
+  border: 1px solid rgba(0, 172, 193, 0.3);
+}
+
+.refreshButton:hover {
+  background-color: rgba(0, 172, 193, 0.2);
+}
+
+.addButton {
+  background-color: #00acc1;
+  color: white;
+  text-decoration: none;
 }
 
 .addButton:hover {
-  background-color: var(--color-primary-dark); /* Azul oscuro para hover */
-  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+  background-color: #008c9e;
+  color: white;
 }
 
-/* Propietarios list */
+.retryButton {
+  background-color: #00acc1;
+  color: white;
+  margin-top: 1rem;
+}
+
+.retryButton:hover {
+  background-color: #008c9e;
+}
+
+/* Barra de búsqueda */
+.searchContainer {
+  position: relative;
+  margin-bottom: 2rem;
+  max-width: 800px;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #00acc1;
+  opacity: 0.7;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 0.8rem 1rem 0.8rem 3rem;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 172, 193, 0.4);
+  background-color: white;
+  font-size: 1rem;
+  color: #333;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: #00acc1;
+  box-shadow: 0 2px 12px rgba(0, 172, 193, 0.2);
+}
+
+/* Lista de propietarios */
 .propietariosList {
-  list-style: none;
-  padding: 0;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   gap: 1.5rem;
+  padding: 0;
+  margin: 0;
+  list-style: none;
 }
 
 .propietarioCard {
-  background: var(--color-white); /* Fondo blanco */
+  background-color: white;
   border-radius: 12px;
   padding: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  border: 1px solid rgba(0, 172, 193, 0.1);
 }
 
 .propietarioInfo {
   display: flex;
-  gap: 1.5rem;
+  gap: 1.2rem;
   margin-bottom: 1.5rem;
 }
 
 .avatar {
-  width: 60px;
-  height: 60px;
-  background: linear-gradient(135deg, var(--color-primary), var(--color-success)); /* Degradado entre azul y verde */
-  color: var(--color-white);
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
+  background-color: #00acc1;
+  color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.75rem;
+  font-size: 1.4rem;
   font-weight: bold;
   flex-shrink: 0;
 }
 
 .details h3 {
   margin: 0 0 0.5rem 0;
-  color: var(--color-text-dark); /* Título en color oscuro */
-  font-size: 1.25rem;
+  color: #333;
+  font-size: 1.2rem;
 }
 
 .details p {
-  margin: 0.25rem 0;
-  color: var(--color-muted); /* Texto secundario */
+  margin: 0.3rem 0;
+  color: #666;
   font-size: 0.9rem;
 }
 
-.details p strong {
-  color: var(--color-dark); /* Color para texto fuerte */
+.details strong {
+  color: #00acc1;
+  font-weight: 600;
 }
 
-/* Actions */
+/* Acciones */
 .actions {
   display: flex;
   justify-content: flex-end;
-  gap: 0.75rem;
-  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  gap: 0.8rem;
+  margin-top: auto;
   padding-top: 1rem;
+  border-top: 1px solid rgba(0, 172, 193, 0.1);
 }
 
 .actionButton {
@@ -203,65 +192,103 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border: none;
   cursor: pointer;
-  color: var(--color-white);
   transition: all 0.2s ease;
-  text-decoration: none;
-}
-
-.actionButton {
-  background-color: var(--color-muted); /* Gris suave */
+  border: none;
+  background-color: transparent;
+  color: #666;
 }
 
 .actionButton:hover {
-  transform: translateY(-2px);
+  color: #00acc1;
+  background-color: rgba(0, 172, 193, 0.1);
 }
 
-.editButton {
-  background-color: var(--color-accent); /* Color dorado */
+.editButton:hover {
+  color: #00acc1;
 }
 
-.disableButton {
-  background-color: var(--color-danger); /* Rojo de peligro */
+.disableButton:hover {
+  color: #e53935;
 }
 
-/* Empty state */
+/* Estados vacíos */
 .emptyState {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 3rem;
   text-align: center;
-  background-color: var(--color-light); /* Fondo azul claro */
+  padding: 3rem 2rem;
+  background-color: white;
   border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
   margin-top: 2rem;
 }
 
 .emptyIllustration {
-  width: 100px;
-  height: 100px;
-  background-color: var(--color-bg-light); /* Fondo claro */
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  background-color: rgba(0, 172, 193, 0.1);
+  color: #00acc1;
   margin-bottom: 1.5rem;
-  color: var(--color-muted); /* Color de texto apagado */
 }
 
 .emptyState h3 {
-  color: var(--color-text-dark); /* Título en texto oscuro */
+  color: #333;
   margin-bottom: 0.5rem;
 }
 
 .emptyState p {
-  color: var(--color-muted); /* Texto apagado */
+  color: #666;
   margin-bottom: 1.5rem;
 }
 
-/* Responsive adjustments */
+/* Loading y errores */
+.loadingContainer, .errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 60vh;
+  text-align: center;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(0, 172, 193, 0.2);
+  border-top-color: #00acc1;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1.5rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.errorMessage {
+  background-color: #ffebee;
+  color: #c62828;
+  padding: 1.5rem;
+  border-radius: 8px;
+  max-width: 500px;
+  margin-bottom: 1.5rem;
+  border-left: 4px solid #e53935;
+}
+
+/* Efectos de hover para tarjetas */
+.propietarioCard:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 15px rgba(0, 172, 193, 0.15);
+}
+
+/* Responsive */
 @media (max-width: 768px) {
   .header {
     flex-direction: column;
@@ -269,66 +296,13 @@
     gap: 1rem;
   }
   
+  .headerActions {
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
   .propietariosList {
     grid-template-columns: 1fr;
   }
-  
-  .propietarioInfo {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-  }
-  
-  .details {
-    text-align: center;
-  }
-  
-  .actions {
-    justify-content: center;
-  }
-}
-
-/* Agrega esto a tu módulo CSS */
-.headerActions {
-  display: flex;
-  gap: 15px;
-  align-items: center;
-}
-
-.refreshButton {
-  padding: 8px 15px;
-  background-color: #f0f0f0;
-  color: #333;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.refreshButton:hover {
-  background-color: #e0e0e0;
-}
-
-.refreshButton:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
-.propietarioCard {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.details p {
-  margin: 5px 0;
-  font-size: 14px;
-}
-
-.actions {
-  display: flex;
-  gap: 10px;
 }
