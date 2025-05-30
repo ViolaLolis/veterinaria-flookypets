@@ -137,26 +137,26 @@ INSERT INTO usuarios (email, password, nombre, apellido, telefono, direccion, ti
 ('user14@example.com', '$2a$10$xJwL5v5Jz5U5Z5U5Z5U5Ze', 'Verónica', 'Salazar', '3009012345', 'Calle Protectora 19', 'CC', '99001122', '1991-08-12', 'usuario'),
 ('user15@example.com', '$2a$10$xJwL5v5Jz5U5Z5U5Z5U5Ze', 'Raúl', 'Fuentes', '3150123456', 'Avenida Cariño 20', 'CC', '00112233', '1994-02-19', 'usuario');
 INSERT INTO citas (id_cliente, id_servicio, id_veterinario, fecha, ubicacion, estado) VALUES
-(1, 1, 2, '2023-06-15 09:00:00', 'Consultorio 1', 'aceptada'),
-(2, 2, 3, '2023-06-15 10:30:00', 'Consultorio 2', 'aceptada'),
-(3, 3, 2, '2023-06-16 11:00:00', 'Sala de Estética', 'aceptada'),
-(4, 1, 3, '2023-06-16 14:00:00', 'Consultorio 1', 'pendiente'),
-(5, 2, 2, '2023-06-17 09:30:00', 'Consultorio 2', 'aceptada'),
-(6, 4, 3, '2023-06-17 11:00:00', 'Quirófano', 'aceptada'),
-(7, 5, 2, '2023-06-18 10:00:00', 'Sala de Rayos X', 'pendiente'),
-(8, 6, 3, '2023-06-18 15:00:00', 'Laboratorio', 'aceptada'),
-(9, 1, 2, '2023-06-19 08:30:00', 'Consultorio 1', 'aceptada'),
-(10, 3, 3, '2023-06-19 13:00:00', 'Sala de Estética', 'pendiente'),
-(11, 2, 2, '2023-06-20 10:00:00', 'Consultorio 2', 'aceptada'),
-(12, 5, 3, '2023-06-20 11:30:00', 'Sala de Rayos X', 'aceptada'),
-(13, 1, 2, '2023-06-21 09:00:00', 'Consultorio 1', 'pendiente'),
-(14, 4, 3, '2023-06-21 14:00:00', 'Quirófano', 'aceptada'),
+(1, 1, 2, '2030-06-15 09:00:00', 'Consultorio 1', 'aceptada'),
+(2, 2, 3, '2030-06-15 10:30:00', 'Consultorio 2', 'aceptada'),
+(3, 3, 2, '2030-06-16 11:00:00', 'Sala de Estética', 'aceptada'),
+(4, 1, 3, '2030-06-16 14:00:00', 'Consultorio 1', 'pendiente'),
+(5, 2, 2, '2030-06-17 09:30:00', 'Consultorio 2', 'aceptada'),
+(6, 4, 3, '2030-06-17 11:00:00', 'Quirófano', 'aceptada'),
+(7, 5, 2, '2030-06-18 10:00:00', 'Sala de Rayos X', 'pendiente'),
+(8, 6, 3, '2030-06-18 15:00:00', 'Laboratorio', 'aceptada'),
+(9, 1, 2, '2030-06-19 08:30:00', 'Consultorio 1', 'aceptada'),
+(10, 3, 3, '2030-06-19 13:00:00', 'Sala de Estética', 'pendiente'),
+(11, 2, 2, '2030-06-20 10:00:00', 'Consultorio 2', 'aceptada'),
+(12, 5, 3, '2030-06-20 11:30:00', 'Sala de Rayos X', 'aceptada'),
+(13, 1, 2, '2030-06-21 09:00:00', 'Consultorio 1', 'pendiente'),
+(14, 4, 3, '2030-06-21 14:00:00', 'Quirófano', 'aceptada'),
 (15, 6, 2, '2023-06-22 10:30:00', 'Laboratorio', 'aceptada'),
-(16, 3, 3, '2023-06-22 12:00:00', 'Sala de Estética', 'pendiente'),
-(17, 2, 2, '2023-06-23 09:00:00', 'Consultorio 2', 'aceptada'),
-(18, 1, 3, '2023-06-23 11:00:00', 'Consultorio 1', 'rechazada'),
-(19, 5, 2, '2023-06-24 10:00:00', 'Sala de Rayos X', 'aceptada'),
-(20, 6, 3, '2023-06-24 15:30:00', 'Laboratorio', 'pendiente');
+(16, 3, 3, '2030-06-22 12:00:00', 'Sala de Estética', 'pendiente'),
+(17, 2, 2, '2030-06-23 09:00:00', 'Consultorio 2', 'aceptada'),
+(18, 1, 3, '2030-06-23 11:00:00', 'Consultorio 1', 'rechazada'),
+(19, 5, 2, '2030-06-24 10:00:00', 'Sala de Rayos X', 'aceptada'),
+(20, 6, 3, '2030-06-24 15:30:00', 'Laboratorio', 'pendiente');
 INSERT INTO mascotas (id_propietario, nombre, especie, raza, edad, peso, fecha_nacimiento, color, sexo, microchip) VALUES
 (1, 'Max', 'Perro', 'Labrador Retriever', 3, 28.5, '2020-05-10', 'Dorado', 'Macho', '123456789012345'),
 (1, 'Luna', 'Gato', 'Siamés', 2, 4.2, '2021-03-15', 'Blanco y café', 'Hembra', '234567890123456'),
@@ -203,3 +203,8 @@ SELECT * FROM clientes;
 SELECT * FROM mascotas;
 SELECT email, nombre, apellido, role FROM usuarios;
 
+-- Agrega esto a tu script SQL para tener citas de hoy
+INSERT INTO citas (id_cliente, id_servicio, id_veterinario, fecha, ubicacion, estado) VALUES
+(1, 1, 2, CURDATE() + INTERVAL 1 HOUR, 'Consultorio 1', 'aceptada'),
+(2, 2, 2, CURDATE() + INTERVAL 2 HOUR, 'Consultorio 2', 'aceptada'),
+(3, 3, 2, CURDATE() + INTERVAL 3 HOUR, 'Sala de Estética', 'pendiente');
