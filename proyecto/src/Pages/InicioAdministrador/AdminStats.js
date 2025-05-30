@@ -1,85 +1,136 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import './Styles/AdminStats.css';
+import React, { useState, useEffect } from 'react';
+import { FaUsers, FaUserMd, FaUserShield, FaConciergeBell, FaCalendarAlt, FaChartLine } from 'react-icons/fa';
+import './Styles/Admin.css';
 
-const AdminStats = () => {
+function AdminStats() {
   const [stats, setStats] = useState({
-    appointments: 0,
-    vets: 0,
-    admins: 0,
-    pets: 0,
-    monthlyGrowth: 0,
-    monthlyData: []
+    totalUsers: 0,
+    totalVets: 0,
+    totalAdmins: 0,
+    totalServices: 0,
+    totalAppointments: 0,
+    monthlyGrowth: 0
   });
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const response = await axios.get('http://localhost:5000/admin/stats');
-        setStats(response.data);
-      } catch (error) {
-        console.error('Error fetching stats:', error);
-      }
-    };
-    
-    fetchStats();
+    // Simular carga de estadísticas
+    setTimeout(() => {
+      setStats({
+        totalUsers: 125,
+        totalVets: 8,
+        totalAdmins: 3,
+        totalServices: 12,
+        totalAppointments: 342,
+        monthlyGrowth: 15.7
+      });
+      setIsLoading(false);
+    }, 1000);
   }, []);
 
-  const chartData = [
-    { name: 'Citas', value: stats.appointments },
-    { name: 'Veterinarios', value: stats.vets },
-    { name: 'Mascotas', value: stats.pets },
-    { name: 'Administradores', value: stats.admins }
-  ];
+  if (isLoading) {
+    return (
+      <div className="admin-loading">
+        <div className="loading-spinner"></div>
+        <p>Cargando estadísticas...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="admin-stats-container">
-      <h2>Estadísticas Generales</h2>
+      <h2>
+        <FaChartLine className="header-icon" />
+        Resumen General
+      </h2>
       
       <div className="stats-grid">
         <div className="stat-card">
-          <h3>Citas este mes</h3>
-          <div className="stat-value">{stats.appointments}</div>
-          <div className={`stat-growth ${stats.monthlyGrowth >= 0 ? 'positive' : 'negative'}`}>
-            {stats.monthlyGrowth >= 0 ? '↑' : '↓'} {Math.abs(stats.monthlyGrowth)}%
+          <div className="stat-icon users">
+            <FaUsers />
+          </div>
+          <div className="stat-info">
+            <h3>Usuarios</h3>
+            <p>{stats.totalUsers}</p>
+            <span className="stat-description">Clientes registrados</span>
           </div>
         </div>
         
         <div className="stat-card">
-          <h3>Veterinarios</h3>
-          <div className="stat-value">{stats.vets}</div>
-          <div className="stat-label">Registrados</div>
+          <div className="stat-icon vets">
+            <FaUserMd />
+          </div>
+          <div className="stat-info">
+            <h3>Veterinarios</h3>
+            <p>{stats.totalVets}</p>
+            <span className="stat-description">Profesionales activos</span>
+          </div>
         </div>
         
         <div className="stat-card">
-          <h3>Mascotas</h3>
-          <div className="stat-value">{stats.pets}</div>
-          <div className="stat-label">Registradas</div>
+          <div className="stat-icon admins">
+            <FaUserShield />
+          </div>
+          <div className="stat-info">
+            <h3>Administradores</h3>
+            <p>{stats.totalAdmins}</p>
+            <span className="stat-description">Usuarios con acceso</span>
+          </div>
         </div>
         
         <div className="stat-card">
-          <h3>Administradores</h3>
-          <div className="stat-value">{stats.admins}</div>
-          <div className="stat-label">Activos</div>
+          <div className="stat-icon services">
+            <FaConciergeBell />
+          </div>
+          <div className="stat-info">
+            <h3>Servicios</h3>
+            <p>{stats.totalServices}</p>
+            <span className="stat-description">Opciones disponibles</span>
+          </div>
+        </div>
+        
+        <div className="stat-card">
+          <div className="stat-icon appointments">
+            <FaCalendarAlt />
+          </div>
+          <div className="stat-info">
+            <h3>Citas</h3>
+            <p>{stats.totalAppointments}</p>
+            <span className="stat-description">Este mes</span>
+          </div>
+        </div>
+        
+        <div className="stat-card">
+          <div className="stat-icon growth">
+            <FaChartLine />
+          </div>
+          <div className="stat-info">
+            <h3>Crecimiento</h3>
+            <p>{stats.monthlyGrowth}%</p>
+            <span className="stat-description">Mes anterior</span>
+          </div>
         </div>
       </div>
       
-      <div className="chart-container">
-        <h3>Resumen Mensual</h3>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <Bar dataKey="value" fill="#1e3a8a" />
-          </BarChart>
-        </ResponsiveContainer>
+      <div className="charts-section">
+        <div className="chart-container">
+          <h3>Citas por Mes</h3>
+          <div className="chart-placeholder">
+            {/* Aquí iría un gráfico real con una librería como Chart.js */}
+            <p>Gráfico de citas mensuales</p>
+          </div>
+        </div>
+        
+        <div className="chart-container">
+          <h3>Servicios Más Populares</h3>
+          <div className="chart-placeholder">
+            {/* Aquí iría un gráfico real con una librería como Chart.js */}
+            <p>Gráfico de servicios populares</p>
+          </div>
+        </div>
       </div>
     </div>
   );
-};
+}
 
 export default AdminStats;
