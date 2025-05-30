@@ -15,8 +15,42 @@ const cardVariants = {
 };
 
 const MainVeterinario = () => {
-  const [citasAgendadas, setCitasAgendadas] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // Datos de ejemplo para citas
+  const citasEjemplo = [
+    {
+      id: 1,
+      fecha: new Date(Date.now() + 3600000 * 2).toISOString(),
+      mascota: "Max",
+      propietario: "Juan Pérez",
+      direccion: "Calle Principal 123",
+      servicio: "Consulta general",
+      tipoMascota: "Perro",
+      estado: "pendiente"
+    },
+    {
+      id: 2,
+      fecha: new Date(Date.now() + 3600000 * 4).toISOString(),
+      mascota: "Luna",
+      propietario: "María García",
+      direccion: "Avenida Central 456",
+      servicio: "Vacunación anual",
+      tipoMascota: "Gato",
+      estado: "pendiente"
+    },
+    {
+      id: 3,
+      fecha: new Date(Date.now() + 3600000 * 6).toISOString(),
+      mascota: "Rocky",
+      propietario: "Carlos López",
+      direccion: "Boulevard Norte 789",
+      servicio: "Control de peso",
+      tipoMascota: "Perro",
+      estado: "completada"
+    }
+  ];
+
+  const [citasAgendadas, setCitasAgendadas] = useState(citasEjemplo);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('hoy');
   const [stats, setStats] = useState({
@@ -26,20 +60,6 @@ const MainVeterinario = () => {
     mascotasAtendidas: 5
   });
 
-  useEffect(() => {
-    fetch("http://localhost:5000/api/citas/hoy")
-      .then((res) => res.json())
-      .then((data) => {
-        setCitasAgendadas(data);
-        setLoading(false);
-      })
-      .catch((error) => {
-        setError(error.message);
-        setLoading(false);
-      });
-  }, []);
-  
-    
   const handleCompleteAppointment = (id) => {
     setCitasAgendadas(citasAgendadas.map(cita => 
       cita.id === id ? {...cita, estado: 'completada'} : cita
@@ -62,7 +82,7 @@ const MainVeterinario = () => {
   }
 
   if (error) {
-    return <div className={styles.errorContainer}>Error al cargar las citas: {error}</div>;
+    return <div className={styles.errorContainer}>Error: {error}</div>;
   }
 
   return (

@@ -351,3 +351,31 @@ setInterval(async () => {
     console.error('Error limpiando tokens expirados:', err);
   }
 }, 3600000);
+
+// Agrega esto en tu servidor (server.js) junto con las otras rutas
+
+// Ruta para obtener citas de hoy
+app.get("/api/citas/hoy", authenticateToken, async (req, res) => {
+  try {
+    const today = new Date().toISOString().split('T')[0];
+    
+    const [citas] = await pool.query(
+      `SELECT c.id_cita, c.id_cliente, cl.nombre as propietario, 
+       m.nombre as mascota, m.especie as tipoMascota, 
+       cl.direccion, s.nombre as servicio, c.fecha, c.estado
+       FROM citas c
+       JOIN clientes cl ON c.id_cliente = cl.id_cliente
+       LEFT JOIN mascotas m ON c.id_cliente = m.id_propietario
+       JOIN servicios s ON c.id_servicio = s.id_servicio
+       WHERE DATE(c.fecha) = ? AND c.id_veterinario = ?`,
+      [today, req.user.id]
+    );
+
+    res.json(citas);
+  } catch (error) {
+    console.error("Error al obtener citas de hoy:", error);
+    res.status(500).json({ message: "Error al obtener citas" });
+  }
+});
+
+    
