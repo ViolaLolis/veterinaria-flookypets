@@ -59,6 +59,233 @@ const isAdmin = (req, res, next) => {
   next();
 };
 
+// Ruta de prueba
+app.get("/", (req, res) => {
+  res.send("Servidor de veterinaria funcionando correctamente");
+});
+
+// =============================================
+// RUTAS DE AUTENTICACIÓN
+// =============================================
+
+// Ruta de login
+app.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const [users] = await pool.query("SELECT * FROM usuarios WHERE email = ?", [email]);
+    
+    if (users.length === 0) {
+      return res.status(401).json({ message: "Credenciales incorrectas" });
+    }
+
+    const user = users[0];
+    const isMatch = await bcrypt.compare(password, user.password);
+    
+    if (!isMatch) {
+      return res.status(401).json({ message: "Credenciales incorrectas" });
+    }
+
+    // Crear token JWT
+    const token = jwt.sign(
+      { id: user.id, email: user.email, role: user.role },
+      process.env.JWT_SECRET || 'your_secret_key',
+      { expiresIn: '24h' }
+    );
+
+    res.json({
+      id: user.id,
+      email: user.email,
+      nombre: user.nombre,
+      apellido: user.apellido,
+      role: user.role,
+      token
+    });
+
+  } catch (error) {
+    console.error("Error en login:", error);
+    res.status(500).json({ message: "Error en el servidor" });
+  }
+});
+
+// Ruta de registro
+app.post("/register", async (req, res) => {
+  const { nombre, apellido, email, password, telefono, direccion, tipo_documento, numero_documento, fecha_nacimiento } = req.body;
+
+  // Validación básica
+  if (!email || !password || !nombre || !telefono) {
+    return res.status(400).json({ message: "Datos incompletos" });
+  }
+
+  try {
+    // Verificar si el usuario ya existe
+    const [existingUsers] = await pool.query("SELECT * FROM usuarios WHERE email = ?", [email]);
+    if (existingUsers.length > 0) {
+      return res.status(409).json({ message: "El email ya está registrado" });
+    }
+
+    // Hash de la contraseña
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Insertar nuevo usuario
+    const [result] = await pool.query(
+      `INSERT INTO usuarios 
+      (email, password, nombre, apellido, telefono, direccion, tipo_documento, numero_documento, fecha_nacimiento, role) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'usuario')`,
+      [email, hashedPassword, nombre, apellido, telefono, direccion, tipo_documento, numero_documento, fecha_nacimiento]
+    );
+
+    res.status(201).json({
+      id: result.insertId,
+      email,
+      nombre,
+      apellido,
+      role: 'usuario'
+    });
+
+  } catch (error) {
+    console.error("Error en registro:", error);
+    res.status(500).json({ message: "Error al registrar usuario" });
+  }
+});
+
+// Ruta para recuperación de contraseña
+app.post("/forgot-password", async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const [users] = await pool.query("SELECT * FROM usuarios WHERE email = ?", [email]);
+    if (users.length === 0) {
+      return res.status(404).json({ 
+        success: false,
+        message: "Usuario no encontrado" 
+      });
+    }
+
+    // Generar token de recuperación (6 dígitos numéricos)
+    const resetToken = Math.floor(100000 + Math.random() * 900000).toString();
+    const resetTokenExpires = new Date(Date.now() + 3600000); // 1 hora de expiración
+
+    await pool.query(
+      "UPDATE usuarios SET reset_token = ?, reset_token_expires = ? WHERE email = ?",
+      [resetToken, resetTokenExpires, email]
+    );
+
+    // En desarrollo, mostramos el token en la respuesta
+    res.json({ 
+      success: true,
+      message: "Token de recuperación generado",
+      resetToken: resetToken // Solo para desarrollo, no en producción
+    });
+
+  } catch (error) {
+    console.error("Error en forgot-password:", error);
+    res.status(500).json({ 
+      success: false,
+      message: "Error en el servidor" 
+    });
+  }
+});
+
+// Ruta para verificar el código de recuperación
+app.post("/verify-reset-code", async (req, res) => {
+  const { email, token } = req.body;
+
+  if (!email || !token) {
+    return res.status(400).json({ 
+      success: false,
+      message: "Email y token son requeridos" 
+    });
+  }
+
+  try {
+    const [users] = await pool.query(
+      "SELECT * FROM usuarios WHERE email = ?",
+      [email]
+    );
+
+    if (users.length === 0) {
+      return res.status(400).json({ 
+        success: false,
+        message: "Usuario no encontrado" 
+      });
+    }
+
+    const user = users[0];
+    
+    if (!user.reset_token || user.reset_token !== token) {
+      return res.status(400).json({ 
+        success: false,
+        message: "Token inválido" 
+      });
+    }
+
+    if (new Date(user.reset_token_expires) < new Date()) {
+      return res.status(400).json({ 
+        success: false,
+        message: "Token expirado" 
+      });
+    }
+
+    res.json({ 
+      success: true,
+      message: "Token válido"
+    });
+
+  } catch (error) {
+    console.error("Error en verify-reset-code:", error);
+    res.status(500).json({ 
+      success: false,
+      message: "Error en el servidor" 
+    });
+  }
+});
+
+// Ruta para resetear contraseña
+app.post("/reset-password", async (req, res) => {
+  const { email, token, newPassword } = req.body;
+
+  if (!email || !token || !newPassword) {
+    return res.status(400).json({ 
+      success: false,
+      message: "Todos los campos son requeridos" 
+    });
+  }
+
+  try {
+    const [users] = await pool.query(
+      "SELECT * FROM usuarios WHERE email = ? AND reset_token = ? AND reset_token_expires > NOW()",
+      [email, token]
+    );
+
+    if (users.length === 0) {
+      return res.status(400).json({ 
+        success: false,
+        message: "Token inválido o expirado" 
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    await pool.query(
+      "UPDATE usuarios SET password = ?, reset_token = NULL, reset_token_expires = NULL WHERE email = ?",
+      [hashedPassword, email]
+    );
+
+    res.json({ 
+      success: true,
+      message: "Contraseña actualizada correctamente" 
+    });
+
+  } catch (error) {
+    console.error("Error en reset-password:", error);
+    res.status(500).json({ 
+      success: false,
+      message: "Error en el servidor" 
+    });
+  }
+});
+
 // =============================================
 // RUTAS DEL PANEL DE ADMINISTRADOR
 // =============================================
@@ -113,10 +340,7 @@ app.get("/admin/stats", authenticateToken, isAdmin, async (req, res) => {
 
 /**
  * GESTIÓN DE SERVICIOS
- * Rutas actualizadas para coincidir con el frontend
  */
-
-// Obtener todos los servicios (ruta actualizada)
 app.get("/servicios", authenticateToken, isAdmin, async (req, res) => {
   try {
     const [services] = await pool.query("SELECT * FROM servicios");
@@ -127,7 +351,6 @@ app.get("/servicios", authenticateToken, isAdmin, async (req, res) => {
   }
 });
 
-// Crear un nuevo servicio (ruta actualizada)
 app.post("/servicios", authenticateToken, isAdmin, async (req, res) => {
   const { nombre, descripcion, precio } = req.body;
   
@@ -153,7 +376,6 @@ app.post("/servicios", authenticateToken, isAdmin, async (req, res) => {
   }
 });
 
-// Actualizar un servicio existente (ruta actualizada)
 app.put("/servicios/:id", authenticateToken, isAdmin, async (req, res) => {
   const { id } = req.params;
   const { nombre, descripcion, precio } = req.body;
@@ -176,7 +398,6 @@ app.put("/servicios/:id", authenticateToken, isAdmin, async (req, res) => {
   }
 });
 
-// Eliminar un servicio (ruta actualizada)
 app.delete("/servicios/:id", authenticateToken, isAdmin, async (req, res) => {
   const { id } = req.params;
   
@@ -198,10 +419,7 @@ app.delete("/servicios/:id", authenticateToken, isAdmin, async (req, res) => {
 
 /**
  * GESTIÓN DE VETERINARIOS
- * Rutas actualizadas para coincidir con el frontend
  */
-
-// Obtener todos los veterinarios (ruta actualizada)
 app.get("/usuarios/veterinarios", authenticateToken, isAdmin, async (req, res) => {
   try {
     const [vets] = await pool.query(
@@ -214,7 +432,6 @@ app.get("/usuarios/veterinarios", authenticateToken, isAdmin, async (req, res) =
   }
 });
 
-// Crear un nuevo veterinario (ruta actualizada)
 app.post("/usuarios/veterinarios", authenticateToken, isAdmin, async (req, res) => {
   const { nombre, apellido, email, telefono, direccion, password } = req.body;
   
@@ -253,7 +470,6 @@ app.post("/usuarios/veterinarios", authenticateToken, isAdmin, async (req, res) 
   }
 });
 
-// Actualizar un veterinario existente (ruta actualizada)
 app.put("/usuarios/veterinarios/:id", authenticateToken, isAdmin, async (req, res) => {
   const { id } = req.params;
   const { nombre, apellido, telefono, direccion } = req.body;
@@ -276,7 +492,6 @@ app.put("/usuarios/veterinarios/:id", authenticateToken, isAdmin, async (req, re
   }
 });
 
-// Eliminar un veterinario (ruta actualizada)
 app.delete("/usuarios/veterinarios/:id", authenticateToken, isAdmin, async (req, res) => {
   const { id } = req.params;
   
@@ -306,10 +521,7 @@ app.delete("/usuarios/veterinarios/:id", authenticateToken, isAdmin, async (req,
 
 /**
  * GESTIÓN DE ADMINISTRADORES
- * Rutas actualizadas para coincidir con el frontend
  */
-
-// Obtener todos los administradores (ruta actualizada)
 app.get("/usuarios/administradores", authenticateToken, isAdmin, async (req, res) => {
   try {
     const [admins] = await pool.query(
@@ -322,7 +534,6 @@ app.get("/usuarios/administradores", authenticateToken, isAdmin, async (req, res
   }
 });
 
-// Crear un nuevo administrador (ruta actualizada)
 app.post("/usuarios/administradores", authenticateToken, isAdmin, async (req, res) => {
   const { nombre, apellido, email, telefono, direccion, password } = req.body;
   
@@ -361,7 +572,6 @@ app.post("/usuarios/administradores", authenticateToken, isAdmin, async (req, re
   }
 });
 
-// Actualizar un administrador existente (ruta actualizada)
 app.put("/usuarios/administradores/:id", authenticateToken, isAdmin, async (req, res) => {
   const { id } = req.params;
   const { nombre, apellido, telefono, direccion } = req.body;
@@ -390,7 +600,6 @@ app.put("/usuarios/administradores/:id", authenticateToken, isAdmin, async (req,
   }
 });
 
-// Eliminar un administrador (ruta actualizada)
 app.delete("/usuarios/administradores/:id", authenticateToken, isAdmin, async (req, res) => {
   const { id } = req.params;
   
@@ -415,7 +624,6 @@ app.delete("/usuarios/administradores/:id", authenticateToken, isAdmin, async (r
 
 /**
  * GESTIÓN DE USUARIOS REGULARES
- * Solo lectura y cambio de estado (no se permite eliminar)
  */
 app.get("/admin/usuarios", authenticateToken, isAdmin, async (req, res) => {
   try {
@@ -456,7 +664,6 @@ app.put("/admin/usuarios/:id/status", authenticateToken, isAdmin, async (req, re
 
 /**
  * VISUALIZACIÓN DE CITAS
- * Solo lectura para el administrador
  */
 app.get("/admin/citas", authenticateToken, isAdmin, async (req, res) => {
   try {
@@ -480,7 +687,6 @@ app.get("/admin/citas", authenticateToken, isAdmin, async (req, res) => {
 
 /**
  * VISUALIZACIÓN DE HISTORIALES MÉDICOS
- * Solo lectura para el administrador
  */
 app.get("/admin/historiales", authenticateToken, isAdmin, async (req, res) => {
   try {
@@ -502,6 +708,30 @@ app.get("/admin/historiales", authenticateToken, isAdmin, async (req, res) => {
   }
 });
 
+// Ruta para obtener citas de hoy
+app.get("/api/citas/hoy", authenticateToken, async (req, res) => {
+  try {
+    const today = new Date().toISOString().split('T')[0];
+    
+    const [citas] = await pool.query(
+      `SELECT c.id_cita, c.id_cliente, cl.nombre as propietario, 
+       m.nombre as mascota, m.especie as tipoMascota, 
+       cl.direccion, s.nombre as servicio, c.fecha, c.estado
+       FROM citas c
+       JOIN clientes cl ON c.id_cliente = cl.id_cliente
+       LEFT JOIN mascotas m ON c.id_cliente = m.id_propietario
+       JOIN servicios s ON c.id_servicio = s.id_servicio
+       WHERE DATE(c.fecha) = ? AND c.id_veterinario = ?`,
+      [today, req.user.id]
+    );
+
+    res.json(citas);
+  } catch (error) {
+    console.error("Error al obtener citas de hoy:", error);
+    res.status(500).json({ message: "Error al obtener citas" });
+  }
+});
+
 // Iniciar el servidor
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
@@ -517,3 +747,4 @@ setInterval(async () => {
     console.error('Error limpiando tokens expirados:', err);
   }
 }, 3600000);
+
