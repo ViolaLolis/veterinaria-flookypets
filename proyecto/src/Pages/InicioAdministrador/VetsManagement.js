@@ -15,7 +15,7 @@ function VetsManagement({ user }) {
 
   const fetchVets = async () => {
     try {
-      const response = await fetch('http://localhost:5000/usuarios/veterinarios', {
+      const response = await fetch('http://localhost:5000/admin/veterinarians', {
         headers: {
           'Authorization': `Bearer ${user.token}`
         }

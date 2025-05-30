@@ -15,7 +15,7 @@ function ServicesManagement({ user }) {
 
   const fetchServices = async () => {
     try {
-      const response = await fetch('http://localhost:5000/servicios', {
+      const response = await fetch('http://localhost:5000/admin/services', {
         headers: {
           'Authorization': `Bearer ${user.token}`
         }

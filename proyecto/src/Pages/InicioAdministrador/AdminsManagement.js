@@ -15,7 +15,7 @@ function AdminsManagement({ user }) {
 
   const fetchAdmins = async () => {
     try {
-      const response = await fetch('http://localhost:5000/usuarios/administradores', {
+      const response = await fetch('http://localhost:5000/admin/administrators', {
         headers: {
           'Authorization': `Bearer ${user.token}`
         }
