@@ -1,302 +1,165 @@
 .container {
-  font-family: 'Nunito Sans', sans-serif;
-  background: linear-gradient(135 deg, #ffffffd9, #fff5e6d9);
-  padding: 40px;
-  border-radius: 15px;
-  box-shadow: 
-    0 8px 20px rgba(0, 0, 0, 0.08),
-    0 0 0 1px rgba(255, 179, 71, 0.2);
-  width: 95%;
-  max-width: 850px;
-  place-content: center;
-  margin: center;
-  display: flex;
-  flex-direction: column;
-  animation: fadeInUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-  position: relative;
-  overflow: hidden;
-  border: 1px solid rgba(255, 179, 71, 0.15);
-}
-
-.container::before {
-  content: '';
-  position: absolute;
-  place-items: center;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: linear-gradient(
-    to bottom right,
-    rgba(255, 179, 71, 0) 0%,
-    rgba(255, 179, 71, 0.05) 50%,
-    rgba(255, 179, 71, 0) 100%
-  );
-  transform: rotate(30deg);
-  transition: all 0.8s ease;
-}
-
-.container:hover::before {
-  left: 100%;
-  top: 100%;
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  padding: 2rem;
+  min-height: 100vh;
 }
 
 .header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  text-align: center;
+  margin-bottom: 2rem;
   position: relative;
-  z-index: 2;
+}
+
+.headerContent {
+  max-width: 800px;
+  margin: 0 auto;
 }
 
 .icon {
-  font-size: 3.5em;
-  color: #ff9500;
-  margin-bottom: 0px;
-  transition: transform 0.4s ease, color 0.4s ease;
-  text-shadow: 0 2px 4px rgba(255, 149, 0, 0.2);
-}
-
-.container:hover .icon {
-  transform: scale(1.1) rotate(5deg);
-  color: #ff8c00;
-}
-
-h3 {
-  color: #5a4a3a;
-  font-size: 2.8em;
-  margin-bottom: 10px;
-  position: relative;
-  display: inline-block;
-}
-
-h3::after {
-  content: '';
-  position: absolute;
-  bottom: -5px;
-  left: 0;
-  width: 0;
-  height: 3px;
-  background: linear-gradient(to right, #ff9500, #ffb347);
-  transition: width 0.6s cubic-bezier(0.65, 0, 0.35, 1);
-}
-
-.container:hover h3::after {
-  width: 100%;
+  font-size: 3rem;
+  margin-bottom: 1rem;
 }
 
 .subtitle {
-  color: #7a6a5a;
-  font-size: 1.15em;
-  text-align: center;
-  margin-bottom: 25px;
-  transition: color 0.4s ease;
+  color: #7f8c8d;
+  font-size: 1.1rem;
 }
 
-.container:hover .subtitle {
-  color: #5a4a3a;
+.searchContainer {
+  max-width: 600px;
+  margin: 2rem auto;
+}
+
+.searchBox {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 15px;
+  color: #00acc1;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 12px 20px 12px 45px;
+  border: 2px solid #bdc3c7;
+  border-radius: 30px;
+  font-size: 1rem;
+  outline: none;
+  transition: all 0.3s;
+}
+
+.searchInput:focus {
+  border-color: #00acc1;
+  box-shadow: 0 0 0 3px rgba(0, 172, 193, 0.2);
+}
+
+.clearSearch {
+  position: absolute;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  color: #7f8c8d;
+  cursor: pointer;
+  padding: 0 5px;
 }
 
 .listaServicios {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 30px;
-  padding-top: 10px;
-  position: relative;
-  z-index: 2;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
 }
 
 .servicioItem {
-  display: flex;
-  flex-direction: column;
-  border-radius: 12px;
+  background: white;
+  border-radius: 10px;
   overflow: hidden;
-  box-shadow: 
-    0 3px 10px rgba(0, 0, 0, 0.08),
-    0 0 0 1px rgba(255, 179, 71, 0.1);
-  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-  background-color: white;
-  position: relative;
-}
-
-.servicioItem::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, rgba(255, 179, 71, 0.05), rgba(255, 179, 71, 0.01));
-  z-index: 1;
-}
-
-.servicioItem:hover {
-  transform: translateY(-8px);
-  box-shadow: 
-    0 8px 25px rgba(0, 0, 0, 0.12),
-    0 0 0 1px rgba(255, 179, 71, 0.2);
+  transition: all 0.3s ease;
 }
 
 .servicioActions {
   display: flex;
-  padding: 18px;
-  gap: 12px;
-  justify-content: flex-end;
-  background-color: #f9f5f0;
-  border-top: 1px solid rgba(255, 179, 71, 0.2);
-  position: relative;
-  z-index: 2;
-}
-
-.verDetallesBtn,
-.agendarBtn {
-  padding: 12px 20px;
-  border: none;
-  border-radius: 8px;
-  font-size: 0.95em;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  position: relative;
-  overflow: hidden;
+  justify-content: space-between;
+  padding: 1rem;
+  border-top: 1px solid #ecf0f1;
 }
 
 .verDetallesBtn {
-  background: linear-gradient(to right, #5a4a3a, #7a6a5a);
-  color: white;
-}
-
-.verDetallesBtn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(to right, #7a6a5a, #5a4a3a);
-  transition: all 0.4s ease;
-  z-index: -1;
-}
-
-.verDetallesBtn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(90, 74, 58, 0.2);
-}
-
-.verDetallesBtn:hover::before {
-  left: 0;
+  padding: 8px 15px;
+  border: 1px solid #00acc1;
+  border-radius: 5px;
+  background: #ecf0f1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s;
 }
 
 .agendarBtn {
-  background: linear-gradient(to right, #ff9500, #ffb347);
+  padding: 8px 15px;
+  border: none;
+  border-radius: 5px;
+  background: #00acc1;
   color: white;
   text-decoration: none;
-  box-shadow: 0 2px 5px rgba(255, 149, 0, 0.3);
-}
-
-.agendarBtn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(to right, #ffb347, #ff9500);
-  transition: all 0.4s ease;
-  z-index: -1;
+  cursor: pointer;
+  transition: all 0.3s;
 }
 
 .agendarBtn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(255, 149, 0, 0.4);
-}
-
-.agendarBtn:hover::before {
-  left: 0;
+  background: #0097b2;
 }
 
 .actionIcon {
-  font-size: 1.1em;
-  transition: transform 0.3s ease;
-}
-
-.verDetallesBtn:hover .actionIcon {
-  transform: translateX(3px);
-}
-
-.agendarBtn:hover .actionIcon {
-  transform: rotate(-5deg) scale(1.1);
+  font-size: 0.9rem;
 }
 
 .verTodosContainer {
-  display: flex;
-  justify-content: center;
-  margin-top: 40px;
-  position: relative;
-  z-index: 2;
+  text-align: center;
+  margin-top: 3rem;
 }
 
 .verTodosBtn {
-  background: linear-gradient(to right, #ff9500, #ffb347);
-  color: white;
+  padding: 12px 25px;
   border: none;
-  border-radius: 10px;
-  padding: 18px 35px;
-  font-size: 1.15em;
-  font-weight: 600;
+  border-radius: 30px;
+  color: white;
+  font-weight: bold;
   cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 4px 15px rgba(255, 149, 0, 0.3);
-  letter-spacing: 0.5px;
-}
-
-.verTodosBtn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(to right, #ffb347, #ff9500);
-  transition: all 0.6s ease;
-  z-index: -1;
+  transition: all 0.3s;
 }
 
 .verTodosBtn:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 25px rgba(255, 149, 0, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 172, 193, 0.4);
 }
 
-.verTodosBtn:hover::before {
-  left: 0;
+.noResults {
+  text-align: center;
+  padding: 3rem;
+  color: #7f8c8d;
 }
 
-.container:hover {
-  animation: containerShine 2s infinite alternate;
-  background-image: 
-    linear-gradient(
-      90deg,
-      rgba(255,255,255,0) 0%,
-      rgba(255,255,255,0.2) 50%,
-      rgba(255,255,255,0) 100%
-    ),
-    linear-gradient(135deg, #ffffffd9, #fff5e6d9);
-  background-size: 200px 100%, auto;
-  background-repeat: no-repeat;
+.resetSearch {
+  margin-top: 1rem;
+  padding: 8px 15px;
+  border: 1px solid #00acc1;
+  border-radius: 5px;
+  background: transparent;
+  color: #00acc1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s;
+}
+
+.resetSearch:hover {
+  background: #00acc1;
+  color: white;
 }

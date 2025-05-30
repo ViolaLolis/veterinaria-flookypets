@@ -33,14 +33,7 @@ const ServiciosVeterinaria = () => {
         {servicios.map(servicio => (
           <div key={servicio.id} className={styles.servicioItem}>
             <TarjetaServicio servicio={servicio} />
-            <div className={styles.servicioActions}>
-              <button className={styles.verDetallesBtn}>
-                <FontAwesomeIcon icon={faEye} className={styles.actionIcon} /> Ver Detalles
-              </button>
-              <Link to="/usuario/citas/agendar" className={styles.agendarBtn}>
-                Agendar Cita
-              </Link>
-            </div>
+            
           </div>
         ))}
       </div>
