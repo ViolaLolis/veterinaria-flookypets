@@ -238,173 +238,182 @@ function OlvideContraseña() {
   };
 
   return (
-    <div className="olvide-container">
-      <div className="olvide-box">
-        <h2>Recuperar Contraseña</h2>
-        
-        {/* Barra de progreso */}
-        <div className="progress-container">
-          <span className={`progress-circle ${step >= 1 ? 'active' : ''}`}>
-            {step > 1 ? '✓' : '1'}
-          </span>
-          <span className="progress-line"></span>
-          <span className={`progress-circle ${step >= 2 ? 'active' : ''}`}>
-            {step > 2 ? '✓' : '2'}
-          </span>
-        </div>
-
-        {error && <div className="error-message">{error}</div>}
-        {successMessage && <div className="success-message">{successMessage}</div>}
-
-        {/* Paso 1: Ingresar correo y verificar código */}
-        {step === 1 && (
-          <form onSubmit={handleSubmit(codigoEnviado ? handleVerificarCodigo : handleEnviarCodigo)}>
-            <div className="input-group">
-              <label>Correo Electrónico</label>
-              <input
-                type="email"
-                {...register('correo', {
-                  required: 'El correo es obligatorio',
-                  pattern: {
-                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                    message: 'Correo electrónico inválido'
-                  }
-                })}
-                disabled={codigoEnviado}
-              />
-              {errors.correo && <span className="error-text">{errors.correo.message}</span>}
+    <div className="password-reset-container">
+      <div className="password-reset-wrapper">
+        <div className="password-reset-box">
+          <div className="reset-info-section">
+            <img src="/logo.png" alt="Flooky Pets" className="reset-illustration" />
+            <h1>Recupera tu contraseña</h1>
+            <p>Ingresa tu correo electrónico y sigue las instrucciones para restablecer tu contraseña.</p>
+          </div>
+          
+          <div className="reset-form-section">
+            <h2>Recuperar Contraseña</h2>
+            
+            {/* Barra de progreso */}
+            <div className="reset-progress">
+              <span className={`reset-progress-step ${step >= 1 ? 'active' : ''} ${step > 1 ? 'completed' : ''}`}>
+                {step > 1 ? '' : '1'}
+              </span>
+              <span className={`reset-progress-step ${step >= 2 ? 'active' : ''} ${step > 2 ? 'completed' : ''}`}>
+                {step > 2 ? '' : '2'}
+              </span>
             </div>
 
-            {codigoEnviado && (
-              <>
-                <div className="input-group">
-                  <label>Código de Verificación</label>
+            {error && <div className="reset-error-message">{error}</div>}
+            {successMessage && <div className="reset-success-message">{successMessage}</div>}
+
+            {/* Paso 1: Ingresar correo y verificar código */}
+            {step === 1 && (
+              <form onSubmit={handleSubmit(codigoEnviado ? handleVerificarCodigo : handleEnviarCodigo)}>
+                <div className="reset-input-group">
+                  <label>Correo Electrónico</label>
                   <input
-                    type="text"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    placeholder="Ingresa el código de 6 dígitos"
-                    {...register('codigoVerificacion', {
-                      required: 'El código es obligatorio',
-                      minLength: {
-                        value: 6,
-                        message: 'El código debe tener 6 dígitos'
-                      },
-                      maxLength: {
-                        value: 6,
-                        message: 'El código debe tener 6 dígitos'
-                      },
+                    type="email"
+                    {...register('correo', {
+                      required: 'El correo es obligatorio',
                       pattern: {
-                        value: /^[0-9]{6}$/,
-                        message: 'Solo se permiten números'
+                        value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                        message: 'Correo electrónico inválido'
                       }
                     })}
-                    disabled={codigoVerificado}
+                    disabled={codigoEnviado}
                   />
-                  {errors.codigoVerificacion && (
-                    <span className="error-text">{errors.codigoVerificacion.message}</span>
-                  )}
+                  {errors.correo && <span className="reset-error-text">{errors.correo.message}</span>}
                 </div>
 
-                <div className="timer-section">
-                  {tiempoRestante > 0 ? (
-                    <p className="timer-text">Puedes reenviar el código en {tiempoRestante} segundos</p>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={handleReenviarCodigo}
-                      className="btn-resend"
-                      disabled={isSubmitting}
-                    >
-                      Reenviar Código
-                    </button>
-                  )}
-                </div>
-              </>
+                {codigoEnviado && (
+                  <>
+                    <div className="reset-input-group">
+                      <label>Código de Verificación</label>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        placeholder="Ingresa el código de 6 dígitos"
+                        {...register('codigoVerificacion', {
+                          required: 'El código es obligatorio',
+                          minLength: {
+                            value: 6,
+                            message: 'El código debe tener 6 dígitos'
+                          },
+                          maxLength: {
+                            value: 6,
+                            message: 'El código debe tener 6 dígitos'
+                          },
+                          pattern: {
+                            value: /^[0-9]{6}$/,
+                            message: 'Solo se permiten números'
+                          }
+                        })}
+                        disabled={codigoVerificado}
+                      />
+                      {errors.codigoVerificacion && (
+                        <span className="reset-error-text">{errors.codigoVerificacion.message}</span>
+                      )}
+                    </div>
+
+                    <div className="reset-timer">
+                      {tiempoRestante > 0 ? (
+                        <p>Puedes reenviar el código en {tiempoRestante} segundos</p>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={handleReenviarCodigo}
+                          className="reset-btn-link"
+                          disabled={isSubmitting}
+                        >
+                          Reenviar Código
+                        </button>
+                      )}
+                    </div>
+                  </>
+                )}
+
+                <button
+                  type="submit"
+                  className={`reset-btn ${isSubmitting ? 'is-submitting' : ''}`}
+                  disabled={isSubmitting || (codigoEnviado && !!errors.codigoVerificacion)}
+                >
+                  {isSubmitting ? 'Procesando...' : 
+                  codigoEnviado ? 'Verificar Código' : 'Enviar Código de Verificación'}
+                </button>
+              </form>
             )}
 
-            <button
-              type="submit"
-              className="btn-submit"
-              disabled={isSubmitting || (codigoEnviado && !!errors.codigoVerificacion)}
-            >
-              {isSubmitting ? 'Procesando...' : 
-               codigoEnviado ? 'Verificar Código' : 'Enviar Código de Verificación'}
-            </button>
-          </form>
-        )}
+            {/* Paso 2: Cambiar contraseña */}
+            {step === 2 && (
+              <form onSubmit={handleSubmit(handleCambiarContraseña)}>
+                <div className="reset-input-group">
+                  <label>Nueva Contraseña</label>
+                  <input
+                    type="password"
+                    placeholder="Ingresa tu nueva contraseña"
+                    {...register('nuevaContraseña', {
+                      required: 'La contraseña es obligatoria',
+                      minLength: {
+                        value: 8,
+                        message: 'Mínimo 8 caracteres'
+                      },
+                      pattern: {
+                        value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+                        message: 'Debe incluir mayúscula, minúscula, número y carácter especial'
+                      }
+                    })}
+                  />
+                  {errors.nuevaContraseña && (
+                    <span className="reset-error-text">{errors.nuevaContraseña.message}</span>
+                  )}
+                  <small className="reset-hint-text">
+                    La contraseña debe contener al menos 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial (@$!%*?&)
+                  </small>
+                </div>
 
-        {/* Paso 2: Cambiar contraseña */}
-        {step === 2 && (
-          <form onSubmit={handleSubmit(handleCambiarContraseña)}>
-            <div className="input-group">
-              <label>Nueva Contraseña</label>
-              <input
-                type="password"
-                placeholder="Ingresa tu nueva contraseña"
-                {...register('nuevaContraseña', {
-                  required: 'La contraseña es obligatoria',
-                  minLength: {
-                    value: 8,
-                    message: 'Mínimo 8 caracteres'
-                  },
-                  pattern: {
-                    value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
-                    message: 'Debe incluir mayúscula, minúscula, número y carácter especial'
-                  }
-                })}
-              />
-              {errors.nuevaContraseña && (
-                <span className="error-text">{errors.nuevaContraseña.message}</span>
-              )}
-              <small className="password-hint">
-                La contraseña debe contener al menos 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial (@$!%*?&)
-              </small>
+                <div className="reset-input-group">
+                  <label>Confirmar Contraseña</label>
+                  <input
+                    type="password"
+                    placeholder="Confirma tu nueva contraseña"
+                    {...register('confirmarContraseña', {
+                      required: 'Debes confirmar la contraseña',
+                      validate: value => 
+                        value === watch('nuevaContraseña') || 'Las contraseñas no coinciden'
+                    })}
+                  />
+                  {errors.confirmarContraseña && (
+                    <span className="reset-error-text">{errors.confirmarContraseña.message}</span>
+                  )}
+                </div>
+
+                <div className="reset-form-navigation">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setStep(1);
+                      setError('');
+                      setSuccessMessage('');
+                    }}
+                    className="reset-btn reset-btn-secondary"
+                  >
+                    Volver
+                  </button>
+                  <button
+                    type="submit"
+                    className={`reset-btn ${isSubmitting ? 'is-submitting' : ''}`}
+                    disabled={isSubmitting || !!errors.nuevaContraseña || !!errors.confirmarContraseña}
+                  >
+                    {isSubmitting ? 'Cambiando...' : 'Cambiar Contraseña'}
+                  </button>
+                </div>
+              </form>
+            )}
+
+            <div className="reset-links">
+              <Link to="/login" className="reset-link">
+                ¿Recordaste tu contraseña? Inicia sesión
+              </Link>
             </div>
-
-            <div className="input-group">
-              <label>Confirmar Contraseña</label>
-              <input
-                type="password"
-                placeholder="Confirma tu nueva contraseña"
-                {...register('confirmarContraseña', {
-                  required: 'Debes confirmar la contraseña',
-                  validate: value => 
-                    value === watch('nuevaContraseña') || 'Las contraseñas no coinciden'
-                })}
-              />
-              {errors.confirmarContraseña && (
-                <span className="error-text">{errors.confirmarContraseña.message}</span>
-              )}
-            </div>
-
-            <div className="form-navigation">
-              <button
-                type="button"
-                onClick={() => {
-                  setStep(1);
-                  setError('');
-                  setSuccessMessage('');
-                }}
-                className="btn-prev"
-              >
-                Volver
-              </button>
-              <button
-                type="submit"
-                className="btn-submit"
-                disabled={isSubmitting || !!errors.nuevaContraseña || !!errors.confirmarContraseña}
-              >
-                {isSubmitting ? 'Cambiando...' : 'Cambiar Contraseña'}
-              </button>
-            </div>
-          </form>
-        )}
-
-        <div className="login-links">
-          <Link to="/login" className="link-login">
-            ¿Recordaste tu contraseña? Inicia sesión
-          </Link>
+          </div>
         </div>
       </div>
     </div>

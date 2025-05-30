@@ -1,98 +1,109 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import DashboardCards from './Components/DashboardCards';
+import { useNavigate } from 'react-router-dom';
+import AdminNavbar from './AdminNavbar';
+import AdminSidebar from './AdminSidebar';
+import AdminStats from './AdminStats';
 import ServicesManagement from './ServicesManagement';
-import UsersManagement from './UsersManagement';
-import MeetingModal from './Components/MeetingModal';
-import "./Styles/AdminDashboard.css";
+import VetsManagement from './VetsManagement';
+import AdminsManagement from './AdminsManagement';
+import UserProfile from './UserProfile';
+import './Styles/Admin.css';
 
-const AdminDashboard = () => {
+function AdminDashboard({ user, setUser }) {
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [showMeetingModal, setShowMeetingModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [stats, setStats] = useState({});
   const navigate = useNavigate();
 
-  // Verificar autenticación al cargar el componente
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem('user'));
     if (!user || user.role !== 'admin') {
       navigate('/login');
+      return;
     }
-  }, [navigate]);
+
+    // Simular carga de datos
+    const timer = setTimeout(() => {
+      fetchAdminStats();
+      setIsLoading(false);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [user, navigate]);
+
+  const fetchAdminStats = async () => {
+    try {
+      // En una aplicación real, harías una llamada a tu API
+      const response = await fetch('http://localhost:5000/admin/stats', {
+        headers: {
+          'Authorization': `Bearer ${user.token}`
+        }
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        setStats(data);
+      } else {
+        console.error('Error al cargar estadísticas:', data.message);
+      }
+    } catch (error) {
+      console.error('Error de conexión:', error);
+      // Datos de ejemplo para desarrollo
+      setStats({
+        totalUsers: 23,
+        totalVets: 5,
+        totalAdmins: 2,
+        totalServices: 6,
+        recentAppointments: 20
+      });
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('user');
+    setUser(null);
     navigate('/login');
   };
 
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'dashboard':
+        return <AdminStats stats={stats} />;
+      case 'services':
+        return <ServicesManagement user={user} />;
+      case 'veterinarians':
+        return <VetsManagement user={user} />;
+      case 'administrators':
+        return <AdminsManagement user={user} />;
+      case 'profile':
+        return <UserProfile user={user} setUser={setUser} />;
+      default:
+        return <AdminStats stats={stats} />;
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="admin-loading">
+        <div className="loading-spinner"></div>
+        <p>Cargando dashboard...</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="admin-container">
-      {/* Sidebar */}
-      <div className="admin-sidebar">
-        <div className="sidebar-header">
-          <img 
-            src={require('../Inicio/Imagenes/flooty.png')} 
-            alt="FlookyPets Logo" 
-            className="sidebar-logo"
-          />
-          <h2>Panel de Administración</h2>
-        </div>
+    <div className="admin-dashboard">
+      <AdminNavbar user={user} handleLogout={handleLogout} />
+      
+      <div className="admin-container">
+        <AdminSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
         
-        <nav className="sidebar-nav">
-          <button 
-            className={activeTab === 'dashboard' ? 'active' : ''}
-            onClick={() => setActiveTab('dashboard')}
-          >
-            <i className="fas fa-chart-line"></i> Dashboard
-          </button>
-          
-          <button 
-            className={activeTab === 'services' ? 'active' : ''}
-            onClick={() => setActiveTab('services')}
-          >
-            <i className="fas fa-clipboard-list"></i> Servicios
-          </button>
-          
-          <button 
-            className={activeTab === 'users' ? 'active' : ''}
-            onClick={() => setActiveTab('users')}
-          >
-            <i className="fas fa-users-cog"></i> Usuarios
-          </button>
-          
-          <button 
-            className={activeTab === 'meetings' ? 'active' : ''}
-            onClick={() => setShowMeetingModal(true)}
-          >
-            <i className="fas fa-calendar-alt"></i> Reunión con Veterinarios
-          </button>
-        </nav>
-        
-        <div className="sidebar-footer">
-          <button onClick={handleLogout} className="logout-btn">
-            <i className="fas fa-sign-out-alt"></i> Cerrar Sesión
-          </button>
-        </div>
+        <main className="admin-content">
+          {renderTabContent()}
+        </main>
       </div>
-
-      {/* Main Content */}
-      <div className="admin-main">
-        {activeTab === 'dashboard' && (
-          <>
-            <h1>Dashboard de Administración</h1>
-            <DashboardCards />
-          </>
-        )}
-        
-        {activeTab === 'services' && <ServicesManagement />}
-        {activeTab === 'users' && <UsersManagement />}
-      </div>
-
-      {/* Meeting Modal */}
-      {showMeetingModal && (
-        <MeetingModal onClose={() => setShowMeetingModal(false)} />
-      )}
     </div>
   );
-};
+}
 
 export default AdminDashboard;

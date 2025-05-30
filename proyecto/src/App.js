@@ -51,19 +51,15 @@ import LlamadaVeterinario from "./Pages/InicioVeterinario/LlamadaVeterinario";
 
 // Componentes de Administrador
 import AdminDashboard from "./Pages/InicioAdministrador/AdminDashboard";
-import ServicesManagement from "./Pages/InicioAdministrador/ServicesManagement.js";
-import UsersManagement from "./Pages/InicioAdministrador/UsersManagement.js";
-import AdminStats from "./Pages/InicioAdministrador/AdminStats";
-import AdminSettings from "./Pages/InicioAdministrador/AdminSettings";
+import AdminServices from "./Pages/InicioAdministrador/AdminServices";
+import AdminVets from "./Pages/InicioAdministrador/AdminVets";
+import AdminAdmins from "./Pages/InicioAdministrador/AdminAdmins";
 import AdminProfile from "./Pages/InicioAdministrador/AdminProfile";
-import AdminReports from "./Pages/InicioAdministrador/AdminReports";
-import MeetingManagement from "./Pages/InicioAdministrador/MeetingManagement.js";
-import AdminCalendar from "./Pages/InicioAdministrador/AdminCalendar.js";
-import AdminNotifications from "./Pages/InicioAdministrador/AdminNotifications.js";
-import AdminBackup from "./Pages/InicioAdministrador/AdminBackup.js";
-import AdminLogs from "./Pages/InicioAdministrador/AdminLogs";
-import AdminBilling from "./Pages/InicioAdministrador/AdminBilling.js";
-import AdminIntegrations from "./Pages/InicioAdministrador/AdminIntegrations";
+import AdminStats from "./Pages/InicioAdministrador/AdminStats";
+import AdminUsers from "./Pages/InicioAdministrador/AdminUsers";
+import AdminAppointments from "./Pages/InicioAdministrador/AdminAppointments";
+import AdminMedicalRecords from "./Pages/InicioAdministrador/AdminMedicalRecords";
+import AdminSettings from "./Pages/InicioAdministrador/AdminSettings";
 
 function App() {
   const [user, setUser] = React.useState(() => {
@@ -82,38 +78,35 @@ function App() {
 
         {/* Rutas de administrador */}
         <Route element={<Protegida user={user} allowedRoles={['admin']} />}>
-          <Route path="/admin" element={<AdminDashboard />}>
-            {/* Dashboard y estadísticas */}
+          <Route path="/admin" element={<AdminDashboard user={user} setUser={setUser} />}>
             <Route index element={<AdminStats />} />
+            
+            {/* Dashboard y estadísticas */}
             <Route path="dashboard" element={<AdminStats />} />
-            <Route path="stats" element={<AdminStats />} />
             
-            {/* Gestión de contenido */}
-            <Route path="services" element={<ServicesManagement />} />
-            <Route path="users" element={<UsersManagement />} />
-            <Route path="meetings" element={<MeetingManagement />} />
+            {/* Gestión de servicios */}
+            <Route path="services" element={<AdminServices />} />
             
-            {/* Reportes y análisis */}
-            <Route path="reports" element={<AdminReports />} />
-            <Route path="reports/:type" element={<AdminReports />} />
+            {/* Gestión de veterinarios */}
+            <Route path="veterinarians" element={<AdminVets />} />
             
-            {/* Configuraciones */}
+            {/* Gestión de administradores */}
+            <Route path="administrators" element={<AdminAdmins />} />
+            
+            {/* Gestión de usuarios */}
+            <Route path="users" element={<AdminUsers />} />
+            
+            {/* Gestión de citas */}
+            <Route path="appointments" element={<AdminAppointments />} />
+            
+            {/* Historiales médicos */}
+            <Route path="medical-records" element={<AdminMedicalRecords />} />
+            
+            {/* Configuración */}
             <Route path="settings" element={<AdminSettings />} />
-            <Route path="settings/general" element={<AdminSettings tab="general" />} />
-            <Route path="settings/security" element={<AdminSettings tab="security" />} />
-            <Route path="settings/notifications" element={<AdminSettings tab="notifications" />} />
-            
-            {/* Herramientas administrativas */}
-            <Route path="calendar" element={<AdminCalendar />} />
-            <Route path="notifications" element={<AdminNotifications />} />
-            <Route path="backup" element={<AdminBackup />} />
-            <Route path="logs" element={<AdminLogs />} />
-            <Route path="billing" element={<AdminBilling />} />
-            <Route path="integrations" element={<AdminIntegrations />} />
             
             {/* Perfil */}
-            <Route path="profile" element={<AdminProfile setUser={setUser} />} />
-            <Route path="profile/edit" element={<AdminProfile setUser={setUser} editMode />} />
+            <Route path="profile" element={<AdminProfile user={user} setUser={setUser} />} />
           </Route>
         </Route>
 
@@ -156,7 +149,7 @@ function App() {
         {/* Rutas de usuario */}
         <Route element={<Protegida user={user} allowedRoles={['usuario', 'admin', 'veterinario']} />}>
           <Route path="/usuario" element={<InicioUsuario />}>
-            
+            <Route index element={<CitasUsuario />} />
             
             {/* Gestión de mascotas */}
             <Route path="mascotas/agregar" element={<AgregarMascota />} />
