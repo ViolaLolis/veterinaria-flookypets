@@ -747,4 +747,42 @@ setInterval(async () => {
     console.error('Error limpiando tokens expirados:', err);
   }
 }, 3600000);
+// Obtener citas por mes para el gráfico
+app.get('/api/stats/citas-por-mes', async (req, res) => {
+  try {
+    const [results] = await pool.query(`
+      SELECT 
+        MONTHNAME(fecha) as mes,
+        COUNT(*) as cantidad
+      FROM citas
+      WHERE fecha >= DATE_SUB(NOW(), INTERVAL 12 MONTH)
+      GROUP BY MONTH(fecha), mes
+      ORDER BY MONTH(fecha) ASC
+    `);
+    res.json(results);
+  } catch (error) {
+    console.error('Error al obtener citas por mes:', error);
+    res.status(500).json({ message: 'Error del servidor' });
+  }
+});
 
+// Obtener servicios más populares
+app.get('/api/stats/servicios-populares', async (req, res) => {
+  try {
+    const [results] = await pool.query(`
+      SELECT 
+        s.nombre as servicio,
+        COUNT(c.id_servicio) as cantidad
+      FROM citas c
+      JOIN servicios s ON c.id_servicio = s.id_servicio
+      WHERE c.fecha >= DATE_SUB(NOW(), INTERVAL 3 MONTH)
+      GROUP BY c.id_servicio
+      ORDER BY cantidad DESC
+      LIMIT 5
+    `);
+    res.json(results);
+  } catch (error) {
+    console.error('Error al obtener servicios populares:', error);
+    res.status(500).json({ message: 'Error del servidor' });
+  }
+});

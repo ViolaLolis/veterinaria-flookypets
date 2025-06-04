@@ -1,6 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { FaUsers, FaUserMd, FaUserShield, FaConciergeBell, FaCalendarAlt, FaChartLine } from 'react-icons/fa';
+import { Bar, Pie } from 'react-chartjs-2';
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement } from 'chart.js';
 import './Styles/Admin.css';
+
+// Registra los componentes necesarios de Chart.js
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement
+);
 
 function AdminStats() {
   const [stats, setStats] = useState({
@@ -11,7 +24,11 @@ function AdminStats() {
     totalAppointments: 0,
     monthlyGrowth: 0
   });
+  
+  const [citasPorMes, setCitasPorMes] = useState([]);
+  const [serviciosPopulares, setServiciosPopulares] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingCharts, setIsLoadingCharts] = useState(true);
 
   useEffect(() => {
     // Simular carga de estadísticas
@@ -26,7 +43,125 @@ function AdminStats() {
       });
       setIsLoading(false);
     }, 1000);
+
+    // Cargar datos para gráficos
+    const fetchChartData = async () => {
+      try {
+        // En un proyecto real, harías fetch a tus endpoints API
+        // const citasRes = await fetch('/api/stats/citas-por-mes');
+        // const serviciosRes = await fetch('/api/stats/servicios-populares');
+        // const citasData = await citasRes.json();
+        // const serviciosData = await serviciosRes.json();
+        
+        // Datos de ejemplo (simulando la respuesta de la API)
+        const citasData = [
+          { mes: 'Enero', cantidad: 45 },
+          { mes: 'Febrero', cantidad: 60 },
+          { mes: 'Marzo', cantidad: 55 },
+          { mes: 'Abril', cantidad: 72 },
+          { mes: 'Mayo', cantidad: 85 },
+          { mes: 'Junio', cantidad: 120 }
+        ];
+        
+        const serviciosData = [
+          { servicio: 'Consulta General', cantidad: 150 },
+          { servicio: 'Vacunación', cantidad: 95 },
+          { servicio: 'Estética Canina y Felina', cantidad: 65 },
+          { servicio: 'Diagnóstico por Imagen', cantidad: 42 },
+          { servicio: 'Laboratorio Clínico', cantidad: 30 }
+        ];
+        
+        setCitasPorMes(citasData);
+        setServiciosPopulares(serviciosData);
+        setIsLoadingCharts(false);
+      } catch (error) {
+        console.error('Error al cargar datos para gráficos:', error);
+        setIsLoadingCharts(false);
+      }
+    };
+
+    fetchChartData();
   }, []);
+
+  // Configuración del gráfico de barras (citas por mes)
+  const citasChartData = {
+    labels: citasPorMes.map(item => item.mes),
+    datasets: [
+      {
+        label: 'Citas por mes',
+        data: citasPorMes.map(item => item.cantidad),
+        backgroundColor: 'rgba(54, 162, 235, 0.7)',
+        borderColor: 'rgba(54, 162, 235, 1)',
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  const citasChartOptions = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'top',
+      },
+      title: {
+        display: true,
+        text: 'Citas registradas por mes',
+        font: {
+          size: 16
+        }
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          stepSize: 20
+        }
+      }
+    }
+  };
+
+  // Configuración del gráfico circular (servicios populares)
+  const serviciosChartData = {
+    labels: serviciosPopulares.map(item => item.servicio),
+    datasets: [
+      {
+        label: 'Cantidad de citas',
+        data: serviciosPopulares.map(item => item.cantidad),
+        backgroundColor: [
+          'rgba(255, 99, 132, 0.7)',
+          'rgba(54, 162, 235, 0.7)',
+          'rgba(255, 206, 86, 0.7)',
+          'rgba(75, 192, 192, 0.7)',
+          'rgba(153, 102, 255, 0.7)',
+        ],
+        borderColor: [
+          'rgba(255, 99, 132, 1)',
+          'rgba(54, 162, 235, 1)',
+          'rgba(255, 206, 86, 1)',
+          'rgba(75, 192, 192, 1)',
+          'rgba(153, 102, 255, 1)',
+        ],
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  const serviciosChartOptions = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'right',
+      },
+      title: {
+        display: true,
+        text: 'Servicios más solicitados',
+        font: {
+          size: 16
+        }
+      },
+    },
+  };
 
   if (isLoading) {
     return (
@@ -115,18 +250,20 @@ function AdminStats() {
       <div className="charts-section">
         <div className="chart-container">
           <h3>Citas por Mes</h3>
-          <div className="chart-placeholder">
-            {/* Aquí iría un gráfico real con una librería como Chart.js */}
-            <p>Gráfico de citas mensuales</p>
-          </div>
+          {isLoadingCharts ? (
+            <div className="chart-loading">Cargando datos...</div>
+          ) : (
+            <Bar options={citasChartOptions} data={citasChartData} />
+          )}
         </div>
         
         <div className="chart-container">
           <h3>Servicios Más Populares</h3>
-          <div className="chart-placeholder">
-            {/* Aquí iría un gráfico real con una librería como Chart.js */}
-            <p>Gráfico de servicios populares</p>
-          </div>
+          {isLoadingCharts ? (
+            <div className="chart-loading">Cargando datos...</div>
+          ) : (
+            <Pie options={serviciosChartOptions} data={serviciosChartData} />
+          )}
         </div>
       </div>
     </div>
