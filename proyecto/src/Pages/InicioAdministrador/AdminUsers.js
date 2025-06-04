@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FaUser, FaEdit, FaTrash, FaSearch, FaBan, FaCheck } from 'react-icons/fa';
-import './Styles/Admin.css';
+import './Styles/AdminUser.css';
 
 function AdminUsers() {
   const [users, setUsers] = useState([]);

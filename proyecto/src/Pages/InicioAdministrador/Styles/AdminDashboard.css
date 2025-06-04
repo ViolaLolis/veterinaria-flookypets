@@ -1,0 +1,155 @@
+/* AdminDashboard.css - Diseño Premium con #00acc1 y #ecf0f1 */
+
+:root {
+    --primary: #00acc1;
+    --primary-light: rgba(0, 172, 193, 0.1);
+    --primary-dark: #008c9e;
+    --primary-glow: rgba(0, 172, 193, 0.3);
+    --secondary: #ecf0f1;
+    --secondary-dark: #dfe6e9;
+    --text-dark: #2c3e50;
+    --text-light: #7f8c8d;
+    --white: #ffffff;
+    --danger: #ff6b6b;
+    --success: #1dd1a1;
+    --warning: #ff9f43;
+    --shadow: 0 4px 25px rgba(0, 0, 0, 0.08);
+    --transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+  
+  /* Estructura principal con efecto de profundidad */
+  .admin-dashboard {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: var(--secondary);
+    font-family: 'Poppins', 'Segoe UI', sans-serif;
+    color: var(--text-dark);
+    overflow-x: hidden;
+  }
+  
+  /* Contenedor principal flexible */
+  .admin-container {
+    display: flex;
+    flex: 1;
+    position: relative;
+    transition: var(--transition);
+  }
+  
+  /* Contenido principal con efecto de elevación */
+  .admin-content {
+    flex: 1;
+    padding: 2.5rem;
+    background-color: var(--secondary);
+    margin-left: 280px;
+    transition: var(--transition);
+    min-height: calc(100vh - 80px);
+  }
+  
+  .admin-content::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 280px;
+    width: calc(100% - 280px);
+    height: 100%;
+    background: radial-gradient(circle at 80% 20%, rgba(0, 172, 193, 0.05) 0%, transparent 40%);
+    pointer-events: none;
+  }
+  
+  /* Animaciones personalizadas */
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+  
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 var(--primary-glow); }
+    70% { box-shadow: 0 0 0 15px transparent; }
+    100% { box-shadow: 0 0 0 0 transparent; }
+  }
+  
+  @keyframes slideIn {
+    from { transform: translateX(-20px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  
+  /* Pantalla de carga */
+  .admin-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background-color: var(--secondary);
+  }
+  
+  .loading-spinner {
+    width: 70px;
+    height: 70px;
+    border: 5px solid var(--secondary-dark);
+    border-top: 5px solid var(--primary);
+    border-radius: 50%;
+    animation: spin 1.5s linear infinite, pulse 2s infinite;
+    margin-bottom: 2rem;
+  }
+  
+  .admin-loading p {
+    font-size: 1.2rem;
+    color: var(--text-dark);
+    margin-top: 1.5rem;
+    animation: slideIn 0.6s ease-out;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  /* Efectos hover para el contenido */
+  .admin-content > * {
+    transition: var(--transition);
+    animation: slideIn 0.4s ease-out;
+  }
+  
+  .admin-content > *:hover {
+    transform: translateY(-3px);
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 1200px) {
+    .admin-sidebar {
+      transform: translateX(-100%);
+      width: 300px;
+    }
+    
+    .admin-sidebar.active {
+      transform: translateX(0);
+    }
+    
+    .admin-content {
+      margin-left: 0;
+    }
+    
+    .admin-content::before {
+      left: 0;
+      width: 100%;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .admin-content {
+      padding: 1.8rem;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .admin-content {
+      padding: 1.5rem;
+    }
+    
+    .loading-spinner {
+      width: 50px;
+      height: 50px;
+    }
+  }

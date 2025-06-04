@@ -1,5 +1,5 @@
 import React from 'react';
-import './Styles/Admin.css';
+import './Styles/AdminSidebar.css';
 
 function AdminSidebar({ activeTab, setActiveTab }) {
   return (

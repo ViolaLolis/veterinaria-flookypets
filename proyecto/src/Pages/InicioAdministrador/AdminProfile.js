@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FaUserCog, FaSave, FaTimes, FaLock } from 'react-icons/fa';
-import './Styles/Admin.css';
+import './Styles/AdminProfile.css';
 
 function AdminProfile({ user, setUser }) {
   const [editMode, setEditMode] = useState(false);

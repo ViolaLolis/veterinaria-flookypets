@@ -7,7 +7,7 @@ import ServicesManagement from './ServicesManagement';
 import VetsManagement from './VetsManagement';
 import AdminsManagement from './AdminsManagement';
 import UserProfile from './UserProfile';
-import './Styles/Admin.css';
+import './Styles/AdminDashboard.css';
 
 function AdminDashboard({ user, setUser }) {
   const [activeTab, setActiveTab] = useState('dashboard');
