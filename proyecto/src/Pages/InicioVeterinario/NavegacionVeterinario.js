@@ -1,6 +1,7 @@
+// NavegacionVeterinario.js
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import styles from './Style/NavegacionVeterinarioStyles.module.css';
+import styles from './Style/NavegacionVeterinarioStyles.module.css'; // Asegúrate de que esta ruta sea correcta
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faPaw, faCalendarAlt, faFileMedicalAlt, faUserCog } from '@fortawesome/free-solid-svg-icons';
 import { motion } from 'framer-motion';
@@ -18,8 +19,16 @@ const NavegacionVeterinario = () => {
     <motion.nav className={styles.navegacion}>
       <ul className={styles.lista}>
         {navItems.map((item) => (
-          <motion.li key={item.path} className={styles.item} whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
-            <NavLink to={item.path} className={({ isActive }) => isActive ? styles.activo : styles.link}>
+          <motion.li
+            key={item.path}
+            className={styles.item}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <NavLink
+              to={item.path}
+              className={({ isActive }) => isActive ? styles.activo : styles.link}
+            >
               <FontAwesomeIcon icon={item.icon} className={styles.icono} />
               <span className={styles.label}>{item.label}</span>
             </NavLink>
