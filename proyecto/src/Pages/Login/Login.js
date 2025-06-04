@@ -99,25 +99,25 @@ function Login({ setUser }) {
   };
 
   return (
-    <div className="login-container">
-      <div className="login-wrapper">
-        <div className="login-box">
-          <div className="logo-section">
+    <div className="auth-container">
+      <div className="auth-wrapper">
+        <div className="auth-box">
+          <div className="brand-section">
             <img 
               src={require('../Inicio/Imagenes/flooty.png')}  
               alt="Logo de la empresa" 
-              className="login-logo"
+              className="auth-logo"
             />
             <h2>Bienvenido</h2>
             <p>Ingresa tus credenciales para acceder a nuestra veterinaria</p>
           </div>
           
-          <div className="form-section">
+          <div className="auth-form">
             <h2>Iniciar Sesión</h2>
             {errors.form && <p className="error-message">⚠ {errors.form} ⚠</p>}
 
             <form onSubmit={handleLogin}>
-              <div className="input-group">
+              <div className="form-field">
                 <label>Correo Electrónico:</label>
                 <input 
                   type="email" 
@@ -129,10 +129,10 @@ function Login({ setUser }) {
                   onBlur={() => handleBlur('email')}
                   className={errors.email ? 'input-error' : ''}
                 />
-                {errors.email && <span className="field-error">⚠ {errors.email} ⚠</span>}
+                {errors.email && <span className="field-error">⚠ {errors.email} �</span>}
               </div>
 
-              <div className="input-group">
+              <div className="form-field">
                 <label>Contraseña:</label>
                 <input 
                   type="password" 
@@ -149,26 +149,30 @@ function Login({ setUser }) {
 
               <button 
                 type="submit" 
-                className="btn-login"
+                className="btn-auth"
                 disabled={!!errors.email || !!errors.password}
               >
                 Iniciar Sesión
               </button>
             </form>
 
-            <div className="login-links">
+            <div className="auth-links">
               <Link to="/olvide-contraseña" className="link">Olvidé mi contraseña</Link>
               <Link to="/register" className="link">Registrarme</Link>
             </div>
           </div>
         </div>
 
-        <div className="login-footer">
-          <button className="btn-back" onClick={() => navigate('/')}>Volver al inicio</button>
+        <div className="auth-footer">
+          <button className="btn-return" onClick={() => navigate('/')}>Volver al inicio</button>
         </div>
       </div>
     </div>
+
+    
   );
+
+  
 }
 
 export default Login;

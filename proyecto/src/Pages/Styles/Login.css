@@ -10,7 +10,7 @@
 }
 
 /* Estructura principal */
-.login-container {
+.auth-container {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -21,13 +21,13 @@
   padding: 20px;
 }
 
-.login-wrapper {
+.auth-wrapper {
   width: 100%;
   max-width: 900px;
 }
 
 /* Contenedor de dos columnas */
-.login-box {
+.auth-box {
   display: flex;
   background: var(--color-white);
   border-radius: 15px;
@@ -37,7 +37,7 @@
 }
 
 /* Columna izquierda (logo) */
-.logo-section {
+.brand-section {
   flex: 1;
   padding: 40px;
   background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
@@ -49,19 +49,19 @@
   color: var(--color-white);
 }
 
-.login-logo {
+.auth-logo {
   max-width: 120px;
   margin-bottom: 30px;
   filter: brightness(0) invert(1);
 }
 
-.logo-section h1 {
+.brand-section h1 {
   font-size: 2rem;
   margin-bottom: 10px;
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
 }
 
-.logo-section h2 {
+.brand-section h2 {
   font-size: 1.2rem;
   font-weight: normal;
   opacity: 0.9;
@@ -69,13 +69,13 @@
 }
 
 /* Columna derecha (formulario) */
-.form-section {
+.auth-form {
   flex: 1;
   padding: 40px;
   background: var(--color-white);
 }
 
-.form-section h2 {
+.auth-form h2 {
   color: var(--color-dark);
   font-size: 1.2rem;
   text-transform: uppercase;
@@ -85,7 +85,7 @@
   padding-bottom: 10px;
 }
 
-.form-section h2::after {
+.auth-form h2::after {
   content: "";
   position: absolute;
   bottom: 0;
@@ -96,18 +96,18 @@
 }
 
 /* Campos de formulario */
-.input-group {
+.form-field {
   margin-bottom: 20px;
 }
 
-.input-group label {
+.form-field label {
   display: block;
   color: var(--color-dark);
   margin-bottom: 8px;
   font-size: 0.9rem;
 }
 
-.input-group input {
+.form-field input {
   width: 100%;
   padding: 12px;
   border: 1px solid var(--color-border);
@@ -116,13 +116,13 @@
   transition: all 0.3s;
 }
 
-.input-group input:focus {
+.form-field input:focus {
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(0, 188, 212, 0.1);
 }
 
 /* Botón */
-.btn-login {
+.btn-auth {
   width: 100%;
   padding: 14px;
   background: linear-gradient(to right, var(--color-primary), var(--color-secondary));
@@ -137,44 +137,44 @@
   box-shadow: 0 4px 12px rgba(0, 188, 212, 0.2);
 }
 
-.btn-login:hover {
+.btn-auth:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(0, 188, 212, 0.3);
 }
 
 /* Enlaces */
-.login-links {
+.auth-links {
   display: flex;
   justify-content: space-between;
   margin-top: 20px;
   font-size: 0.9rem;
 }
 
-.login-links a {
+.auth-links a {
   color: var(--color-primary);
   text-decoration: none;
   transition: all 0.2s;
 }
 
-.login-links a:hover {
+.auth-links a:hover {
   text-decoration: underline;
   color: var(--color-secondary);
 }
 
 /* Pie de página */
-.login-footer {
+.auth-footer {
   margin-top: 30px;
   text-align: center;
 }
 
-.btn-back {
+.btn-return {
   color: var(--color-primary);
   text-decoration: none;
   font-size: 0.9rem;
   transition: all 0.2s;
 }
 
-.btn-back:hover {
+.btn-return:hover {
   text-decoration: underline;
 }
 
@@ -192,7 +192,7 @@
 
 /* Responsive */
 /* Ajustes específicos para el logo más grande */
-.login-logo {
+.auth-logo {
   max-width: 180px; /* Aumenté de 120px a 180px */
   margin-bottom: 30px;
   filter: brightness(0) invert(1);
@@ -201,13 +201,13 @@
 
 /* Versión móvil para que no sea demasiado grande en pantallas pequeñas */
 @media (max-width: 480px) {
-  .login-logo {
+  .auth-logo {
     max-width: 140px; /* Más grande que antes pero no excesivo */
   }
 }
 
 /* Ajusté el contenedor del logo para mejor proporción */
-.logo-section {
+.brand-section {
   flex: 1;
   padding: 50px 40px; /* Más padding arriba/abajo */
   background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
@@ -215,4 +215,31 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
+}
+
+/* Estilos para el botón de volver */
+.btn-return {
+  background: transparent;
+  color: var(--color-primary);
+  border: 2px solid var(--color-primary);
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-block;
+  margin-top: 20px;
+}
+
+.btn-return:hover {
+  background: var(--color-primary);
+  color: var(--color-white);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 188, 212, 0.2);
+}
+
+.btn-return:active {
+  transform: translateY(0);
 }
