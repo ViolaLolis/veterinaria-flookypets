@@ -1,241 +1,250 @@
+/* CitasUsuario.module.css */
+
 .container {
-  font-family: 'Quicksand', sans-serif;
-  background: linear-gradient(135deg, #fff8e6, #fff0d8);
-  padding: 40px;
-  border-radius: 16px;
-  box-shadow: 
-    0 10px 25px rgba(0, 0, 0, 0.08),
-    0 0 0 1px rgba(255, 179, 71, 0.1);
-  width: 95%;
   max-width: 800px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  animation: slideInBounce 0.8s cubic-bezier(0.68, -0.6, 0.32, 1.6) forwards;
-  margin: 40px auto;
-  position: relative;
-  overflow: hidden;
-  border: 1px solid rgba(255, 179, 71, 0.15);
-  text-align: center; /* Centraliza todo el texto */
+  margin: 2rem auto;
+  padding: 1.5rem;
+  background-color: #ecf0f1;
+  border-radius: 15px;
+  box-shadow: 0 10px 25px rgba(0, 172, 193, 0.2);
+  transition: all 0.3s ease;
 }
 
-@keyframes slideInBounce {
-  from {
-    opacity: 0;
-    transform: translateY(-30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.container:hover {
+  box-shadow: 0 15px 30px rgba(0, 172, 193, 0.3);
 }
 
 .header {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 15px;
-  margin-bottom: 30px;
-  width: 100%;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #00acc1;
+}
+
+.header h3 {
+  color: #2c3e50;
+  font-size: 1.8rem;
+  margin: 0;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .icon {
-  font-size: 3em;
-  color: #ff9500;
-  animation: pulseIcon 2s infinite alternate;
-  text-shadow: 0 2px 8px rgba(255, 149, 0, 0.3);
+  color: #00acc1;
+  font-size: 2rem;
+  transition: transform 0.3s ease;
 }
 
-@keyframes pulseIcon {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.1); }
-}
-
-h3 {
-  color: #5a4a3a;
-  font-size: 2.5em;
-  margin: 0;
-  font-weight: 700;
-  position: relative;
-  display: inline-block;
-}
-
-h3::after {
-  content: '';
-  position: absolute;
-  bottom: -8px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 0;
-  height: 4px;
-  background: linear-gradient(to right, #ff9500, #ffb347);
-  border-radius: 2px;
-  transition: width 0.6s ease;
-}
-
-.container:hover h3::after {
-  width: 80%;
+.header:hover .icon {
+  transform: rotate(-10deg) scale(1.1);
 }
 
 .listaCitas {
   list-style: none;
   padding: 0;
+  margin: 0;
   display: flex;
   flex-direction: column;
-  align-items: center; /* Centraliza las tarjetas */
-  gap: 25px;
-  width: 100%;
+  gap: 1.5rem;
 }
 
 .citaItem {
-  background-color: #fff;
+  background: white;
   border-radius: 12px;
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
-  width: 90%;
-  max-width: 650px; /* Ancho máximo para las tarjetas */
-  padding: 25px;
-  border-left: 6px solid #ffb347;
-  transition: all 0.4s ease;
-  text-align: left; /* Alinea el texto a la izquierda dentro de la tarjeta */
+  padding: 1.5rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  border-left: 4px solid #00acc1;
+  position: relative;
+  overflow: hidden;
 }
 
 .citaItem:hover {
   transform: translateY(-5px);
-  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.12);
-  border-left-width: 8px;
+  box-shadow: 0 8px 16px rgba(0, 172, 193, 0.2);
+}
+
+.citaItem::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(0, 172, 193, 0.05) 0%, transparent 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.citaItem:hover::before {
+  opacity: 1;
 }
 
 .citaInfo {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
 }
 
 .citaFecha, .citaHora, .citaLugar {
   display: flex;
   align-items: center;
-  gap: 10px;
-  color: #5a4a3a;
-  font-weight: 600;
+  gap: 0.5rem;
+  color: #34495e;
+  font-weight: 500;
 }
 
 .citaIcon {
-  color: #ff9500;
-  font-size: 1.2em;
+  color: #00acc1;
+  width: 1.2rem;
+  text-align: center;
 }
 
 .citaServicio, .citaVeterinario {
-  color: #7a6a5a;
+  color: #2c3e50;
+  font-weight: 500;
 }
 
 .servicioLabel, .veterinarioLabel {
-  font-weight: bold;
-  color: #5a4a3a;
+  color: #00acc1;
+  font-weight: 600;
 }
 
 .citaActions {
   display: flex;
-  justify-content: center; /* Centraliza los botones */
-  gap: 15px;
-  margin-top: 20px;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1rem;
 }
 
 .accionBtn {
-  padding: 12px 25px;
+  padding: 0.6rem 1.2rem;
   border: none;
-  border-radius: 8px;
+  border-radius: 25px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.5px;
 }
 
 .accionBtn:first-child {
-  background: linear-gradient(to right, #ff9500, #ffb347);
+  background-color: #00acc1;
   color: white;
+}
+
+.accionBtn:first-child:hover {
+  background-color: #0097a7;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 172, 193, 0.3);
 }
 
 .accionBtn:last-child {
-  background: linear-gradient(to right, #5a4a3a, #7a6a5a);
-  color: white;
+  background-color: transparent;
+  color: #e74c3c;
+  border: 1px solid #e74c3c;
 }
 
-.accionBtn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+.accionBtn:last-child:hover {
+  background-color: rgba(231, 76, 60, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(231, 76, 60, 0.2);
 }
 
 .noCitas {
-  background: linear-gradient(135deg, #fff0d8, #ffe8c5);
-  color: #7a6a5a;
-  padding: 30px;
+  text-align: center;
+  padding: 2rem;
+  background-color: white;
   border-radius: 12px;
-  width: 80%;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+}
+
+.noCitas p {
+  color: #2c3e50;
+  font-size: 1.2rem;
+  margin: 0.5rem 0;
+}
+
+.noCitas p:last-child {
+  color: #00acc1;
+  font-weight: 600;
+  font-size: 1.3rem;
+  margin-top: 1rem;
 }
 
 .noCitasIcon {
-  font-size: 3em;
-  color: #ffb347;
-  margin-bottom: 15px;
+  color: #00acc1;
+  font-size: 3rem;
+  margin: 1rem 0;
+  opacity: 0.7;
+  transition: all 0.5s ease;
+}
+
+.noCitas:hover .noCitasIcon {
+  transform: scale(1.1);
+  opacity: 1;
 }
 
 .verTodas {
-  background: linear-gradient(to right, #ff9500, #ffb347);
-  color: white;
-  padding: 15px 30px;
-  border-radius: 8px;
-  font-weight: 600;
-  text-decoration: none;
-  transition: all 0.3s ease;
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 0.8rem;
+  margin-top: 2rem;
+  padding: 0.8rem 1.5rem;
+  background-color: #00acc1;
+  color: white;
+  text-decoration: none;
+  border-radius: 25px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0, 172, 193, 0.3);
 }
 
 .verTodas:hover {
+  background-color: #0097a7;
   transform: translateY(-3px);
-  box-shadow: 0 8px 15px rgba(255, 149, 0, 0.3);
+  box-shadow: 0 8px 16px rgba(0, 172, 193, 0.4);
 }
 
-.volverBtn {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  background: rgba(255, 255, 255, 0.8);
-  border: none;
-  border-radius: 6px;
-  padding: 8px 15px;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  cursor: pointer;
-  transition: all 0.3s ease;
+.plusIcon {
+  font-size: 1.2rem;
+  transition: transform 0.3s ease;
 }
 
-.volverBtn:hover {
-  background: white;
-  transform: translateX(-3px);
+.verTodas:hover .plusIcon {
+  transform: rotate(90deg) scale(1.2);
 }
 
-/* Efecto de brillo al pasar el mouse */
-@keyframes shine {
-  to {
-    background-position: 200% center;
+
+
+.citaItem {
+  animation: pulse 3s infinite;
+}
+
+.citaItem:hover {
+  animation: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    margin: 1rem;
+    padding: 1rem;
   }
-}
-
-.container:hover {
-  background-image: linear-gradient(
-    110deg,
-    #fff8e6 0%,
-    #fff0d8 20%,
-    rgba(255, 255, 255, 0.8) 40%,
-    #fff0d8 60%,
-    #fff8e6 100%
-  );
-  background-size: 200% auto;
-  animation: shine 2s linear infinite;
+  
+  .citaInfo {
+    grid-template-columns: 1fr;
+  }
+  
+  .citaActions {
+    flex-direction: column;
+  }
+  
+  .accionBtn {
+    width: 100%;
+  }
 }

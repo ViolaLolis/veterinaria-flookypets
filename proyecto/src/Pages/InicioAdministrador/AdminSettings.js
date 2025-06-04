@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FaCog, FaSave, FaBusinessTime, FaMoneyBillWave, FaBell } from 'react-icons/fa';
-import './Styles/Admin.css';
+import './Styles/AdminSettings.css';
 
 function AdminSettings() {
   const [settings, setSettings] = useState({
