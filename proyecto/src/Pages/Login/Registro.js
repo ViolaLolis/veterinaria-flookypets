@@ -4,7 +4,6 @@ import { Link } from 'react-router-dom';
 import '../Styles/Registro.css';
 import { send } from '@emailjs/browser';
 
-// Configuración de EmailJS con tus credenciales
 const serviceId = 'Flooky Pets';
 const templateId = 'template_z3izl33';
 const publicKey = 'Glz70TavlG0ANcvrb';
@@ -49,7 +48,6 @@ function Registro() {
     const [registroExitoso, setRegistroExitoso] = useState(false);
     const [isSidebarVisible, setIsSidebarVisible] = useState(true);
 
-    // Temporizador para el código de verificación
     useEffect(() => {
         let timer;
         if (codigoEnviado && tiempoRestante > 0 && !codigoVerificado) {
@@ -62,7 +60,6 @@ function Registro() {
         return () => clearInterval(timer);
     }, [codigoEnviado, tiempoRestante, codigoVerificado]);
 
-    // Generar código aleatorio
     const generarCodigo = async () => {
         const nuevoCodigo = Math.random().toString(36).substring(2, 8).toUpperCase();
         setCodigoGenerado(nuevoCodigo);
@@ -79,7 +76,6 @@ function Registro() {
         }
     };
 
-    // Función mejorada para enviar el correo
     const enviarCodigoPorCorreo = async (codigo) => {
         const verificationLink = `https://tudominio.com/verificar?codigo=${codigo}&email=${encodeURIComponent(formData.correo)}`;
         
@@ -121,7 +117,6 @@ function Registro() {
         }
     };
 
-    // Validar un campo individual en tiempo real
     const validateField = (name, value) => {
         let error = '';
         
@@ -246,11 +241,8 @@ function Registro() {
         return error;
     };
 
-    // Manejar cambios en los inputs con validación en tiempo real
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        
-        // Validación en tiempo real
         const error = validateField(name, value);
         
         setFieldErrors(prevErrors => ({
@@ -264,7 +256,6 @@ function Registro() {
         }));
     };
 
-    // Validar todos los campos del paso actual
     const validateCurrentStep = () => {
         let isValid = true;
         const newErrors = {...fieldErrors};
@@ -299,13 +290,12 @@ function Registro() {
         return isValid;
     };
 
-    // Avanzar al siguiente paso
     const nextStep = async () => {
         setError('');
         if (validateCurrentStep()) {
             if (step === 2) {
                 await generarCodigo();
-                setIsSidebarVisible(false); // Ocultar sidebar en el paso de verificación
+                setIsSidebarVisible(false);
             }
             setStep(prevStep => prevStep + 1);
         } else {
@@ -313,16 +303,14 @@ function Registro() {
         }
     };
 
-    // Retroceder al paso anterior
     const prevStep = () => {
         if (step === 3) {
-            setIsSidebarVisible(true); // Mostrar sidebar al volver atrás
+            setIsSidebarVisible(true);
         }
         setStep(prevStep => prevStep - 1);
         setError('');
     };
 
-    // Verificar el código ingresado
     const verificarCodigo = () => {
         setError('');
         if (fieldErrors.codigoIngresado) {
@@ -337,21 +325,18 @@ function Registro() {
         }
     };
 
-    // Enviar el formulario completo
     const handleSubmit = async (e) => {
         e.preventDefault();
         
-        // Verificar que el código esté verificado
         if (!codigoVerificado) {
           setError('Por favor, verifique el código antes de enviar.');
           return;
         }
       
-        // Preparar datos para enviar
         const userData = {
           nombre: formData.nombre,
           apellido: formData.apellido,
-          email: formData.correo,  // Asegúrate que coincida con el backend
+          email: formData.correo,
           password: formData.contrasena,
           telefono: formData.telefono,
           direccion: formData.direccion,
@@ -386,7 +371,6 @@ function Registro() {
         }
       };
 
-    // Redirigir después de registro exitoso
     useEffect(() => {
         if (registroExitoso) {
             const timer = setTimeout(() => {
@@ -396,16 +380,15 @@ function Registro() {
         }
     }, [registroExitoso, navigate]);
 
-    // Renderizar el paso actual del formulario
     const renderStep = () => {
         switch (step) {
             case 1:
                 return (
-                    <div className="fp-step-container fp-two-columns">
+                    <div className="step-container two-columns">
                         <h2>Información Básica</h2>
-                        <div className="fp-form-columns">
-                            <div className="fp-form-column">
-                                <div className="fp-input-group">
+                        <div className="form-columns">
+                            <div className="form-column">
+                                <div className="input-group">
                                     <label>Nombre:</label>
                                     <input 
                                         type="text" 
@@ -413,12 +396,12 @@ function Registro() {
                                         value={formData.nombre} 
                                         onChange={handleInputChange} 
                                         maxLength="50"
-                                        className={fieldErrors.nombre ? 'fp-input-error' : ''}
+                                        className={fieldErrors.nombre ? 'input-error' : ''}
                                         required 
                                     />
-                                    {fieldErrors.nombre && <span className="fp-error-text">{fieldErrors.nombre}</span>}
+                                    {fieldErrors.nombre && <span className="error-text">{fieldErrors.nombre}</span>}
                                 </div>
-                                <div className="fp-input-group">
+                                <div className="input-group">
                                     <label>Apellido:</label>
                                     <input 
                                         type="text" 
@@ -426,12 +409,12 @@ function Registro() {
                                         value={formData.apellido} 
                                         onChange={handleInputChange} 
                                         maxLength="50"
-                                        className={fieldErrors.apellido ? 'fp-input-error' : ''}
+                                        className={fieldErrors.apellido ? 'input-error' : ''}
                                         required 
                                     />
-                                    {fieldErrors.apellido && <span className="fp-error-text">{fieldErrors.apellido}</span>}
+                                    {fieldErrors.apellido && <span className="error-text">{fieldErrors.apellido}</span>}
                                 </div>
-                                <div className="fp-input-group">
+                                <div className="input-group">
                                     <label>Teléfono:</label>
                                     <input 
                                         type="tel" 
@@ -439,12 +422,12 @@ function Registro() {
                                         value={formData.telefono} 
                                         onChange={handleInputChange} 
                                         maxLength="10"
-                                        className={fieldErrors.telefono ? 'fp-input-error' : ''}
+                                        className={fieldErrors.telefono ? 'input-error' : ''}
                                         required 
                                     />
-                                    {fieldErrors.telefono && <span className="fp-error-text">{fieldErrors.telefono}</span>}
+                                    {fieldErrors.telefono && <span className="error-text">{fieldErrors.telefono}</span>}
                                 </div>
-                                <div className="fp-input-group">
+                                <div className="input-group">
                                     <label>Teléfono Fijo (Opcional):</label>
                                     <input 
                                         type="tel" 
@@ -452,13 +435,13 @@ function Registro() {
                                         value={formData.telefonoFijo} 
                                         onChange={handleInputChange} 
                                         maxLength="10"
-                                        className={fieldErrors.telefonoFijo ? 'fp-input-error' : ''}
+                                        className={fieldErrors.telefonoFijo ? 'input-error' : ''}
                                     />
-                                    {fieldErrors.telefonoFijo && <span className="fp-error-text">{fieldErrors.telefonoFijo}</span>}
+                                    {fieldErrors.telefonoFijo && <span className="error-text">{fieldErrors.telefonoFijo}</span>}
                                 </div>
                             </div>
-                            <div className="fp-form-column">
-                                <div className="fp-input-group">
+                            <div className="form-column">
+                                <div className="input-group">
                                     <label>Dirección:</label>
                                     <input 
                                         type="text" 
@@ -466,27 +449,27 @@ function Registro() {
                                         value={formData.direccion} 
                                         onChange={handleInputChange} 
                                         maxLength="100"
-                                        className={fieldErrors.direccion ? 'fp-input-error' : ''}
+                                        className={fieldErrors.direccion ? 'input-error' : ''}
                                         required 
                                     />
-                                    {fieldErrors.direccion && <span className="fp-error-text">{fieldErrors.direccion}</span>}
+                                    {fieldErrors.direccion && <span className="error-text">{fieldErrors.direccion}</span>}
                                 </div>
-                                <div className="fp-input-group">
+                                <div className="input-group">
                                     <label>Tipo de Documento:</label>
                                     <select 
                                         name="tipoDocumento" 
                                         value={formData.tipoDocumento} 
                                         onChange={handleInputChange} 
-                                        className={fieldErrors.tipoDocumento ? 'fp-input-error' : ''}
+                                        className={fieldErrors.tipoDocumento ? 'input-error' : ''}
                                         required
                                     >
                                         <option value="">Seleccione un tipo</option>
                                         <option value="CC">Cédula de Ciudadanía</option>
                                         <option value="Pasaporte">Pasaporte</option>
                                     </select>
-                                    {fieldErrors.tipoDocumento && <span className="fp-error-text">{fieldErrors.tipoDocumento}</span>}
+                                    {fieldErrors.tipoDocumento && <span className="error-text">{fieldErrors.tipoDocumento}</span>}
                                 </div>
-                                <div className="fp-input-group">
+                                <div className="input-group">
                                     <label>Número de Documento:</label>
                                     <input 
                                         type="text" 
@@ -494,23 +477,23 @@ function Registro() {
                                         value={formData.numeroDocumento} 
                                         onChange={handleInputChange} 
                                         maxLength="12"
-                                        className={fieldErrors.numeroDocumento ? 'fp-input-error' : ''}
+                                        className={fieldErrors.numeroDocumento ? 'input-error' : ''}
                                         required 
                                     />
-                                    {fieldErrors.numeroDocumento && <span className="fp-error-text">{fieldErrors.numeroDocumento}</span>}
+                                    {fieldErrors.numeroDocumento && <span className="error-text">{fieldErrors.numeroDocumento}</span>}
                                 </div>
-                                <div className="fp-input-group">
+                                <div className="input-group">
                                     <label>Fecha de Nacimiento:</label>
                                     <input 
                                         type="date" 
                                         name="fechaNacimiento" 
                                         value={formData.fechaNacimiento} 
                                         onChange={handleInputChange} 
-                                        className={fieldErrors.fechaNacimiento ? 'fp-input-error' : ''}
+                                        className={fieldErrors.fechaNacimiento ? 'input-error' : ''}
                                         required 
                                         max={new Date().toISOString().split('T')[0]}
                                     />
-                                    {fieldErrors.fechaNacimiento && <span className="fp-error-text">{fieldErrors.fechaNacimiento}</span>}
+                                    {fieldErrors.fechaNacimiento && <span className="error-text">{fieldErrors.fechaNacimiento}</span>}
                                 </div>
                             </div>
                         </div>
@@ -518,11 +501,11 @@ function Registro() {
                 );
             case 2:
                 return (
-                    <div className="fp-step-container">
+                    <div className="step-container">
                         <h2>Información de Cuenta</h2>
-                        <div className="fp-form-columns">
-                            <div className="fp-form-column">
-                                <div className="fp-input-group">
+                        <div className="form-columns">
+                            <div className="form-column">
+                                <div className="input-group">
                                     <label>Correo Electrónico:</label>
                                     <input 
                                         type="email" 
@@ -530,14 +513,14 @@ function Registro() {
                                         value={formData.correo} 
                                         onChange={handleInputChange} 
                                         maxLength="100"
-                                        className={fieldErrors.correo ? 'fp-input-error' : ''}
+                                        className={fieldErrors.correo ? 'input-error' : ''}
                                         required 
                                     />
-                                    {fieldErrors.correo && <span className="fp-error-text">{fieldErrors.correo}</span>}
+                                    {fieldErrors.correo && <span className="error-text">{fieldErrors.correo}</span>}
                                 </div>
                             </div>
-                            <div className="fp-form-column">
-                                <div className="fp-input-group">
+                            <div className="form-column">
+                                <div className="input-group">
                                     <label>Contraseña:</label>
                                     <input 
                                         type="password" 
@@ -546,16 +529,16 @@ function Registro() {
                                         value={formData.contrasena} 
                                         onChange={handleInputChange} 
                                         maxLength="30"
-                                        className={fieldErrors.contrasena ? 'fp-input-error' : ''}
+                                        className={fieldErrors.contrasena ? 'input-error' : ''}
                                         required 
                                     />
                                     {fieldErrors.contrasena ? (
-                                        <span className="fp-error-text">{fieldErrors.contrasena}</span>
+                                        <span className="error-text">{fieldErrors.contrasena}</span>
                                     ) : (
                                         <small>Debe contener al menos: 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial (@$!%*?&)</small>
                                     )}
                                 </div>
-                                <div className="fp-input-group">
+                                <div className="input-group">
                                     <label>Verificar Contraseña:</label>
                                     <input 
                                         type="password" 
@@ -563,10 +546,10 @@ function Registro() {
                                         value={formData.verificarContrasena} 
                                         onChange={handleInputChange} 
                                         maxLength="30"
-                                        className={fieldErrors.verificarContrasena ? 'fp-input-error' : ''}
+                                        className={fieldErrors.verificarContrasena ? 'input-error' : ''}
                                         required 
                                     />
-                                    {fieldErrors.verificarContrasena && <span className="fp-error-text">{fieldErrors.verificarContrasena}</span>}
+                                    {fieldErrors.verificarContrasena && <span className="error-text">{fieldErrors.verificarContrasena}</span>}
                                 </div>
                             </div>
                         </div>
@@ -574,10 +557,10 @@ function Registro() {
                 );
             case 3:
                 return (
-                    <div className="fp-step-container fp-verification-step">
+                    <div className="step-container verification-step">
                         <h2>Verificación de Código</h2>
                         {!codigoEnviado && (
-                            <div className="fp-input-group">
+                            <div className="input-group">
                                 <label>Correo Electrónico:</label>
                                 <input 
                                     type="email" 
@@ -585,14 +568,14 @@ function Registro() {
                                     value={formData.correo} 
                                     onChange={handleInputChange} 
                                     maxLength="100"
-                                    className={fieldErrors.correo ? 'fp-input-error' : ''}
+                                    className={fieldErrors.correo ? 'input-error' : ''}
                                     required 
                                 />
-                                {fieldErrors.correo && <span className="fp-error-text">{fieldErrors.correo}</span>}
+                                {fieldErrors.correo && <span className="error-text">{fieldErrors.correo}</span>}
                                 <button 
                                     type="button" 
                                     onClick={nextStep} 
-                                    className="fp-btn-generar-codigo"
+                                    className="btn-generate-code"
                                     disabled={!!fieldErrors.correo}
                                 >
                                     Generar y Enviar Código de Verificación
@@ -600,9 +583,9 @@ function Registro() {
                             </div>
                         )}
                         {codigoEnviado && (
-                            <div id="fp-verification-section">
+                            <div id="verification-section">
                                 <p>Se ha enviado un código de verificación a <strong>{formData.correo}</strong></p>
-                                <div className="fp-input-group">
+                                <div className="input-group">
                                     <label>Ingresa el código de verificación:</label>
                                     <input
                                         type="text"
@@ -611,35 +594,38 @@ function Registro() {
                                         value={formData.codigoIngresado}
                                         onChange={handleInputChange}
                                         maxLength="6"
-                                        className={fieldErrors.codigoIngresado ? 'fp-input-error' : ''}
+                                        className={fieldErrors.codigoIngresado ? 'input-error' : ''}
                                         required
                                     />
-                                    {fieldErrors.codigoIngresado && <span className="fp-error-text">{fieldErrors.codigoIngresado}</span>}
+                                    {fieldErrors.codigoIngresado && <span className="error-text">{fieldErrors.codigoIngresado}</span>}
                                 </div>
-                                <div className="fp-verification-actions">
+                                <div className="verification-actions">
                                     <button 
                                         type="button" 
                                         onClick={verificarCodigo} 
                                         disabled={codigoVerificado || !!fieldErrors.codigoIngresado}
-                                        className={codigoVerificado ? 'fp-btn-verified' : 'fp-btn-verify'}
+                                        className={codigoVerificado ? 'btn-verified' : 'btn-verify'}
                                     >
                                         {codigoVerificado ? '✓ Código Verificado' : 'Verificar Código'}
                                     </button>
                                     {tiempoRestante > 0 && !codigoVerificado && (
-                                        <p className="fp-timer-text">Tiempo restante: {tiempoRestante}s</p>
+                                        <p className="timer-text">Tiempo restante: {tiempoRestante}s</p>
                                     )}
                                     {tiempoRestante === 0 && (
                                         <button 
                                             type="button" 
                                             onClick={generarCodigo}
-                                            className="fp-btn-resend"
+                                            className="btn-resend"
                                         >
                                             Reenviar Código
                                         </button>
                                     )}
                                 </div>
                                 {codigoVerificado && (
-                                    <p className="fp-success-message">✓ Puedes continuar.</p>
+                                    <div className="success-message">
+                                        <p>✓ Código verificado correctamente</p>
+                                        <p>✓ Puedes continuar</p>
+                                    </div>
                                 )}
                             </div>
                         )}
@@ -650,19 +636,18 @@ function Registro() {
         }
     };
 
-    // Renderizar círculos de progreso
     const renderProgressCircles = () => {
         const circles = [1, 2, 3];
         return (
-            <div className="fp-progress-container">
+            <div className="progress-container">
                 {circles.map(circle => (
                     <React.Fragment key={circle}>
                         <span
-                            className={`fp-progress-circle ${step === circle ? 'active' : ''} ${step > circle ? 'completed' : ''}`}
+                            className={`progress-circle ${step === circle ? 'active' : ''} ${step > circle ? 'completed' : ''}`}
                         >
                             {step > circle ? '✓' : circle}
                         </span>
-                        {circle < 3 && <span className="fp-progress-line"></span>}
+                        {circle < 3 && <span className="progress-line"></span>}
                     </React.Fragment>
                 ))}
             </div>
@@ -670,14 +655,14 @@ function Registro() {
     };
 
     return (
-        <div className="fp-registro-container">
-            <div className={`fp-registro-box ${!isSidebarVisible ? 'full-width' : ''}`}>
+        <div className="register-container">
+            <div className={`register-box ${!isSidebarVisible ? 'full-width' : ''}`}>
                 {isSidebarVisible && (
-                    <div className="fp-registro-sidebar">
-                        <div className="fp-sidebar-content">
+                    <div className="register-sidebar">
+                        <div className="sidebar-content">
                             <h1>Únete a Flooky Pets</h1>
                             <p>Regístrate para acceder a todos los beneficios de nuestra comunidad de mascotas.</p>
-                            <ul className="fp-benefits-list">
+                            <ul className="benefits-list">
                                 <li>✓ Acceso a descuentos exclusivos</li>
                                 <li>✓ Historial de compras</li>
                                 <li>✓ Programación de citas</li>
@@ -686,26 +671,26 @@ function Registro() {
                         </div>
                     </div>
                 )}
-                <div className="fp-registro-content">
-                    <h1 className="fp-mobile-title">Registro de Usuario</h1>
+                <div className="register-content">
+                    <h1 className="mobile-title">Registro de Usuario</h1>
                     {renderProgressCircles()}
-                    {error && <p className="fp-error-message">{error}</p>}
+                    {error && <p className="error-message">{error}</p>}
                     {registroExitoso && (
-                        <div className="fp-success-message">
+                        <div className="success-message">
                             <p>✓ Registro exitoso. Redirigiendo...</p>
                         </div>
                     )}
 
                     {!registroExitoso && (
-                        <form onSubmit={handleSubmit} className="fp-registro-form">
+                        <form onSubmit={handleSubmit} className="register-form">
                             {renderStep()}
 
-                            <div className="fp-form-navigation">
+                            <div className="form-navigation">
                                 {step > 1 && (
                                     <button 
                                         type="button" 
                                         onClick={prevStep}
-                                        className="fp-btn-prev"
+                                        className="btn-prev"
                                     >
                                         Anterior
                                     </button>
@@ -714,7 +699,7 @@ function Registro() {
                                     <button 
                                         type="button" 
                                         onClick={nextStep}
-                                        className="fp-btn-next"
+                                        className="btn-next"
                                         disabled={Object.values(fieldErrors).some(error => error)}
                                     >
                                         Siguiente
@@ -724,7 +709,7 @@ function Registro() {
                                     <button 
                                         type="submit" 
                                         disabled={isSubmitting}
-                                        className="fp-btn-submit"
+                                        className="btn-submit"
                                     >
                                         {isSubmitting ? 'Registrando...' : 'Finalizar Registro'}
                                     </button>
@@ -733,8 +718,8 @@ function Registro() {
                         </form>
                     )}
 
-                    <div className="fp-login-links">
-                        <Link to="/login" className="fp-link">¿Ya tienes una cuenta? Inicia sesión</Link>
+                    <div className="login-links">
+                        <Link to="/login" className="link">¿Ya tienes una cuenta? Inicia sesión</Link>
                     </div>
                 </div>
             </div>
