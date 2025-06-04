@@ -1,31 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { FaPaw, FaCalendarPlus, FaShoppingCart, FaBell, FaClipboardList, FaHeart, FaQuestionCircle, FaUserCog, FaChevronDown, FaChevronLeft, FaChevronRight, FaSignOutAlt, FaUserEdit, FaCog } from 'react-icons/fa';
+import { motion, AnimatePresence } from 'framer-motion';
 import CitasUsuario from './CitasUsuario';
 import ServiciosVeterinaria from './ServiciosVeterinaria';
 import styles from './Styles/InicioUsuario.module.css';
 import logo from '../Inicio/Imagenes/flooty.png';
-import { FaPaw, FaCalendarPlus, FaShoppingCart, FaBell, FaClipboardList, FaHeart, FaQuestionCircle, FaUserCog, FaChevronDown, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
-
-// Añade este componente antes de InicioUsuario
-const MisMascotas = () => {
-  return (
-    <div className={styles.mascotasContainer}>
-      <h2>Mis Mascotas</h2>
-      <p>Aquí puedes ver y gestionar toda la información de tus mascotas.</p>
-      {/* Agrega más contenido según necesites */}
-    </div>
-  );
-};
 
 const InicioUsuario = () => {
-  // ... el resto de tu código permanece igual ...
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('mascotas');
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [expandedReminders, setExpandedReminders] = useState(false);
   const [currentPetIndex, setCurrentPetIndex] = useState(0);
   const [showPetsDropdown, setShowPetsDropdown] = useState(false);
-  
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
   // Datos del usuario con múltiples mascotas
-  const userData = {
+  const [userData, setUserData] = useState({
     nombre: "Juan Pérez",
     email: "juan.perez@example.com",
     membresia: "Premium",
@@ -45,17 +37,9 @@ const InicioUsuario = () => {
         raza: "Siamés",
         edad: "2 años",
         imagen: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=774&q=80"
-      },
-      {
-        id: 3,
-        nombre: "Rocky",
-        tipo: "Perro",
-        raza: "Bulldog",
-        edad: "5 años",
-        imagen: "https://images.unsplash.com/photo-1586671267731-da2cf3ceeb80?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=774&q=80"
       }
     ]
-  };
+  });
 
   const proximaCita = {
     fecha: "15 de Abril",
@@ -69,20 +53,94 @@ const InicioUsuario = () => {
     { id: 1, texto: "Vacuna antirrábica para Max - Vence en 15 días", importante: true },
     { id: 2, texto: "Comprar alimento premium para gatos", importante: false },
     { id: 3, texto: "Baño y grooming para Luna - Programar cita", importante: false },
-    { id: 4, texto: "Renovar membresía premium - Vence en 1 mes", importante: true },
-    { id: 5, texto: "Recordar desparasitación trimestral", importante: false },
-    { id: 6, texto: "Revisar ofertas en alimentos este mes", importante: false }
+    { id: 4, texto: "Renovar membresía premium - Vence en 1 mes", importante: true }
   ];
+
+  // Animaciones
+  const fadeIn = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { duration: 0.3 } }
+  };
+
+  const slideUp = {
+    hidden: { y: 20, opacity: 0 },
+    visible: { y: 0, opacity: 1, transition: { type: 'spring', stiffness: 100 } }
+  };
+
+  // Función para manejar el cierre de sesión
+  const handleLogout = () => {
+    setIsLoggingOut(true);
+    // Simular proceso de logout
+    setTimeout(() => {
+      // Aquí deberías reemplazar con tu lógica real de logout
+      // Por ejemplo: limpiar tokens, contexto, etc.
+      navigate('/login'); // Redirigir a la página de login
+    }, 1500);
+  };
+
+  // Función para navegar a perfil
+  const goToProfile = () => {
+    navigate('/perfil'); // Reemplaza con tu ruta de perfil
+  };
+
+  // Función para navegar a configuración
+  const goToSettings = () => {
+    navigate('/configuracion'); // Reemplaza con tu ruta de configuración
+  };
 
   const renderContent = () => {
     switch(activeTab) {
-      
       case 'citas':
         return <CitasUsuario />;
       case 'servicios':
         return <ServiciosVeterinaria />;
       default:
-        return <MisMascotas />;
+        return (
+          <motion.div 
+            initial="hidden"
+            animate="visible"
+            variants={fadeIn}
+            className={styles.petsContent}
+          >
+            <h2>Tus Mascotas</h2>
+            <div className={styles.petsGrid}>
+              {userData.mascotas.map((pet, index) => (
+                <motion.div 
+                  key={pet.id}
+                  className={styles.petCard}
+                  variants={slideUp}
+                  whileHover={{ y: -5 }}
+                >
+                  <img src={pet.imagen} alt={pet.nombre} className={styles.petCardImage} />
+                  <div className={styles.petCardInfo}>
+                    <h3>{pet.nombre}</h3>
+                    <p>{pet.tipo} • {pet.raza}</p>
+                    <p>{pet.edad}</p>
+                  </div>
+                  <button 
+                    className={styles.petCardButton}
+                    onClick={() => {
+                      setCurrentPetIndex(index);
+                      setShowPetsDropdown(false);
+                    }}
+                  >
+                    Ver detalles
+                  </button>
+                </motion.div>
+              ))}
+              <motion.div 
+                className={styles.addPetCard}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <div className={styles.addPetContent}>
+                  <div className={styles.addPetIcon}>+</div>
+                  <p>Agregar nueva mascota</p>
+                </div>
+              </motion.div>
+            </div>
+          </motion.div>
+        );
     }
   };
 
@@ -115,98 +173,198 @@ const InicioUsuario = () => {
         </div>
         
         <div className={styles.userWelcome}>
-          <h1 className={styles.welcome}>¡Hola, <span>{userData.nombre}</span>!</h1>
-          <p className={styles.subtitle}>¿Qué vamos a hacer hoy?</p>
+          <motion.h1 
+            className={styles.welcome}
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+          >
+            ¡Hola, <span>{userData.nombre}</span>!
+          </motion.h1>
+          <motion.p 
+            className={styles.subtitle}
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            ¿Qué vamos a hacer hoy?
+          </motion.p>
         </div>
         
         <div className={styles.userActions}>
-          <button className={styles.helpButton}>
+          <motion.button 
+            className={styles.helpButton}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
             <FaQuestionCircle /> <span>Ayuda</span>
-          </button>
+          </motion.button>
           
           <div className={styles.profileContainer}>
-            <button 
+            <motion.button 
               className={styles.profileButton}
               onClick={() => setShowProfileMenu(!showProfileMenu)}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
               <div className={styles.profileInitial}>{userData.nombre.charAt(0)}</div>
               <FaChevronDown className={`${styles.profileArrow} ${showProfileMenu ? styles.rotated : ''}`} />
-            </button>
+            </motion.button>
             
-            {showProfileMenu && (
-              <div className={styles.profileMenu}>
-                <div className={styles.profileInfo}>
-                  <div className={styles.profileInitialLarge}>{userData.nombre.charAt(0)}</div>
-                  <div>
-                    <div className={styles.profileName}>{userData.nombre}</div>
-                    <div className={styles.profileEmail}>{userData.email}</div>
+            <AnimatePresence>
+              {showProfileMenu && (
+                <motion.div 
+                  className={styles.profileMenu}
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ type: 'spring', stiffness: 300 }}
+                >
+                  <div className={styles.profileInfo}>
+                    <div className={styles.profileInitialLarge}>{userData.nombre.charAt(0)}</div>
+                    <div>
+                      <div className={styles.profileName}>{userData.nombre}</div>
+                      <div className={styles.profileEmail}>{userData.email}</div>
+                    </div>
                   </div>
-                </div>
-                <div className={styles.profileStatus}>
-                  <span className={styles.membershipBadge}>{userData.membresia}</span>
-                </div>
-                <button className={styles.menuItem}>Mi perfil</button>
-                <button className={styles.menuItem}>Configuración</button>
-                <button className={styles.menuItem}>Cerrar sesión</button>
-              </div>
-            )}
+                  <div className={styles.profileStatus}>
+                    <span className={styles.membershipBadge}>{userData.membresia}</span>
+                  </div>
+                  <motion.button 
+                    className={styles.menuItem}
+                    onClick={goToProfile}
+                    whileHover={{ x: 5 }}
+                  >
+                    <FaUserEdit className={styles.menuIcon} /> Mi perfil
+                  </motion.button>
+                  <motion.button 
+                    className={styles.menuItem}
+                    onClick={goToSettings}
+                    whileHover={{ x: 5 }}
+                  >
+                    <FaCog className={styles.menuIcon} /> Configuración
+                  </motion.button>
+                  <motion.button 
+                    className={styles.menuItem}
+                    onClick={handleLogout}
+                    whileHover={{ x: 5 }}
+                  >
+                    <FaSignOutAlt className={styles.menuIcon} /> Cerrar sesión
+                  </motion.button>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       </div>
 
       {/* Sección de mascota destacada y próxima cita */}
       <div className={styles.highlightSection}>
-        <div className={styles.petHighlight}>
+        <motion.div 
+          className={styles.petHighlight}
+          initial="hidden"
+          animate="visible"
+          variants={fadeIn}
+        >
           <div className={styles.petImageContainer}>
             <img src={currentPet.imagen} alt={currentPet.nombre} className={styles.petImage} />
             <div className={styles.petImageOverlay}></div>
             <div className={styles.petNavigation}>
-              <button className={styles.navArrow} onClick={handlePrevPet}>
+              <motion.button 
+                className={styles.navArrow} 
+                onClick={handlePrevPet}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+              >
                 <FaChevronLeft />
-              </button>
-              <button className={styles.navArrow} onClick={handleNextPet}>
+              </motion.button>
+              <motion.button 
+                className={styles.navArrow} 
+                onClick={handleNextPet}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+              >
                 <FaChevronRight />
-              </button>
+              </motion.button>
             </div>
           </div>
           <div className={styles.petInfo}>
             <div className={styles.petSelectorContainer}>
               <h3>Mi compañero:</h3>
               <div className={styles.petSelectorWrapper}>
-                <button 
+                <motion.button 
                   className={styles.petSelectorButton}
                   onClick={() => setShowPetsDropdown(!showPetsDropdown)}
+                  whileHover={{ scale: 1.02 }}
                 >
                   <span>{currentPet.nombre}</span>
                   <FaChevronDown className={styles.selectorArrow} />
-                </button>
-                {showPetsDropdown && (
-                  <div className={styles.petsDropdown}>
-                    {userData.mascotas.map((pet, index) => (
-                      <button
-                        key={pet.id}
-                        className={`${styles.petOption} ${index === currentPetIndex ? styles.selectedPet : ''}`}
-                        onClick={() => handlePetSelect(index)}
+                </motion.button>
+                <AnimatePresence>
+                  {showPetsDropdown && (
+                    <motion.div 
+                      className={styles.petsDropdown}
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                    >
+                      {userData.mascotas.map((pet, index) => (
+                        <motion.button
+                          key={pet.id}
+                          className={`${styles.petOption} ${index === currentPetIndex ? styles.selectedPet : ''}`}
+                          onClick={() => handlePetSelect(index)}
+                          whileHover={{ x: 5 }}
+                        >
+                          {pet.nombre}
+                        </motion.button>
+                      ))}
+                      <motion.button
+                        className={styles.addPetOption}
+                        whileHover={{ x: 5 }}
                       >
-                        {pet.nombre}
-                      </button>
-                    ))}
-                  </div>
-                )}
+                        + Agregar mascota
+                      </motion.button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </div>
             <div className={styles.petDetails}>
-              <span className={styles.petDetail}>{currentPet.tipo}</span>
-              <span className={styles.petDetail}>{currentPet.raza}</span>
-              <span className={styles.petDetail}>{currentPet.edad}</span>
+              <motion.span 
+                className={styles.petDetail}
+                whileHover={{ scale: 1.05 }}
+              >
+                {currentPet.tipo}
+              </motion.span>
+              <motion.span 
+                className={styles.petDetail}
+                whileHover={{ scale: 1.05 }}
+              >
+                {currentPet.raza}
+              </motion.span>
+              <motion.span 
+                className={styles.petDetail}
+                whileHover={{ scale: 1.05 }}
+              >
+                {currentPet.edad}
+              </motion.span>
             </div>
-            <button className={styles.careButton}>
+            <motion.button 
+              className={styles.careButton}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+            >
               <FaHeart /> <span>Historial de salud</span>
-            </button>
+            </motion.button>
           </div>
-        </div>
+        </motion.div>
 
-        <div className={styles.nextAppointment}>
+        <motion.div 
+          className={styles.nextAppointment}
+          initial="hidden"
+          animate="visible"
+          variants={fadeIn}
+        >
           <div className={styles.appointmentHeader}>
             <FaCalendarPlus className={styles.appointmentIcon} />
             <h3>Próxima cita</h3>
@@ -230,85 +388,157 @@ const InicioUsuario = () => {
             </div>
           </div>
           <div className={styles.appointmentActions}>
-            <button className={styles.primaryButton}>Confirmar asistencia</button>
-            <button className={styles.secondaryButton}>Reagendar</button>
+            <motion.button 
+              className={styles.primaryButton}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+            >
+              Confirmar asistencia
+            </motion.button>
+            <motion.button 
+              className={styles.secondaryButton}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+            >
+              Reagendar
+            </motion.button>
           </div>
-        </div>
+        </motion.div>
       </div>
 
       {/* Barra de navegación integrada */}
       <nav className={styles.integratedNav}>
-        <button 
+        <motion.button 
           className={`${styles.navButton} ${activeTab === 'mascotas' ? styles.active : ''}`}
           onClick={() => setActiveTab('mascotas')}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
         >
           <FaPaw className={styles.navIcon} />
           <span>Mis Mascotas</span>
           <div className={styles.navIndicator}></div>
-        </button>
-        <button 
+        </motion.button>
+        <motion.button 
           className={`${styles.navButton} ${activeTab === 'citas' ? styles.active : ''}`}
           onClick={() => setActiveTab('citas')}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
         >
           <FaClipboardList className={styles.navIcon} />
           <span>Mis Citas</span>
           <div className={styles.navIndicator}></div>
-        </button>
-        <button 
+        </motion.button>
+        <motion.button 
           className={`${styles.navButton} ${activeTab === 'servicios' ? styles.active : ''}`}
           onClick={() => setActiveTab('servicios')}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
         >
           <FaShoppingCart className={styles.navIcon} />
           <span>Servicios</span>
           <div className={styles.navIndicator}></div>
-        </button>
+        </motion.button>
       </nav>
 
       {/* Contenido principal dinámico */}
       <div className={styles.mainContent}>
-        {renderContent()}
+        <AnimatePresence mode='wait'>
+          {renderContent()}
+        </AnimatePresence>
       </div>
 
       {/* Sidebar con recordatorios y más información */}
       <div className={styles.sidebar}>
-        <div className={styles.remindersCard}>
+        <motion.div 
+          className={styles.remindersCard}
+          initial="hidden"
+          animate="visible"
+          variants={slideUp}
+        >
           <div className={styles.cardHeader}>
             <FaBell className={styles.cardIcon} />
             <h3>Recordatorios importantes</h3>
           </div>
           <ul className={styles.remindersList}>
             {recordatorios.filter(r => r.importante).map(item => (
-              <li key={item.id} className={styles.importantReminder}>
+              <motion.li 
+                key={item.id} 
+                className={styles.importantReminder}
+                whileHover={{ x: 5 }}
+              >
                 <div className={styles.reminderDot}></div>
                 <span>{item.texto}</span>
-              </li>
+              </motion.li>
             ))}
           </ul>
-        </div>
+        </motion.div>
 
-        <div className={styles.remindersCard}>
-          <div className={styles.cardHeader} onClick={() => setExpandedReminders(!expandedReminders)}>
+        <motion.div 
+          className={styles.remindersCard}
+          initial="hidden"
+          animate="visible"
+          variants={slideUp}
+        >
+          <div 
+            className={styles.cardHeader} 
+            onClick={() => setExpandedReminders(!expandedReminders)}
+          >
             <h3>Tus recordatorios</h3>
             <FaChevronDown className={`${styles.expandIcon} ${expandedReminders ? styles.expanded : ''}`} />
           </div>
-          <ul className={`${styles.remindersList} ${expandedReminders ? styles.expanded : ''}`}>
+          <motion.ul 
+            className={`${styles.remindersList} ${expandedReminders ? styles.expanded : ''}`}
+            initial={{ height: 0 }}
+            animate={{ height: expandedReminders ? 'auto' : 0 }}
+          >
             {recordatorios.map(item => (
-              <li key={item.id} className={item.importante ? styles.importantReminder : ''}>
+              <motion.li 
+                key={item.id} 
+                className={item.importante ? styles.importantReminder : ''}
+                whileHover={{ x: 5 }}
+              >
                 <div className={`${styles.reminderDot} ${item.importante ? styles.importantDot : ''}`}></div>
                 <span>{item.texto}</span>
-              </li>
+              </motion.li>
             ))}
-          </ul>
-        </div>
+          </motion.ul>
+        </motion.div>
 
-        <div className={styles.tipCard}>
+        <motion.div 
+          className={styles.tipCard}
+          initial="hidden"
+          animate="visible"
+          variants={slideUp}
+        >
           <div className={styles.tipHeader}>
             <div className={styles.tipIcon}>💡</div>
             <h3>Consejos</h3>
           </div>
-          <p>Los perros de razas grandes necesitan ejercicio regular pero controlado durante su crecimiento para evitar problemas articulares. 30-40 minutos dos veces al día es ideal para {currentPet.nombre}.</p>
-        </div>
+          <p>Los {currentPet.tipo === 'Perro' ? 'perros' : 'gatos'} de raza {currentPet.raza} necesitan cuidados específicos. Consulta con nuestro veterinario para recomendaciones personalizadas para {currentPet.nombre}.</p>
+        </motion.div>
       </div>
+
+      {/* Overlay de logout */}
+      <AnimatePresence>
+        {isLoggingOut && (
+          <motion.div 
+            className={styles.logoutOverlay}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className={styles.logoutModal}
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+            >
+              <div className={styles.spinner}></div>
+              <p>Cerrando sesión...</p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

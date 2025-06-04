@@ -8,7 +8,7 @@
   align-items: center;
   justify-content: space-between;
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-  border-left: 4px solid #ffb347; /* Amarillo quemado */
+  border-left: 4px solid #000000; /* Amarillo quemado */
   position: relative;
   overflow: hidden;
 }
@@ -27,7 +27,7 @@
 .tarjeta:hover {
   transform: translateY(-5px);
   box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
-  border-left-color: #ff9500; /* Amarillo más intenso */
+  border-left-color: #ffffff; /* Amarillo más intenso */
 }
 
 .tarjeta:hover::before {
@@ -43,14 +43,14 @@
 }
 
 .iconoFecha {
-  color: #ff9500; /* Amarillo quemado */
+  color: #ffffff; /* Amarillo quemado */
   font-size: 1.4em;
   transition: transform 0.3s ease;
 }
 
 .tarjeta:hover .iconoFecha {
   transform: rotate(10deg) scale(1.1);
-  color: #ff7b00;
+  color: #ffffff;
 }
 
 .fecha {

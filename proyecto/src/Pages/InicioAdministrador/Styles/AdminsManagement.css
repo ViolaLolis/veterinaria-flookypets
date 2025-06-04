@@ -1,0 +1,462 @@
+/* AdminsManagement.css - Diseño Profesional con #00acc1 y #ecf0f1 */
+
+:root {
+    --primary: #00acc1;
+    --primary-light: rgba(0, 172, 193, 0.1);
+    --primary-dark: #008c9e;
+    --primary-glow: rgba(0, 172, 193, 0.3);
+    --secondary: #ecf0f1;
+    --secondary-dark: #dfe6e9;
+    --text-dark: #2c3e50;
+    --text-light: #7f8c8d;
+    --white: #ffffff;
+    --success: #1dd1a1;
+    --warning: #ff9f43;
+    --danger: #ff6b6b;
+    --shadow: 0 4px 25px rgba(0, 0, 0, 0.08);
+    --transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+  
+  /* Estructura principal con efecto de elevación */
+  .admins-management {
+    padding: 2.5rem;
+    background-color: var(--white);
+    border-radius: 18px;
+    box-shadow: var(--shadow);
+    margin: 1.5rem;
+    transition: var(--transition);
+    border: 1px solid rgba(0, 172, 193, 0.1);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .admins-management::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 80% 20%, rgba(0, 172, 193, 0.05) 0%, transparent 40%);
+    pointer-events: none;
+  }
+  
+  .admins-management:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 172, 193, 0.15);
+  }
+  
+  /* Encabezado con efecto de neón */
+  .management-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.8rem;
+    border-bottom: 2px solid var(--primary-light);
+    flex-wrap: wrap;
+    gap: 1.5rem;
+  }
+  
+  .management-header h2 {
+    color: var(--text-dark);
+    font-size: 2rem;
+    margin: 0;
+    position: relative;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+  
+  /* Barra de búsqueda futurista */
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+  
+  .search-bar {
+    position: relative;
+    flex-grow: 1;
+    min-width: 300px;
+  }
+  
+  .search-bar input {
+    width: 100%;
+    padding: 1rem 1.5rem 1rem 3.5rem;
+    border: 2px solid var(--secondary-dark);
+    border-radius: 50px;
+    background-color: var(--white);
+    font-size: 1rem;
+    transition: var(--transition);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  }
+  
+  .search-bar input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(0, 172, 193, 0.2);
+  }
+  
+  .search-bar i {
+    position: absolute;
+    left: 1.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--primary);
+    font-size: 1.2rem;
+    transition: var(--transition);
+  }
+  
+  .search-bar:hover i {
+    transform: translateY(-50%) scale(1.1);
+  }
+  
+  /* Botón principal con efecto de partículas */
+  .add-btn {
+    padding: 0.8rem 1.8rem;
+    border-radius: 50px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: var(--white);
+    border: none;
+    box-shadow: 0 4px 15px rgba(0, 172, 193, 0.3);
+    position: relative;
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+  }
+  
+  .add-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 172, 193, 0.4);
+  }
+  
+  .add-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: all 0.6s ease;
+  }
+  
+  .add-btn:hover::before {
+    left: 100%;
+  }
+  
+  /* Formulario de edición */
+  .edit-form {
+    background-color: var(--white);
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: var(--shadow);
+    margin-bottom: 2rem;
+    border: 1px solid rgba(0, 172, 193, 0.1);
+    transition: var(--transition);
+  }
+  
+  .edit-form:hover {
+    box-shadow: 0 8px 25px rgba(0, 172, 193, 0.15);
+  }
+  
+  .edit-form h3 {
+    color: var(--primary);
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+    border-bottom: 2px solid var(--primary-light);
+    padding-bottom: 0.8rem;
+  }
+  
+  .form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .form-group label {
+    font-weight: 600;
+    color: var(--text-dark);
+    font-size: 0.95rem;
+  }
+  
+  .form-group input {
+    padding: 1rem;
+    border: 2px solid var(--secondary-dark);
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: var(--transition);
+    background-color: var(--white);
+  }
+  
+  .form-group input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(0, 172, 193, 0.2);
+  }
+  
+  .form-group input:disabled {
+    background-color: var(--secondary);
+    opacity: 0.7;
+  }
+  
+  .form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+  
+  .save-btn, .cancel-btn {
+    padding: 1rem 1.8rem;
+    border-radius: 50px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.8rem;
+    font-size: 1rem;
+    border: none;
+  }
+  
+  .save-btn {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: var(--white);
+    box-shadow: 0 4px 15px rgba(0, 172, 193, 0.3);
+  }
+  
+  .save-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 172, 193, 0.4);
+  }
+  
+  .cancel-btn {
+    background-color: var(--white);
+    color: var(--primary);
+    border: 2px solid var(--primary);
+  }
+  
+  .cancel-btn:hover {
+    background-color: var(--primary-light);
+    transform: translateY(-3px);
+  }
+  
+  /* Tabla de administradores */
+  .admins-table-container {
+    background-color: var(--white);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+    position: relative;
+    overflow-x: auto;
+  }
+  
+  .admins-table-container:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0, 172, 193, 0.15);
+  }
+  
+  .admins-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    min-width: 800px;
+  }
+  
+  .admins-table th {
+    background: linear-gradient(to right, var(--primary-light), var(--secondary));
+    padding: 1.5rem;
+    text-align: left;
+    color: var(--primary);
+    font-weight: 700;
+    position: sticky;
+    top: 0;
+    border-bottom: 2px solid var(--primary-light);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.9rem;
+  }
+  
+  .admins-table td {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--secondary-dark);
+    transition: var(--transition);
+  }
+  
+  .admins-table tr:last-child td {
+    border-bottom: none;
+  }
+  
+  .admins-table tr:hover td {
+    background-color: var(--primary-light);
+    transform: scale(1.01);
+  }
+  
+  /* Botones de acción en tabla */
+  .actions-cell {
+    display: flex;
+    gap: 0.8rem;
+  }
+  
+  .edit-btn, .delete-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+    border: none;
+    font-size: 1rem;
+  }
+  
+  .edit-btn {
+    background-color: var(--primary-light);
+    color: var(--primary);
+  }
+  
+  .edit-btn:hover {
+    background-color: var(--primary);
+    color: var(--white);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 172, 193, 0.2);
+  }
+  
+  .delete-btn {
+    background-color: rgba(255, 107, 107, 0.1);
+    color: var(--danger);
+  }
+  
+  .delete-btn:hover:not(:disabled) {
+    background-color: var(--danger);
+    color: var(--white);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(255, 107, 107, 0.2);
+  }
+  
+  .delete-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  /* Mensajes y estados */
+  .no-results {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-light);
+    font-size: 1.2rem;
+  }
+  
+  .error-message {
+    background-color: rgba(255, 107, 107, 0.1);
+    color: var(--danger);
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    font-weight: 600;
+    border-left: 4px solid var(--danger);
+    animation: slideIn 0.4s ease-out;
+  }
+  
+  .loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 300px;
+  }
+  
+  .loading-spinner {
+    width: 60px;
+    height: 60px;
+    border: 5px solid var(--secondary-dark);
+    border-top: 5px solid var(--primary);
+    border-radius: 50%;
+    animation: spin 1.2s linear infinite;
+    margin-bottom: 1.5rem;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  @keyframes slideIn {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  
+  /* Responsive */
+  @media (max-width: 1200px) {
+    .admins-management {
+      padding: 2rem;
+      margin: 1rem;
+    }
+    
+    .management-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    
+    .header-actions {
+      width: 100%;
+    }
+    
+    .search-bar {
+      min-width: 100%;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .admins-management {
+      padding: 1.5rem;
+      margin: 0.5rem;
+    }
+    
+    .edit-form {
+      padding: 1.5rem;
+    }
+    
+    .form-row {
+      grid-template-columns: 1fr;
+    }
+    
+    .form-actions {
+      flex-direction: column;
+    }
+    
+    .save-btn, .cancel-btn {
+      width: 100%;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .management-header h2 {
+      font-size: 1.6rem;
+    }
+    
+    .edit-form h3 {
+      font-size: 1.3rem;
+    }
+    
+    .add-btn {
+      padding: 0.7rem 1.2rem;
+      font-size: 0.9rem;
+      width: 100%;
+    }
+  }

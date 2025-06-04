@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FaUsers, FaUserMd, FaUserShield, FaConciergeBell, FaCalendarAlt, FaChartLine } from 'react-icons/fa';
-import './Styles/Admin.css';
+import './Styles/AdminStats.css';
 
 function AdminStats() {
   const [stats, setStats] = useState({

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import './Styles/Admin.css';
+import './Styles/vetsManagement.css';
 
 function VetsManagement({ user }) {
   const [vets, setVets] = useState([]);

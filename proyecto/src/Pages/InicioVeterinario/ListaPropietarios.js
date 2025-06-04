@@ -5,6 +5,46 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEdit, faPlus, faBan, faUser, faSync, faSearch } from '@fortawesome/free-solid-svg-icons';
 
+// Local data for testing/mocking
+const localPropietariosData = [
+  {
+    id: 1,
+    nombre: "Juan",
+    apellido: "Pérez",
+    email: "juan.perez@example.com",
+    telefono: "3001234567",
+    tipo_documento: "CC",
+    numero_documento: "1012345678",
+  },
+  {
+    id: 2,
+    nombre: "María",
+    apellido: "González",
+    email: "maria.gonzalez@example.com",
+    telefono: "3109876543",
+    tipo_documento: "TI",
+    numero_documento: "9876543210",
+  },
+  {
+    id: 3,
+    nombre: "Carlos",
+    apellido: "Rodríguez",
+    email: "carlos.r@example.com",
+    telefono: "3201122334",
+    tipo_documento: "CE",
+    numero_documento: "5432109876",
+  },
+  {
+    id: 4,
+    nombre: "Ana",
+    apellido: "Martínez",
+    email: "ana.m@example.com",
+    telefono: "3055678901",
+    tipo_documento: "CC",
+    numero_documento: "1122334455",
+  },
+];
+
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
@@ -41,22 +81,20 @@ const ListaPropietarios = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
+  // Modified fetchPropietarios to use local data
   const fetchPropietarios = async () => {
+    setLoading(true); // Ensure loading state is true when fetching (even local)
+    setError(null); // Clear previous errors
+    // Simulate an API call delay
+    await new Promise(resolve => setTimeout(resolve, 500)); // Simulate 0.5 second delay
+
     try {
-      const response = await fetch('http://localhost:5000/api/propietarios');
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `Error HTTP: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      setPropietarios(data);
-      setFilteredPropietarios(data);
-      setError(null);
+      setPropietarios(localPropietariosData);
+      setFilteredPropietarios(localPropietariosData);
     } catch (err) {
-      console.error('Error en fetchPropietarios:', err);
-      setError(err.message || 'Error al cargar los propietarios');
+      // This catch might not be strictly necessary for local data, but good practice
+      setError("Error al cargar los propietarios desde los datos locales.");
+      console.error("Error loading local data:", err);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -88,37 +126,27 @@ const ListaPropietarios = () => {
 
   const handleRefresh = () => {
     setRefreshing(true);
-    fetchPropietarios();
+    fetchPropietarios(); // Re-fetch (or re-load local data)
   };
 
-  const handleDisable = async (id) => {
-    if (window.confirm('¿Estás seguro de que deseas deshabilitar este propietario?')) {
-      try {
-        setRefreshing(true);
-        const response = await fetch(`http://localhost:5000/api/propietarios/${id}/disable`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          }
-        });
-        
-        const data = await response.json();
-        
-        if (!response.ok) {
-          throw new Error(data.error || 'Error al deshabilitar el propietario');
-        }
-        
-        alert(data.message || 'Propietario deshabilitado correctamente');
-        fetchPropietarios();
-      } catch (err) {
-        console.error('Error en handleDisable:', err);
-        setError(err.message || 'Error al deshabilitar el propietario');
-      } finally {
+  const handleDisable = (id) => {
+    if (window.confirm('¿Estás seguro de que deseas deshabilitar este propietario? (Esta acción es solo de ejemplo para datos locales)')) {
+      setRefreshing(true);
+      // Simulate an API call for disabling
+      setTimeout(() => {
+        setPropietarios(prevPropietarios =>
+          prevPropietarios.filter(prop => prop.id !== id)
+        );
+        // Also update filtered list
+        setFilteredPropietarios(prevFiltered =>
+          prevFiltered.filter(prop => prop.id !== id)
+        );
+        alert('Propietario deshabilitado (simulado) correctamente');
         setRefreshing(false);
-      }
+      }, 500); // Simulate network delay for disabling
     }
   };
-  
+
   if (loading) {
     return (
       <div className={styles.loadingContainer}>
@@ -130,7 +158,7 @@ const ListaPropietarios = () => {
 
   if (error) {
     return (
-      <motion.div 
+      <motion.div
         className={styles.errorContainer}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -138,7 +166,7 @@ const ListaPropietarios = () => {
         <div className={styles.errorMessage}>
           Error al cargar los propietarios: {error}
         </div>
-        <button 
+        <button
           className={styles.retryButton}
           onClick={handleRefresh}
           disabled={refreshing}
@@ -162,7 +190,7 @@ const ListaPropietarios = () => {
       initial="hidden"
       animate="visible"
     >
-      <motion.div 
+      <motion.div
         className={styles.header}
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -172,7 +200,7 @@ const ListaPropietarios = () => {
           <FontAwesomeIcon icon={faUser} className={styles.titleIcon} />
           Lista de Propietarios
         </h1>
-        
+
         <div className={styles.headerActions}>
           <motion.button
             onClick={handleRefresh}
@@ -181,11 +209,13 @@ const ListaPropietarios = () => {
             whileTap={{ scale: 0.95 }}
             disabled={refreshing}
           >
-            <FontAwesomeIcon icon={faSync} spin={refreshing} /> 
+            <FontAwesomeIcon icon={faSync} spin={refreshing} />
             {refreshing ? ' Actualizando...' : ' Actualizar'}
           </motion.button>
-          
+
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            {/* Note: The "Registrar" link will still navigate, but without a backend,
+                the registration won't persist locally. */}
             <Link to="/veterinario/propietarios/registrar" className={styles.addButton}>
               <FontAwesomeIcon icon={faPlus} /> Nuevo Propietario
             </Link>
@@ -194,7 +224,7 @@ const ListaPropietarios = () => {
       </motion.div>
 
       {/* Barra de búsqueda */}
-      <motion.div 
+      <motion.div
         className={styles.searchContainer}
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -214,7 +244,7 @@ const ListaPropietarios = () => {
         {filteredPropietarios.length > 0 ? (
           <ul className={styles.propietariosList}>
             {filteredPropietarios.map((propietario) => (
-              <motion.li 
+              <motion.li
                 key={propietario.id}
                 className={styles.propietarioCard}
                 variants={itemVariants}
@@ -233,30 +263,32 @@ const ListaPropietarios = () => {
                     <p><strong>Documento:</strong> {propietario.tipo_documento} {propietario.numero_documento}</p>
                   </div>
                 </div>
-                
+
                 <div className={styles.actions}>
                   <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-                    <Link 
-                      to={`/veterinario/propietarios/${propietario.id}`} 
+                    {/* These links will still navigate, but detail/edit pages
+                        will need similar local data handling or mock data */}
+                    <Link
+                      to={`/veterinario/propietarios/${propietario.id}`}
                       className={styles.actionButton}
                       title="Ver detalles"
                     >
                       <FontAwesomeIcon icon={faEye} />
                     </Link>
                   </motion.div>
-                  
+
                   <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-                    <Link 
-                      to={`/veterinario/propietarios/editar/${propietario.id}`} 
+                    <Link
+                      to={`/veterinario/propietarios/editar/${propietario.id}`}
                       className={`${styles.actionButton} ${styles.editButton}`}
                       title="Editar"
                     >
                       <FontAwesomeIcon icon={faEdit} />
                     </Link>
                   </motion.div>
-                  
+
                   <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-                    <button 
+                    <button
                       className={`${styles.actionButton} ${styles.disableButton}`}
                       title="Deshabilitar"
                       onClick={() => handleDisable(propietario.id)}
@@ -269,7 +301,7 @@ const ListaPropietarios = () => {
             ))}
           </ul>
         ) : (
-          <motion.div 
+          <motion.div
             className={styles.emptyState}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
