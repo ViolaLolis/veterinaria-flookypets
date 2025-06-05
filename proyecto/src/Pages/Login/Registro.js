@@ -8,13 +8,61 @@ const serviceId = 'Flooky Pets';
 const templateId = 'template_z3izl33';
 const publicKey = 'Glz70TavlG0ANcvrb';
 
+// Lista de prefijos telefónicos internacionales
+const countryCodes = [
+  { code: '+57', name: 'Colombia (+57)' },
+  { code: '+1', name: 'Estados Unidos/Canadá (+1)' },
+  { code: '+52', name: 'México (+52)' },
+  { code: '+34', name: 'España (+34)' },
+  { code: '+54', name: 'Argentina (+54)' },
+  { code: '+55', name: 'Brasil (+55)' },
+  { code: '+56', name: 'Chile (+56)' },
+  { code: '+51', name: 'Perú (+51)' },
+  { code: '+58', name: 'Venezuela (+58)' },
+  { code: '+593', name: 'Ecuador (+593)' },
+  { code: '+503', name: 'El Salvador (+503)' },
+  { code: '+502', name: 'Guatemala (+502)' },
+  { code: '+504', name: 'Honduras (+504)' },
+  { code: '+505', name: 'Nicaragua (+505)' },
+  { code: '+507', name: 'Panamá (+507)' },
+  { code: '+506', name: 'Costa Rica (+506)' },
+  { code: '+44', name: 'Reino Unido (+44)' },
+  { code: '+33', name: 'Francia (+33)' },
+  { code: '+49', name: 'Alemania (+49)' },
+  { code: '+39', name: 'Italia (+39)' },
+  { code: '+7', name: 'Rusia (+7)' },
+  { code: '+81', name: 'Japón (+81)' },
+  { code: '+86', name: 'China (+86)' },
+  { code: '+91', name: 'India (+91)' },
+  { code: '+61', name: 'Australia (+61)' },
+  { code: '+64', name: 'Nueva Zelanda (+64)' },
+  { code: '+27', name: 'Sudáfrica (+27)' },
+  { code: '+20', name: 'Egipto (+20)' },
+  { code: '+971', name: 'Emiratos Árabes (+971)' },
+  { code: '+966', name: 'Arabia Saudita (+966)' }
+];
+
+// Prefijos de área para Colombia (puedes agregar más países si es necesario)
+const areaCodesColombia = [
+  { code: '1', name: 'Bogotá (1)' },
+  { code: '2', name: 'Cali (2)' },
+  { code: '4', name: 'Medellín (4)' },
+  { code: '5', name: 'Barranquilla (5)' },
+  { code: '6', name: 'Pereira (6)' },
+  { code: '7', name: 'Bucaramanga (7)' },
+  { code: '8', name: 'Cúcuta (8)' },
+  { code: '9', name: 'Manizales (9)' }
+];
+
 function Registro() {
     const navigate = useNavigate();
     const [step, setStep] = useState(1);
     const [formData, setFormData] = useState({
         nombre: '',
         apellido: '',
+        countryCode: '+57', // Prefijo internacional por defecto
         telefono: '',
+        areaCode: '1', // Prefijo de área por defecto
         telefonoFijo: '',
         direccion: '',
         tipoDocumento: '',
@@ -24,6 +72,7 @@ function Registro() {
         contrasena: '',
         verificarContrasena: '',
         codigoIngresado: '',
+        aceptaTerminos: false // Nuevo campo para términos y condiciones
     });
     const [fieldErrors, setFieldErrors] = useState({
         nombre: '',
@@ -38,6 +87,7 @@ function Registro() {
         contrasena: '',
         verificarContrasena: '',
         codigoIngresado: '',
+        aceptaTerminos: '' // Error para términos no aceptados
     });
     const [codigoGenerado, setCodigoGenerado] = useState('');
     const [tiempoRestante, setTiempoRestante] = useState(60);
@@ -47,6 +97,7 @@ function Registro() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [registroExitoso, setRegistroExitoso] = useState(false);
     const [isSidebarVisible, setIsSidebarVisible] = useState(true);
+    const [showTermsModal, setShowTermsModal] = useState(false);
 
     useEffect(() => {
         let timer;
@@ -141,8 +192,8 @@ function Registro() {
                 break;
                 
             case 'telefonoFijo':
-                if (value && !/^\d{7,10}$/.test(value)) {
-                    error = 'Debe tener entre 7 y 10 dígitos';
+                if (value && !/^\d{7}$/.test(value)) {
+                    error = 'Debe tener 7 dígitos';
                 }
                 break;
                 
@@ -234,6 +285,12 @@ function Registro() {
                 }
                 break;
                 
+            case 'aceptaTerminos':
+                if (!value) {
+                    error = 'Debes aceptar los términos y condiciones';
+                }
+                break;
+                
             default:
                 break;
         }
@@ -242,14 +299,23 @@ function Registro() {
     };
 
     const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        const error = validateField(name, value);
+        const { name, value, type, checked } = e.target;
+        const inputValue = type === 'checkbox' ? checked : value;
+        const error = validateField(name, inputValue);
         
         setFieldErrors(prevErrors => ({
             ...prevErrors,
             [name]: error
         }));
         
+        setFormData(prevData => ({
+            ...prevData,
+            [name]: inputValue
+        }));
+    };
+
+    const handleSelectChange = (e) => {
+        const { name, value } = e.target;
         setFormData(prevData => ({
             ...prevData,
             [name]: value
@@ -268,7 +334,7 @@ function Registro() {
                 if (error) isValid = false;
             });
         } else if (step === 2) {
-            const fieldsToValidate = ['correo', 'contrasena', 'verificarContrasena'];
+            const fieldsToValidate = ['correo', 'contrasena', 'verificarContrasena', 'aceptaTerminos'];
             fieldsToValidate.forEach(field => {
                 const error = validateField(field, formData[field]);
                 newErrors[field] = error;
@@ -338,11 +404,13 @@ function Registro() {
           apellido: formData.apellido,
           email: formData.correo,
           password: formData.contrasena,
-          telefono: formData.telefono,
+          telefono: `${formData.countryCode}${formData.telefono}`,
+          telefonoFijo: formData.telefonoFijo ? `${formData.areaCode}${formData.telefonoFijo}` : null,
           direccion: formData.direccion,
           tipoDocumento: formData.tipoDocumento,
           numeroDocumento: formData.numeroDocumento,
-          fechaNacimiento: formData.fechaNacimiento
+          fechaNacimiento: formData.fechaNacimiento,
+          aceptaTerminos: formData.aceptaTerminos
         };
       
         console.log("Enviando datos al backend:", userData);
@@ -414,29 +482,59 @@ function Registro() {
                                     />
                                     {fieldErrors.apellido && <span className="error-text">{fieldErrors.apellido}</span>}
                                 </div>
-                                <div className="input-group">
-                                    <label>Teléfono:</label>
-                                    <input 
-                                        type="tel" 
-                                        name="telefono" 
-                                        value={formData.telefono} 
-                                        onChange={handleInputChange} 
-                                        maxLength="10"
-                                        className={fieldErrors.telefono ? 'input-error' : ''}
-                                        required 
-                                    />
+                                <div className="input-group phone-input">
+                                    <label>Teléfono Móvil:</label>
+                                    <div className="phone-input-container">
+                                        <select
+                                            name="countryCode"
+                                            value={formData.countryCode}
+                                            onChange={handleSelectChange}
+                                            className="country-code-select"
+                                        >
+                                            {countryCodes.map((country) => (
+                                                <option key={country.code} value={country.code}>
+                                                    {country.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        <input 
+                                            type="tel" 
+                                            name="telefono" 
+                                            value={formData.telefono} 
+                                            onChange={handleInputChange} 
+                                            maxLength="10"
+                                            className={`phone-number-input ${fieldErrors.telefono ? 'input-error' : ''}`}
+                                            required 
+                                            placeholder="Número móvil"
+                                        />
+                                    </div>
                                     {fieldErrors.telefono && <span className="error-text">{fieldErrors.telefono}</span>}
                                 </div>
-                                <div className="input-group">
+                                <div className="input-group phone-input">
                                     <label>Teléfono Fijo (Opcional):</label>
-                                    <input 
-                                        type="tel" 
-                                        name="telefonoFijo" 
-                                        value={formData.telefonoFijo} 
-                                        onChange={handleInputChange} 
-                                        maxLength="10"
-                                        className={fieldErrors.telefonoFijo ? 'input-error' : ''}
-                                    />
+                                    <div className="phone-input-container">
+                                        <select
+                                            name="areaCode"
+                                            value={formData.areaCode}
+                                            onChange={handleSelectChange}
+                                            className="area-code-select"
+                                        >
+                                            {areaCodesColombia.map((area) => (
+                                                <option key={area.code} value={area.code}>
+                                                    {area.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        <input 
+                                            type="tel" 
+                                            name="telefonoFijo" 
+                                            value={formData.telefonoFijo} 
+                                            onChange={handleInputChange} 
+                                            maxLength="7"
+                                            className={`phone-number-input ${fieldErrors.telefonoFijo ? 'input-error' : ''}`}
+                                            placeholder="Número fijo"
+                                        />
+                                    </div>
                                     {fieldErrors.telefonoFijo && <span className="error-text">{fieldErrors.telefonoFijo}</span>}
                                 </div>
                             </div>
@@ -551,6 +649,19 @@ function Registro() {
                                     />
                                     {fieldErrors.verificarContrasena && <span className="error-text">{fieldErrors.verificarContrasena}</span>}
                                 </div>
+                                <div className="input-group terms-checkbox">
+                                    <label className="checkbox-label">
+                                        <input
+                                            type="checkbox"
+                                            name="aceptaTerminos"
+                                            checked={formData.aceptaTerminos}
+                                            onChange={handleInputChange}
+                                            className={fieldErrors.aceptaTerminos ? 'input-error' : ''}
+                                        />
+                                        <span>Acepto los <button type="button" className="terms-link" onClick={() => setShowTermsModal(true)}>Términos y Condiciones</button></span>
+                                    </label>
+                                    {fieldErrors.aceptaTerminos && <span className="error-text">{fieldErrors.aceptaTerminos}</span>}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -654,6 +765,92 @@ function Registro() {
         );
     };
 
+    const renderTermsModal = () => {
+        if (!showTermsModal) return null;
+
+        return (
+            <div className="modal-overlay">
+                <div className="terms-modal">
+                    <div className="modal-header">
+                        <h2>Términos y Condiciones</h2>
+                        <button 
+                            type="button" 
+                            className="close-modal" 
+                            onClick={() => setShowTermsModal(false)}
+                        >
+                            &times;
+                        </button>
+                    </div>
+                    <div className="modal-content">
+                        <h3>1. Aceptación de los Términos</h3>
+                        <p>
+                            Al registrarte en Flooky Pets, aceptas cumplir con estos términos y condiciones, 
+                            nuestra Política de Privacidad y todas las leyes y regulaciones aplicables.
+                        </p>
+
+                        <h3>2. Uso del Servicio</h3>
+                        <p>
+                            Flooky Pets proporciona servicios veterinarios y relacionados con mascotas. 
+                            Te comprometes a usar el servicio solo para fines legales y de acuerdo con estos términos.
+                        </p>
+
+                        <h3>3. Cuenta de Usuario</h3>
+                        <p>
+                            Eres responsable de mantener la confidencialidad de tu cuenta y contraseña, 
+                            y de restringir el acceso a tu computadora. Aceptas la responsabilidad por 
+                            todas las actividades que ocurran bajo tu cuenta.
+                        </p>
+
+                        <h3>4. Privacidad</h3>
+                        <p>
+                            Tu información personal se manejará de acuerdo con nuestra Política de Privacidad. 
+                            Al usar nuestro servicio, consientes el procesamiento de tus datos personales.
+                        </p>
+
+                        <h3>5. Modificaciones</h3>
+                        <p>
+                            Nos reservamos el derecho de modificar estos términos en cualquier momento. 
+                            Las modificaciones entrarán en vigor inmediatamente después de su publicación en el sitio.
+                        </p>
+
+                        <h3>6. Limitación de Responsabilidad</h3>
+                        <p>
+                            Flooky Pets no será responsable por daños indirectos, incidentales, especiales, 
+                            consecuentes o punitivos que resulten del uso o la imposibilidad de usar el servicio.
+                        </p>
+
+                        <h3>7. Ley Aplicable</h3>
+                        <p>
+                            Estos términos se regirán e interpretarán de acuerdo con las leyes de Colombia, 
+                            sin tener en cuenta sus disposiciones sobre conflictos de leyes.
+                        </p>
+
+                        <div className="modal-actions">
+                            <button 
+                                type="button" 
+                                className="btn-accept-terms"
+                                onClick={() => {
+                                    setFormData(prev => ({...prev, aceptaTerminos: true}));
+                                    setFieldErrors(prev => ({...prev, aceptaTerminos: ''}));
+                                    setShowTermsModal(false);
+                                }}
+                            >
+                                Aceptar Términos
+                            </button>
+                            <button 
+                                type="button" 
+                                className="btn-close-terms"
+                                onClick={() => setShowTermsModal(false)}
+                            >
+                                Cerrar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
     return (
         <div className="register-container">
             <div className={`register-box ${!isSidebarVisible ? 'full-width' : ''}`}>
@@ -723,6 +920,7 @@ function Registro() {
                     </div>
                 </div>
             </div>
+            {renderTermsModal()}
         </div>
     );
 }

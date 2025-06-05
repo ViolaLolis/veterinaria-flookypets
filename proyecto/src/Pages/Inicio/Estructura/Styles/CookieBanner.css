@@ -1,0 +1,112 @@
+.cookie-banner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #2c3e50;
+  color: white;
+  padding: 20px;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+.cookie-banner-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.cookie-banner h3 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.cookie-banner p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.cookie-buttons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.cookie-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.3s;
+}
+
+.cookie-btn.accept-all {
+  background-color: #27ae60;
+  color: white;
+}
+
+.cookie-btn.preferences {
+  background-color: #3498db;
+  color: white;
+}
+
+.cookie-btn.reject-all {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.cookie-btn:hover {
+  opacity: 0.9;
+}
+
+.cookie-policy-link {
+  color: #3498db;
+  text-decoration: none;
+  font-size: 0.8rem;
+}
+
+.cookie-policy-link:hover {
+  text-decoration: underline;
+}
+
+.login-restriction-banner {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #e74c3c;
+  color: white;
+  padding: 15px 20px;
+  border-radius: 5px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  z-index: 1001;
+  max-width: 80%;
+  text-align: center;
+}
+
+.login-restriction-banner p {
+  margin: 0 0 10px 0;
+}
+
+.login-restriction-banner button {
+  background: white;
+  color: #e74c3c;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .cookie-buttons {
+    flex-direction: column;
+  }
+  
+  .cookie-btn {
+    width: 100%;
+  }
+}
