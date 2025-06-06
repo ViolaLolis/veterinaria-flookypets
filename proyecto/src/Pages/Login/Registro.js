@@ -42,7 +42,7 @@ const countryCodes = [
   { code: '+966', name: 'Arabia Saudita (+966)' }
 ];
 
-// Prefijos de área para Colombia (puedes agregar más países si es necesario)
+// Prefijos de área para Colombia
 const areaCodesColombia = [
   { code: '1', name: 'Bogotá (1)' },
   { code: '2', name: 'Cali (2)' },
@@ -54,17 +54,59 @@ const areaCodesColombia = [
   { code: '9', name: 'Manizales (9)' }
 ];
 
+// Tipos de vía para dirección
+const viaTypes = [
+  { value: 'CL', label: 'Calle' },
+  { value: 'CR', label: 'Carrera' },
+  { value: 'AV', label: 'Avenida' },
+  { value: 'DG', label: 'Diagonal' },
+  { value: 'TV', label: 'Transversal' },
+  { value: 'AC', label: 'Avenida Calle' },
+  { value: 'AK', label: 'Avenida Carrera' },
+  { value: 'CQ', label: 'Circunvalar' },
+  { value: 'CV', label: 'Circular' },
+  { value: 'CC', label: 'Centro Comercial' },
+  { value: 'ED', label: 'Edificio' },
+  { value: 'LT', label: 'Lote' },
+  { value: 'MZ', label: 'Manzana' },
+  { value: 'UR', label: 'Urbanización' }
+];
+
+// Cuadrantes
+const cuadrantes = [
+  { value: '', label: 'Ninguno' },
+  { value: 'NORTE', label: 'Norte' },
+  { value: 'SUR', label: 'Sur' },
+  { value: 'ESTE', label: 'Este' },
+  { value: 'OESTE', label: 'Oeste' },
+  { value: 'NORESTE', label: 'Noreste' },
+  { value: 'NOROESTE', label: 'Noroeste' },
+  { value: 'SURESTE', label: 'Sureste' },
+  { value: 'SUROESTE', label: 'Suroeste' }
+];
+
 function Registro() {
     const navigate = useNavigate();
     const [step, setStep] = useState(1);
     const [formData, setFormData] = useState({
         nombre: '',
         apellido: '',
-        countryCode: '+57', // Prefijo internacional por defecto
+        countryCode: '+57',
         telefono: '',
-        areaCode: '1', // Prefijo de área por defecto
+        areaCode: '1',
         telefonoFijo: '',
-        direccion: '',
+        // Campos de dirección estructurada
+        tipoVia: 'CL',
+        numeroVia: '',
+        cuadrante: '',
+        numeroViaGeneradora: '',
+        placa: '',
+        tipoComplemento: 'AP',
+        numeroComplemento: '',
+        codigoPostal: '',
+        ciudad: 'Bogotá',
+        barrio: '',
+        // Fin campos dirección
         tipoDocumento: '',
         numeroDocumento: '',
         fechaNacimiento: '',
@@ -72,14 +114,20 @@ function Registro() {
         contrasena: '',
         verificarContrasena: '',
         codigoIngresado: '',
-        aceptaTerminos: false // Nuevo campo para términos y condiciones
+        aceptaTerminos: false
     });
     const [fieldErrors, setFieldErrors] = useState({
         nombre: '',
         apellido: '',
         telefono: '',
         telefonoFijo: '',
-        direccion: '',
+        // Errores de dirección
+        numeroVia: '',
+        placa: '',
+        numeroComplemento: '',
+        codigoPostal: '',
+        barrio: '',
+        // Fin errores dirección
         tipoDocumento: '',
         numeroDocumento: '',
         fechaNacimiento: '',
@@ -87,7 +135,7 @@ function Registro() {
         contrasena: '',
         verificarContrasena: '',
         codigoIngresado: '',
-        aceptaTerminos: '' // Error para términos no aceptados
+        aceptaTerminos: ''
     });
     const [codigoGenerado, setCodigoGenerado] = useState('');
     const [tiempoRestante, setTiempoRestante] = useState(60);
@@ -197,13 +245,51 @@ function Registro() {
                 }
                 break;
                 
-            case 'direccion':
+            // Validaciones para campos de dirección
+            case 'numeroVia':
                 if (!value.trim()) {
-                    error = 'Este campo es obligatorio';
-                } else if (value.length > 100) {
-                    error = 'Máximo 100 caracteres';
+                    error = 'Número de vía es obligatorio';
+                } else if (!/^[0-9A-Za-z\s\-]+$/.test(value)) {
+                    error = 'Solo números, letras, espacios y guiones';
+                } else if (value.length > 20) {
+                    error = 'Máximo 20 caracteres';
                 }
                 break;
+                
+            case 'placa':
+                if (!value.trim()) {
+                    error = 'Número de placa es obligatorio';
+                } else if (!/^\d+[A-Za-z]?$/.test(value)) {
+                    error = 'Formato inválido (ej: 123A)';
+                } else if (value.length > 10) {
+                    error = 'Máximo 10 caracteres';
+                }
+                break;
+                
+            case 'numeroComplemento':
+                if (value && !/^[0-9A-Za-z\s\-]+$/.test(value)) {
+                    error = 'Solo números, letras, espacios y guiones';
+                } else if (value && value.length > 10) {
+                    error = 'Máximo 10 caracteres';
+                }
+                break;
+                
+            case 'codigoPostal':
+                if (value && !/^\d{6}$/.test(value)) {
+                    error = 'Debe tener 6 dígitos';
+                }
+                break;
+                
+            case 'barrio':
+                if (!value.trim()) {
+                    error = 'Barrio es obligatorio';
+                } else if (!/^[A-Za-zÁÉÍÓÚáéíóúñÑ\s\-]+$/.test(value)) {
+                    error = 'Solo letras, espacios y guiones';
+                } else if (value.length > 50) {
+                    error = 'Máximo 50 caracteres';
+                }
+                break;
+            // Fin validaciones dirección
                 
             case 'tipoDocumento':
                 if (!value) {
@@ -327,7 +413,11 @@ function Registro() {
         const newErrors = {...fieldErrors};
         
         if (step === 1) {
-            const fieldsToValidate = ['nombre', 'apellido', 'telefono', 'direccion', 'tipoDocumento', 'numeroDocumento', 'fechaNacimiento'];
+            const fieldsToValidate = [
+                'nombre', 'apellido', 'telefono', 
+                'tipoDocumento', 'numeroDocumento', 'fechaNacimiento',
+                'numeroVia', 'placa', 'barrio' // Campos obligatorios de dirección
+            ];
             fieldsToValidate.forEach(field => {
                 const error = validateField(field, formData[field]);
                 newErrors[field] = error;
@@ -399,6 +489,13 @@ function Registro() {
           return;
         }
       
+        // Construir la dirección completa para enviar a la base de datos
+        const direccionCompleta = `${formData.tipoVia} ${formData.numeroVia} ${formData.cuadrante ? formData.cuadrante + ' ' : ''}` +
+                                 `# ${formData.numeroViaGeneradora} - ${formData.placa}` +
+                                 `${formData.numeroComplemento ? ', ' + formData.tipoComplemento + ' ' + formData.numeroComplemento : ''}` +
+                                 `, ${formData.barrio}, ${formData.ciudad}` +
+                                 `${formData.codigoPostal ? ', Código Postal: ' + formData.codigoPostal : ''}`;
+      
         const userData = {
           nombre: formData.nombre,
           apellido: formData.apellido,
@@ -406,7 +503,7 @@ function Registro() {
           password: formData.contrasena,
           telefono: `${formData.countryCode}${formData.telefono}`,
           telefonoFijo: formData.telefonoFijo ? `${formData.areaCode}${formData.telefonoFijo}` : null,
-          direccion: formData.direccion,
+          direccion: direccionCompleta,
           tipoDocumento: formData.tipoDocumento,
           numeroDocumento: formData.numeroDocumento,
           fechaNacimiento: formData.fechaNacimiento,
@@ -537,22 +634,7 @@ function Registro() {
                                     </div>
                                     {fieldErrors.telefonoFijo && <span className="error-text">{fieldErrors.telefonoFijo}</span>}
                                 </div>
-                            </div>
-                            <div className="form-column">
-                                <div className="input-group">
-                                    <label>Dirección:</label>
-                                    <input 
-                                        type="text" 
-                                        name="direccion" 
-                                        value={formData.direccion} 
-                                        onChange={handleInputChange} 
-                                        maxLength="100"
-                                        className={fieldErrors.direccion ? 'input-error' : ''}
-                                        required 
-                                    />
-                                    {fieldErrors.direccion && <span className="error-text">{fieldErrors.direccion}</span>}
-                                </div>
-                                <div className="input-group">
+                                                                <div className="input-group">
                                     <label>Tipo de Documento:</label>
                                     <select 
                                         name="tipoDocumento" 
@@ -593,6 +675,155 @@ function Registro() {
                                     />
                                     {fieldErrors.fechaNacimiento && <span className="error-text">{fieldErrors.fechaNacimiento}</span>}
                                 </div>
+                            </div>
+                            <div className="form-column">
+                                
+                                <div className="address-row">
+                                    <div className="input-group address-select">
+                                        <label>Tipo de vía:</label>
+                                        <select
+                                            name="tipoVia"
+                                            value={formData.tipoVia}
+                                            onChange={handleSelectChange}
+                                        >
+                                            {viaTypes.map((via) => (
+                                                <option key={via.value} value={via.value}>
+                                                    {via.label}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div className="input-group address-input">
+                                        <label>Número o nombre de vía:</label>
+                                        <input 
+                                            type="text" 
+                                            name="numeroVia" 
+                                            value={formData.numeroVia} 
+                                            onChange={handleInputChange} 
+                                            maxLength="20"
+                                            className={fieldErrors.numeroVia ? 'input-error' : ''}
+                                            required 
+                                            placeholder="Ej: 12B, 45-23, Caracas"
+                                        />
+                                        {fieldErrors.numeroVia && <span className="error-text">{fieldErrors.numeroVia}</span>}
+                                    </div>
+                                </div>
+                                
+                                <div className="address-row">
+                                    <div className="input-group address-select">
+                                        <label>Cuadrante (opcional):</label>
+                                        <select
+                                            name="cuadrante"
+                                            value={formData.cuadrante}
+                                            onChange={handleSelectChange}
+                                        >
+                                            {cuadrantes.map((cuadrante) => (
+                                                <option key={cuadrante.value} value={cuadrante.value}>
+                                                    {cuadrante.label}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div className="input-group address-input">
+                                        <label>Número vía generadora:</label>
+                                        <input 
+                                            type="text" 
+                                            name="numeroViaGeneradora" 
+                                            value={formData.numeroViaGeneradora} 
+                                            onChange={handleInputChange} 
+                                            maxLength="20"
+                                            placeholder="Ej: 45, 23A"
+                                        />
+                                    </div>
+                                </div>
+                                
+                                <div className="address-row">
+                                    <div className="input-group address-input">
+                                        <label>Número de placa:</label>
+                                        <input 
+                                            type="text" 
+                                            name="placa" 
+                                            value={formData.placa} 
+                                            onChange={handleInputChange} 
+                                            maxLength="10"
+                                            className={fieldErrors.placa ? 'input-error' : ''}
+                                            required 
+                                            placeholder="Ej: 25A, 10B"
+                                        />
+                                        {fieldErrors.placa && <span className="error-text">{fieldErrors.placa}</span>}
+                                    </div>
+                                    <div className="input-group address-select">
+                                        <label>Tipo complemento:</label>
+                                        <select
+                                            name="tipoComplemento"
+                                            value={formData.tipoComplemento}
+                                            onChange={handleSelectChange}
+                                        >
+                                            <option value="AP">Apartamento</option>
+                                            <option value="CS">Casa</option>
+                                            <option value="OF">Oficina</option>
+                                            <option value="LT">Local</option>
+                                        </select>
+                                    </div>
+                                    <div className="input-group address-input">
+                                        <label>Número complemento (opcional):</label>
+                                        <input 
+                                            type="text" 
+                                            name="numeroComplemento" 
+                                            value={formData.numeroComplemento} 
+                                            onChange={handleInputChange} 
+                                            maxLength="10"
+                                            className={fieldErrors.numeroComplemento ? 'input-error' : ''}
+                                            placeholder="Ej: 201, 5B"
+                                        />
+                                        {fieldErrors.numeroComplemento && <span className="error-text">{fieldErrors.numeroComplemento}</span>}
+                                    </div>
+                                </div>
+                                
+                                <div className="address-row">
+                                    <div className="input-group address-input">
+                                        <label>Barrio:</label>
+                                        <input 
+                                            type="text" 
+                                            name="barrio" 
+                                            value={formData.barrio} 
+                                            onChange={handleInputChange} 
+                                            maxLength="50"
+                                            className={fieldErrors.barrio ? 'input-error' : ''}
+                                            required 
+                                            placeholder="Nombre del barrio"
+                                        />
+                                        {fieldErrors.barrio && <span className="error-text">{fieldErrors.barrio}</span>}
+                                    </div>
+                                    <div className="input-group address-input">
+                                        <label>Ciudad:</label>
+                                        <input 
+                                            type="text" 
+                                            name="ciudad" 
+                                            value={formData.ciudad} 
+                                            onChange={handleInputChange} 
+                                            maxLength="50"
+                                            required 
+                                        />
+                                    </div>
+                                </div>
+                                
+                                <div className="address-row">
+                                    <div className="input-group address-input">
+                                        <label>Código Postal (opcional):</label>
+                                        <input 
+                                            type="text" 
+                                            name="codigoPostal" 
+                                            value={formData.codigoPostal} 
+                                            onChange={handleInputChange} 
+                                            maxLength="6"
+                                            className={fieldErrors.codigoPostal ? 'input-error' : ''}
+                                            placeholder="6 dígitos"
+                                        />
+                                        {fieldErrors.codigoPostal && <span className="error-text">{fieldErrors.codigoPostal}</span>}
+                                    </div>
+                                </div>
+                                
                             </div>
                         </div>
                     </div>
