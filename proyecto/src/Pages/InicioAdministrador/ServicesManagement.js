@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FaSearch, FaPlus, FaEdit, FaTrash, FaTimes, FaSave, FaSpinner } from 'react-icons/fa';
-import './Styles/ServicesManagement.css';
+import './Styles/AdminStyles.css';
 
 function ServicesManagement({ user }) {
   const [services, setServices] = useState([]);

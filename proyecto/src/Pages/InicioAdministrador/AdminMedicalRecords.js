@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FaNotesMedical, FaSearch, FaPaw, FaUserMd, FaCalendarAlt } from 'react-icons/fa';
-import './Styles/AdminMedicalrecords.css';
+import './Styles/AdminStyles.css';
 
 function AdminMedicalRecords() {
   const [records, setRecords] = useState([]);
