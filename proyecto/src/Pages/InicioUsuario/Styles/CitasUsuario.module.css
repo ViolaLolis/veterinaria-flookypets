@@ -1,0 +1,250 @@
+/* CitasUsuario.module.css */
+
+.container {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  background-color: #ecf0f1;
+  border-radius: 15px;
+  box-shadow: 0 10px 25px rgba(0, 172, 193, 0.2);
+  transition: all 0.3s ease;
+}
+
+.container:hover {
+  box-shadow: 0 15px 30px rgba(0, 172, 193, 0.3);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #00acc1;
+}
+
+.header h3 {
+  color: #2c3e50;
+  font-size: 1.8rem;
+  margin: 0;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.icon {
+  color: #00acc1;
+  font-size: 2rem;
+  transition: transform 0.3s ease;
+}
+
+.header:hover .icon {
+  transform: rotate(-10deg) scale(1.1);
+}
+
+.listaCitas {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.citaItem {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  border-left: 4px solid #00acc1;
+  position: relative;
+  overflow: hidden;
+}
+
+.citaItem:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 172, 193, 0.2);
+}
+
+.citaItem::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(0, 172, 193, 0.05) 0%, transparent 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.citaItem:hover::before {
+  opacity: 1;
+}
+
+.citaInfo {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.citaFecha, .citaHora, .citaLugar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #34495e;
+  font-weight: 500;
+}
+
+.citaIcon {
+  color: #00acc1;
+  width: 1.2rem;
+  text-align: center;
+}
+
+.citaServicio, .citaVeterinario {
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+.servicioLabel, .veterinarioLabel {
+  color: #00acc1;
+  font-weight: 600;
+}
+
+.citaActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.accionBtn {
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 25px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.5px;
+}
+
+.accionBtn:first-child {
+  background-color: #00acc1;
+  color: white;
+}
+
+.accionBtn:first-child:hover {
+  background-color: #0097a7;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 172, 193, 0.3);
+}
+
+.accionBtn:last-child {
+  background-color: transparent;
+  color: #e74c3c;
+  border: 1px solid #e74c3c;
+}
+
+.accionBtn:last-child:hover {
+  background-color: rgba(231, 76, 60, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(231, 76, 60, 0.2);
+}
+
+.noCitas {
+  text-align: center;
+  padding: 2rem;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+}
+
+.noCitas p {
+  color: #2c3e50;
+  font-size: 1.2rem;
+  margin: 0.5rem 0;
+}
+
+.noCitas p:last-child {
+  color: #00acc1;
+  font-weight: 600;
+  font-size: 1.3rem;
+  margin-top: 1rem;
+}
+
+.noCitasIcon {
+  color: #00acc1;
+  font-size: 3rem;
+  margin: 1rem 0;
+  opacity: 0.7;
+  transition: all 0.5s ease;
+}
+
+.noCitas:hover .noCitasIcon {
+  transform: scale(1.1);
+  opacity: 1;
+}
+
+.verTodas {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-top: 2rem;
+  padding: 0.8rem 1.5rem;
+  background-color: #00acc1;
+  color: white;
+  text-decoration: none;
+  border-radius: 25px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0, 172, 193, 0.3);
+}
+
+.verTodas:hover {
+  background-color: #0097a7;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 16px rgba(0, 172, 193, 0.4);
+}
+
+.plusIcon {
+  font-size: 1.2rem;
+  transition: transform 0.3s ease;
+}
+
+.verTodas:hover .plusIcon {
+  transform: rotate(90deg) scale(1.2);
+}
+
+
+
+.citaItem {
+  animation: pulse 3s infinite;
+}
+
+.citaItem:hover {
+  animation: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    margin: 1rem;
+    padding: 1rem;
+  }
+  
+  .citaInfo {
+    grid-template-columns: 1fr;
+  }
+  
+  .citaActions {
+    flex-direction: column;
+  }
+  
+  .accionBtn {
+    width: 100%;
+  }
+}

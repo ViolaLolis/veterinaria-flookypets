@@ -1,6 +1,8 @@
 //Modulos para que funcione el proyecto
 npm i react-scripts 
+npm install recharts
 npm install @emailjs/browser
+npm install react-dom
 
 Usuarios de prueba
 Admin: admin@example.com | 1234
@@ -24,14 +26,33 @@ git pull origin main
 git push origin main
 
 // ahora vamos a instalar sus dependencias del server
+npm install mysql2
 npm init -y
 npm install express mysql cors dotenv
+
+Para luego ejecutar el servidor para que quede activo
+node server.js
+luego aparecera un link, dale control+click y les abrira una pagina, les tiene que aparecer pagina abierta con exito
 
 Luego seleccionamos la carpeta del servidor//
 cd servidor.js
 npm install
 
 Para luego ejecutar el servidor para que quede activo
-node server.js
+node server.
 
-T
+
+Debera aparecerte Servidor backen corriendo, eso significa que ya esta corriendo con la base de datos
+
+npm install axios (Vamos a usar axios para hacer solicitudes HTTP)
+
+npm install bcrypt (para que las contraseñas no se muestren)
+
+npm install framer-motion
+npm install react-calendar
+npm install @fortawesome/free-brands-svg-icons
+npm install react-big-calendar moment
+npm install chart.js react-chartjs-2
+
+Comando para permisos sin perfil
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser

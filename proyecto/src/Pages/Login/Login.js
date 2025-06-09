@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import "../Styles/Login.css";
 
 function Login({ setUser }) {
@@ -16,12 +15,6 @@ function Login({ setUser }) {
     password: false
   });
   const navigate = useNavigate();
-
-  const users = [
-    { email: 'admin@example.com', password: '1234', role: 'admin', name: 'Administrador' },
-    { email: 'vet@example.com', password: '5678', role: 'veterinario', name: 'Dr. Veterinario' },
-    { email: 'user@example.com', password: 'abcd', role: 'usuario', name: 'Juan Pérez' }
-  ];
 
   // Validación en tiempo real
   useEffect(() => {
@@ -45,86 +38,109 @@ function Login({ setUser }) {
     setTouched(prev => ({ ...prev, [field]: true }));
   };
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
 
-    // Validar todos los campos al enviar
     setTouched({
       email: true,
       password: true
     });
 
-    // Verificar si hay errores
-    const hasErrors = Object.values(errors).some(error => error !== '');
+    const hasErrors = Object.entries(errors)
+      .filter(([key]) => key !== 'form')
+      .some(([, error]) => error !== '');
+
     if (!email || !password || hasErrors) {
       setErrors(prev => ({
         ...prev,
-        form: '⚠Correo o contraseña son incorrectas⚠'
+        form: '⚠ Correo o contraseña son incorrectas ⚠'
       }));
       return;
     }
 
-    const foundUser = users.find(user => user.email === email && user.password === password);
-    
-    if (foundUser) {
-      setUser(foundUser);
-      localStorage.setItem('user', JSON.stringify(foundUser));
-      
-      if (foundUser.role === 'admin') {
+    try {
+      const response = await fetch('http://localhost:5000/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setErrors(prev => ({
+          ...prev,
+          form: data.message || '⚠ Error al iniciar sesión ⚠'
+        }));
+        return;
+      }
+
+      // Login exitoso
+      setUser(data);
+      localStorage.setItem('user', JSON.stringify(data));
+
+      if (data.role === 'admin') {
         navigate('/admin');
-      } else if (foundUser.role === 'veterinario') {
+      } else if (data.role === 'veterinario') {
         navigate('/veterinario');
       } else {
         navigate('/usuario');
       }
-    } else {
+
+    } catch (error) {
+      console.error('Error al conectar con el servidor:', error);
       setErrors(prev => ({
         ...prev,
-        form: '⚠Correo electrónico o contraseña incorrectos⚠'
+        form: '⚠ Error al conectar con el servidor ⚠'
       }));
     }
   };
 
   return (
-    <div className="login-container">
-      <div className="login-wrapper">
-        <div className="login-box">
-          
-          <div className="logo-section">
+    <div className="auth-container">
+      <div className="auth-wrapper">
+        <div className="auth-box">
+          <div className="brand-section">
             <img 
-              src={require ('../Inicio/Imagenes/flooty.png')}  
+              src={require('../Inicio/Imagenes/flooty.png')}  
               alt="Logo de la empresa" 
-              className="login-logo"
+              className="auth-logo"
             />
             <h2>Bienvenido</h2>
             <p>Ingresa tus credenciales para acceder a nuestra veterinaria</p>
           </div>
           
-          <div className="form-section">
+          <div className="auth-form">
             <h2>Iniciar Sesión</h2>
             {errors.form && <p className="error-message">⚠ {errors.form} ⚠</p>}
 
             <form onSubmit={handleLogin}>
-              <div className="input-group">
+              <div className="form-field">
                 <label>Correo Electrónico:</label>
                 <input 
                   type="email" 
-                  placeholder="Ingrese su correo electrónico" 
                   value={email} 
-                  onChange={(e) => setEmail(e.target.value.slice(0, 63))}
+                  onChange={(e) => {
+                    setEmail(e.target.value.slice(0, 63));
+                    setErrors(prev => ({ ...prev, form: '' }));
+                  }}
                   onBlur={() => handleBlur('email')}
                   className={errors.email ? 'input-error' : ''}
                 />
-                {errors.email && <span className="field-error">⚠ {errors.email} ⚠</span>}
+                {errors.email && <span className="field-error">⚠ {errors.email} �</span>}
               </div>
 
-              <div className="input-group">
+              <div className="form-field">
                 <label>Contraseña:</label>
                 <input 
                   type="password" 
-                  placeholder="Ingrese su contraseña" 
                   value={password} 
-                  onChange={(e) => setPassword(e.target.value.slice(0, 63))}
+                  onChange={(e) => {
+                    setPassword(e.target.value.slice(0, 63));
+                    setErrors(prev => ({ ...prev, form: '' }));
+                  }}
                   onBlur={() => handleBlur('password')}
                   className={errors.password ? 'input-error' : ''}
                 />
@@ -133,26 +149,30 @@ function Login({ setUser }) {
 
               <button 
                 type="submit" 
-                className="btn-login"
+                className="btn-auth"
                 disabled={!!errors.email || !!errors.password}
               >
                 Iniciar Sesión
               </button>
             </form>
 
-            <div className="login-links">
+            <div className="auth-links">
               <Link to="/olvide-contraseña" className="link">Olvidé mi contraseña</Link>
               <Link to="/register" className="link">Registrarme</Link>
             </div>
           </div>
         </div>
 
-        <div className="login-footer">
-          <button className="btn-back" onClick={() => navigate('/')}>Volver al inicio</button>
+        <div className="auth-footer">
+          <button className="btn-return" onClick={() => navigate('/')}>Volver al inicio</button>
         </div>
       </div>
     </div>
+
+    
   );
+
+  
 }
 
 export default Login;

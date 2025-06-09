@@ -1,0 +1,172 @@
+:root {
+  --color-primary: #00bcd4; /* Azul claro */
+  --color-secondary: #00acc1; /* Azul más oscuro */
+  --color-success: #4CAF50; /* Verde de éxito */
+  --color-warning: #ffce54; /* Amarillo de advertencia */
+  --color-white: #ffffff; /* Blanco */
+  --color-light: #e0f7fa; /* Fondo azul claro */
+  --color-dark: #333; /* Gris oscuro */
+  --color-muted: #666; /* Gris suave */
+  --color-border: #b2ebf2; /* Azul suave */
+  --color-tab-active: #00bcd4; /* Azul claro */
+  --color-tab-border: #00acc1; /* Azul más oscuro */
+  --color-primary-dark: #3a63d1; /* Azul oscuro */
+  --color-danger: #ff5252; /* Rojo de peligro */
+  --color-danger-dark: #e03e3e; /* Rojo oscuro para hover */
+  --color-success-dark: #28a745; /* Verde oscuro para hover */
+  --color-text-dark: #333; /* Gris oscuro para texto */
+  --color-bg-light: #f4f7ff; /* Fondo claro */
+  --color-accent: #d4a017; /* Color de acento (amarillo dorado) */
+  --color-accent-light: #f0c14b; /* Color de acento claro */
+  --color-muted: #7a6a56; /* Color para texto secundario */
+}
+
+/* Llamada Container */
+.llamadaContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30px;
+  background-color: var(--color-bg-light); /* Fondo claro */
+  border-radius: 15px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  width: 90%;
+  max-width: 700px;
+  margin: 20px auto;
+}
+
+/* Header */
+.header {
+  color: var(--color-text-dark); /* Color de texto oscuro */
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.header h2 {
+  font-size: 2.2em;
+  margin-bottom: 10px;
+  color: var(--color-primary); /* Azul claro */
+}
+
+.header svg {
+  margin-right: 10px;
+}
+
+/* Llamada Panel */
+.llamadaPanel {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 20px;
+}
+
+/* Local and Remote Video Containers */
+.localVideoContainer,
+.remoteVideoContainer {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background-color: var(--color-dark); /* Gris oscuro */
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.localVideo,
+.remoteVideo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity 0.3s ease;
+}
+
+/* Input Contacto */
+.inputContacto {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 15px;
+  background-color: var(--color-white); /* Blanco */
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.inputContacto input[type="text"] {
+  flex-grow: 1;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1em;
+}
+
+/* Iniciar Llamada Button */
+.iniciarLlamadaBtn {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  font-size: 1em;
+  background-color: var(--color-primary); /* Azul claro */
+  color: var(--color-white); /* Blanco */
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.iniciarLlamadaBtn:hover {
+  background-color: var(--color-primary-dark); /* Azul oscuro */
+  transform: scale(1.02);
+}
+
+/* Controles de Llamada */
+.controlesLlamada {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  padding: 20px;
+  background-color: var(--color-light); /* Fondo claro */
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Control Buttons */
+.controlBtn,
+.finalizarLlamadaBtn {
+  padding: 12px;
+  border: none;
+  border-radius: 50%;
+  font-size: 1.2em;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+}
+
+.controlBtn {
+  background-color: var(--color-muted); /* Gris suave */
+  color: var(--color-white); /* Blanco */
+}
+
+.controlBtn:hover {
+  background-color: var(--color-muted); /* Gris suave oscuro */
+  transform: scale(1.05);
+}
+
+.finalizarLlamadaBtn {
+  background-color: var(--color-danger); /* Rojo de peligro */
+  color: var(--color-white); /* Blanco */
+}
+
+.finalizarLlamadaBtn:hover {
+  background-color: var(--color-danger-dark); /* Rojo oscuro para hover */
+  transform: scale(1.05);
+}
+
+/* Error */
+.error {
+  color: var(--color-danger); /* Rojo de peligro */
+  font-weight: bold;
+  margin-top: 10px;
+  text-align: center;
+}

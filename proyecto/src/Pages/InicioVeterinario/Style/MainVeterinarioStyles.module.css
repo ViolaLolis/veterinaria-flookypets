@@ -1,0 +1,416 @@
+.mainContainer {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  background-color: #f5fbfc;
+  min-height: 100vh;
+}
+
+.header {
+  margin-bottom: 2.5rem;
+  text-align: center;
+}
+
+.header h1 {
+  color: #00838f;
+  font-size: 2.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  color: #00acc1;
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+/* Stats Cards */
+.statsContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.statCard {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 188, 212, 0.08);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid #e0f7fa;
+}
+
+.statCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 188, 212, 0.12);
+}
+
+.statIcon {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+}
+
+.statContent h3 {
+  color: #006064;
+  font-size: 1.8rem;
+  margin: 0;
+  line-height: 1;
+}
+
+.statContent p {
+  color: #00acc1;
+  margin: 0.3rem 0 0;
+  font-size: 0.9rem;
+}
+
+/* Tabs */
+.tabsContainer {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  justify-content: center;
+}
+
+.tabButton {
+  padding: 0.8rem 1.5rem;
+  border: none;
+  background: #e0f7fa;
+  color: #00838f;
+  border-radius: 50px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.95rem;
+}
+
+.tabButton:hover {
+  background: #b2ebf2;
+}
+
+.activeTab {
+  background: #00bcd4;
+  color: white;
+}
+
+/* Citas Section */
+.citasSection {
+  margin-bottom: 3rem;
+}
+
+.citasHeader {
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.citasHeader h2 {
+  color: #006064;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  font-size: 1.5rem;
+}
+
+.sectionIcon {
+  color: #00acc1;
+}
+
+.citasSubtitle {
+  color: #00acc1;
+  margin-top: 0.5rem;
+}
+
+.citasLista {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  padding: 0;
+  list-style: none;
+}
+
+.citaItem {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 188, 212, 0.08);
+  transition: all 0.3s ease;
+  border: 1px solid #e0f7fa;
+  position: relative;
+  overflow: hidden;
+}
+
+.citaItem.completed {
+  background: #f5fbfc;
+  border-color: #b2ebf2;
+}
+
+.citaItem.completed::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 5px;
+  height: 100%;
+  background: #00acc1;
+}
+
+.citaHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px dashed #b2ebf2;
+}
+
+.citaDetalle {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.8rem;
+}
+
+.citaIcon {
+  color: #00bcd4;
+  width: 16px;
+}
+
+.hora {
+  font-weight: 600;
+  color: #006064;
+}
+
+.fecha {
+  color: #00acc1;
+  font-size: 0.8rem;
+  margin-left: 0.5rem;
+}
+
+.mascotaType {
+  color: #00acc1;
+  font-size: 1.2rem;
+}
+
+.petIcon {
+  color: #00838f;
+}
+
+.mascota, .propietario {
+  font-weight: 500;
+  color: #333;
+}
+
+.direccion {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.citaFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+  padding-top: 0.8rem;
+  border-top: 1px dashed #b2ebf2;
+}
+
+.servicio {
+  background: #e0f7fa;
+  color: #00838f;
+  padding: 0.3rem 0.8rem;
+  border-radius: 50px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.completeButton {
+  background: #00bcd4;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 50px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.completeButton:hover {
+  background: #0097a7;
+}
+
+.completeButton:disabled {
+  background: #b2ebf2;
+  cursor: not-allowed;
+}
+
+.completedLabel {
+  background: #e0f7fa;
+  color: #00838f;
+  padding: 0.5rem 1rem;
+  border-radius: 50px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* No Citas */
+.noCitas {
+  text-align: center;
+  padding: 3rem 2rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 188, 212, 0.08);
+  border: 1px dashed #b2ebf2;
+}
+
+.noCitasIcon {
+  color: #00acc1;
+  margin-bottom: 1rem;
+}
+
+.noCitas h3 {
+  color: #006064;
+  margin-bottom: 0.5rem;
+}
+
+.noCitas p {
+  color: #00acc1;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+/* Tips Section */
+.tipsSection {
+  margin-top: 3rem;
+}
+
+.tipsSection h3 {
+  text-align: center;
+  color: #006064;
+  margin-bottom: 1.5rem;
+  font-size: 1.3rem;
+}
+
+.tipsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.tipCard {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 188, 212, 0.08);
+  transition: all 0.3s ease;
+  border: 1px solid #e0f7fa;
+  text-align: center;
+}
+
+.tipCard h4 {
+  color: #00838f;
+  margin: 1rem 0 0.5rem;
+}
+
+.tipCard p {
+  color: #666;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.tipIcon {
+  width: 50px;
+  height: 50px;
+  background: #e0f7fa;
+  color: #00bcd4;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  font-size: 1.2rem;
+}
+
+/* Loading and Error States */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  color: #00acc1;
+}
+
+.loadingSpinner {
+  margin-bottom: 1rem;
+}
+
+.errorContainer {
+  background: #ffebee;
+  color: #c62828;
+  padding: 2rem;
+  border-radius: 8px;
+  text-align: center;
+  max-width: 500px;
+  margin: 2rem auto;
+}
+
+.retryButton {
+  background: #00bcd4;
+  color: white;
+  border: none;
+  padding: 0.5rem 1.5rem;
+  border-radius: 50px;
+  margin-top: 1rem;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .mainContainer {
+    padding: 1.5rem;
+  }
+  
+  .statsContainer {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .tabsContainer {
+    flex-wrap: wrap;
+  }
+  
+  .citasLista {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .statsContainer {
+    grid-template-columns: 1fr;
+  }
+  
+  .header h1 {
+    font-size: 1.8rem;
+  }
+  
+  .tabButton {
+    padding: 0.6rem 1rem;
+    font-size: 0.85rem;
+  }
+}

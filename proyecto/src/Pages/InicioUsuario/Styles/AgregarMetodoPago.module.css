@@ -1,0 +1,239 @@
+/* Styles/AgregarMetodoPago.module.css */
+
+.container {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: #fffaf0;
+  border-radius: 15px;
+  box-shadow: 0 8px 20px rgba(255, 215, 0, 0.1);
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #fff3bf;
+}
+
+.header h3 {
+  margin: 0;
+  color: #ffd43b;
+  font-size: 1.8rem;
+  font-weight: 600;
+}
+
+.volverBtn {
+  background: #fff9db;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 50px;
+  color: #f59f00;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(255, 212, 59, 0.2);
+}
+
+.volverBtn:hover {
+  background: #ffec99;
+  transform: translateX(-5px);
+  box-shadow: 0 4px 8px rgba(255, 212, 59, 0.3);
+}
+
+.volverIcon {
+  margin-right: 0.5rem;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1.5rem;
+  background-color: #fff9db;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  animation: slideIn 0.4s ease-out forwards;
+  opacity: 0;
+}
+
+.formGroup:nth-child(1) { animation-delay: 0.1s; }
+.formGroup:nth-child(2) { animation-delay: 0.2s; }
+.formGroup:nth-child(3) { animation-delay: 0.3s; }
+.formGroup:nth-child(4) { animation-delay: 0.4s; }
+.formGroup:nth-child(5) { animation-delay: 0.5s; }
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.formGroup label {
+  font-weight: 600;
+  color: #f59f00;
+  margin-bottom: 0.3rem;
+}
+
+.formGroup input,
+.formGroup select {
+  padding: 0.8rem 1rem;
+  border: 2px solid #ffec99;
+  border-radius: 8px;
+  background-color: #fffef9;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.formGroup input:focus,
+.formGroup select:focus {
+  outline: none;
+  border-color: #ffd43b;
+  box-shadow: 0 0 0 3px rgba(255, 212, 59, 0.3);
+  transform: translateY(-2px);
+}
+
+.formGroup input::placeholder {
+  color: #d4b483;
+}
+
+/* Estilos específicos para cada tipo de pago */
+.tarjeta {
+  display: flex;
+  flex-direction: column;
+}
+
+.tarjeta input {
+  max-width: 300px;
+}
+
+.paypal {
+  display: none;
+}
+
+.applepay, .googlepay {
+  display: none;
+  text-align: center;
+  color: #5c3c00;
+}
+
+.transferencia {
+  display: none;
+}
+
+.notaTransferencia {
+  font-size: 0.9rem;
+  color: #d4b483;
+  margin: 0.5rem 0;
+}
+
+/* Estilos para el input de archivo */
+.formGroup input[type="file"] {
+  padding: 0.5rem;
+  border: 2px dashed #ffec99;
+  background-color: #fffef9;
+  cursor: pointer;
+}
+
+.formGroup input[type="file"]:hover {
+  background-color: #ffec99;
+}
+
+/* Mostrar solo el grupo de campos relevante según el tipo de pago seleccionado */
+#tipo:focus ~ .formGroup {
+  display: none;
+}
+
+#tipo[value="credito"]:focus ~ .tarjeta,
+#tipo[value="debito"]:focus ~ .tarjeta {
+  display: flex;
+  animation: expand 0.5s ease-out;
+}
+
+#tipo[value="paypal"]:focus ~ .paypal {
+  display: flex;
+  animation: expand 0.5s ease-out;
+}
+
+#tipo[value="applepay"]:focus ~ .applepay {
+  display: flex;
+  animation: expand 0.5s ease-out;
+}
+
+#tipo[value="googlepay"]:focus ~ .googlepay {
+  display: flex;
+  animation: expand 0.5s ease-out;
+}
+
+#tipo[value="transferencia"]:focus ~ .transferencia {
+  display: flex;
+  animation: expand 0.5s ease-out;
+}
+
+@keyframes expand {
+  from { opacity: 0; max-height: 0; }
+  to { opacity: 1; max-height: 500px; }
+}
+
+.agregarBtn {
+  background: linear-gradient(135deg, #ffec99, #fcc419);
+  color: #5c3c00;
+  padding: 1rem 1.5rem;
+  border: none;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(255, 212, 59, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+}
+
+.agregarBtn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(255, 212, 59, 0.3);
+  background: linear-gradient(135deg, #fcc419, #ffec99);
+}
+
+.agregarBtn:active {
+  transform: translateY(1px);
+}
+
+/* Efecto de carga al enviar el formulario */
+.agregarBtn.loading {
+  position: relative;
+  color: transparent;
+}
+
+.agregarBtn.loading::after {
+  content: "";
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

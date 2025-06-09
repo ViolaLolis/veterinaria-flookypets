@@ -1,0 +1,303 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #f5971d, #c0babaa2);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Contenedor principal con efecto vidrio */
+.container {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  width: 90%;
+  max-width: 1000px;
+  margin: 40px auto;
+  animation: fadeInUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px) rotateX(10deg);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) rotateX(0);
+  }
+}
+
+/* Header con efecto 3D */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 30px;
+  width: 100%;
+  justify-content: center;
+  transform-style: preserve-3d;
+}
+
+.icon {
+  font-size: 2.2em;
+  color: #28a745;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+  transition: transform 0.4s ease, filter 0.4s ease;
+}
+
+.icon:hover {
+  transform: rotate(15deg) scale(1.1);
+  filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.15));
+}
+
+h3 {
+  color: #333;
+  font-size: 2.5em;
+  margin: 0;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  position: relative;
+  display: inline-block;
+}
+
+h3::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, #f5971d, #c0babaa2);
+  border-radius: 3px;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.6s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.container:hover h3::after {
+  transform: scaleX(1);
+}
+
+/* Tabla con efecto hover 3D */
+.tableContainer {
+  overflow-x: auto;
+  border-radius: 12px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+  width: 100%;
+  margin: 30px 0;
+  transform: translateZ(0);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.tableContainer:hover {
+  transform: translateY(-5px) translateZ(10px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.12);
+}
+
+.historialTable {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.95em;
+  position: relative;
+}
+
+.tableHead th {
+  background: linear-gradient(to right, #f5971d, #f8b133);
+  color: white;
+  padding: 15px 20px;
+  text-align: left;
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.tableHead th:first-child {
+  border-top-left-radius: 12px;
+}
+
+.tableHead th:last-child {
+  border-top-right-radius: 12px;
+}
+
+.tableBody td {
+  border-bottom: 1px solid rgba(221, 221, 221, 0.5);
+  padding: 12px 20px;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.tableBody tr {
+  transition: all 0.3s ease;
+}
+
+.tableBody tr:hover td {
+  background: rgba(245, 151, 29, 0.08);
+  transform: scale(1.01);
+}
+
+.tableBody tr:nth-child(even) {
+  background-color: rgba(249, 249, 249, 0.7);
+}
+
+.tableBody tr:last-child td:first-child {
+  border-bottom-left-radius: 12px;
+}
+
+.tableBody tr:last-child td:last-child {
+  border-bottom-right-radius: 12px;
+}
+
+.notasColumn {
+  white-space: pre-line;
+  max-width: 300px;
+}
+
+/* Mensaje sin historial */
+.noHistorial {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 40px;
+  background: rgba(248, 248, 248, 0.7);
+  border-radius: 12px;
+  color: #777;
+  text-align: center;
+  width: 80%;
+  margin: 30px auto;
+  transform-style: preserve-3d;
+}
+
+.noHistorialIcon {
+  font-size: 3em;
+  color: rgba(204, 204, 204, 0.7);
+  transition: all 0.5s ease;
+}
+
+.noHistorial:hover .noHistorialIcon {
+  transform: rotateY(180deg) scale(1.2);
+  color: #f5971d;
+}
+
+/* Botones de acción con efecto flotante */
+.actions {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  width: 100%;
+  margin-top: 30px;
+}
+
+.actionButton {
+  padding: 12px 25px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #5b615b, #7a817a);
+  color: white;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.actionButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: 0.5s;
+}
+
+.actionButton:hover {
+  background: linear-gradient(135deg, #f58504, #f5971d);
+  transform: translateY(-5px) scale(1.05);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+}
+
+.actionButton:hover::before {
+  left: 100%;
+}
+
+.actionButton svg {
+  margin-right: 8px;
+  transition: transform 0.3s ease;
+}
+
+.actionButton:hover svg {
+  transform: rotate(15deg) scale(1.2);
+}
+
+/* Efectos de hover para filas de la tabla */
+@keyframes rowEntry {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.tableBody tr {
+  animation: rowEntry 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: calc(var(--row-index) * 0.1s);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: 25px;
+    width: 95%;
+  }
+  
+  h3 {
+    font-size: 2em;
+  }
+  
+  .actions {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .actionButton {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 20px;
+    border-radius: 15px;
+  }
+  
+  .header {
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+  }
+  
+  .noHistorial {
+    width: 100%;
+    padding: 30px 20px;
+  }
+}

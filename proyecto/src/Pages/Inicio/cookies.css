@@ -1,0 +1,293 @@
+/* cookies.css - Versión con tu paleta de colores */
+:root {
+  --color-primary: #00bcd4;    /* Azul claro */
+  --color-secondary: #00acc1;  /* Azul más oscuro */
+  --color-light: #e0f7fa;     /* Fondo azul clarito */
+  --color-white: #ffffff;
+  --color-dark: #333;
+  --color-muted: #666;
+  --color-border: #b2ebf2;    /* Borde azul suave */
+}
+
+.cookie-banner {
+  position: fixed;
+  bottom: -100%;
+  left: 0;
+  right: 0;
+  background: var(--color-light);
+  color: var(--color-dark);
+  padding: 0;
+  box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+  max-width: 100%;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  border-top: 3px solid var(--color-primary);
+}
+
+.cookie-banner.visible {
+  bottom: 0;
+  animation: floatUp 0.6s ease-out;
+}
+
+@keyframes floatUp {
+  from { 
+    bottom: -100%;
+    opacity: 0;
+  }
+  to { 
+    bottom: 0;
+    opacity: 1;
+  }
+}
+
+.cookie-content {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1.8rem 2rem;
+}
+
+/* Header con onda acuática */
+.cookie-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.2rem;
+  cursor: pointer;
+  padding: 0.8rem;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  background-color: rgba(0, 188, 212, 0.08);
+}
+
+.cookie-header:hover {
+  background-color: rgba(0, 188, 212, 0.15);
+}
+
+.cookie-header h3 {
+  margin: 0;
+  font-size: 1.4rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--color-secondary);
+  font-weight: 600;
+}
+
+.toggle-btn {
+  background: rgba(0, 172, 193, 0.1);
+  border: 1px solid var(--color-border);
+  color: var(--color-secondary);
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0.4rem;
+  transition: all 0.4s ease;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.toggle-btn:hover {
+  background: rgba(0, 172, 193, 0.2);
+  transform: rotate(180deg);
+}
+
+/* Mensaje con onda suave */
+.cookie-description {
+  margin: 0 0 1.8rem 0;
+  line-height: 1.6;
+  color: var(--color-dark);
+  font-size: 1.05rem;
+  padding: 0 0.8rem;
+}
+
+/* Opciones con efecto de ola */
+.cookie-options {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  margin: 2rem 0;
+  animation: waveIn 0.5s ease-out;
+}
+
+@keyframes waveIn {
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.cookie-option {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  padding: 1.2rem;
+  background-color: var(--color-white);
+  border-radius: 10px;
+  transition: all 0.3s ease;
+  border: 1px solid var(--color-border);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.cookie-option:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 188, 212, 0.15);
+  border-color: var(--color-primary);
+}
+
+/* Switch acuático */
+.cookie-switch {
+  position: relative;
+  display: inline-block;
+  width: 52px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
+.cookie-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.cookie-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--color-border);
+  transition: all 0.4s ease;
+  border-radius: 34px;
+}
+
+.cookie-slider:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 4px;
+  bottom: 4px;
+  background-color: var(--color-white);
+  transition: all 0.4s ease;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+input:checked + .cookie-slider {
+  background: linear-gradient(to right, var(--color-primary), var(--color-secondary));
+}
+
+input:checked + .cookie-slider:before {
+  transform: translateX(24px);
+}
+
+/* Texto con gradiente sutil */
+.cookie-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.cookie-label {
+  font-weight: 600;
+  color: var(--color-secondary);
+  font-size: 0.98rem;
+}
+
+.cookie-tooltip {
+  font-size: 0.88rem;
+  color: var(--color-muted);
+}
+
+/* Botones que parecen gotas de agua */
+.cookie-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1.2rem;
+  margin-top: 2.2rem;
+}
+
+.cookie-btn {
+  padding: 0.9rem 2rem;
+  border: none;
+  border-radius: 50px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  font-size: 0.96rem;
+  min-width: 200px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 188, 212, 0.2);
+}
+
+.primary-btn {
+  background: var(--color-primary);
+  color: var(--color-white);
+}
+
+.primary-btn:hover {
+  background: var(--color-secondary);
+  transform: translateY(-3px);
+  box-shadow: 0 5px 20px rgba(0, 188, 212, 0.3);
+  animation: waterDrop 1.5s infinite;
+}
+
+.secondary-btn {
+  background: var(--color-white);
+  color: var(--color-secondary);
+  border: 1px solid var(--color-border);
+}
+
+.secondary-btn:hover {
+  background: rgba(0, 172, 193, 0.1);
+  color: var(--color-secondary);
+  transform: translateY(-3px);
+  box-shadow: 0 5px 20px rgba(0, 172, 193, 0.2);
+}
+
+@keyframes waterDrop {
+  0% { box-shadow: 0 0 0 0 rgba(0, 188, 212, 0.4); }
+  70% { box-shadow: 0 0 0 12px rgba(0, 188, 212, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(0, 188, 212, 0); }
+}
+
+/* Efecto de burbuja al hacer clic */
+.cookie-btn:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+/* Responsive con amor */
+@media (max-width: 768px) {
+  .cookie-content {
+    padding: 1.4rem;
+  }
+  
+  .cookie-buttons {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .cookie-btn {
+    width: 100%;
+    min-width: auto;
+    padding: 0.9rem;
+  }
+  
+  .cookie-header h3 {
+    font-size: 1.25rem;
+  }
+  
+  .cookie-option {
+    padding: 1rem;
+    gap: 1rem;
+  }
+  
+  .cookie-description {
+    font-size: 1rem;
+  }
+}

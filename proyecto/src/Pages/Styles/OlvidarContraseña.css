@@ -1,181 +1,387 @@
-/* Hereda todos los estilos del registro y añade/sobrescribe estos */
-.registro-container {
-    display: flex;
+/* OlvidarContraseña.css */
+
+:root {
+  --color-primary: #00bcd4;
+  --color-secondary: #00acc1;
+  --color-light: #e0f7fa;
+  --color-white: #ffffff;
+  --color-dark: #333;
+  --color-muted: #666;
+  --color-border: #b2ebf2;
+  --color-error: #ff6b6b;
+  --color-success: #51cf66;
+}
+
+/* Estructura principal */
+.password-reset-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: var(--color-light);
+  font-family: 'Segoe UI', sans-serif;
+  padding: 20px;
+}
+
+.password-reset-wrapper {
+  width: 100%;
+  max-width: 900px;
+}
+
+/* Contenedor principal */
+.password-reset-box {
+  display: flex;
+  background: var(--color-white);
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 188, 212, 0.15);
+  animation: fadeInUp 0.8s ease-in-out;
+}
+
+/* Columna izquierda (ilustración/información) */
+.reset-info-section {
+  flex: 1;
+  padding: 40px;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: var(--color-white);
+}
+
+.reset-illustration {
+  max-width: 200px;
+  margin-bottom: 30px;
+  filter: brightness(0) invert(1);
+}
+
+.reset-info-section h1 {
+  font-size: 2rem;
+  margin-bottom: 10px;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.reset-info-section p {
+  font-size: 1rem;
+  opacity: 0.9;
+  margin-bottom: 30px;
+  line-height: 1.6;
+}
+
+/* Columna derecha (formulario) */
+.reset-form-section {
+  flex: 1;
+  padding: 40px;
+  background: var(--color-white);
+  position: relative;
+}
+
+.reset-form-section h2 {
+  color: var(--color-dark);
+  font-size: 1.5rem;
+  margin-bottom: 25px;
+  position: relative;
+  padding-bottom: 10px;
+}
+
+.reset-form-section h2::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 40px;
+  height: 3px;
+  background: var(--color-primary);
+}
+
+/* Barra de progreso */
+.reset-progress {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  position: relative;
+}
+
+.reset-progress::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #e0e0e0;
+  z-index: 0;
+}
+
+.reset-progress-step {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: #e0e0e0;
+  color: #999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  z-index: 1;
+  transition: all 0.3s ease;
+  border: 2px solid #e0e0e0;
+  position: relative;
+}
+
+.reset-progress-step.active {
+  background-color: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+.reset-progress-step.completed {
+  background-color: var(--color-success);
+  color: white;
+  border-color: var(--color-success);
+}
+
+.reset-progress-step.completed::after {
+  content: '✓';
+}
+
+/* Campos de formulario */
+.reset-input-group {
+  margin-bottom: 20px;
+}
+
+.reset-input-group label {
+  display: block;
+  color: var(--color-dark);
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.reset-input-group input {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: all 0.3s;
+  background-color: #f9f9f9;
+}
+
+.reset-input-group input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(0, 188, 212, 0.1);
+  outline: none;
+  background-color: white;
+}
+
+.reset-input-group input:disabled {
+  background-color: #f0f0f0;
+  opacity: 0.8;
+}
+
+/* Mensajes de error y éxito */
+.reset-error-message {
+  background-color: #ffebee;
+  color: var(--color-error);
+  padding: 12px 15px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  border-left: 4px solid var(--color-error);
+  animation: fadeIn 0.3s ease;
+}
+
+.reset-success-message {
+  background-color: #e8f5e9;
+  color: var(--color-success);
+  padding: 12px 15px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  border-left: 4px solid var(--color-success);
+  animation: fadeIn 0.3s ease;
+}
+
+.reset-error-text {
+  color: var(--color-error);
+  font-size: 0.8rem;
+  margin-top: 5px;
+  display: block;
+}
+
+.reset-hint-text {
+  color: var(--color-muted);
+  font-size: 0.8rem;
+  margin-top: 5px;
+  display: block;
+}
+
+/* Temporizador */
+.reset-timer {
+  text-align: center;
+  margin: 15px 0;
+  color: var(--color-primary);
+  font-weight: 500;
+}
+
+/* Botones */
+.reset-btn {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(to right, var(--color-primary), var(--color-secondary));
+  color: var(--color-white);
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: all 0.3s;
+  box-shadow: 0 4px 12px rgba(0, 188, 212, 0.2);
+}
+
+.reset-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 188, 212, 0.3);
+}
+
+.reset-btn:disabled {
+  background: #b2ebf2;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.reset-btn-secondary {
+  background: #f0f0f0;
+  color: var(--color-dark);
+}
+
+.reset-btn-secondary:hover {
+  background: #e0e0e0;
+}
+
+.reset-btn-link {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+  margin-top: 5px;
+}
+
+.reset-btn-link:hover {
+  color: var(--color-secondary);
+  text-decoration: none;
+}
+
+.reset-btn-link:disabled {
+  color: #b2ebf2;
+  cursor: not-allowed;
+}
+
+/* Navegación del formulario */
+.reset-form-navigation {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+/* Enlaces */
+.reset-links {
+  text-align: center;
+  margin-top: 25px;
+}
+
+.reset-link {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.reset-link:hover {
+  text-decoration: underline;
+  color: var(--color-secondary);
+}
+
+/* Animaciones */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Efecto de carga */
+.is-submitting {
+  position: relative;
+}
+
+.is-submitting::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .password-reset-box {
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    background: linear-gradient(135deg, #000428, #004e92);
-    color: white;
-    padding: 20px;
   }
   
-  .registro-box {
-    background: rgba(255, 255, 255, 0.1);
-    padding: 30px;
-    border-radius: 10px;
-    backdrop-filter: blur(5px);
-    width: 90%;
-    max-width: 500px;
-    text-align: center;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    animation: fadeIn 0.5s ease-out;
+  .reset-info-section {
+    padding: 30px 20px;
   }
   
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(-20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+  .reset-form-section {
+    padding: 30px 20px;
   }
   
-  .registro-box h2 {
-    margin-bottom: 20px;
-    font-size: 24px;
-    color: #fff;
+  .reset-illustration {
+    max-width: 150px;
   }
-  
-  .input-group {
-    display: flex;
-    flex-direction: column;
-    text-align: left;
-    margin-bottom: 15px;
-  }
-  
-  .input-group label {
-    font-weight: bold;
-    margin-bottom: 5px;
-    color: #eee;
-  }
-  
-  .input-group input {
-    padding: 10px;
-    border: 2px solid transparent;
-    border-radius: 5px;
-    font-size: 16px;
-    background-color: rgba(255, 255, 255, 0.8);
-    transition: all 0.3s ease;
-  }
-  
-  .input-group input:focus {
-    outline: none;
-    background-color: white;
-    border-color: #007bff;
-    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
-  }
-  
-  .error-message {
-    color: #ff3860;
-    font-size: 14px;
-    margin-top: 5px;
-    animation: slideIn 0.3s ease-out;
-  }
-  
-  @keyframes slideIn {
-    from {
-      opacity: 0;
-      transform: translateY(-5px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  
-  .btn-submit {
-    background-color: #0e70f1;
-    color: white;
-    padding: 12px 20px;
-    border: none;
-    border-radius: 5px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-  }
-  
-  .btn-submit:hover {
-    background-color: #218838;
-    transform: translateY(-2px);
-  }
-  
-  .btn-prev {
-    background-color: #6c757d;
-    color: white;
-    padding: 12px 20px;
-    border: none;
-    border-radius: 5px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-  }
-  
-  .btn-prev:hover {
-    background-color: #5a6268;
-    transform: translateY(-2px);
-  }
-  
-  .form-navigation {
-    display: flex;
-    gap: 10px;
-    margin-top: 20px;
-  }
-  
-  .form-navigation button {
-    flex: 1;
-  }
-  
-  .login-links {
-    margin-top: 20px;
-  }
-  
-  .volver-inicio {
-    color: #ffffff;
-    text-decoration: none;
-    transition: all 0.3s ease;
-  }
-  
-  .volver-inicio:hover {
-    text-decoration: underline;
-    color: #ddd;
-  }
-  
-  /* Estilos del progreso (heredados del registro) */
-  .progress-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 20px;
-  }
-  
-  .progress-circle {
+}
+
+@media (max-width: 480px) {
+  .reset-progress-step {
     width: 30px;
     height: 30px;
-    border-radius: 50%;
-    background-color: #ddd;
-    margin: 0 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0.7;
-    transition: all 0.3s ease;
+    font-size: 0.9rem;
   }
   
-  .progress-circle.active {
-    background-color: #007bff;
-    opacity: 1;
-    transform: scale(1.1);
+  .reset-form-navigation {
+    flex-direction: column;
   }
   
-  .progress-circle.completed {
-    background-color: #28a745;
+  .reset-btn {
+    padding: 12px;
+  font-size: 0.9rem;
   }
-  
-  .progress-line {
-    height: 2px;
-    width: 30px;
-    background-color: #ddd;
-  }
+}

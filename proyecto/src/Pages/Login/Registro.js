@@ -4,7 +4,6 @@ import { Link } from 'react-router-dom';
 import '../Styles/Registro.css';
 import { send } from '@emailjs/browser';
 
-// Configuración de EmailJS con tus credenciales
 const serviceId = 'Flooky Pets';
 const templateId = 'template_z3izl33';
 const publicKey = 'Glz70TavlG0ANcvrb';
@@ -16,7 +15,6 @@ function Registro() {
         nombre: '',
         apellido: '',
         telefono: '',
-        telefonoFijo: '',
         direccion: '',
         tipoDocumento: '',
         numeroDocumento: '',
@@ -30,7 +28,6 @@ function Registro() {
         nombre: '',
         apellido: '',
         telefono: '',
-        telefonoFijo: '',
         direccion: '',
         tipoDocumento: '',
         numeroDocumento: '',
@@ -47,8 +44,8 @@ function Registro() {
     const [error, setError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [registroExitoso, setRegistroExitoso] = useState(false);
+    const [isSidebarVisible, setIsSidebarVisible] = useState(true);
 
-    // Temporizador para el código de verificación
     useEffect(() => {
         let timer;
         if (codigoEnviado && tiempoRestante > 0 && !codigoVerificado) {
@@ -61,7 +58,6 @@ function Registro() {
         return () => clearInterval(timer);
     }, [codigoEnviado, tiempoRestante, codigoVerificado]);
 
-    // Generar código aleatorio
     const generarCodigo = async () => {
         const nuevoCodigo = Math.random().toString(36).substring(2, 8).toUpperCase();
         setCodigoGenerado(nuevoCodigo);
@@ -78,7 +74,6 @@ function Registro() {
         }
     };
 
-    // Función mejorada para enviar el correo
     const enviarCodigoPorCorreo = async (codigo) => {
         const verificationLink = `https://tudominio.com/verificar?codigo=${codigo}&email=${encodeURIComponent(formData.correo)}`;
         
@@ -120,7 +115,6 @@ function Registro() {
         }
     };
 
-    // Validar un campo individual en tiempo real
     const validateField = (name, value) => {
         let error = '';
         
@@ -139,20 +133,16 @@ function Registro() {
             case 'telefono':
                 if (!value.trim()) {
                     error = 'Este campo es obligatorio';
-                } else if (!/^\d{10}$/.test(value)) {
-                    error = 'Debe tener 10 dígitos numéricos';
-                }
-                break;
-                
-            case 'telefonoFijo':
-                if (value && !/^\d{7,10}$/.test(value)) {
-                    error = 'Debe tener entre 7 y 10 dígitos';
+                } else if (!/^(3\d{9}|[1-9]\d{6,7})$/.test(value)) {
+                    error = 'Formato de teléfono colombiano inválido';
                 }
                 break;
                 
             case 'direccion':
                 if (!value.trim()) {
                     error = 'Este campo es obligatorio';
+                } else if (!/^(Calle|Cll|Cl|Carrera|Cra|Cr|Avenida|Av|Avda|Avd|Transversal|Trans|Circular|Cir)\s?\d+.*$/i.test(value)) {
+                    error = 'La dirección debe comenzar con el tipo de vía (Ej: Calle, Carrera, Av.) seguido de número';
                 } else if (value.length > 100) {
                     error = 'Máximo 100 caracteres';
                 }
@@ -167,8 +157,8 @@ function Registro() {
             case 'numeroDocumento':
                 if (!value.trim()) {
                     error = 'Este campo es obligatorio';
-                } else if (!/^\d{6,12}$/.test(value)) {
-                    error = 'Debe tener entre 6 y 12 dígitos';
+                } else if (!/^\d{8,11}$/.test(value)) {
+                    error = 'Número de documento inválido (8-11 dígitos)';
                 }
                 break;
                 
@@ -245,11 +235,8 @@ function Registro() {
         return error;
     };
 
-    // Manejar cambios en los inputs con validación en tiempo real
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        
-        // Validación en tiempo real
         const error = validateField(name, value);
         
         setFieldErrors(prevErrors => ({
@@ -263,7 +250,6 @@ function Registro() {
         }));
     };
 
-    // Validar todos los campos del paso actual
     const validateCurrentStep = () => {
         let isValid = true;
         const newErrors = {...fieldErrors};
@@ -298,12 +284,12 @@ function Registro() {
         return isValid;
     };
 
-    // Avanzar al siguiente paso
     const nextStep = async () => {
         setError('');
         if (validateCurrentStep()) {
             if (step === 2) {
                 await generarCodigo();
+                setIsSidebarVisible(false);
             }
             setStep(prevStep => prevStep + 1);
         } else {
@@ -311,13 +297,14 @@ function Registro() {
         }
     };
 
-    // Retroceder al paso anterior
     const prevStep = () => {
+        if (step === 3) {
+            setIsSidebarVisible(true);
+        }
         setStep(prevStep => prevStep - 1);
         setError('');
     };
 
-    // Verificar el código ingresado
     const verificarCodigo = () => {
         setError('');
         if (fieldErrors.codigoIngresado) {
@@ -332,33 +319,52 @@ function Registro() {
         }
     };
 
-    // Enviar el formulario completo
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError('');
         
         if (!codigoVerificado) {
-            setError('Por favor, verifique el código antes de enviar.');
-            return;
+          setError('Por favor, verifique el código antes de enviar.');
+          return;
         }
-
-        setIsSubmitting(true);
+      
+        const userData = {
+          nombre: formData.nombre,
+          apellido: formData.apellido,
+          email: formData.correo,
+          password: formData.contrasena,
+          telefono: formData.telefono,
+          direccion: formData.direccion,
+          tipoDocumento: formData.tipoDocumento,
+          numeroDocumento: formData.numeroDocumento,
+          fechaNacimiento: formData.fechaNacimiento
+        };
+      
+        console.log("Enviando datos al backend:", userData);
+      
         try {
-            console.log("Enviando datos del formulario:", formData);
-            // Simulamos el envío al servidor
-            await new Promise(resolve => setTimeout(resolve, 2000));
-
-            console.log("Datos del formulario enviados con éxito:", formData);
-            setRegistroExitoso(true);
+          const response = await fetch('http://localhost:5000/register', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(userData)
+          });
+      
+          const data = await response.json();
+      
+          if (!response.ok) {
+            throw new Error(data.message || 'Error en el registro');
+          }
+      
+          console.log("Registro exitoso:", data);
+          setRegistroExitoso(true);
+          
         } catch (error) {
-            console.error("Error al enviar el formulario:", error);
-            setError('Hubo un error al procesar el registro. Por favor, inténtelo de nuevo más tarde.');
-        } finally {
-            setIsSubmitting(false);
+          console.error("Error en el registro:", error);
+          setError(error.message || 'Hubo un error al registrar. Por favor, inténtalo de nuevo.');
         }
-    };
+      };
 
-    // Redirigir después de registro exitoso
     useEffect(() => {
         if (registroExitoso) {
             const timer = setTimeout(() => {
@@ -368,201 +374,192 @@ function Registro() {
         }
     }, [registroExitoso, navigate]);
 
-    // Renderizar el paso actual del formulario
     const renderStep = () => {
         switch (step) {
             case 1:
                 return (
-                    <div className="step-container">
+                    <div className="reg-step-container reg-two-columns">
                         <h2>Información Básica</h2>
-                        <div className="input-group">
-                            <label>Nombre:</label>
-                            <input 
-                                type="text" 
-                                name="nombre" 
-                                placeholder="Nombre"
-                                value={formData.nombre} 
-                                onChange={handleInputChange} 
-                                maxLength="50"
-                                className={fieldErrors.nombre ? 'input-error' : ''}
-                                required 
-                            />
-                            {fieldErrors.nombre && <span className="error-text">{fieldErrors.nombre}</span>}
-                        </div>
-                        <div className="input-group">
-                            <label>Apellido:</label>
-                            <input 
-                                type="text" 
-                                name="apellido" 
-                                placeholder="Apellido" 
-                                value={formData.apellido} 
-                                onChange={handleInputChange} 
-                                maxLength="50"
-                                className={fieldErrors.apellido ? 'input-error' : ''}
-                                required 
-                            />
-                            {fieldErrors.apellido && <span className="error-text">{fieldErrors.apellido}</span>}
-                        </div>
-                        <div className="input-group">
-                            <label>Teléfono:</label>
-                            <input 
-                                type="tel" 
-                                name="telefono" 
-                                placeholder="Teléfono" 
-                                value={formData.telefono} 
-                                onChange={handleInputChange} 
-                                maxLength="10"
-                                className={fieldErrors.telefono ? 'input-error' : ''}
-                                required 
-                            />
-                            {fieldErrors.telefono && <span className="error-text">{fieldErrors.telefono}</span>}
-                        </div>
-                        <div className="input-group">
-                            <label>Teléfono Fijo (Opcional):</label>
-                            <input 
-                                type="tel" 
-                                name="telefonoFijo" 
-                                placeholder="Teléfono Fijo (Opcional)" 
-                                value={formData.telefonoFijo} 
-                                onChange={handleInputChange} 
-                                maxLength="10"
-                                className={fieldErrors.telefonoFijo ? 'input-error' : ''}
-                            />
-                            {fieldErrors.telefonoFijo && <span className="error-text">{fieldErrors.telefonoFijo}</span>}
-                        </div>
-                        <div className="input-group">
-                            <label>Dirección:</label>
-                            <input 
-                                type="text" 
-                                name="direccion" 
-                                placeholder="Dirección" 
-                                value={formData.direccion} 
-                                onChange={handleInputChange} 
-                                maxLength="100"
-                                className={fieldErrors.direccion ? 'input-error' : ''}
-                                required 
-                            />
-                            {fieldErrors.direccion && <span className="error-text">{fieldErrors.direccion}</span>}
-                        </div>
-                        <div className="input-group">
-                            <label>Tipo de Documento:</label>
-                            <select 
-                                name="tipoDocumento" 
-                                value={formData.tipoDocumento} 
-                                onChange={handleInputChange} 
-                                className={fieldErrors.tipoDocumento ? 'input-error' : ''}
-                                required
-                            >
-                                <option value="">Seleccione un tipo</option>
-                                <option value="CC">Cédula de Ciudadanía</option>
-                                <option value="Pasaporte">Pasaporte</option>
-                            </select>
-                            {fieldErrors.tipoDocumento && <span className="error-text">{fieldErrors.tipoDocumento}</span>}
-                        </div>
-                        <div className="input-group">
-                            <label>Número de Documento:</label>
-                            <input 
-                                type="text" 
-                                name="numeroDocumento" 
-                                placeholder="Número de Documento" 
-                                value={formData.numeroDocumento} 
-                                onChange={handleInputChange} 
-                                maxLength="12"
-                                className={fieldErrors.numeroDocumento ? 'input-error' : ''}
-                                required 
-                            />
-                            {fieldErrors.numeroDocumento && <span className="error-text">{fieldErrors.numeroDocumento}</span>}
-                        </div>
-                        <div className="input-group">
-                            <label>Fecha de Nacimiento:</label>
-                            <input 
-                                type="date" 
-                                name="fechaNacimiento" 
-                                placeholder="Fecha de Nacimiento" 
-                                value={formData.fechaNacimiento} 
-                                onChange={handleInputChange} 
-                                className={fieldErrors.fechaNacimiento ? 'input-error' : ''}
-                                required 
-                                max={new Date().toISOString().split('T')[0]}
-                            />
-                            {fieldErrors.fechaNacimiento && <span className="error-text">{fieldErrors.fechaNacimiento}</span>}
+                        <div className="reg-form-columns">
+                            <div className="reg-form-column">
+                                <div className="reg-input-group">
+                                    <label>Nombre:</label>
+                                    <input 
+                                        type="text" 
+                                        name="nombre" 
+                                        value={formData.nombre} 
+                                        onChange={handleInputChange} 
+                                        maxLength="50"
+                                        className={fieldErrors.nombre ? 'reg-input-error' : ''}
+                                        required 
+                                    />
+                                    {fieldErrors.nombre && <span className="reg-error-text">{fieldErrors.nombre}</span>}
+                                </div>
+                                <div className="reg-input-group">
+                                    <label>Apellido:</label>
+                                    <input 
+                                        type="text" 
+                                        name="apellido" 
+                                        value={formData.apellido} 
+                                        onChange={handleInputChange} 
+                                        maxLength="50"
+                                        className={fieldErrors.apellido ? 'reg-input-error' : ''}
+                                        required 
+                                    />
+                                    {fieldErrors.apellido && <span className="reg-error-text">{fieldErrors.apellido}</span>}
+                                </div>
+                                <div className="reg-input-group">
+                                    <label>Teléfono:</label>
+                                    <input 
+                                        type="tel" 
+                                        name="telefono" 
+                                        value={formData.telefono} 
+                                        onChange={handleInputChange} 
+                                        maxLength="10"
+                                        placeholder="Ej: 3001234567"
+                                        className={fieldErrors.telefono ? 'reg-input-error' : ''}
+                                        required 
+                                    />
+                                    {fieldErrors.telefono && <span className="reg-error-text">{fieldErrors.telefono}</span>}
+                                </div>
+                            </div>
+                            <div className="reg-form-column">
+                                <div className="reg-input-group">
+                                    <label>Dirección:</label>
+                                    <input 
+                                        type="text" 
+                                        name="direccion" 
+                                        value={formData.direccion} 
+                                        onChange={handleInputChange} 
+                                        maxLength="100"
+                                        placeholder="Ej: Calle 123 #45-67"
+                                        className={fieldErrors.direccion ? 'reg-input-error' : ''}
+                                        required 
+                                    />
+                                    {fieldErrors.direccion && <span className="reg-error-text">{fieldErrors.direccion}</span>}
+                                </div>
+                                <div className="reg-input-group">
+                                    <label>Tipo de Documento:</label>
+                                    <select 
+                                        name="tipoDocumento" 
+                                        value={formData.tipoDocumento} 
+                                        onChange={handleInputChange} 
+                                        className={fieldErrors.tipoDocumento ? 'reg-input-error' : ''}
+                                        required
+                                    >
+                                        <option value="">Seleccione un tipo</option>
+                                        <option value="CC">Cédula de Ciudadanía</option>
+                                        <option value="Pasaporte">Pasaporte</option>
+                                    </select>
+                                    {fieldErrors.tipoDocumento && <span className="reg-error-text">{fieldErrors.tipoDocumento}</span>}
+                                </div>
+                                <div className="reg-input-group">
+                                    <label>Número de Documento:</label>
+                                    <input 
+                                        type="text" 
+                                        name="numeroDocumento" 
+                                        value={formData.numeroDocumento} 
+                                        onChange={handleInputChange} 
+                                        maxLength="12"
+                                        className={fieldErrors.numeroDocumento ? 'reg-input-error' : ''}
+                                        required 
+                                    />
+                                    {fieldErrors.numeroDocumento && <span className="reg-error-text">{fieldErrors.numeroDocumento}</span>}
+                                </div>
+                                <div className="reg-input-group">
+                                    <label>Fecha de Nacimiento:</label>
+                                    <input 
+                                        type="date" 
+                                        name="fechaNacimiento" 
+                                        value={formData.fechaNacimiento} 
+                                        onChange={handleInputChange} 
+                                        className={fieldErrors.fechaNacimiento ? 'reg-input-error' : ''}
+                                        required 
+                                        max={new Date().toISOString().split('T')[0]}
+                                    />
+                                    {fieldErrors.fechaNacimiento && <span className="reg-error-text">{fieldErrors.fechaNacimiento}</span>}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 );
             case 2:
                 return (
-                    <div className="step-container">
+                    <div className="reg-step-container">
                         <h2>Información de Cuenta</h2>
-                        <div className="input-group">
-                            <label>Correo Electrónico:</label>
-                            <input 
-                                type="email" 
-                                name="correo" 
-                                placeholder="Correo Electrónico" 
-                                value={formData.correo} 
-                                onChange={handleInputChange} 
-                                maxLength="100"
-                                className={fieldErrors.correo ? 'input-error' : ''}
-                                required 
-                            />
-                            {fieldErrors.correo && <span className="error-text">{fieldErrors.correo}</span>}
-                        </div>
-                        <div className="input-group">
-                            <label>Contraseña:</label>
-                            <input 
-                                type="password" 
-                                name="contrasena" 
-                                placeholder="Contraseña" 
-                                value={formData.contrasena} 
-                                onChange={handleInputChange} 
-                                maxLength="30"
-                                className={fieldErrors.contrasena ? 'input-error' : ''}
-                                required 
-                            />
-                            {fieldErrors.contrasena ? (
-                                <span className="error-text">{fieldErrors.contrasena}</span>
-                            ) : (
-                                <small>Debe contener al menos: 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial (@$!%*?&)</small>
-                            )}
-                        </div>
-                        <div className="input-group">
-                            <label>Verificar Contraseña:</label>
-                            <input 
-                                type="password" 
-                                name="verificarContrasena" 
-                                placeholder="Verificar Contraseña" 
-                                value={formData.verificarContrasena} 
-                                onChange={handleInputChange} 
-                                maxLength="30"
-                                className={fieldErrors.verificarContrasena ? 'input-error' : ''}
-                                required 
-                            />
-                            {fieldErrors.verificarContrasena && <span className="error-text">{fieldErrors.verificarContrasena}</span>}
+                        <div className="reg-form-columns">
+                            <div className="reg-form-column">
+                                <div className="reg-input-group">
+                                    <label>Correo Electrónico:</label>
+                                    <input 
+                                        type="email" 
+                                        name="correo" 
+                                        value={formData.correo} 
+                                        onChange={handleInputChange} 
+                                        maxLength="100"
+                                        className={fieldErrors.correo ? 'reg-input-error' : ''}
+                                        required 
+                                    />
+                                    {fieldErrors.correo && <span className="reg-error-text">{fieldErrors.correo}</span>}
+                                </div>
+                            </div>
+                            <div className="reg-form-column">
+                                <div className="reg-input-group">
+                                    <label>Contraseña:</label>
+                                    <input 
+                                        type="password" 
+                                        name="contrasena" 
+                                        placeholder="Contraseña" 
+                                        value={formData.contrasena} 
+                                        onChange={handleInputChange} 
+                                        maxLength="30"
+                                        className={fieldErrors.contrasena ? 'reg-input-error' : ''}
+                                        required 
+                                    />
+                                    {fieldErrors.contrasena ? (
+                                        <span className="reg-error-text">{fieldErrors.contrasena}</span>
+                                    ) : (
+                                        <small>Debe contener al menos: 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial (@$!%*?&)</small>
+                                    )}
+                                </div>
+                                <div className="reg-input-group">
+                                    <label>Verificar Contraseña:</label>
+                                    <input 
+                                        type="password" 
+                                        name="verificarContrasena" 
+                                        value={formData.verificarContrasena} 
+                                        onChange={handleInputChange} 
+                                        maxLength="30"
+                                        className={fieldErrors.verificarContrasena ? 'reg-input-error' : ''}
+                                        required 
+                                    />
+                                    {fieldErrors.verificarContrasena && <span className="reg-error-text">{fieldErrors.verificarContrasena}</span>}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 );
             case 3:
                 return (
-                    <div className="step-container">
+                    <div className="reg-step-container reg-verification-step">
                         <h2>Verificación de Código</h2>
                         {!codigoEnviado && (
-                            <div className="input-group">
+                            <div className="reg-input-group">
                                 <label>Correo Electrónico:</label>
                                 <input 
                                     type="email" 
                                     name="correo" 
-                                    placeholder="Correo Electrónico" 
                                     value={formData.correo} 
                                     onChange={handleInputChange} 
                                     maxLength="100"
-                                    className={fieldErrors.correo ? 'input-error' : ''}
+                                    className={fieldErrors.correo ? 'reg-input-error' : ''}
                                     required 
                                 />
-                                {fieldErrors.correo && <span className="error-text">{fieldErrors.correo}</span>}
+                                {fieldErrors.correo && <span className="reg-error-text">{fieldErrors.correo}</span>}
                                 <button 
                                     type="button" 
                                     onClick={nextStep} 
-                                    className="btn-generar-codigo"
+                                    className="reg-btn-generate-code"
                                     disabled={!!fieldErrors.correo}
                                 >
                                     Generar y Enviar Código de Verificación
@@ -570,9 +567,9 @@ function Registro() {
                             </div>
                         )}
                         {codigoEnviado && (
-                            <div id="verification-section">
+                            <div id="reg-verification-section">
                                 <p>Se ha enviado un código de verificación a <strong>{formData.correo}</strong></p>
-                                <div className="input-group">
+                                <div className="reg-input-group">
                                     <label>Ingresa el código de verificación:</label>
                                     <input
                                         type="text"
@@ -581,33 +578,38 @@ function Registro() {
                                         value={formData.codigoIngresado}
                                         onChange={handleInputChange}
                                         maxLength="6"
-                                        className={fieldErrors.codigoIngresado ? 'input-error' : ''}
+                                        className={fieldErrors.codigoIngresado ? 'reg-input-error' : ''}
                                         required
                                     />
-                                    {fieldErrors.codigoIngresado && <span className="error-text">{fieldErrors.codigoIngresado}</span>}
+                                    {fieldErrors.codigoIngresado && <span className="reg-error-text">{fieldErrors.codigoIngresado}</span>}
                                 </div>
-                                <button 
-                                    type="button" 
-                                    onClick={verificarCodigo} 
-                                    disabled={codigoVerificado || !!fieldErrors.codigoIngresado}
-                                    className={codigoVerificado ? 'btn-verified' : 'btn-verify'}
-                                >
-                                    {codigoVerificado ? '✓ Código Verificado' : 'Verificar Código'}
-                                </button>
-                                {tiempoRestante > 0 && !codigoVerificado && (
-                                    <p className="timer-text">Tiempo restante para un nuevo código: {tiempoRestante} segundos</p>
-                                )}
-                                {tiempoRestante === 0 && (
+                                <div className="reg-verification-actions">
                                     <button 
                                         type="button" 
-                                        onClick={generarCodigo}
-                                        className="btn-resend"
+                                        onClick={verificarCodigo} 
+                                        disabled={codigoVerificado || !!fieldErrors.codigoIngresado}
+                                        className={codigoVerificado ? 'reg-btn-verified' : 'reg-btn-verify'}
                                     >
-                                        Reenviar Código
+                                        {codigoVerificado ? '✓ Código Verificado' : 'Verificar Código'}
                                     </button>
-                                )}
+                                    {tiempoRestante > 0 && !codigoVerificado && (
+                                        <p className="reg-timer-text">Tiempo restante: {tiempoRestante}s</p>
+                                    )}
+                                    {tiempoRestante === 0 && (
+                                        <button 
+                                            type="button" 
+                                            onClick={generarCodigo}
+                                            className="reg-btn-resend"
+                                        >
+                                            Reenviar Código
+                                        </button>
+                                    )}
+                                </div>
                                 {codigoVerificado && (
-                                    <p className="success-message">✓ Puedes continuar.</p>
+                                    <div className="reg-success-message">
+                                        <p>✓ Código verificado correctamente</p>
+                                        <p>✓ Puedes continuar</p>
+                                    </div>
                                 )}
                             </div>
                         )}
@@ -618,19 +620,18 @@ function Registro() {
         }
     };
 
-    // Renderizar círculos de progreso
     const renderProgressCircles = () => {
         const circles = [1, 2, 3];
         return (
-            <div className="progress-container">
+            <div className="reg-progress-container">
                 {circles.map(circle => (
                     <React.Fragment key={circle}>
                         <span
-                            className={`progress-circle ${step === circle ? 'active' : ''} ${step > circle ? 'completed' : ''}`}
+                            className={`reg-progress-circle ${step === circle ? 'active' : ''} ${step > circle ? 'completed' : ''}`}
                         >
                             {step > circle ? '✓' : circle}
                         </span>
-                        {circle < 3 && <span className="progress-line"></span>}
+                        {circle < 3 && <span className="reg-progress-line"></span>}
                     </React.Fragment>
                 ))}
             </div>
@@ -638,58 +639,73 @@ function Registro() {
     };
 
     return (
-        <div className="registro-container">
-            <div className="registro-box">
-                <h1>Registro de Usuario</h1>
-                {renderProgressCircles()}
-                {error && <p className="error-message">{error}</p>}
-                {registroExitoso && (
-                    <div className="success-message">
-                        <p>✓ Registro exitoso. Redirigiendo...</p>
+        <div className="reg-container">
+            <div className={`reg-box ${!isSidebarVisible ? 'full-width' : ''}`}>
+                {isSidebarVisible && (
+                    <div className="reg-sidebar">
+                        <div className="reg-sidebar-content">
+                            <h1>Únete a Flooky Pets</h1>
+                            <p>Regístrate para acceder a todos los beneficios de nuestra comunidad de mascotas.</p>
+                            <ul className="reg-benefits-list">
+                                <li>✓ Acceso a descuentos exclusivos</li>
+                                <li>✓ Historial de compras</li>
+                                <li>✓ Programación de citas</li>
+                                <li>✓ Seguimiento de mascotas</li>
+                            </ul>
+                        </div>
                     </div>
                 )}
-
-                {!registroExitoso && (
-                    <form onSubmit={handleSubmit} className="registro-form">
-                        {renderStep()}
-
-                        <div className="form-navigation">
-                            {step > 1 && (
-                                <button 
-                                    type="button" 
-                                    onClick={prevStep}
-                                    className="btn-prev"
-                                >
-                                    Anterior
-                                </button>
-                            )}
-                            {step < 3 && (
-                                <button 
-                                    type="button" 
-                                    onClick={nextStep}
-                                    className="btn-next"
-                                    disabled={Object.values(fieldErrors).some(error => error)}
-                                >
-                                    Siguiente
-                                </button>
-                            )}
-                            {step === 3 && codigoVerificado && (
-                                <button 
-                                    type="submit" 
-                                    disabled={isSubmitting}
-                                    className="btn-submit"
-                                >
-                                    {isSubmitting ? 'Registrando...' : 'Finalizar Registro'}
-                                </button>
-                            )}
+                <div className="reg-content">
+                    <h1 className="reg-mobile-title">Registro de Usuario</h1>
+                    {renderProgressCircles()}
+                    {error && <p className="reg-error-message">{error}</p>}
+                    {registroExitoso && (
+                        <div className="reg-success-message">
+                            <p>✓ Registro exitoso. Redirigiendo...</p>
                         </div>
-                    </form>
-                )}
+                    )}
 
-            <div className="login-links">
-              <Link to="/login" className="link">¿Ya tienes una cuenta?</Link>
-            </div>
+                    {!registroExitoso && (
+                        <form onSubmit={handleSubmit} className="reg-register-form">
+                            {renderStep()}
 
+                            <div className="reg-form-navigation">
+                                {step > 1 && (
+                                    <button 
+                                        type="button" 
+                                        onClick={prevStep}
+                                        className="reg-btn-prev"
+                                    >
+                                        Anterior
+                                    </button>
+                                )}
+                                {step < 3 && (
+                                    <button 
+                                        type="button" 
+                                        onClick={nextStep}
+                                        className="reg-btn-next"
+                                        disabled={Object.values(fieldErrors).some(error => error)}
+                                    >
+                                        Siguiente
+                                    </button>
+                                )}
+                                {step === 3 && codigoVerificado && (
+                                    <button 
+                                        type="submit" 
+                                        disabled={isSubmitting}
+                                        className="reg-btn-submit"
+                                    >
+                                        {isSubmitting ? 'Registrando...' : 'Finalizar Registro'}
+                                    </button>
+                                )}
+                            </div>
+                        </form>
+                    )}
+
+                    <div className="reg-login-links">
+                        <Link to="/login" className="reg-link">¿Ya tienes una cuenta? Inicia sesión</Link>
+                    </div>
+                </div>
             </div>
         </div>
     );

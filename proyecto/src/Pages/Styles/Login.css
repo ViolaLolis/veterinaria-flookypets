@@ -1,260 +1,245 @@
-/* Estilos generales */
-.login-container {
+:root {
+  --color-primary: #00bcd4;    /* Azul claro */
+  --color-secondary: #00acc1;  /* Azul más oscuro */
+  --color-light: #e0f7fa;     /* Fondo azul clarito */
+  --color-white: #ffffff;
+  --color-dark: #333;
+  --color-muted: #666;
+  --color-border: #b2ebf2;    /* Borde azul suave */
+  --color-warning: #54b2ff;   /* Solo para referencia (no usado aquí) */
+}
+
+/* Estructura principal */
+.auth-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #000428, #004e92);
+  background-color: var(--color-light);
+  font-family: 'Segoe UI', sans-serif;
   padding: 20px;
 }
 
-.login-wrapper {
+.auth-wrapper {
   width: 100%;
   max-width: 900px;
 }
 
-/* Contenedor principal del login */
-.login-box {
+/* Contenedor de dos columnas */
+.auth-box {
   display: flex;
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(10px);
+  background: var(--color-white);
   border-radius: 15px;
   overflow: hidden;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 24px rgba(0, 188, 212, 0.15);
   animation: fadeInUp 0.8s ease-in-out;
 }
 
-/* Sección del logo */
-.logo-section {
+/* Columna izquierda (logo) */
+.brand-section {
   flex: 1;
   padding: 40px;
-  background: rgba(255, 255, 255, 0.1);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  color: #fff;
+  color: var(--color-white);
 }
 
-.login-logo {
-  max-width: 180px;
-  max-height: 180px;
+.auth-logo {
+  max-width: 120px;
   margin-bottom: 30px;
-  object-fit: contain;
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
-  transition: transform 0.3s ease;
+  filter: brightness(0) invert(1);
 }
 
-.login-logo:hover {
-  transform: scale(1.05);
+.brand-section h1 {
+  font-size: 2rem;
+  margin-bottom: 10px;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
 }
 
-.logo-section h2 {
-  font-size: 1.8rem;
-  margin-bottom: 15px;
-  font-weight: bold;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.logo-section p {
-  font-size: 1rem;
+.brand-section h2 {
+  font-size: 1.2rem;
+  font-weight: normal;
   opacity: 0.9;
+  margin-bottom: 30px;
 }
 
-/* Sección del formulario */
-.form-section {
+/* Columna derecha (formulario) */
+.auth-form {
   flex: 1;
   padding: 40px;
+  background: var(--color-white);
 }
 
-.form-section h2 {
-  color: #fff;
-  font-size: 2rem;
+.auth-form h2 {
+  color: var(--color-dark);
+  font-size: 1.2rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 25px;
+  position: relative;
+  padding-bottom: 10px;
+}
+
+.auth-form h2::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 40px;
+  height: 3px;
+  background: var(--color-primary);
+}
+
+/* Campos de formulario */
+.form-field {
   margin-bottom: 20px;
-  font-weight: bold;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-/* Mensaje de error */
-.error-message {
-  color: #ff4d4d;
-  background: rgba(255, 77, 77, 0.2);
-  padding: 10px;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  margin-bottom: 15px;
-  box-shadow: 0 2px 6px rgba(255, 77, 77, 0.3);
-}
-
-/* Inputs */
-.input-group {
-  margin-bottom: 20px;
-  text-align: left;
-}
-
-.input-group label {
+.form-field label {
   display: block;
-  color: #fff;
-  font-size: 1rem;
-  margin-bottom: 5px;
+  color: var(--color-dark);
+  margin-bottom: 8px;
+  font-size: 0.9rem;
 }
 
-.input-group input {
+.form-field input {
   width: 100%;
   padding: 12px;
-  border-radius: 8px;
-  border: none;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
   font-size: 1rem;
-  background: rgba(255, 255, 255, 0.2);
-  color: #fff;
-  outline: none;
-  transition: 0.3s;
+  transition: all 0.3s;
 }
 
-.input-group input::placeholder {
-  color: rgba(255, 255, 255, 0.6);
-}
-
-.input-group input:focus {
-  background: rgba(255, 255, 255, 0.3);
-  box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+.form-field input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(0, 188, 212, 0.1);
 }
 
 /* Botón */
-.btn-login {
+.btn-auth {
   width: 100%;
-  padding: 12px;
-  font-size: 1rem;
-  font-weight: bold;
-  color: #fff;
-  background: #007bff;
+  padding: 14px;
+  background: linear-gradient(to right, var(--color-primary), var(--color-secondary));
+  color: var(--color-white);
   border: none;
-  border-radius: 8px;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: 0.3s;
   margin-top: 10px;
+  transition: all 0.3s;
+  box-shadow: 0 4px 12px rgba(0, 188, 212, 0.2);
 }
 
-.btn-login:hover {
-  background: #0056b3;
-  transform: scale(1.05);
+.btn-auth:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 188, 212, 0.3);
 }
 
 /* Enlaces */
-.login-links {
-  margin-top: 15px;
+.auth-links {
   display: flex;
   justify-content: space-between;
-}
-
-.login-links .link {
-  color: #ffffff;
-  font-size: 0.9rem;
-  text-decoration: none;
-  transition: 0.3s;
-}
-
-.login-links .link:hover {
-  text-decoration: underline;
-  color: #ffdd57;
-}
-
-/* Animaciones */
-@keyframes fadeInUp {
-  from {
-      opacity: 0;
-      transform: translateY(20px);
-  }
-  to {
-      opacity: 1;
-      transform: translateY(0);
-  }
-}
-
-/* Footer del login */
-.login-footer {
   margin-top: 20px;
+  font-size: 0.9rem;
+}
+
+.auth-links a {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.auth-links a:hover {
+  text-decoration: underline;
+  color: var(--color-secondary);
+}
+
+/* Pie de página */
+.auth-footer {
+  margin-top: 30px;
   text-align: center;
 }
 
-.btn-back {
-  background: #007bff;
-  color: #fff;
-  padding: 12px 20px;
-  font-size: 1rem;
-  font-weight: bold;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: 0.3s;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+.btn-return {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: all 0.2s;
 }
 
-.btn-back:hover {
-  transform: scale(1.05);
+.btn-return:hover {
+  text-decoration: underline;
+}
+
+/* Animación */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Responsive */
-@media (max-width: 768px) {
-  .login-box {
-      flex-direction: column;
-  }
-  
-  .logo-section {
-      padding: 30px;
-  }
-  
-  .logo-section h2 {
-      font-size: 1.5rem;
-  }
-  
-  .form-section {
-      padding: 30px;
-  }
+/* Ajustes específicos para el logo más grande */
+.auth-logo {
+  max-width: 180px; /* Aumenté de 120px a 180px */
+  margin-bottom: 30px;
+  filter: brightness(0) invert(1);
+  transition: all 0.3s ease;
 }
 
+/* Versión móvil para que no sea demasiado grande en pantallas pequeñas */
 @media (max-width: 480px) {
-  .login-links {
-      flex-direction: column;
-      gap: 10px;
-      align-items: center;
-  }
-  
-  .btn-login {
-      font-size: 0.9rem;
-  }
-
-  .input-group input {
-      font-size: 0.9rem;
-  }
-  
-  .login-logo {
-      max-width: 120px;
+  .auth-logo {
+    max-width: 140px; /* Más grande que antes pero no excesivo */
   }
 }
-/* Estilos para errores */
-.field-error {
-  color: #ff4d4d;
-  font-size: 0.8rem;
-  margin-top: 5px;
-  display: block;
+
+/* Ajusté el contenedor del logo para mejor proporción */
+.brand-section {
+  flex: 1;
+  padding: 50px 40px; /* Más padding arriba/abajo */
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
-.input-error {
-  border: 2px solid #ff4d4d !important;
-  background-color: white;
-}
-
-/* Mejorar mensaje de error principal */
-.error-message {
-  color: #ff4d4d;
-  background: rgba(255, 77, 77, 0.1);
-  padding: 12px;
-  border-radius: 8px;
+/* Estilos para el botón de volver */
+.btn-return {
+  background: transparent;
+  color: var(--color-primary);
+  border: 2px solid var(--color-primary);
+  padding: 10px 20px;
+  border-radius: 6px;
   font-size: 0.9rem;
-  margin-bottom: 15px;
-  border-left: 4px solid #ff4d4d;
-  text-align: center;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-block;
+  margin-top: 20px;
+}
+
+.btn-return:hover {
+  background: var(--color-primary);
+  color: var(--color-white);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 188, 212, 0.2);
+}
+
+.btn-return:active {
+  transform: translateY(0);
 }

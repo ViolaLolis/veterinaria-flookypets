@@ -1,0 +1,166 @@
+.container {
+  padding: 2rem;
+  min-height: 100vh;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.headerContent {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.subtitle {
+  color: #7f8c8d;
+  font-size: 1.1rem;
+}
+
+.searchContainer {
+  max-width: 600px;
+  margin: 2rem auto;
+}
+
+.searchBox {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 15px;
+  color: #00acc1;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 12px 20px 12px 45px;
+  border: 2px solid #bdc3c7;
+  border-radius: 30px;
+  font-size: 1rem;
+  outline: none;
+  transition: all 0.3s;
+}
+
+.searchInput:focus {
+  border-color: #00acc1;
+  box-shadow: 0 0 0 3px rgba(0, 172, 193, 0.2);
+}
+
+.clearSearch {
+  position: absolute;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  color: #7f8c8d;
+  cursor: pointer;
+  padding: 0 5px;
+}
+
+.listaServicios {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.servicioItem {
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.servicioActions {
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem;
+  border-top: 1px solid #ecf0f1;
+}
+
+.verDetallesBtn {
+  padding: 8px 15px;
+  border: 1px solid #00acc1;
+  border-radius: 5px;
+  background: #ecf0f1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s;
+}
+
+.agendarBtn {
+  padding: 8px 15px;
+  border: none;
+  border-radius: 5px;
+  background: #00acc1;
+  color: white;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.agendarBtn:hover {
+  background: #0097b2;
+}
+
+.actionIcon {
+  font-size: 0.9rem;
+}
+
+.verTodosContainer {
+  text-align: center;
+  margin-top: 3rem;
+  
+}
+
+.verTodosBtn {
+  padding: 12px 25px;
+  border: none;
+  border-radius: 30px;
+  color: rgb(0, 0, 0);
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.verTodosBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(61, 84, 88, 0.514);
+}
+
+.noResults {
+  text-align: center;
+  padding: 3rem;
+  color: #7f8c8d;
+}
+
+.resetSearch {
+  margin-top: 1rem;
+  padding: 8px 15px;
+  border: 1px solid #00acc1;
+  border-radius: 5px;
+  background: transparent;
+  color: #00acc1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s;
+}
+
+.resetSearch:hover {
+  background: #00acc1;
+  color: white;
+}

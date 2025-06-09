@@ -1,121 +1,209 @@
+/* AboutUs.css */
 .about-us {
-    padding: 60px 30px; /* Slightly more padding */
-    background: linear-gradient(135deg, #fff9e6 0%, #fff0b3 100%); /* Very light grey for a subtle background */
-    color: #444; /* Slightly darker text */
-    text-align: center;
-    opacity: 0;
-    transform: translateY(20px);
-    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+  padding: 4rem 2rem;
+  background: linear-gradient(135deg, var(--color-light) 0%, rgba(224, 247, 250, 0.8) 100%);
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.about-us.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.about-us__title {
+  text-align: center;
+  font-size: 2.5rem;
+  margin-bottom: 3rem;
+  color: #2c3e50;
+  position: relative;
+}
+
+.about-us__title::after {
+  content: '';
+  display: block;
+  width: 80px;
+  height: 4px;
+  background: #3498db;
+  margin: 0.5rem auto;
+  border-radius: 2px;
+}
+
+.about-us__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.about-us__content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* Tarjetas con imágenes */
+.about-card {
+  display: flex;
+  min-height: 200px;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.about-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.card-content {
+  flex: 2;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-image {
+  flex: 1;
+  background-size: cover;
+  background-position: center;
+  transition: all 0.5s ease;
+}
+
+.about-card:hover .card-image {
+  transform: scale(1.05);
+}
+
+.card-icon {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.about-card h3 {
+  color: #000000;
+  margin-bottom: 1rem;
+  font-size: 1.3rem;
+}
+
+.about-card p {
+  color: #000000;
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+/* Carrusel con imágenes de fondo */
+.about-carousel {
+  position: relative;
+  height: 300px;
+  overflow: hidden;
+  border-radius: 10px;
+  margin-bottom: 2rem;
+}
+
+.carousel-item {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+
+.carousel-item.active {
+  opacity: 1;
+}
+
+.carousel-content {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 2rem;
+  color: rgb(255, 255, 255);
+  background: linear-gradient(transparent, rgba(0,0,0,0.7));
+}
+
+.carousel-content h4 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.carousel-content p {
+  line-height: 1.5;
+}
+
+.carousel-dots {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  z-index: 2;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.5);
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.dot.active {
+  background: rgb(0, 140, 255);
+  transform: scale(1.2);
+}
+
+/* Tarjeta de fundación */
+.foundation-card {
+  flex-direction: column;
+  padding: 1.5rem;
+}
+
+.foundation-logo {
+  width: 80px;
+  height: auto;
+  margin-bottom: 1rem;
+}
+
+/* Colores específicos para cada tarjeta */
+.mission-card .card-content { background: #ffffff; }
+.vision-card .card-content { background: #ffffff; }
+.purpose-card .card-content { background: #ffffff; }
+.foundation-card { background: #ffffff; }
+
+.mission-card .card-icon { color: #3498db; }
+.vision-card .card-icon { color: #2ecc71; }
+.purpose-card .card-icon { color: #e74c3c; }
+.foundation-card .card-icon { color: #ffffff; }
+
+/* Responsive */
+@media (max-width: 992px) {
+  .about-card {
+    flex-direction: column;
   }
   
-  .about-us.visible {
-    opacity: 1;
-    transform: translateY(0);
+  .card-image {
+    height: 150px;
+  }
+}
+
+@media (max-width: 768px) {
+  .about-us__grid {
+    grid-template-columns: 1fr;
   }
   
-  .about-us h2 {
-    font-size: 2.75em; /* Slightly larger heading */
-    margin-bottom: 40px;
-    color: #2c3e50; /* Darker blue-grey for heading */
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.05);
+  .about-carousel {
+    height: 250px;
   }
-  
-  .about-us__content {
-    display: grid; /* Use grid for more control over layout */
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); /* Responsive columns */
-    gap: 40px;
-    max-width: 1200px;
-    margin: 0 auto;
-  }
-  
-  .about-us h2::after {
-    content: '';
-    position: relative; /* Changed to relative for better flow with grid */
-    display: block; /* Make it take full width of its container */
-    width: 80px; /* Shorter underline */
-    height: 3px;
-    background-color: #f39c12; /* A more vibrant orange */
-    margin: 20px auto 0; /* Center the underline */
-    border-radius: 2px;
-    opacity: 0;
-    transform: translateY(10px);
-    transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
-  }
-  
-  .about-us.visible h2::after {
-    transform: translateY(0);
-    opacity: 1;
-  }
-  
-  .about-us__mission,
-  .about-us__vision,
-  .about-us__purpose {
-    padding: 35px;
-    background-color: #fff; /* White boxes for better contrast */
-    border-radius: 15px; /* More pronounced rounded corners */
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1); /* Slightly stronger shadow */
-    text-align: left;
-    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
-    border-left: 5px solid #f39c12; /* Add a colored border to the left */
-  }
-  
-  .about-us__mission:hover,
-  .about-us__vision:hover,
-  .about-us__purpose:hover {
-    transform: translateY(-8px); /* More noticeable lift on hover */
-    box-shadow: 0 10px 18px rgba(0, 0, 0, 0.15);
-  }
-  
-  .about-us h3 {
-    font-size: 2.2em; /* Slightly larger box heading */
-    margin-bottom: 25px;
-    color: #34495e; /* Darker blue-grey for box heading */
-    transition: color 0.3s ease-in-out;
-  }
-  
-  .about-us__mission:hover h3,
-  .about-us__vision:hover h3,
-  .about-us__purpose:hover h3 {
-    color: #e67e22; /* A brighter orange on hover */
-  }
-  
-  .about-us p {
-    font-size: 1.18em;
-    line-height: 1.8;
-    color: #555;
-  }
-  
-  /* Optional: Add a subtle background pattern */
-  /* .about-us {
-    background-image: radial-gradient(circle, #f0f0f0 1px, transparent 1px);
-    background-size: 20px 20px;
-  } */
-  
-  @media (max-width: 768px) {
-    .about-us {
-      padding: 40px 20px;
-    }
-  
-    .about-us h2 {
-      font-size: 2.2em;
-      margin-bottom: 30px;
-    }
-  
-    .about-us__content {
-      grid-template-columns: 1fr; /* Stack boxes on smaller screens */
-      gap: 30px;
-    }
-  
-    .about-us h2::after {
-      width: 60px;
-    }
-  
-    .about-us h3 {
-      font-size: 1.8em;
-      margin-bottom: 20px;
-    }
-  
-    .about-us p {
-      font-size: 1.1em;
-    }
-  }
+}

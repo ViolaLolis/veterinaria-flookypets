@@ -1,0 +1,387 @@
+/* AdminAppointments.css - Diseño Dinámico e Interactivo */
+
+:root {
+    --primary: #00acc1;
+    --primary-light: rgba(0, 172, 193, 0.1);
+    --primary-dark: #008c9e;
+    --secondary: #ecf0f1;
+    --secondary-dark: #dfe6e9;
+    --text-dark: #2c3e50;
+    --text-light: #7f8c8d;
+    --white: #ffffff;
+    --success: #1dd1a1;
+    --warning: #ff9f43;
+    --danger: #ff6b6b;
+    --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    --transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+  
+  /* Estructura principal con efecto de profundidad */
+  .admin-content-container {
+    padding: 2.5rem;
+    background-color: var(--secondary);
+    border-radius: 18px;
+    box-shadow: var(--shadow);
+    margin: 1.5rem;
+    transition: var(--transition);
+    border: 1px solid rgba(0, 172, 193, 0.1);
+  }
+  
+  .admin-content-container:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 172, 193, 0.15);
+  }
+  
+  /* Encabezado con efecto de neón */
+  .admin-content-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.8rem;
+    border-bottom: 2px solid var(--primary-light);
+    flex-wrap: wrap;
+    gap: 1.5rem;
+  }
+  
+  .admin-content-header h2 {
+    color: var(--text-dark);
+    font-size: 2rem;
+    display: flex;
+    align-items: center;
+    margin: 0;
+    position: relative;
+  }
+  
+  .header-icon {
+    color: var(--primary);
+    font-size: 1.8rem;
+    margin-right: 1.2rem;
+    transition: var(--transition);
+    filter: drop-shadow(0 0 5px rgba(0, 172, 193, 0.3));
+  }
+  
+  .admin-content-header:hover .header-icon {
+    transform: rotate(15deg) scale(1.2);
+    filter: drop-shadow(0 0 8px rgba(0, 172, 193, 0.5));
+  }
+  
+  /* Barra de búsqueda futurista */
+  .search-box {
+    position: relative;
+    flex-grow: 1;
+    min-width: 300px;
+    max-width: 500px;
+  }
+  
+  .search-box input {
+    width: 100%;
+    padding: 1rem 1.5rem 1rem 3.5rem;
+    border: 2px solid var(--secondary-dark);
+    border-radius: 50px;
+    background-color: var(--white);
+    font-size: 1rem;
+    transition: var(--transition);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  }
+  
+  .search-box input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(0, 172, 193, 0.2);
+  }
+  
+  .search-icon {
+    position: absolute;
+    left: 1.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--primary);
+    font-size: 1.2rem;
+    transition: var(--transition);
+  }
+  
+  .search-box:hover .search-icon {
+    transform: translateY(-50%) scale(1.1);
+  }
+  
+  /* Filtros interactivos */
+  .filter-buttons {
+    display: flex;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+  }
+  
+  .filter-btn {
+    padding: 0.8rem 1.5rem;
+    border-radius: 50px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    border: 2px solid var(--secondary-dark);
+    background-color: var(--white);
+    color: var(--text-dark);
+  }
+  
+  .filter-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .filter-btn.active {
+    background-color: var(--primary);
+    color: var(--white);
+    border-color: var(--primary);
+    box-shadow: 0 4px 15px rgba(0, 172, 193, 0.3);
+  }
+  
+  /* Tabla con efecto holográfico */
+  .admin-table-container {
+    background-color: var(--white);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+    position: relative;
+    overflow-x: auto;
+  }
+  
+  .admin-table-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      to bottom right,
+      rgba(255, 255, 255, 0.3) 0%,
+      rgba(255, 255, 255, 0) 60%
+    );
+    pointer-events: none;
+  }
+  
+  .admin-table-container:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0, 172, 193, 0.15);
+  }
+  
+  .admin-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    min-width: 1000px;
+  }
+  
+  .admin-table th {
+    background: linear-gradient(to right, var(--primary-light), var(--secondary));
+    padding: 1.5rem;
+    text-align: left;
+    color: var(--primary);
+    font-weight: 700;
+    position: sticky;
+    top: 0;
+    border-bottom: 2px solid var(--primary-light);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.9rem;
+  }
+  
+  .admin-table td {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--secondary-dark);
+    transition: var(--transition);
+  }
+  
+  .admin-table tr:last-child td {
+    border-bottom: none;
+  }
+  
+  .admin-table tr:hover td {
+    background-color: var(--primary-light);
+    transform: scale(1.01);
+  }
+  
+  /* Iconos de la tabla */
+  .icon {
+    margin-right: 0.8rem;
+    color: var(--primary);
+    font-size: 1.1rem;
+    vertical-align: middle;
+  }
+  
+  /* Badges de estado */
+  .status-badge {
+    display: inline-block;
+    padding: 0.5rem 1.2rem;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: var(--transition);
+  }
+  
+  .badge-success {
+    background-color: rgba(29, 209, 161, 0.1);
+    color: var(--success);
+    border: 1px solid var(--success);
+  }
+  
+  .badge-warning {
+    background-color: rgba(255, 159, 67, 0.1);
+    color: var(--warning);
+    border: 1px solid var(--warning);
+  }
+  
+  .badge-danger {
+    background-color: rgba(255, 107, 107, 0.1);
+    color: var(--danger);
+    border: 1px solid var(--danger);
+  }
+  
+  /* Botón de acciones */
+  .btn-primary {
+    padding: 0.8rem 1.8rem;
+    border-radius: 50px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: var(--white);
+    border: none;
+    box-shadow: 0 4px 15px rgba(0, 172, 193, 0.3);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 172, 193, 0.4);
+  }
+  
+  .btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: all 0.6s ease;
+  }
+  
+  .btn-primary:hover::before {
+    left: 100%;
+  }
+  
+  /* Mensajes y estados */
+  .no-results {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-light);
+    font-size: 1.2rem;
+  }
+  
+  .admin-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 300px;
+  }
+  
+  .loading-spinner {
+    width: 60px;
+    height: 60px;
+    border: 5px solid var(--secondary-dark);
+    border-top: 5px solid var(--primary);
+    border-radius: 50%;
+    animation: spin 1.2s linear infinite;
+    margin-bottom: 1.5rem;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  .error-message {
+    background-color: rgba(255, 107, 107, 0.1);
+    color: var(--danger);
+    padding: 1.8rem;
+    border-radius: 12px;
+    margin: 1.5rem;
+    text-align: center;
+    font-weight: 600;
+    border-left: 5px solid var(--danger);
+    box-shadow: var(--shadow);
+  }
+  
+  /* Efectos especiales */
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  
+  .floating {
+    animation: float 5s ease-in-out infinite;
+  }
+  
+  /* Responsive */
+  @media (max-width: 1200px) {
+    .admin-content-container {
+      padding: 2rem;
+      margin: 1rem;
+    }
+    
+    .admin-content-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    
+    .search-box {
+      width: 100%;
+      max-width: 100%;
+    }
+    
+    .filter-buttons {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .admin-content-container {
+      padding: 1.5rem;
+      margin: 0.5rem;
+    }
+    
+    .admin-table th, 
+    .admin-table td {
+      padding: 1.2rem;
+    }
+    
+    .filter-btn {
+      padding: 0.6rem 1rem;
+      font-size: 0.9rem;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .admin-content-header h2 {
+      font-size: 1.6rem;
+    }
+    
+    .header-icon {
+      font-size: 1.5rem;
+    }
+    
+    .search-box input {
+      padding: 0.8rem 1.2rem 0.8rem 3rem;
+    }
+    
+    .search-icon {
+      left: 1.2rem;
+    }
+  }

@@ -1,0 +1,238 @@
+/* Styles/MetodosPago.module.css */
+
+.container {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: #fffaf0;
+  border-radius: 15px;
+  box-shadow: 0 8px 20px rgba(255, 215, 0, 0.1);
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #fff3bf;
+  position: relative;
+}
+
+.header h3 {
+  margin: 0 1rem;
+  color: #ffd43b;
+  font-size: 1.8rem;
+  font-weight: 600;
+}
+
+.icon {
+  font-size: 2rem;
+  color: #ffd43b;
+}
+
+.volverBtn {
+  position: absolute;
+  right: 0;
+  background: #fff9db;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 50px;
+  color: #f59f00;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(255, 212, 59, 0.2);
+}
+
+.volverBtn:hover {
+  background: #ffec99;
+  transform: translateX(-5px);
+  box-shadow: 0 4px 8px rgba(255, 212, 59, 0.3);
+}
+
+.volverIcon {
+  margin-right: 0.5rem;
+}
+
+.listaMetodos {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 2rem 0;
+}
+
+.metodo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.2rem;
+  margin-bottom: 1rem;
+  background-color: #fff9db;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  animation: slideIn 0.4s ease-out forwards;
+  opacity: 0;
+}
+
+.metodo:nth-child(1) { animation-delay: 0.1s; }
+.metodo:nth-child(2) { animation-delay: 0.2s; }
+.metodo:nth-child(3) { animation-delay: 0.3s; }
+.metodo:nth-child(4) { animation-delay: 0.4s; }
+.metodo:nth-child(5) { animation-delay: 0.5s; }
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.metodo:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(255, 212, 59, 0.15);
+  background-color: #ffec99;
+}
+
+.metodoInfo {
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
+}
+
+.metodoIcon {
+  font-size: 1.8rem;
+  margin-right: 1.5rem;
+  transition: transform 0.3s ease;
+}
+
+.metodo:hover .metodoIcon {
+  transform: scale(1.1);
+}
+
+.visa { color: #1a1f71; }
+.mastercard { color: #eb001b; }
+.paypal { color: #003087; }
+.applepay { color: #000000; }
+.googlepay { color: #5f6368; }
+
+.detalles {
+  display: flex;
+  flex-direction: column;
+}
+
+.metodoTipo {
+  font-weight: 600;
+  color: #f59f00;
+  margin-bottom: 0.3rem;
+}
+
+.metodoDetalle {
+  color: #5c3c00;
+  font-size: 0.95rem;
+}
+
+.acciones {
+  display: flex;
+  gap: 0.8rem;
+}
+
+.editarBtn, .eliminarBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.1rem;
+  padding: 0.5rem;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.editarBtn {
+  color: #f59f00;
+  background-color: rgba(255, 236, 153, 0.3);
+}
+
+.editarBtn:hover {
+  background-color: rgba(255, 236, 153, 0.7);
+  transform: scale(1.1);
+}
+
+.eliminarBtn {
+  color: #ff8787;
+  background-color: rgba(255, 135, 135, 0.1);
+}
+
+.eliminarBtn:hover {
+  background-color: rgba(255, 135, 135, 0.3);
+  transform: scale(1.1);
+}
+
+.noMetodos {
+  text-align: center;
+  padding: 2rem;
+  color: #f59f00;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.8; }
+  50% { opacity: 1; }
+  100% { opacity: 0.8; }
+}
+
+.noMetodosIcon {
+  font-size: 3rem;
+  margin: 1rem 0;
+  color: #ffec99;
+}
+
+.agregarBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #ffec99, #fcc419);
+  color: #5c3c00;
+  padding: 1rem 1.5rem;
+  border-radius: 50px;
+  text-decoration: none;
+  font-weight: 600;
+  margin-top: 1rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(255, 212, 59, 0.2);
+  border: none;
+  cursor: pointer;
+  width: 95%;
+}
+
+.agregarBtn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(255, 212, 59, 0.3);
+  background: linear-gradient(135deg, #fcc419, #ffec99);
+}
+
+.plusIcon {
+  margin-right: 0.9rem;
+  font-size: 2rem;
+  transition: transform 0.3s ease;
+}
+
+.agregarBtn:hover .plusIcon {
+  transform: rotate(90deg) scale(1.2);
+}
+
+/* Efecto al eliminar un método */
+.metodo.eliminando {
+  animation: slideOut 0.4s ease-out forwards;
+}
+
+@keyframes slideOut {
+  to { opacity: 0; transform: translateX(100px); }
+}
