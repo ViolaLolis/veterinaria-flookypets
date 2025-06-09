@@ -50,7 +50,6 @@ npm install bcrypt (para que las contraseñas no se muestren)
 
 npm install framer-motion
 npm install react-calendar
-npm install @fortawesome/react-fontawesome @fortawesome/free-solid-svg-icons
 npm install @fortawesome/free-brands-svg-icons
 npm install react-big-calendar moment
 npm install chart.js react-chartjs-2
