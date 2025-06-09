@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faCog, faBell, faSave, faTimesCircle, 
   faPalette, faLanguage, faClock, faCheckCircle,
-  faExclamationTriangle, faSpinner
+  faExclamationTriangle, faSpinner, faInfoCircle
 } from '@fortawesome/free-solid-svg-icons';
 
 const containerVariants = {
@@ -56,7 +56,6 @@ const ConfiguracionVeterinario = () => {
   const [mensaje, setMensaje] = useState({ texto: '', tipo: '' });
   const [originalConfig, setOriginalConfig] = useState(null);
 
-  // Cargar configuración al montar el componente
   useEffect(() => {
     const loadConfig = () => {
       const savedConfig = {
@@ -72,7 +71,6 @@ const ConfiguracionVeterinario = () => {
       setOriginalConfig(savedConfig);
     };
     
-    // Simular carga asíncrona
     const timer = setTimeout(loadConfig, 500);
     return () => clearTimeout(timer);
   }, []);
@@ -90,10 +88,8 @@ const ConfiguracionVeterinario = () => {
     setMensaje({ texto: '', tipo: '' });
     
     try {
-      // Simular guardado asíncrono
       await new Promise(resolve => setTimeout(resolve, 1200));
       
-      // Guardar en localStorage
       Object.entries(config).forEach(([key, value]) => {
         localStorage.setItem(key, typeof value === 'boolean' ? value.toString() : value);
       });
@@ -125,7 +121,6 @@ const ConfiguracionVeterinario = () => {
     setTimeout(() => setMensaje({ texto: '', tipo: '' }), 3000);
   };
 
-  // Verificar si hay cambios sin guardar
   const hasChanges = originalConfig && 
     JSON.stringify(config) !== JSON.stringify(originalConfig);
 
@@ -338,8 +333,7 @@ const ConfiguracionVeterinario = () => {
             <FontAwesomeIcon 
               icon={
                 mensaje.tipo === 'exito' ? faCheckCircle :
-                mensaje.tipo === 'error' ? faExclamationTriangle :
-                faInfoCircle
+                mensaje.tipo === 'error' ? faExclamationTriangle : faInfoCircle
               } 
             />
             <span>{mensaje.texto}</span>

@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import "../Styles/Login.css";
 
 function Login({ setUser }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({
     email: '',
     password: '',
@@ -36,6 +39,10 @@ function Login({ setUser }) {
 
   const handleBlur = (field) => {
     setTouched(prev => ({ ...prev, [field]: true }));
+  };
+
+  const toggleShowPassword = () => {
+    setShowPassword(!showPassword);
   };
 
   const handleLogin = async (e) => {
@@ -129,21 +136,30 @@ function Login({ setUser }) {
                   onBlur={() => handleBlur('email')}
                   className={errors.email ? 'input-error' : ''}
                 />
-                {errors.email && <span className="field-error">⚠ {errors.email} �</span>}
+                {errors.email && <span className="field-error">⚠ {errors.email} ⚠</span>}
               </div>
 
-              <div className="form-field">
+              <div className="form-field password-field">
                 <label>Contraseña:</label>
-                <input 
-                  type="password" 
-                  value={password} 
-                  onChange={(e) => {
-                    setPassword(e.target.value.slice(0, 63));
-                    setErrors(prev => ({ ...prev, form: '' }));
-                  }}
-                  onBlur={() => handleBlur('password')}
-                  className={errors.password ? 'input-error' : ''}
-                />
+                <div className="password-input-container">
+                  <input 
+                    type={showPassword ? 'text' : 'password'} 
+                    value={password} 
+                    onChange={(e) => {
+                      setPassword(e.target.value.slice(0, 63));
+                      setErrors(prev => ({ ...prev, form: '' }));
+                    }}
+                    onBlur={() => handleBlur('password')}
+                    className={errors.password ? 'input-error' : ''}
+                  />
+                  <button 
+                    type="button" 
+                    className="toggle-password"
+                    onClick={toggleShowPassword}
+                  >
+                    <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
+                  </button>
+                </div>
                 {errors.password && <span className="field-error">⚠ {errors.password} ⚠</span>}
               </div>
 
@@ -168,11 +184,7 @@ function Login({ setUser }) {
         </div>
       </div>
     </div>
-
-    
   );
-
-  
 }
 
 export default Login;
