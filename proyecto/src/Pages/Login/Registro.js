@@ -8,105 +8,14 @@ const serviceId = 'Flooky Pets';
 const templateId = 'template_z3izl33';
 const publicKey = 'Glz70TavlG0ANcvrb';
 
-// Lista de prefijos telefónicos internacionales
-const countryCodes = [
-  { code: '+57', name: 'Colombia (+57)' },
-  { code: '+1', name: 'Estados Unidos/Canadá (+1)' },
-  { code: '+52', name: 'México (+52)' },
-  { code: '+34', name: 'España (+34)' },
-  { code: '+54', name: 'Argentina (+54)' },
-  { code: '+55', name: 'Brasil (+55)' },
-  { code: '+56', name: 'Chile (+56)' },
-  { code: '+51', name: 'Perú (+51)' },
-  { code: '+58', name: 'Venezuela (+58)' },
-  { code: '+593', name: 'Ecuador (+593)' },
-  { code: '+503', name: 'El Salvador (+503)' },
-  { code: '+502', name: 'Guatemala (+502)' },
-  { code: '+504', name: 'Honduras (+504)' },
-  { code: '+505', name: 'Nicaragua (+505)' },
-  { code: '+507', name: 'Panamá (+507)' },
-  { code: '+506', name: 'Costa Rica (+506)' },
-  { code: '+44', name: 'Reino Unido (+44)' },
-  { code: '+33', name: 'Francia (+33)' },
-  { code: '+49', name: 'Alemania (+49)' },
-  { code: '+39', name: 'Italia (+39)' },
-  { code: '+7', name: 'Rusia (+7)' },
-  { code: '+81', name: 'Japón (+81)' },
-  { code: '+86', name: 'China (+86)' },
-  { code: '+91', name: 'India (+91)' },
-  { code: '+61', name: 'Australia (+61)' },
-  { code: '+64', name: 'Nueva Zelanda (+64)' },
-  { code: '+27', name: 'Sudáfrica (+27)' },
-  { code: '+20', name: 'Egipto (+20)' },
-  { code: '+971', name: 'Emiratos Árabes (+971)' },
-  { code: '+966', name: 'Arabia Saudita (+966)' }
-];
-
-// Prefijos de área para Colombia
-const areaCodesColombia = [
-  { code: '1', name: 'Bogotá (1)' },
-  { code: '2', name: 'Cali (2)' },
-  { code: '4', name: 'Medellín (4)' },
-  { code: '5', name: 'Barranquilla (5)' },
-  { code: '6', name: 'Pereira (6)' },
-  { code: '7', name: 'Bucaramanga (7)' },
-  { code: '8', name: 'Cúcuta (8)' },
-  { code: '9', name: 'Manizales (9)' }
-];
-
-// Tipos de vía para dirección
-const viaTypes = [
-  { value: 'CL', label: 'Calle' },
-  { value: 'CR', label: 'Carrera' },
-  { value: 'AV', label: 'Avenida' },
-  { value: 'DG', label: 'Diagonal' },
-  { value: 'TV', label: 'Transversal' },
-  { value: 'AC', label: 'Avenida Calle' },
-  { value: 'AK', label: 'Avenida Carrera' },
-  { value: 'CQ', label: 'Circunvalar' },
-  { value: 'CV', label: 'Circular' },
-  { value: 'CC', label: 'Centro Comercial' },
-  { value: 'ED', label: 'Edificio' },
-  { value: 'LT', label: 'Lote' },
-  { value: 'MZ', label: 'Manzana' },
-  { value: 'UR', label: 'Urbanización' }
-];
-
-// Cuadrantes
-const cuadrantes = [
-  { value: '', label: 'Ninguno' },
-  { value: 'NORTE', label: 'Norte' },
-  { value: 'SUR', label: 'Sur' },
-  { value: 'ESTE', label: 'Este' },
-  { value: 'OESTE', label: 'Oeste' },
-  { value: 'NORESTE', label: 'Noreste' },
-  { value: 'NOROESTE', label: 'Noroeste' },
-  { value: 'SURESTE', label: 'Sureste' },
-  { value: 'SUROESTE', label: 'Suroeste' }
-];
-
 function Registro() {
     const navigate = useNavigate();
     const [step, setStep] = useState(1);
     const [formData, setFormData] = useState({
         nombre: '',
         apellido: '',
-        countryCode: '+57',
         telefono: '',
-        areaCode: '1',
-        telefonoFijo: '',
-        // Campos de dirección estructurada
-        tipoVia: 'CL',
-        numeroVia: '',
-        cuadrante: '',
-        numeroViaGeneradora: '',
-        placa: '',
-        tipoComplemento: 'AP',
-        numeroComplemento: '',
-        codigoPostal: '',
-        ciudad: 'Bogotá',
-        barrio: '',
-        // Fin campos dirección
+        direccion: '',
         tipoDocumento: '',
         numeroDocumento: '',
         fechaNacimiento: '',
@@ -114,20 +23,12 @@ function Registro() {
         contrasena: '',
         verificarContrasena: '',
         codigoIngresado: '',
-        aceptaTerminos: false
     });
     const [fieldErrors, setFieldErrors] = useState({
         nombre: '',
         apellido: '',
         telefono: '',
-        telefonoFijo: '',
-        // Errores de dirección
-        numeroVia: '',
-        placa: '',
-        numeroComplemento: '',
-        codigoPostal: '',
-        barrio: '',
-        // Fin errores dirección
+        direccion: '',
         tipoDocumento: '',
         numeroDocumento: '',
         fechaNacimiento: '',
@@ -135,7 +36,6 @@ function Registro() {
         contrasena: '',
         verificarContrasena: '',
         codigoIngresado: '',
-        aceptaTerminos: ''
     });
     const [codigoGenerado, setCodigoGenerado] = useState('');
     const [tiempoRestante, setTiempoRestante] = useState(60);
@@ -145,7 +45,6 @@ function Registro() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [registroExitoso, setRegistroExitoso] = useState(false);
     const [isSidebarVisible, setIsSidebarVisible] = useState(true);
-    const [showTermsModal, setShowTermsModal] = useState(false);
 
     useEffect(() => {
         let timer;
@@ -234,62 +133,20 @@ function Registro() {
             case 'telefono':
                 if (!value.trim()) {
                     error = 'Este campo es obligatorio';
-                } else if (!/^\d{10}$/.test(value)) {
-                    error = 'Debe tener 10 dígitos numéricos';
+                } else if (!/^(3\d{9}|[1-9]\d{6,7})$/.test(value)) {
+                    error = 'Formato de teléfono colombiano inválido';
                 }
                 break;
                 
-            case 'telefonoFijo':
-                if (value && !/^\d{7}$/.test(value)) {
-                    error = 'Debe tener 7 dígitos';
-                }
-                break;
-                
-            // Validaciones para campos de dirección
-            case 'numeroVia':
+            case 'direccion':
                 if (!value.trim()) {
-                    error = 'Número de vía es obligatorio';
-                } else if (!/^[0-9A-Za-z\s\-]+$/.test(value)) {
-                    error = 'Solo números, letras, espacios y guiones';
-                } else if (value.length > 20) {
-                    error = 'Máximo 20 caracteres';
+                    error = 'Este campo es obligatorio';
+                } else if (!/^(Calle|Cll|Cl|Carrera|Cra|Cr|Avenida|Av|Avda|Avd|Transversal|Trans|Circular|Cir)\s?\d+.*$/i.test(value)) {
+                    error = 'La dirección debe comenzar con el tipo de vía (Ej: Calle, Carrera, Av.) seguido de número';
+                } else if (value.length > 100) {
+                    error = 'Máximo 100 caracteres';
                 }
                 break;
-                
-            case 'placa':
-                if (!value.trim()) {
-                    error = 'Número de placa es obligatorio';
-                } else if (!/^\d+[A-Za-z]?$/.test(value)) {
-                    error = 'Formato inválido (ej: 123A)';
-                } else if (value.length > 10) {
-                    error = 'Máximo 10 caracteres';
-                }
-                break;
-                
-            case 'numeroComplemento':
-                if (value && !/^[0-9A-Za-z\s\-]+$/.test(value)) {
-                    error = 'Solo números, letras, espacios y guiones';
-                } else if (value && value.length > 10) {
-                    error = 'Máximo 10 caracteres';
-                }
-                break;
-                
-            case 'codigoPostal':
-                if (value && !/^\d{6}$/.test(value)) {
-                    error = 'Debe tener 6 dígitos';
-                }
-                break;
-                
-            case 'barrio':
-                if (!value.trim()) {
-                    error = 'Barrio es obligatorio';
-                } else if (!/^[A-Za-zÁÉÍÓÚáéíóúñÑ\s\-]+$/.test(value)) {
-                    error = 'Solo letras, espacios y guiones';
-                } else if (value.length > 50) {
-                    error = 'Máximo 50 caracteres';
-                }
-                break;
-            // Fin validaciones dirección
                 
             case 'tipoDocumento':
                 if (!value) {
@@ -300,8 +157,8 @@ function Registro() {
             case 'numeroDocumento':
                 if (!value.trim()) {
                     error = 'Este campo es obligatorio';
-                } else if (!/^\d{9,11}$/.test(value)) {
-                    error = 'Debe tener 10 digitos';
+                } else if (!/^\d{8,11}$/.test(value)) {
+                    error = 'Número de documento inválido (8-11 dígitos)';
                 }
                 break;
                 
@@ -371,12 +228,6 @@ function Registro() {
                 }
                 break;
                 
-            case 'aceptaTerminos':
-                if (!value) {
-                    error = 'Debes aceptar los términos y condiciones';
-                }
-                break;
-                
             default:
                 break;
         }
@@ -385,23 +236,14 @@ function Registro() {
     };
 
     const handleInputChange = (e) => {
-        const { name, value, type, checked } = e.target;
-        const inputValue = type === 'checkbox' ? checked : value;
-        const error = validateField(name, inputValue);
+        const { name, value } = e.target;
+        const error = validateField(name, value);
         
         setFieldErrors(prevErrors => ({
             ...prevErrors,
             [name]: error
         }));
         
-        setFormData(prevData => ({
-            ...prevData,
-            [name]: inputValue
-        }));
-    };
-
-    const handleSelectChange = (e) => {
-        const { name, value } = e.target;
         setFormData(prevData => ({
             ...prevData,
             [name]: value
@@ -413,18 +255,14 @@ function Registro() {
         const newErrors = {...fieldErrors};
         
         if (step === 1) {
-            const fieldsToValidate = [
-                'nombre', 'apellido', 'telefono', 
-                'tipoDocumento', 'numeroDocumento', 'fechaNacimiento',
-                'numeroVia', 'placa', 'barrio' // Campos obligatorios de dirección
-            ];
+            const fieldsToValidate = ['nombre', 'apellido', 'telefono', 'direccion', 'tipoDocumento', 'numeroDocumento', 'fechaNacimiento'];
             fieldsToValidate.forEach(field => {
                 const error = validateField(field, formData[field]);
                 newErrors[field] = error;
                 if (error) isValid = false;
             });
         } else if (step === 2) {
-            const fieldsToValidate = ['correo', 'contrasena', 'verificarContrasena', 'aceptaTerminos'];
+            const fieldsToValidate = ['correo', 'contrasena', 'verificarContrasena'];
             fieldsToValidate.forEach(field => {
                 const error = validateField(field, formData[field]);
                 newErrors[field] = error;
@@ -489,25 +327,16 @@ function Registro() {
           return;
         }
       
-        // Construir la dirección completa para enviar a la base de datos
-        const direccionCompleta = `${formData.tipoVia} ${formData.numeroVia} ${formData.cuadrante ? formData.cuadrante + ' ' : ''}` +
-                                 `# ${formData.numeroViaGeneradora} - ${formData.placa}` +
-                                 `${formData.numeroComplemento ? ', ' + formData.tipoComplemento + ' ' + formData.numeroComplemento : ''}` +
-                                 `, ${formData.barrio}, ${formData.ciudad}` +
-                                 `${formData.codigoPostal ? ', Código Postal: ' + formData.codigoPostal : ''}`;
-      
         const userData = {
           nombre: formData.nombre,
           apellido: formData.apellido,
           email: formData.correo,
           password: formData.contrasena,
-          telefono: `${formData.countryCode}${formData.telefono}`,
-          telefonoFijo: formData.telefonoFijo ? `${formData.areaCode}${formData.telefonoFijo}` : null,
-          direccion: direccionCompleta,
+          telefono: formData.telefono,
+          direccion: formData.direccion,
           tipoDocumento: formData.tipoDocumento,
           numeroDocumento: formData.numeroDocumento,
-          fechaNacimiento: formData.fechaNacimiento,
-          aceptaTerminos: formData.aceptaTerminos
+          fechaNacimiento: formData.fechaNacimiento
         };
       
         console.log("Enviando datos al backend:", userData);
@@ -549,11 +378,11 @@ function Registro() {
         switch (step) {
             case 1:
                 return (
-                    <div className="step-container two-columns">
+                    <div className="reg-step-container reg-two-columns">
                         <h2>Información Básica</h2>
-                        <div className="form-columns">
-                            <div className="form-column">
-                                <div className="input-group">
+                        <div className="reg-form-columns">
+                            <div className="reg-form-column">
+                                <div className="reg-input-group">
                                     <label>Nombre:</label>
                                     <input 
                                         type="text" 
@@ -561,12 +390,12 @@ function Registro() {
                                         value={formData.nombre} 
                                         onChange={handleInputChange} 
                                         maxLength="50"
-                                        className={fieldErrors.nombre ? 'input-error' : ''}
+                                        className={fieldErrors.nombre ? 'reg-input-error' : ''}
                                         required 
                                     />
-                                    {fieldErrors.nombre && <span className="error-text">{fieldErrors.nombre}</span>}
+                                    {fieldErrors.nombre && <span className="reg-error-text">{fieldErrors.nombre}</span>}
                                 </div>
-                                <div className="input-group">
+                                <div className="reg-input-group">
                                     <label>Apellido:</label>
                                     <input 
                                         type="text" 
@@ -574,82 +403,57 @@ function Registro() {
                                         value={formData.apellido} 
                                         onChange={handleInputChange} 
                                         maxLength="50"
-                                        className={fieldErrors.apellido ? 'input-error' : ''}
+                                        className={fieldErrors.apellido ? 'reg-input-error' : ''}
                                         required 
                                     />
-                                    {fieldErrors.apellido && <span className="error-text">{fieldErrors.apellido}</span>}
+                                    {fieldErrors.apellido && <span className="reg-error-text">{fieldErrors.apellido}</span>}
                                 </div>
-                                <div className="input-group phone-input">
-                                    <label>Teléfono Móvil:</label>
-                                    <div className="phone-input-container">
-                                        <select
-                                            name="countryCode"
-                                            value={formData.countryCode}
-                                            onChange={handleSelectChange}
-                                            className="country-code-select"
-                                        >
-                                            {countryCodes.map((country) => (
-                                                <option key={country.code} value={country.code}>
-                                                    {country.name}
-                                                </option>
-                                            ))}
-                                        </select>
-                                        <input 
-                                            type="tel" 
-                                            name="telefono" 
-                                            value={formData.telefono} 
-                                            onChange={handleInputChange} 
-                                            maxLength="10"
-                                            className={`phone-number-input ${fieldErrors.telefono ? 'input-error' : ''}`}
-                                            required 
-                                            placeholder="Número móvil"
-                                        />
-                                    </div>
-                                    {fieldErrors.telefono && <span className="error-text">{fieldErrors.telefono}</span>}
+                                <div className="reg-input-group">
+                                    <label>Teléfono:</label>
+                                    <input 
+                                        type="tel" 
+                                        name="telefono" 
+                                        value={formData.telefono} 
+                                        onChange={handleInputChange} 
+                                        maxLength="10"
+                                        placeholder="Ej: 3001234567"
+                                        className={fieldErrors.telefono ? 'reg-input-error' : ''}
+                                        required 
+                                    />
+                                    {fieldErrors.telefono && <span className="reg-error-text">{fieldErrors.telefono}</span>}
                                 </div>
-                                <div className="input-group phone-input">
-                                    <label>Teléfono Fijo (Opcional):</label>
-                                    <div className="phone-input-container">
-                                        <select
-                                            name="areaCode"
-                                            value={formData.areaCode}
-                                            onChange={handleSelectChange}
-                                            className="area-code-select"
-                                        >
-                                            {areaCodesColombia.map((area) => (
-                                                <option key={area.code} value={area.code}>
-                                                    {area.name}
-                                                </option>
-                                            ))}
-                                        </select>
-                                        <input 
-                                            type="tel" 
-                                            name="telefonoFijo" 
-                                            value={formData.telefonoFijo} 
-                                            onChange={handleInputChange} 
-                                            maxLength="7"
-                                            className={`phone-number-input ${fieldErrors.telefonoFijo ? 'input-error' : ''}`}
-                                            placeholder="Número fijo"
-                                        />
-                                    </div>
-                                    {fieldErrors.telefonoFijo && <span className="error-text">{fieldErrors.telefonoFijo}</span>}
+                            </div>
+                            <div className="reg-form-column">
+                                <div className="reg-input-group">
+                                    <label>Dirección:</label>
+                                    <input 
+                                        type="text" 
+                                        name="direccion" 
+                                        value={formData.direccion} 
+                                        onChange={handleInputChange} 
+                                        maxLength="100"
+                                        placeholder="Ej: Calle 123 #45-67"
+                                        className={fieldErrors.direccion ? 'reg-input-error' : ''}
+                                        required 
+                                    />
+                                    {fieldErrors.direccion && <span className="reg-error-text">{fieldErrors.direccion}</span>}
                                 </div>
-                                                                <div className="input-group">
+                                <div className="reg-input-group">
                                     <label>Tipo de Documento:</label>
                                     <select 
                                         name="tipoDocumento" 
                                         value={formData.tipoDocumento} 
                                         onChange={handleInputChange} 
-                                        className={fieldErrors.tipoDocumento ? 'input-error' : ''}
+                                        className={fieldErrors.tipoDocumento ? 'reg-input-error' : ''}
                                         required
                                     >
                                         <option value="">Seleccione un tipo</option>
                                         <option value="CC">Cédula de Ciudadanía</option>
                                         <option value="Pasaporte">Pasaporte</option>
                                     </select>
-                                    {fieldErrors.tipoDocumento && <span className="error-text">{fieldErrors.tipoDocumento}</span>}
+                                    {fieldErrors.tipoDocumento && <span className="reg-error-text">{fieldErrors.tipoDocumento}</span>}
                                 </div>
-                                <div className="input-group">
+                                <div className="reg-input-group">
                                     <label>Número de Documento:</label>
                                     <input 
                                         type="text" 
@@ -657,184 +461,35 @@ function Registro() {
                                         value={formData.numeroDocumento} 
                                         onChange={handleInputChange} 
                                         maxLength="12"
-                                        className={fieldErrors.numeroDocumento ? 'input-error' : ''}
+                                        className={fieldErrors.numeroDocumento ? 'reg-input-error' : ''}
                                         required 
                                     />
-                                    {fieldErrors.numeroDocumento && <span className="error-text">{fieldErrors.numeroDocumento}</span>}
+                                    {fieldErrors.numeroDocumento && <span className="reg-error-text">{fieldErrors.numeroDocumento}</span>}
                                 </div>
-                                <div className="input-group">
+                                <div className="reg-input-group">
                                     <label>Fecha de Nacimiento:</label>
                                     <input 
                                         type="date" 
                                         name="fechaNacimiento" 
                                         value={formData.fechaNacimiento} 
                                         onChange={handleInputChange} 
-                                        className={fieldErrors.fechaNacimiento ? 'input-error' : ''}
+                                        className={fieldErrors.fechaNacimiento ? 'reg-input-error' : ''}
                                         required 
                                         max={new Date().toISOString().split('T')[0]}
                                     />
-                                    {fieldErrors.fechaNacimiento && <span className="error-text">{fieldErrors.fechaNacimiento}</span>}
+                                    {fieldErrors.fechaNacimiento && <span className="reg-error-text">{fieldErrors.fechaNacimiento}</span>}
                                 </div>
-                            </div>
-                            <div className="form-column">
-                                
-                                <div className="address-row">
-                                    <div className="input-group address-select">
-                                        <label>Tipo de vía:</label>
-                                        <select
-                                            name="tipoVia"
-                                            value={formData.tipoVia}
-                                            onChange={handleSelectChange}
-                                        >
-                                            {viaTypes.map((via) => (
-                                                <option key={via.value} value={via.value}>
-                                                    {via.label}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                    <div className="input-group address-input">
-                                        <label>Número o nombre de vía:</label>
-                                        <input 
-                                            type="text" 
-                                            name="numeroVia" 
-                                            value={formData.numeroVia} 
-                                            onChange={handleInputChange} 
-                                            maxLength="20"
-                                            className={fieldErrors.numeroVia ? 'input-error' : ''}
-                                            required 
-                                            placeholder="Ej: 12B, 45-23, Caracas"
-                                        />
-                                        {fieldErrors.numeroVia && <span className="error-text">{fieldErrors.numeroVia}</span>}
-                                    </div>
-                                </div>
-                                
-                                <div className="address-row">
-                                    <div className="input-group address-select">
-                                        <label>Cuadrante (opcional):</label>
-                                        <select
-                                            name="cuadrante"
-                                            value={formData.cuadrante}
-                                            onChange={handleSelectChange}
-                                        >
-                                            {cuadrantes.map((cuadrante) => (
-                                                <option key={cuadrante.value} value={cuadrante.value}>
-                                                    {cuadrante.label}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                    <div className="input-group address-input">
-                                        <label>Número vía generadora:</label>
-                                        <input 
-                                            type="text" 
-                                            name="numeroViaGeneradora" 
-                                            value={formData.numeroViaGeneradora} 
-                                            onChange={handleInputChange} 
-                                            maxLength="20"
-                                            placeholder="Ej: 45, 23A"
-                                        />
-                                    </div>
-                                </div>
-                                
-                                <div className="address-row">
-                                    <div className="input-group address-input">
-                                        <label>Número de placa:</label>
-                                        <input 
-                                            type="text" 
-                                            name="placa" 
-                                            value={formData.placa} 
-                                            onChange={handleInputChange} 
-                                            maxLength="10"
-                                            className={fieldErrors.placa ? 'input-error' : ''}
-                                            required 
-                                            placeholder="Ej: 25A, 10B"
-                                        />
-                                        {fieldErrors.placa && <span className="error-text">{fieldErrors.placa}</span>}
-                                    </div>
-                                    <div className="input-group address-select">
-                                        <label>Tipo complemento:</label>
-                                        <select
-                                            name="tipoComplemento"
-                                            value={formData.tipoComplemento}
-                                            onChange={handleSelectChange}
-                                        >
-                                            <option value="AP">Apartamento</option>
-                                            <option value="CS">Casa</option>
-                                            <option value="OF">Oficina</option>
-                                            <option value="LT">Local</option>
-                                        </select>
-                                    </div>
-                                    <div className="input-group address-input">
-                                        <label>Número complemento (opcional):</label>
-                                        <input 
-                                            type="text" 
-                                            name="numeroComplemento" 
-                                            value={formData.numeroComplemento} 
-                                            onChange={handleInputChange} 
-                                            maxLength="10"
-                                            className={fieldErrors.numeroComplemento ? 'input-error' : ''}
-                                            placeholder="Ej: 201, 5B"
-                                        />
-                                        {fieldErrors.numeroComplemento && <span className="error-text">{fieldErrors.numeroComplemento}</span>}
-                                    </div>
-                                </div>
-                                
-                                <div className="address-row">
-                                    <div className="input-group address-input">
-                                        <label>Barrio:</label>
-                                        <input 
-                                            type="text" 
-                                            name="barrio" 
-                                            value={formData.barrio} 
-                                            onChange={handleInputChange} 
-                                            maxLength="50"
-                                            className={fieldErrors.barrio ? 'input-error' : ''}
-                                            required 
-                                            placeholder="Nombre del barrio"
-                                        />
-                                        {fieldErrors.barrio && <span className="error-text">{fieldErrors.barrio}</span>}
-                                    </div>
-                                    <div className="input-group address-input">
-                                        <label>Ciudad:</label>
-                                        <input 
-                                            type="text" 
-                                            name="ciudad" 
-                                            value={formData.ciudad} 
-                                            onChange={handleInputChange} 
-                                            maxLength="50"
-                                            required 
-                                        />
-                                    </div>
-                                </div>
-                                
-                                <div className="address-row">
-                                    <div className="input-group address-input">
-                                        <label>Código Postal (opcional):</label>
-                                        <input 
-                                            type="text" 
-                                            name="codigoPostal" 
-                                            value={formData.codigoPostal} 
-                                            onChange={handleInputChange} 
-                                            maxLength="6"
-                                            className={fieldErrors.codigoPostal ? 'input-error' : ''}
-                                            placeholder="6 dígitos"
-                                        />
-                                        {fieldErrors.codigoPostal && <span className="error-text">{fieldErrors.codigoPostal}</span>}
-                                    </div>
-                                </div>
-                                
                             </div>
                         </div>
                     </div>
                 );
             case 2:
                 return (
-                    <div className="step-container">
+                    <div className="reg-step-container">
                         <h2>Información de Cuenta</h2>
-                        <div className="form-columns">
-                            <div className="form-column">
-                                <div className="input-group">
+                        <div className="reg-form-columns">
+                            <div className="reg-form-column">
+                                <div className="reg-input-group">
                                     <label>Correo Electrónico:</label>
                                     <input 
                                         type="email" 
@@ -842,14 +497,14 @@ function Registro() {
                                         value={formData.correo} 
                                         onChange={handleInputChange} 
                                         maxLength="100"
-                                        className={fieldErrors.correo ? 'input-error' : ''}
+                                        className={fieldErrors.correo ? 'reg-input-error' : ''}
                                         required 
                                     />
-                                    {fieldErrors.correo && <span className="error-text">{fieldErrors.correo}</span>}
+                                    {fieldErrors.correo && <span className="reg-error-text">{fieldErrors.correo}</span>}
                                 </div>
                             </div>
-                            <div className="form-column">
-                                <div className="input-group">
+                            <div className="reg-form-column">
+                                <div className="reg-input-group">
                                     <label>Contraseña:</label>
                                     <input 
                                         type="password" 
@@ -858,16 +513,16 @@ function Registro() {
                                         value={formData.contrasena} 
                                         onChange={handleInputChange} 
                                         maxLength="30"
-                                        className={fieldErrors.contrasena ? 'input-error' : ''}
+                                        className={fieldErrors.contrasena ? 'reg-input-error' : ''}
                                         required 
                                     />
                                     {fieldErrors.contrasena ? (
-                                        <span className="error-text">{fieldErrors.contrasena}</span>
+                                        <span className="reg-error-text">{fieldErrors.contrasena}</span>
                                     ) : (
                                         <small>Debe contener al menos: 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial (@$!%*?&)</small>
                                     )}
                                 </div>
-                                <div className="input-group">
+                                <div className="reg-input-group">
                                     <label>Verificar Contraseña:</label>
                                     <input 
                                         type="password" 
@@ -875,23 +530,10 @@ function Registro() {
                                         value={formData.verificarContrasena} 
                                         onChange={handleInputChange} 
                                         maxLength="30"
-                                        className={fieldErrors.verificarContrasena ? 'input-error' : ''}
+                                        className={fieldErrors.verificarContrasena ? 'reg-input-error' : ''}
                                         required 
                                     />
-                                    {fieldErrors.verificarContrasena && <span className="error-text">{fieldErrors.verificarContrasena}</span>}
-                                </div>
-                                <div className="input-group terms-checkbox">
-                                    <label className="checkbox-label">
-                                        <input
-                                            type="checkbox"
-                                            name="aceptaTerminos"
-                                            checked={formData.aceptaTerminos}
-                                            onChange={handleInputChange}
-                                            className={fieldErrors.aceptaTerminos ? 'input-error' : ''}
-                                        />
-                                        <span>Acepto los <button type="button" className="terms-link" onClick={() => setShowTermsModal(true)}>Términos y Condiciones</button></span>
-                                    </label>
-                                    {fieldErrors.aceptaTerminos && <span className="error-text">{fieldErrors.aceptaTerminos}</span>}
+                                    {fieldErrors.verificarContrasena && <span className="reg-error-text">{fieldErrors.verificarContrasena}</span>}
                                 </div>
                             </div>
                         </div>
@@ -899,10 +541,10 @@ function Registro() {
                 );
             case 3:
                 return (
-                    <div className="step-container verification-step">
+                    <div className="reg-step-container reg-verification-step">
                         <h2>Verificación de Código</h2>
                         {!codigoEnviado && (
-                            <div className="input-group">
+                            <div className="reg-input-group">
                                 <label>Correo Electrónico:</label>
                                 <input 
                                     type="email" 
@@ -910,14 +552,14 @@ function Registro() {
                                     value={formData.correo} 
                                     onChange={handleInputChange} 
                                     maxLength="100"
-                                    className={fieldErrors.correo ? 'input-error' : ''}
+                                    className={fieldErrors.correo ? 'reg-input-error' : ''}
                                     required 
                                 />
-                                {fieldErrors.correo && <span className="error-text">{fieldErrors.correo}</span>}
+                                {fieldErrors.correo && <span className="reg-error-text">{fieldErrors.correo}</span>}
                                 <button 
                                     type="button" 
                                     onClick={nextStep} 
-                                    className="btn-generate-code"
+                                    className="reg-btn-generate-code"
                                     disabled={!!fieldErrors.correo}
                                 >
                                     Generar y Enviar Código de Verificación
@@ -925,9 +567,9 @@ function Registro() {
                             </div>
                         )}
                         {codigoEnviado && (
-                            <div id="verification-section">
+                            <div id="reg-verification-section">
                                 <p>Se ha enviado un código de verificación a <strong>{formData.correo}</strong></p>
-                                <div className="input-group">
+                                <div className="reg-input-group">
                                     <label>Ingresa el código de verificación:</label>
                                     <input
                                         type="text"
@@ -936,35 +578,35 @@ function Registro() {
                                         value={formData.codigoIngresado}
                                         onChange={handleInputChange}
                                         maxLength="6"
-                                        className={fieldErrors.codigoIngresado ? 'input-error' : ''}
+                                        className={fieldErrors.codigoIngresado ? 'reg-input-error' : ''}
                                         required
                                     />
-                                    {fieldErrors.codigoIngresado && <span className="error-text">{fieldErrors.codigoIngresado}</span>}
+                                    {fieldErrors.codigoIngresado && <span className="reg-error-text">{fieldErrors.codigoIngresado}</span>}
                                 </div>
-                                <div className="verification-actions">
+                                <div className="reg-verification-actions">
                                     <button 
                                         type="button" 
                                         onClick={verificarCodigo} 
                                         disabled={codigoVerificado || !!fieldErrors.codigoIngresado}
-                                        className={codigoVerificado ? 'btn-verified' : 'btn-verify'}
+                                        className={codigoVerificado ? 'reg-btn-verified' : 'reg-btn-verify'}
                                     >
                                         {codigoVerificado ? '✓ Código Verificado' : 'Verificar Código'}
                                     </button>
                                     {tiempoRestante > 0 && !codigoVerificado && (
-                                        <p className="timer-text">Tiempo restante: {tiempoRestante}s</p>
+                                        <p className="reg-timer-text">Tiempo restante: {tiempoRestante}s</p>
                                     )}
                                     {tiempoRestante === 0 && (
                                         <button 
                                             type="button" 
                                             onClick={generarCodigo}
-                                            className="btn-resend"
+                                            className="reg-btn-resend"
                                         >
                                             Reenviar Código
                                         </button>
                                     )}
                                 </div>
                                 {codigoVerificado && (
-                                    <div className="success-message">
+                                    <div className="reg-success-message">
                                         <p>✓ Código verificado correctamente</p>
                                         <p>✓ Puedes continuar</p>
                                     </div>
@@ -981,116 +623,30 @@ function Registro() {
     const renderProgressCircles = () => {
         const circles = [1, 2, 3];
         return (
-            <div className="progress-container">
+            <div className="reg-progress-container">
                 {circles.map(circle => (
                     <React.Fragment key={circle}>
                         <span
-                            className={`progress-circle ${step === circle ? 'active' : ''} ${step > circle ? 'completed' : ''}`}
+                            className={`reg-progress-circle ${step === circle ? 'active' : ''} ${step > circle ? 'completed' : ''}`}
                         >
                             {step > circle ? '✓' : circle}
                         </span>
-                        {circle < 3 && <span className="progress-line"></span>}
+                        {circle < 3 && <span className="reg-progress-line"></span>}
                     </React.Fragment>
                 ))}
             </div>
         );
     };
 
-    const renderTermsModal = () => {
-        if (!showTermsModal) return null;
-
-        return (
-            <div className="modal-overlay">
-                <div className="terms-modal">
-                    <div className="modal-header">
-                        <h2>Términos y Condiciones</h2>
-                        <button 
-                            type="button" 
-                            className="close-modal" 
-                            onClick={() => setShowTermsModal(false)}
-                        >
-                            &times;
-                        </button>
-                    </div>
-                    <div className="modal-content">
-                        <h3>1. Aceptación de los Términos</h3>
-                        <p>
-                            Al registrarte en Flooky Pets, aceptas cumplir con estos términos y condiciones, 
-                            nuestra Política de Privacidad y todas las leyes y regulaciones aplicables.
-                        </p>
-
-                        <h3>2. Uso del Servicio</h3>
-                        <p>
-                            Flooky Pets proporciona servicios veterinarios y relacionados con mascotas. 
-                            Te comprometes a usar el servicio solo para fines legales y de acuerdo con estos términos.
-                        </p>
-
-                        <h3>3. Cuenta de Usuario</h3>
-                        <p>
-                            Eres responsable de mantener la confidencialidad de tu cuenta y contraseña, 
-                            y de restringir el acceso a tu computadora. Aceptas la responsabilidad por 
-                            todas las actividades que ocurran bajo tu cuenta.
-                        </p>
-
-                        <h3>4. Privacidad</h3>
-                        <p>
-                            Tu información personal se manejará de acuerdo con nuestra Política de Privacidad. 
-                            Al usar nuestro servicio, consientes el procesamiento de tus datos personales.
-                        </p>
-
-                        <h3>5. Modificaciones</h3>
-                        <p>
-                            Nos reservamos el derecho de modificar estos términos en cualquier momento. 
-                            Las modificaciones entrarán en vigor inmediatamente después de su publicación en el sitio.
-                        </p>
-
-                        <h3>6. Limitación de Responsabilidad</h3>
-                        <p>
-                            Flooky Pets no será responsable por daños indirectos, incidentales, especiales, 
-                            consecuentes o punitivos que resulten del uso o la imposibilidad de usar el servicio.
-                        </p>
-
-                        <h3>7. Ley Aplicable</h3>
-                        <p>
-                            Estos términos se regirán e interpretarán de acuerdo con las leyes de Colombia, 
-                            sin tener en cuenta sus disposiciones sobre conflictos de leyes.
-                        </p>
-
-                        <div className="modal-actions">
-                            <button 
-                                type="button" 
-                                className="btn-accept-terms"
-                                onClick={() => {
-                                    setFormData(prev => ({...prev, aceptaTerminos: true}));
-                                    setFieldErrors(prev => ({...prev, aceptaTerminos: ''}));
-                                    setShowTermsModal(false);
-                                }}
-                            >
-                                Aceptar Términos
-                            </button>
-                            <button 
-                                type="button" 
-                                className="btn-close-terms"
-                                onClick={() => setShowTermsModal(false)}
-                            >
-                                Cerrar
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        );
-    };
-
     return (
-        <div className="register-container">
-            <div className={`register-box ${!isSidebarVisible ? 'full-width' : ''}`}>
+        <div className="reg-container">
+            <div className={`reg-box ${!isSidebarVisible ? 'full-width' : ''}`}>
                 {isSidebarVisible && (
-                    <div className="register-sidebar">
-                        <div className="sidebar-content">
+                    <div className="reg-sidebar">
+                        <div className="reg-sidebar-content">
                             <h1>Únete a Flooky Pets</h1>
                             <p>Regístrate para acceder a todos los beneficios de nuestra comunidad de mascotas.</p>
-                            <ul className="benefits-list">
+                            <ul className="reg-benefits-list">
                                 <li>✓ Acceso a descuentos exclusivos</li>
                                 <li>✓ Historial de compras</li>
                                 <li>✓ Programación de citas</li>
@@ -1099,26 +655,26 @@ function Registro() {
                         </div>
                     </div>
                 )}
-                <div className="register-content">
-                    <h1 className="mobile-title">Registro de Usuario</h1>
+                <div className="reg-content">
+                    <h1 className="reg-mobile-title">Registro de Usuario</h1>
                     {renderProgressCircles()}
-                    {error && <p className="error-message">{error}</p>}
+                    {error && <p className="reg-error-message">{error}</p>}
                     {registroExitoso && (
-                        <div className="success-message">
+                        <div className="reg-success-message">
                             <p>✓ Registro exitoso. Redirigiendo...</p>
                         </div>
                     )}
 
                     {!registroExitoso && (
-                        <form onSubmit={handleSubmit} className="register-form">
+                        <form onSubmit={handleSubmit} className="reg-register-form">
                             {renderStep()}
 
-                            <div className="form-navigation">
+                            <div className="reg-form-navigation">
                                 {step > 1 && (
                                     <button 
                                         type="button" 
                                         onClick={prevStep}
-                                        className="btn-prev"
+                                        className="reg-btn-prev"
                                     >
                                         Anterior
                                     </button>
@@ -1127,7 +683,7 @@ function Registro() {
                                     <button 
                                         type="button" 
                                         onClick={nextStep}
-                                        className="btn-next"
+                                        className="reg-btn-next"
                                         disabled={Object.values(fieldErrors).some(error => error)}
                                     >
                                         Siguiente
@@ -1137,7 +693,7 @@ function Registro() {
                                     <button 
                                         type="submit" 
                                         disabled={isSubmitting}
-                                        className="btn-submit"
+                                        className="reg-btn-submit"
                                     >
                                         {isSubmitting ? 'Registrando...' : 'Finalizar Registro'}
                                     </button>
@@ -1146,12 +702,11 @@ function Registro() {
                         </form>
                     )}
 
-                    <div className="login-links">
-                        <Link to="/login" className="link">¿Ya tienes una cuenta? Inicia sesión</Link>
+                    <div className="reg-login-links">
+                        <Link to="/login" className="reg-link">¿Ya tienes una cuenta? Inicia sesión</Link>
                     </div>
                 </div>
             </div>
-            {renderTermsModal()}
         </div>
     );
 }

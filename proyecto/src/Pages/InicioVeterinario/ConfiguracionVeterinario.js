@@ -2,71 +2,132 @@ import React, { useState, useEffect } from 'react';
 import styles from './Style/ConfiguracionVeterinarioStyles.module.css';
 import { motion } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCog, faBell, faSave, faTimesCircle } from '@fortawesome/free-solid-svg-icons';
+import { 
+  faCog, faBell, faSave, faTimesCircle, 
+  faPalette, faLanguage, faClock, faCheckCircle,
+  faExclamationTriangle, faSpinner
+} from '@fortawesome/free-solid-svg-icons';
 
 const containerVariants = {
   hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: 'easeInOut' } },
+  visible: { 
+    opacity: 1, 
+    y: 0, 
+    transition: { 
+      duration: 0.7, 
+      ease: 'easeInOut',
+      when: "beforeChildren",
+      staggerChildren: 0.1
+    } 
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, x: -20 },
+  visible: { 
+    opacity: 1, 
+    x: 0,
+    transition: {
+      type: "spring",
+      stiffness: 100
+    }
+  }
 };
 
 const buttonVariants = {
-  hover: { scale: 1.05 },
+  hover: { 
+    scale: 1.05,
+    boxShadow: "0 4px 12px rgba(0, 188, 212, 0.2)"
+  },
   tap: { scale: 0.95 },
 };
 
 const ConfiguracionVeterinario = () => {
-  const [notificacionesActivas, setNotificacionesActivas] = useState(true);
-  const [sonidoNotificacion, setSonidoNotificacion] = useState('default');
-  const [temaVisual, setTemaVisual] = useState('light');
-  const [idiomaApp, setIdiomaApp] = useState('es');
-  const [recordatoriosCita, setRecordatoriosCita] = useState(true);
-  const [intervaloRecordatorio, setIntervaloRecordatorio] = useState('30 minutos');
+  const [config, setConfig] = useState({
+    notificacionesActivas: true,
+    sonidoNotificacion: 'default',
+    temaVisual: 'light',
+    idiomaApp: 'es',
+    recordatoriosCita: true,
+    intervaloRecordatorio: '30 minutos'
+  });
+  
   const [guardando, setGuardando] = useState(false);
-  const [mensajeGuardado, setMensajeGuardado] = useState('');
-  const [errorGuardado, setErrorGuardado] = useState('');
+  const [mensaje, setMensaje] = useState({ texto: '', tipo: '' });
+  const [originalConfig, setOriginalConfig] = useState(null);
 
+  // Cargar configuración al montar el componente
   useEffect(() => {
-    // Simulación de carga de la configuración guardada al montar el componente
-    setTimeout(() => {
-      setNotificacionesActivas(localStorage.getItem('notificacionesActivas') === 'true' || true);
-      setSonidoNotificacion(localStorage.getItem('sonidoNotificacion') || 'default');
-      setTemaVisual(localStorage.getItem('temaVisual') || 'light');
-      setIdiomaApp(localStorage.getItem('idiomaApp') || 'es');
-      setRecordatoriosCita(localStorage.getItem('recordatoriosCita') === 'true' || true);
-      setIntervaloRecordatorio(localStorage.getItem('intervaloRecordatorio') || '30 minutos');
-    }, 300);
+    const loadConfig = () => {
+      const savedConfig = {
+        notificacionesActivas: localStorage.getItem('notificacionesActivas') === 'true' || true,
+        sonidoNotificacion: localStorage.getItem('sonidoNotificacion') || 'default',
+        temaVisual: localStorage.getItem('temaVisual') || 'light',
+        idiomaApp: localStorage.getItem('idiomaApp') || 'es',
+        recordatoriosCita: localStorage.getItem('recordatoriosCita') === 'true' || true,
+        intervaloRecordatorio: localStorage.getItem('intervaloRecordatorio') || '30 minutos'
+      };
+      
+      setConfig(savedConfig);
+      setOriginalConfig(savedConfig);
+    };
+    
+    // Simular carga asíncrona
+    const timer = setTimeout(loadConfig, 500);
+    return () => clearTimeout(timer);
   }, []);
 
-  const handleGuardarConfiguracion = () => {
-    setGuardando(true);
-    setMensajeGuardado('');
-    setErrorGuardado('');
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setConfig(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
+  };
 
-    // Simulación de guardado en la base de datos o localStorage
-    setTimeout(() => {
-      localStorage.setItem('notificacionesActivas', notificacionesActivas);
-      localStorage.setItem('sonidoNotificacion', sonidoNotificacion);
-      localStorage.setItem('temaVisual', temaVisual);
-      localStorage.setItem('idiomaApp', idiomaApp);
-      localStorage.setItem('recordatoriosCita', recordatoriosCita);
-      localStorage.setItem('intervaloRecordatorio', intervaloRecordatorio);
+  const handleGuardarConfiguracion = async () => {
+    setGuardando(true);
+    setMensaje({ texto: '', tipo: '' });
+    
+    try {
+      // Simular guardado asíncrono
+      await new Promise(resolve => setTimeout(resolve, 1200));
+      
+      // Guardar en localStorage
+      Object.entries(config).forEach(([key, value]) => {
+        localStorage.setItem(key, typeof value === 'boolean' ? value.toString() : value);
+      });
+      
+      setOriginalConfig(config);
+      setMensaje({ 
+        texto: 'Configuración guardada exitosamente', 
+        tipo: 'exito' 
+      });
+    } catch (error) {
+      setMensaje({ 
+        texto: 'Error al guardar la configuración', 
+        tipo: 'error' 
+      });
+    } finally {
       setGuardando(false);
-      setMensajeGuardado('Configuración guardada exitosamente.');
-      setTimeout(() => setMensajeGuardado(''), 3000);
-    }, 1500);
+      setTimeout(() => setMensaje({ texto: '', tipo: '' }), 3000);
+    }
   };
 
   const handleCancelar = () => {
-    // Simulación de recarga de la configuración guardada
-    setNotificacionesActivas(localStorage.getItem('notificacionesActivas') === 'true' || true);
-    setSonidoNotificacion(localStorage.getItem('sonidoNotificacion') || 'default');
-    setTemaVisual(localStorage.getItem('temaVisual') || 'light');
-    setIdiomaApp(localStorage.getItem('idiomaApp') || 'es');
-    setRecordatoriosCita(localStorage.getItem('recordatoriosCita') === 'true' || true);
-    setIntervaloRecordatorio(localStorage.getItem('intervaloRecordatorio') || '30 minutos');
-    setErrorGuardado('Cambios descartados.');
-    setTimeout(() => setErrorGuardado(''), 3000);
+    if (originalConfig) {
+      setConfig(originalConfig);
+    }
+    setMensaje({ 
+      texto: 'Cambios descartados', 
+      tipo: 'info' 
+    });
+    setTimeout(() => setMensaje({ texto: '', tipo: '' }), 3000);
   };
+
+  // Verificar si hay cambios sin guardar
+  const hasChanges = originalConfig && 
+    JSON.stringify(config) !== JSON.stringify(originalConfig);
 
   return (
     <motion.div
@@ -75,99 +136,216 @@ const ConfiguracionVeterinario = () => {
       initial="hidden"
       animate="visible"
     >
-      <div className={styles.header}>
-        <h2><FontAwesomeIcon icon={faCog} /> Configuración</h2>
-      </div>
-      <form className={styles.configForm}>
-        <div className={styles.formGroup}>
-          <label htmlFor="notificaciones">
-            <FontAwesomeIcon icon={faBell} /> Notificaciones Activas
-          </label>
-          <input
-            type="checkbox"
-            id="notificaciones"
-            checked={notificacionesActivas}
-            onChange={(e) => setNotificacionesActivas(e.target.checked)}
-          />
-        </div>
+      <motion.div 
+        className={styles.header}
+        variants={itemVariants}
+      >
+        <h2>
+          <FontAwesomeIcon icon={faCog} className={styles.headerIcon} /> 
+          Configuración del Veterinario
+        </h2>
+        <p className={styles.subtitle}>Personaliza tu experiencia en la aplicación</p>
+      </motion.div>
 
-        <div className={styles.formGroup}>
-          <label htmlFor="sonido">Sonido de Notificación</label>
-          <select id="sonido" value={sonidoNotificacion} onChange={(e) => setSonidoNotificacion(e.target.value)}>
-            <option value="default">Default</option>
-            <option value="sonido1">Sonido 1</option>
-            <option value="sonido2">Sonido 2</option>
-          </select>
-        </div>
-
-        <div className={styles.formGroup}>
-          <label htmlFor="tema">Tema Visual</label>
-          <select id="tema" value={temaVisual} onChange={(e) => setTemaVisual(e.target.value)}>
-            <option value="light">Claro</option>
-            <option value="dark">Oscuro</option>
-          </select>
-        </div>
-
-        <div className={styles.formGroup}>
-          <label htmlFor="idioma">Idioma de la Aplicación</label>
-          <select id="idioma" value={idiomaApp} onChange={(e) => setIdiomaApp(e.target.value)}>
-            <option value="es">Español</option>
-            <option value="en">Inglés</option>
-          </select>
-        </div>
-
-        <div className={styles.formGroup}>
-          <label htmlFor="recordatorios">Recordatorios de Cita</label>
-          <input
-            type="checkbox"
-            id="recordatorios"
-            checked={recordatoriosCita}
-            onChange={(e) => setRecordatoriosCita(e.target.checked)}
-          />
-        </div>
-
-        {recordatoriosCita && (
+      <motion.form 
+        className={styles.configForm}
+        variants={itemVariants}
+      >
+        {/* Grupo de Notificaciones */}
+        <motion.div 
+          className={styles.configSection}
+          variants={itemVariants}
+        >
+          <h3 className={styles.sectionTitle}>
+            <FontAwesomeIcon icon={faBell} /> Notificaciones
+          </h3>
+          
           <div className={styles.formGroup}>
-            <label htmlFor="intervalo">Intervalo de Recordatorio</label>
+            <label className={styles.switchLabel}>
+              <input
+                type="checkbox"
+                name="notificacionesActivas"
+                checked={config.notificacionesActivas}
+                onChange={handleChange}
+                className={styles.switchInput}
+              />
+              <span className={styles.slider}></span>
+              <span className={styles.labelText}>Notificaciones activas</span>
+            </label>
+          </div>
+
+          {config.notificacionesActivas && (
+            <>
+              <div className={styles.formGroup}>
+                <label htmlFor="sonidoNotificacion" className={styles.selectLabel}>
+                  Sonido de notificación
+                </label>
+                <select
+                  id="sonidoNotificacion"
+                  name="sonidoNotificacion"
+                  value={config.sonidoNotificacion}
+                  onChange={handleChange}
+                  className={styles.selectInput}
+                >
+                  <option value="default">Default</option>
+                  <option value="sonido1">Sonido 1</option>
+                  <option value="sonido2">Sonido 2</option>
+                  <option value="sonido3">Sonido 3</option>
+                </select>
+              </div>
+
+              <div className={styles.formGroup}>
+                <label className={styles.switchLabel}>
+                  <input
+                    type="checkbox"
+                    name="recordatoriosCita"
+                    checked={config.recordatoriosCita}
+                    onChange={handleChange}
+                    className={styles.switchInput}
+                  />
+                  <span className={styles.slider}></span>
+                  <span className={styles.labelText}>Recordatorios de cita</span>
+                </label>
+              </div>
+
+              {config.recordatoriosCita && (
+                <div className={styles.formGroup}>
+                  <label htmlFor="intervaloRecordatorio" className={styles.selectLabel}>
+                    <FontAwesomeIcon icon={faClock} /> Intervalo de recordatorio
+                  </label>
+                  <select
+                    id="intervaloRecordatorio"
+                    name="intervaloRecordatorio"
+                    value={config.intervaloRecordatorio}
+                    onChange={handleChange}
+                    className={styles.selectInput}
+                  >
+                    <option value="15 minutos">15 minutos antes</option>
+                    <option value="30 minutos">30 minutos antes</option>
+                    <option value="1 hora">1 hora antes</option>
+                    <option value="1 día">1 día antes</option>
+                  </select>
+                </div>
+              )}
+            </>
+          )}
+        </motion.div>
+
+        {/* Grupo de Apariencia */}
+        <motion.div 
+          className={styles.configSection}
+          variants={itemVariants}
+        >
+          <h3 className={styles.sectionTitle}>
+            <FontAwesomeIcon icon={faPalette} /> Apariencia
+          </h3>
+          
+          <div className={styles.formGroup}>
+            <label htmlFor="temaVisual" className={styles.selectLabel}>
+              Tema visual
+            </label>
             <select
-              id="intervalo"
-              value={intervaloRecordatorio}
-              onChange={(e) => setIntervaloRecordatorio(e.target.value)}
+              id="temaVisual"
+              name="temaVisual"
+              value={config.temaVisual}
+              onChange={handleChange}
+              className={styles.selectInput}
             >
-              <option value="15 minutos">15 minutos antes</option>
-              <option value="30 minutos">30 minutos antes</option>
-              <option value="1 hora">1 hora antes</option>
+              <option value="light">Claro</option>
+              <option value="dark">Oscuro</option>
+              <option value="blue">Azul (personalizado)</option>
             </select>
           </div>
-        )}
+        </motion.div>
 
-        <div className={styles.buttonGroup}>
+        {/* Grupo de Idioma */}
+        <motion.div 
+          className={styles.configSection}
+          variants={itemVariants}
+        >
+          <h3 className={styles.sectionTitle}>
+            <FontAwesomeIcon icon={faLanguage} /> Idioma
+          </h3>
+          
+          <div className={styles.formGroup}>
+            <label htmlFor="idiomaApp" className={styles.selectLabel}>
+              Idioma de la aplicación
+            </label>
+            <select
+              id="idiomaApp"
+              name="idiomaApp"
+              value={config.idiomaApp}
+              onChange={handleChange}
+              className={styles.selectInput}
+            >
+              <option value="es">Español</option>
+              <option value="en">Inglés</option>
+              <option value="pt">Portugués</option>
+            </select>
+          </div>
+        </motion.div>
+
+        {/* Botones de acción */}
+        <motion.div 
+          className={styles.buttonGroup}
+          variants={itemVariants}
+        >
           <motion.button
             type="button"
-            className={styles.guardarBtn}
+            className={`${styles.actionButton} ${styles.saveButton}`}
             onClick={handleGuardarConfiguracion}
             variants={buttonVariants}
             whileHover="hover"
             whileTap="tap"
-            disabled={guardando}
+            disabled={guardando || !hasChanges}
           >
-            <FontAwesomeIcon icon={faSave} /> {guardando ? 'Guardando...' : 'Guardar Cambios'}
+            {guardando ? (
+              <>
+                <FontAwesomeIcon icon={faSpinner} spin /> Guardando...
+              </>
+            ) : (
+              <>
+                <FontAwesomeIcon icon={faSave} /> Guardar cambios
+              </>
+            )}
           </motion.button>
+
           <motion.button
             type="button"
-            className={styles.cancelarBtn}
+            className={`${styles.actionButton} ${styles.cancelButton}`}
             onClick={handleCancelar}
             variants={buttonVariants}
             whileHover="hover"
             whileTap="tap"
+            disabled={!hasChanges || guardando}
           >
             <FontAwesomeIcon icon={faTimesCircle} /> Cancelar
           </motion.button>
-        </div>
+        </motion.div>
 
-        {mensajeGuardado && <div className={styles.mensajeExito}>{mensajeGuardado}</div>}
-        {errorGuardado && <div className={styles.mensajeError}>{errorGuardado}</div>}
-      </form>
+        {/* Mensajes de estado */}
+        {mensaje.texto && (
+          <motion.div
+            className={`${styles.message} ${
+              mensaje.tipo === 'exito' ? styles.successMessage :
+              mensaje.tipo === 'error' ? styles.errorMessage :
+              styles.infoMessage
+            }`}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+          >
+            <FontAwesomeIcon 
+              icon={
+                mensaje.tipo === 'exito' ? faCheckCircle :
+                mensaje.tipo === 'error' ? faExclamationTriangle :
+                faInfoCircle
+              } 
+            />
+            <span>{mensaje.texto}</span>
+          </motion.div>
+        )}
+      </motion.form>
     </motion.div>
   );
 };
