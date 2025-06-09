@@ -2,17 +2,12 @@ import React from 'react';
 import TarjetaServicio from './TarjetaServicio';
 import styles from './Styles/ServiciosVeterinaria.module.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBriefcaseMedical, faEye } from '@fortawesome/free-solid-svg-icons';
-import { Link, useNavigate } from 'react-router-dom'; // Importa useNavigate
+import { faBriefcaseMedical } from '@fortawesome/free-solid-svg-icons';
+import { useNavigate } from 'react-router-dom';
 
 const ServiciosVeterinaria = () => {
   const navigate = useNavigate();
 
-  const handleVolverInicio = () => {
-    navigate('/usuario'); // Asume que '/usuario' es tu página principal
-  };
-
-  // Aquí iría la lógica para obtener los servicios de la veterinaria
   const servicios = [
     { id: 1, nombre: 'Consulta General', descripcion: 'Revisión médica básica para tu mascota.', precio: '$50.000' },
     { id: 2, nombre: 'Vacunación', descripcion: 'Programas de vacunación personalizados para proteger a tu compañero.', precio: '$30.000' },
@@ -21,6 +16,12 @@ const ServiciosVeterinaria = () => {
     { id: 5, nombre: 'Diagnóstico por Imagen', descripcion: 'Rayos X, ecografías y otros métodos de diagnóstico avanzado.', precio: 'Consultar' },
     { id: 6, nombre: 'Laboratorio Clínico', descripcion: 'Análisis de sangre, orina y otros fluidos corporales.', precio: '25.000' },
   ];
+
+  const handleAgendar = (servicioId) => {
+    navigate('/usuario/citas/agendar', { 
+      state: { servicioId } // Pasamos el ID del servicio como estado
+    });
+  };
 
   return (
     <div className={styles.container}>
@@ -32,13 +33,12 @@ const ServiciosVeterinaria = () => {
       <div className={styles.listaServicios}>
         {servicios.map(servicio => (
           <div key={servicio.id} className={styles.servicioItem}>
-            <TarjetaServicio servicio={servicio} />
-            
+            <TarjetaServicio 
+              servicio={servicio} 
+              onAgendar={handleAgendar} // Pasamos la función de agendar
+            />
           </div>
         ))}
-      </div>
-      <div className={styles.verTodosContainer}>
-        <button className={styles.verTodosBtn}>Ver Todos Los Servicios</button>
       </div>
     </div>
   );

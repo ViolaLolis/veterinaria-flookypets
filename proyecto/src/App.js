@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
 import Main from "./Pages/Inicio/Main";
 import Login from "./Pages/Login/Login.js";
 import Registro from "./Pages/Login/Registro.js";
@@ -147,47 +147,38 @@ function App() {
         </Route>
 
         {/* Rutas de usuario */}
-        <Route element={<Protegida user={user} allowedRoles={['usuario', 'admin', 'veterinario']} />}>
-          <Route path="/usuario" element={<InicioUsuario />}>
-            <Route index element={<CitasUsuario />} />
+        <Route element={<Protegida user={user} allowedRoles={['usuario']} />}>
+          <Route path="/usuario" element={<InicioUsuario user={user} setUser={setUser} />}>
+            {/* Rutas anidadas */}
+            <Route index element={<Navigate to="inicio" replace />} />
+            <Route path="inicio" element={<CitasUsuario />} />
+            <Route path="citas" element={<CitasUsuario />} />
+            <Route path="citas/agendar" element={<AgendarCita />} />
+            <Route path="citas/:id" element={<DetalleCita />} />
+            <Route path="citas/editar/:id" element={<EditarCita />} />
             
-            {/* Gestión de mascotas */}
+            <Route path="servicios" element={<ServiciosVeterinaria />} />
+            <Route path="servicios/:id" element={<DetalleServicio />} />
+            
+            <Route path="mascotas" element={<Navigate to="/usuario/inicio" replace />} />
             <Route path="mascotas/agregar" element={<AgregarMascota />} />
             <Route path="mascotas/:id" element={<DetalleMascota />} />
             <Route path="mascotas/editar/:id" element={<EditarMascota />} />
             
-            {/* Historial médico */}
-            <Route path="mascota/:mascotaId/historial" element={<HistorialMedico />} />
-            <Route path="mascota/:mascotaId/historial/:historialId" element={<DetalleHistorial />} />
-            <Route path="mascota/:mascotaId/historial/agregar" element={<AgregarHistorial />} />
-            <Route path="mascota/:mascotaId/historial/editar/:historialId" element={<EditarHistorial />} />
+            <Route path="historial/:mascotaId" element={<HistorialMedico />} />
+            <Route path="historial/:mascotaId/agregar" element={<AgregarHistorial />} />
+            <Route path="historial/:mascotaId/:historialId" element={<DetalleHistorial />} />
+            <Route path="historial/:mascotaId/editar/:historialId" element={<EditarHistorial />} />
             
-            {/* Gestión de citas */}
-            <Route path="citas" element={<CitasUsuario />} />
-            <Route path="citas/agendar" element={<AgendarCita />} />
-            <Route path="citas/crear" element={<CrearCita />} />
-            <Route path="citas/:id" element={<DetalleCita />} />
-            <Route path="citas/editar/:id" element={<EditarCita />} />
-            
-            {/* Servicios */}
-            <Route path="servicios" element={<ServiciosVeterinaria />} />
-            <Route path="servicios/:id" element={<DetalleServicio />} />
-            
-            {/* Perfil */}
             <Route path="perfil" element={<PerfilUsuario />} />
             <Route path="perfil/editar" element={<EditarPerfil />} />
-            
-            {/* Ayuda y soporte */}
-            <Route path="ayuda" element={<AyudaSoporte />} />
-            <Route path="ayuda/chat" element={<ChatSoporte />} />
-            
-            {/* Configuración */}
             <Route path="perfil/configuracion" element={<ConfiguracionPerfil />} />
-            
-            {/* Métodos de pago */}
             <Route path="perfil/pagos" element={<MetodosPago />} />
             <Route path="perfil/pagos/agregar" element={<AgregarMetodoPago />} />
             <Route path="perfil/pagos/eliminar/:id" element={<EliminarMetodoPago />} />
+            
+            <Route path="ayuda" element={<AyudaSoporte />} />
+            <Route path="ayuda/chat" element={<ChatSoporte />} />
           </Route>
         </Route>
 
