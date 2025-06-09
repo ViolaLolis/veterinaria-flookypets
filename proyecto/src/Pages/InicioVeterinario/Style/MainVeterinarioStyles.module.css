@@ -1,14 +1,16 @@
+/* Estructura principal */
 .mainContainer {
-  padding: 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
-  background-color: #f5fbfc;
+  padding: 0;
+  width: 100vw;
   min-height: 100vh;
+  margin: 0;
+  background-color: #f5fbfc;
 }
 
 .header {
   margin-bottom: 2.5rem;
   text-align: center;
+  padding: 2rem 2rem 0 2rem;
 }
 
 .header h1 {
@@ -23,12 +25,20 @@
   font-weight: 500;
 }
 
+/* Contenedor principal del contenido */
+.contentArea {
+  padding: 0 2rem 2rem 2rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
 /* Stats Cards */
 .statsContainer {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 1.5rem;
   margin-bottom: 2.5rem;
+  width: 100%;
 }
 
 .statCard {
@@ -78,6 +88,7 @@
   gap: 0.5rem;
   margin-bottom: 2rem;
   justify-content: center;
+  width: 100%;
 }
 
 .tabButton {
@@ -104,6 +115,7 @@
 /* Citas Section */
 .citasSection {
   margin-bottom: 3rem;
+  width: 100%;
 }
 
 .citasHeader {
@@ -135,6 +147,7 @@
   gap: 1.5rem;
   padding: 0;
   list-style: none;
+  width: 100%;
 }
 
 .citaItem {
@@ -276,6 +289,7 @@
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 188, 212, 0.08);
   border: 1px dashed #b2ebf2;
+  width: 100%;
 }
 
 .noCitasIcon {
@@ -297,6 +311,7 @@
 /* Tips Section */
 .tipsSection {
   margin-top: 3rem;
+  width: 100%;
 }
 
 .tipsSection h3 {
@@ -310,6 +325,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 1.5rem;
+  width: 100%;
 }
 
 .tipCard {
@@ -354,6 +370,7 @@
   justify-content: center;
   height: 300px;
   color: #00acc1;
+  width: 100%;
 }
 
 .loadingSpinner {
@@ -368,6 +385,7 @@
   text-align: center;
   max-width: 500px;
   margin: 2rem auto;
+  width: 100%;
 }
 
 .retryButton {
@@ -383,8 +401,8 @@
 
 /* Responsive */
 @media (max-width: 768px) {
-  .mainContainer {
-    padding: 1.5rem;
+  .contentArea {
+    padding: 0 1.5rem 1.5rem 1.5rem;
   }
   
   .statsContainer {
@@ -401,6 +419,14 @@
 }
 
 @media (max-width: 480px) {
+  .header {
+    padding: 1.5rem 1.5rem 0 1.5rem;
+  }
+  
+  .contentArea {
+    padding: 0 1rem 1rem 1rem;
+  }
+  
   .statsContainer {
     grid-template-columns: 1fr;
   }
