@@ -1,131 +1,150 @@
-/* AdminSidebar.css - Menú lateral premium */
+/* Styles/AdminSidebar.css */
 
 .admin-sidebar {
-    width: 280px;
-    background: linear-gradient(180deg, var(--primary) 0%, var(--primary-dark) 100%);
-    color: var(--white);
-    position: fixed;
-    height: 100vh;
-    overflow-y: auto;
-    transition: var(--transition);
-    z-index: 900;
-    box-shadow: 5px 0 30px rgba(0, 0, 0, 0.1);
-    border-right: 1px solid rgba(255, 255, 255, 0.1);
+  position: fixed;
+  left: 0;
+  top: 70px; /* Altura del navbar */
+  bottom: 0;
+  width: 250px;
+  background: linear-gradient(to bottom, #00acc1);
+  color: white;
+  z-index: 900;
+  transition: all 0.3s ease;
+  box-shadow: 2px 0 10px rgb(255, 255, 255);
+  overflow-y: auto;
+  transform: translateX(0);
+}
+
+.admin-sidebar nav {
+  padding: 20px 0;
+}
+
+.admin-sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.admin-sidebar li {
+  position: relative;
+  margin: 5px 15px;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.admin-sidebar li:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgb(255, 255, 255), transparent);
+ 
+}
+
+.admin-sidebar li:hover:before {
+  left: 100%;
+}
+
+.admin-sidebar li a, 
+.admin-sidebar li {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  color: rgba(255, 255, 255, 0.9);
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.admin-sidebar li i {
+  font-size: 1.1rem;
+  margin-right: 15px;
+  width: 20px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.admin-sidebar li:hover {
+  background-color: rgb(224, 224, 224);
+  color: white;
+  transform: translateX(5px);
+}
+
+.admin-sidebar li.active {
+  background-color: rgb(255, 253, 253);
+  color: white;
+  box-shadow: 0 4px 15px rgb(255, 255, 255);
+}
+
+.admin-sidebar li.active:after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background-color: #e0f7fa;
+  border-radius: 4px 0 0 4px;
+}
+
+.admin-sidebar li.active i {
+  color: #ffffff;
+}
+
+
+
+/* Animación de entrada para los items */
+.admin-sidebar li {
+  opacity: 0;
+  transform: translateX(-20px);
+  animation: slideIn 0.4s forwards;
+}
+
+@keyframes slideIn {
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Retraso en la animación para cada item */
+.admin-sidebar li:nth-child(1) { animation-delay: 0.1s; }
+.admin-sidebar li:nth-child(2) { animation-delay: 0.2s; }
+.admin-sidebar li:nth-child(3) { animation-delay: 0.3s; }
+.admin-sidebar li:nth-child(4) { animation-delay: 0.4s; }
+.admin-sidebar li:nth-child(5) { animation-delay: 0.5s; }
+
+/* Responsive */
+@media (max-width: 992px) {
+  .admin-sidebar {
+    transform: translateX(-100%);
+    top: 60px;
   }
   
-  .admin-sidebar::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(circle at 20% 40%, rgba(255, 255, 255, 0.1) 0%, transparent 40%);
-    pointer-events: none;
+  .admin-sidebar.active {
+    transform: translateX(0);
   }
-  
-  .sidebar-header {
-    padding: 1.8rem 1.5rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    margin-bottom: 1rem;
-  }
-  
-  .sidebar-title {
-    font-size: 1.3rem;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 0.8rem;
-  }
-  
-  .sidebar-nav {
-    padding: 1rem 0;
-  }
-  
-  .sidebar-nav ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-  
-  .sidebar-nav li {
-    position: relative;
-    margin: 0.5rem 1rem;
-  }
-  
-  .sidebar-nav a {
-    display: flex;
-    align-items: center;
-    padding: 1rem 1.5rem;
-    color: rgba(255, 255, 255, 0.9);
-    text-decoration: none;
-    border-radius: 8px;
-    transition: var(--transition);
-  }
-  
-  .sidebar-nav a:hover {
-    background: rgba(255, 255, 255, 0.15);
-    transform: translateX(10px);
-    color: var(--white);
-  }
-  
-  .sidebar-nav a.active {
-    background: rgba(255, 255, 255, 0.25);
-    transform: translateX(15px);
-    color: var(--white);
-    font-weight: 500;
-  }
-  
-  .sidebar-nav a::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 5px;
-    height: 100%;
-    background: var(--white);
-    transform: scaleY(0);
-    transform-origin: top;
-    transition: transform 0.4s ease;
-    border-radius: 0 8px 8px 0;
-  }
-  
-  .sidebar-nav a:hover::before,
-  .sidebar-nav a.active::before {
-    transform: scaleY(1);
-  }
-  
-  .sidebar-icon {
-    font-size: 1.2rem;
-    margin-right: 1.2rem;
-    width: 24px;
-    text-align: center;
-    transition: var(--transition);
-  }
-  
-  .sidebar-nav a:hover .sidebar-icon,
-  .sidebar-nav a.active .sidebar-icon {
-    transform: scale(1.2);
-  }
-  
-  /* Responsive */
-  @media (max-width: 1200px) {
-    .admin-sidebar {
-      transform: translateX(-100%);
-      width: 300px;
-    }
-    
-    .admin-sidebar.active {
-      transform: translateX(0);
-    }
-  }
-  
-  @media (max-width: 576px) {
-    .sidebar-header {
-      padding: 1.2rem 1rem;
-    }
-    
-    .sidebar-nav a {
-      padding: 0.8rem 1rem;
-    }
-  }
+}
+
+/* Scrollbar personalizada */
+.admin-sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.admin-sidebar::-webkit-scrollbar-track {
+  background: rgb(255, 255, 255);
+}
+
+.admin-sidebar::-webkit-scrollbar-thumb {
+  background: rgb(255, 255, 255);
+  border-radius: 3px;
+}
+
+.admin-sidebar::-webkit-scrollbar-thumb:hover {
+  background: rgb(255, 255, 255);
+}

@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { FaUsers, FaUserMd, FaUserShield, FaConciergeBell, FaCalendarAlt, FaChartLine } from 'react-icons/fa';
 import { Bar, Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement } from 'chart.js';
-import './Styles/Admin.css';
 import './Styles/AdminStats.css';
+
 
 // Registra los componentes necesarios de Chart.js
 ChartJS.register(
