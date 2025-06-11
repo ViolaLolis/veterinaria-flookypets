@@ -85,24 +85,23 @@ function OlvideContraseña() {
       return false;
     }
   };
-
   const handleEnviarCodigo = async () => {
     setError('');
     setSuccessMessage('');
     setIsSubmitting(true);
-    
+  
     try {
       const email = getValues('correo');
-      
+  
       if (!email) {
         throw new Error('El correo es obligatorio');
       }
-
+  
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
         throw new Error('Correo electrónico inválido');
       }
-
+  
       const response = await fetch('http://localhost:5000/forgot-password', {
         method: 'POST',
         headers: {
@@ -110,31 +109,34 @@ function OlvideContraseña() {
         },
         body: JSON.stringify({ email })
       });
-
+  
       const data = await response.json();
-
+  
       if (!response.ok) {
         throw new Error(data.message || 'Error al verificar el correo');
       }
-
+  
       if (data.previousPasswords) {
         setPreviousPasswords(data.previousPasswords);
       }
-
+  
       const codigo = data.resetToken || generarCodigo();
+  
+      // 👇 Línea agregada para mostrar el código en consola (solo para pruebas)
+      console.log( `Codigo de verificación para ${email}: ${codigo}`);
+  
       const emailEnviado = await enviarCodigoPorCorreo(codigo, email);
-      
+  
       if (emailEnviado) {
         setCodigoGenerado(codigo);
       }
-
+  
     } catch (error) {
       setError(error.message);
     } finally {
       setIsSubmitting(false);
     }
   };
-
   const handleVerificarCodigo = async () => {
     const codigoIngresado = getValues('codigoVerificacion')?.replace(/\D/g,'');
     const email = getValues('correo')?.trim();
