@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import '../Styles/Registro.css';
@@ -47,6 +47,17 @@ function Registro() {
     const [isSidebarVisible, setIsSidebarVisible] = useState(true);
     const [termsAccepted, setTermsAccepted] = useState(false);
     const [showTermsModal, setShowTermsModal] = useState(false);
+    const [isButtonDisabled, setIsButtonDisabled] = useState(false);
+    const buttonTimerRef = useRef(null);
+
+    // Limpiar el temporizador al desmontar el componente
+    useEffect(() => {
+        return () => {
+            if (buttonTimerRef.current) {
+                clearTimeout(buttonTimerRef.current);
+            }
+        };
+    }, []);
 
     useEffect(() => {
         let timer;
@@ -59,6 +70,22 @@ function Registro() {
         }
         return () => clearInterval(timer);
     }, [codigoEnviado, tiempoRestante, codigoVerificado]);
+
+    useEffect(() => {
+        if (registroExitoso) {
+            const timer = setTimeout(() => {
+                navigate('/login');
+            }, 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [registroExitoso, navigate]);
+
+    const disableButtonsTemporarily = () => {
+        setIsButtonDisabled(true);
+        buttonTimerRef.current = setTimeout(() => {
+            setIsButtonDisabled(false);
+        }, 1000);
+    };
 
     const generarCodigo = async () => {
         const nuevoCodigo = Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -87,7 +114,6 @@ function Registro() {
             user_name: `${formData.nombre} ${formData.apellido}`
         };
 
-        
         try {
             const response = await send(serviceId, templateId, templateParams, publicKey);
             setError('Se ha enviado un código de verificación a tu correo electrónico.');
@@ -122,7 +148,7 @@ function Registro() {
             case 'apellido':
                 if (!value.trim()) {
                     error = 'Este campo es obligatorio';
-                } else if (!/^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+$/.test(value)) {
+                } else if (!/^[A-ZÁÉÍÓÚÑ\s]+$/.test(value)) {
                     error = 'Solo se permiten letras y espacios';
                 } else if (value.length > 50) {
                     error = 'Máximo 50 caracteres';
@@ -236,7 +262,14 @@ function Registro() {
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        const error = validateField(name, value);
+        let processedValue = value;
+        
+        // Convertir a mayúsculas los campos específicos
+        if (name === 'nombre' || name === 'apellido' || name === 'codigoIngresado') {
+            processedValue = value.toUpperCase();
+        }
+        
+        const error = validateField(name, processedValue);
         
         setFieldErrors(prevErrors => ({
             ...prevErrors,
@@ -245,7 +278,7 @@ function Registro() {
         
         setFormData(prevData => ({
             ...prevData,
-            [name]: value
+            [name]: processedValue
         }));
     };
 
@@ -284,7 +317,11 @@ function Registro() {
     };
 
     const nextStep = async () => {
+        if (isButtonDisabled) return;
+        
         setError('');
+        disableButtonsTemporarily();
+        
         if (validateCurrentStep()) {
             if (step === 2) {
                 await generarCodigo();
@@ -297,6 +334,10 @@ function Registro() {
     };
 
     const prevStep = () => {
+        if (isButtonDisabled) return;
+        
+        disableButtonsTemporarily();
+        
         if (step === 3) {
             setIsSidebarVisible(true);
         }
@@ -305,12 +346,16 @@ function Registro() {
     };
 
     const verificarCodigo = () => {
+        if (isButtonDisabled) return;
+        
+        disableButtonsTemporarily();
+        
         setError('');
         if (fieldErrors.codigoIngresado) {
             return;
         }
         
-        if (formData.codigoIngresado.toUpperCase() === codigoGenerado) {
+        if (formData.codigoIngresado === codigoGenerado) {
             setCodigoVerificado(true);
         } else {
             setError('El código ingresado no coincide.');
@@ -342,7 +387,6 @@ function Registro() {
           fechaNacimiento: formData.fechaNacimiento
         };
       
-      
         try {
           setIsSubmitting(true);
           const response = await fetch('http://localhost:5000/register', {
@@ -368,15 +412,6 @@ function Registro() {
           setIsSubmitting(false);
         }
     };
-
-    useEffect(() => {
-        if (registroExitoso) {
-            const timer = setTimeout(() => {
-                navigate('/login');
-            }, 3000);
-            return () => clearTimeout(timer);
-        }
-    }, [registroExitoso, navigate]);
 
     const toggleTermsModal = () => {
         setShowTermsModal(!showTermsModal);
@@ -573,7 +608,7 @@ function Registro() {
                                     type="button" 
                                     onClick={nextStep} 
                                     className="reg-btn-generate-code"
-                                    disabled={!!fieldErrors.correo}
+                                    disabled={isButtonDisabled || !!fieldErrors.correo}
                                 >
                                     Generar y Enviar Código de Verificación
                                 </button>
@@ -600,10 +635,10 @@ function Registro() {
                                     <button 
                                         type="button" 
                                         onClick={verificarCodigo} 
-                                        disabled={codigoVerificado || !!fieldErrors.codigoIngresado}
+                                        disabled={isButtonDisabled || codigoVerificado || !!fieldErrors.codigoIngresado}
                                         className={codigoVerificado ? 'reg-btn-verified' : 'reg-btn-verify'}
                                     >
-                                        {codigoVerificado ? '' : 'Verificar Código'}
+                                        {codigoVerificado ? '✓ Verificado' : 'Verificar Código'}
                                     </button>
                                     {tiempoRestante > 0 && !codigoVerificado && (
                                         <p className="reg-timer-text">Tiempo restante: {tiempoRestante}s</p>
@@ -613,6 +648,7 @@ function Registro() {
                                             type="button" 
                                             onClick={generarCodigo}
                                             className="reg-btn-resend"
+                                            disabled={isButtonDisabled}
                                         >
                                             Reenviar Código
                                         </button>
@@ -647,9 +683,6 @@ function Registro() {
         }
     };
 
-    
-
-    
     const renderProgressCircles = () => {
         const circles = [1, 2, 3];
         return (
@@ -705,6 +738,7 @@ function Registro() {
                                         type="button" 
                                         onClick={prevStep}
                                         className="reg-btn-prev"
+                                        disabled={isButtonDisabled || isSubmitting}
                                     >
                                         Anterior
                                     </button>
@@ -714,7 +748,7 @@ function Registro() {
                                         type="button" 
                                         onClick={nextStep}
                                         className="reg-btn-next"
-                                        disabled={Object.values(fieldErrors).some(error => error)}
+                                        disabled={isButtonDisabled || Object.values(fieldErrors).some(error => error)}
                                     >
                                         Siguiente
                                     </button>
@@ -722,7 +756,7 @@ function Registro() {
                                 {step === 3 && codigoVerificado && (
                                     <button 
                                         type="submit" 
-                                        disabled={isSubmitting || !termsAccepted}
+                                        disabled={isButtonDisabled || isSubmitting || !termsAccepted}
                                         className="reg-btn-submit"
                                     >
                                         {isSubmitting ? 'Registrando...' : 'Finalizar Registro'}

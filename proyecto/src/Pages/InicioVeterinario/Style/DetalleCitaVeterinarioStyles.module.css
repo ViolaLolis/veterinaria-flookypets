@@ -1,0 +1,136 @@
+/* DetalleCitaVeterinarioStyles.module.css */
+
+:root {
+    --color-primary: #00bcd4;
+    --color-secondary: #00acc1;
+    --color-light: #e0f7fa;
+    --color-white: #ffffff;
+    --color-dark: #333;
+    --color-muted: #666;
+    --color-border: #b2ebf2;
+    --color-warning: #54b2ff;
+  }
+  
+  .vetDetalleContainer {
+    background-color: var(--color-light);
+    padding: 2rem;
+    border-radius: 16px;
+    box-shadow: 0 0 20px rgba(0, 172, 193, 0.1);
+    color: var(--color-dark);
+  }
+  
+  .vetDetalleHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+  
+  .vetDetalleVolverBtn {
+    background-color: var(--color-primary);
+    color: var(--color-white);
+    padding: 0.6rem 1.2rem;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.3s;
+  }
+  
+  .vetDetalleVolverBtn:hover {
+    background-color: var(--color-secondary);
+  }
+  
+  .vetDetalleInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  
+  .vetDetalleInfoGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  .vetDetalleInfoCard {
+    background-color: var(--color-white);
+    border: 1px solid var(--color-border);
+    border-radius: 14px;
+    padding: 1rem;
+    transition: box-shadow 0.3s ease;
+  }
+  
+  .vetDetalleInfoCard h3 {
+    color: var(--color-primary);
+    margin-bottom: 0.5rem;
+  }
+  
+  .vetDetalleNotasCard {
+    background-color: var(--color-white);
+    border-left: 5px solid var(--color-primary);
+    padding: 1rem;
+    border-radius: 14px;
+    box-shadow: 0 2px 8px rgba(0, 188, 212, 0.1);
+  }
+  
+  .vetDetalleAccionesSection {
+    margin-top: 2rem;
+  }
+  
+  .vetDetalleAccionesGrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+  
+  .vetDetalleAccionBtn {
+    background-color: var(--color-secondary);
+    color: var(--color-white);
+    padding: 0.75rem 1.2rem;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.3s;
+    flex: 1 1 220px;
+  }
+  
+  .vetDetalleAccionBtn:hover {
+    background-color: var(--color-primary);
+  }
+  
+  .vetDetalleCompletada {
+    background-color: #4caf50 !important;
+  }
+  
+  .vetDetalleCancelada {
+    background-color: #f44336 !important;
+  }
+  
+  .vetDetalleLoadingContainer,
+  .vetDetalleErrorContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+    text-align: center;
+    padding: 1rem;
+  }
+  
+  .vetDetalleLoadingSpinner {
+    border: 6px solid var(--color-light);
+    border-top: 6px solid var(--color-primary);
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+  }
+  
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  
