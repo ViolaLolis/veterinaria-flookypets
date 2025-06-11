@@ -17,6 +17,7 @@ function OlvideContraseña() {
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [previousPasswords, setPreviousPasswords] = useState([]);
   
   const { 
     register, 
@@ -29,25 +30,31 @@ function OlvideContraseña() {
   
   const navigate = useNavigate();
 
-  // Temporizador para el código de verificación
+  // Temporizador mejorado
   useEffect(() => {
-    let timer;
-    if (codigoEnviado && tiempoRestante > 0 && !codigoVerificado) {
-      timer = setInterval(() => {
-        setTiempoRestante(prev => prev - 1);
-      }, 1000);
+    if (!codigoEnviado || tiempoRestante <= 0 || codigoVerificado) {
+      return;
     }
+
+    const timer = setInterval(() => {
+      setTiempoRestante(prev => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
     return () => clearInterval(timer);
   }, [codigoEnviado, tiempoRestante, codigoVerificado]);
 
-  // Generar código aleatorio de 6 dígitos numéricos
   const generarCodigo = () => {
     const nuevoCodigo = Math.floor(100000 + Math.random() * 900000).toString();
     setCodigoGenerado(nuevoCodigo);
     return nuevoCodigo;
   };
 
-  // Enviar código por correo electrónico
   const enviarCodigoPorCorreo = async (codigo, email) => {
     const templateParams = {
       to_email: email,
@@ -79,7 +86,6 @@ function OlvideContraseña() {
     }
   };
 
-  // Paso 1: Verificar correo y enviar código
   const handleEnviarCodigo = async () => {
     setError('');
     setSuccessMessage('');
@@ -88,7 +94,15 @@ function OlvideContraseña() {
     try {
       const email = getValues('correo');
       
-      // Verificar si el email existe en el backend
+      if (!email) {
+        throw new Error('El correo es obligatorio');
+      }
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        throw new Error('Correo electrónico inválido');
+      }
+
       const response = await fetch('http://localhost:5000/forgot-password', {
         method: 'POST',
         headers: {
@@ -103,9 +117,11 @@ function OlvideContraseña() {
         throw new Error(data.message || 'Error al verificar el correo');
       }
 
-      // Generar y enviar código
+      if (data.previousPasswords) {
+        setPreviousPasswords(data.previousPasswords);
+      }
+
       const codigo = data.resetToken || generarCodigo();
-      console.log('Código generado/enviado:', codigo);
       const emailEnviado = await enviarCodigoPorCorreo(codigo, email);
       
       if (emailEnviado) {
@@ -119,9 +135,8 @@ function OlvideContraseña() {
     }
   };
 
-  // Paso 2: Verificar código ingresado
   const handleVerificarCodigo = async () => {
-    const codigoIngresado = getValues('codigoVerificacion')?.replace(/\D/g,''); // Solo números
+    const codigoIngresado = getValues('codigoVerificacion')?.replace(/\D/g,'');
     const email = getValues('correo')?.trim();
     
     if (!codigoIngresado || codigoIngresado.length !== 6) {
@@ -133,8 +148,6 @@ function OlvideContraseña() {
     setError('');
     
     try {
-      console.log('Verificando código:', { email, token: codigoIngresado });
-      
       const response = await fetch('http://localhost:5000/verify-reset-code', {
         method: 'POST',
         headers: {
@@ -158,27 +171,62 @@ function OlvideContraseña() {
       setTimeout(() => {
         setStep(2);
         setSuccessMessage('');
+        reset({
+          correo: getValues('correo'),
+          codigoVerificacion: '',
+          nuevaContraseña: '',
+          confirmarContraseña: ''
+        });
       }, 1500);
     
     } catch (error) {
-      console.error('Error en verificación:', {
-        error: error,
-        message: error.message,
-        stack: error.stack
-      });
       setError(error.message || 'Error al verificar el código');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Paso 3: Cambiar contraseña
+  const validatePassword = (value) => {
+    const nuevaContraseña = value;
+    
+    if (previousPasswords.includes(nuevaContraseña)) {
+      return 'No puedes usar una contraseña anterior';
+    }
+    
+    if (nuevaContraseña.length < 8) {
+      return 'Mínimo 8 caracteres';
+    }
+    
+    if (!/[A-Z]/.test(nuevaContraseña)) {
+      return 'Debe incluir al menos una mayúscula';
+    }
+    
+    if (!/[a-z]/.test(nuevaContraseña)) {
+      return 'Debe incluir al menos una minúscula';
+    }
+    
+    if (!/\d/.test(nuevaContraseña)) {
+      return 'Debe incluir al menos un número';
+    }
+    
+    if (!/[@$!%*?&]/.test(nuevaContraseña)) {
+      return 'Debe incluir al menos un carácter especial (@$!%*?&)';
+    }
+    
+    return true;
+  };
+
   const handleCambiarContraseña = async () => {
     const { nuevaContraseña, confirmarContraseña } = getValues();
     const email = getValues('correo');
     
     if (nuevaContraseña !== confirmarContraseña) {
       setError('Las contraseñas no coinciden');
+      return;
+    }
+    
+    if (previousPasswords.includes(nuevaContraseña)) {
+      setError('No puedes usar una contraseña anterior');
       return;
     }
     
@@ -204,18 +252,17 @@ function OlvideContraseña() {
         throw new Error(data.message || 'Error al cambiar la contraseña');
       }
 
+      reset();
       setSuccessMessage('¡Contraseña cambiada con éxito!');
       setTimeout(() => navigate('/login'), 2000);
       
     } catch (error) {
       setError(error.message);
-      console.error('Error al cambiar contraseña:', error);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Reenviar código
   const handleReenviarCodigo = async () => {
     if (tiempoRestante > 0) return;
     
@@ -231,45 +278,62 @@ function OlvideContraseña() {
         setCodigoGenerado(codigo);
       }
     } catch (error) {
-      console.error('Error al reenviar código:', error);
+      setError('Error al reenviar el código');
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const handleVolver = () => {
+    setStep(1);
+    setCodigoEnviado(false);
+    setCodigoVerificado(false);
+    setTiempoRestante(60);
+    setError('');
+    setSuccessMessage('');
+    reset({
+      correo: getValues('correo'),
+      codigoVerificacion: ''
+    });
+  };
+
   return (
-    <div className="password-reset-container">
-      <div className="password-reset-wrapper">
-        <div className="password-reset-box">
-          <div className="reset-info-section">
-            <img src="/logo.png" alt="Flooky Pets" className="reset-illustration" />
-            <h1>Recupera tu contraseña</h1>
-            <p>Ingresa tu correo electrónico y sigue las instrucciones para restablecer tu contraseña.</p>
+    <div className="olv-reset-container">
+      <div className="olv-reset-wrapper">
+        <div className="olv-reset-box">
+          <div className="olv-reset-info-section">
+            <h1 style={{textAlign: 'center', marginBottom: '1rem'}}>Flooky Pets</h1>
+            <h2 style={{textAlign: 'center', marginBottom: '1rem'}}>Recupera tu contraseña</h2>
+            <p style={{textAlign: 'center'}}>Ingresa tu correo electrónico y sigue las instrucciones para restablecer tu contraseña.</p>
           </div>
           
-          <div className="reset-form-section">
-            <h2>Recuperar Contraseña</h2>
+          <div className="olv-reset-form-section">
+            <h2 className="olv-title">Recuperar Contraseña</h2>
             
-            {/* Barra de progreso */}
-            <div className="reset-progress">
-              <span className={`reset-progress-step ${step >= 1 ? 'active' : ''} ${step > 1 ? 'completed' : ''}`}>
-                {step > 1 ? '' : '1'}
-              </span>
-              <span className={`reset-progress-step ${step >= 2 ? 'active' : ''} ${step > 2 ? 'completed' : ''}`}>
-                {step > 2 ? '' : '2'}
-              </span>
+            {/* Barra de progreso mejorada */}
+            <div className="olv-progress-container">
+              <div className={`olv-progress-step ${step >= 1 ? 'active' : ''}`}>
+                <div className="olv-step-number">1</div>
+                <div className="olv-step-label">Verificar Email</div>
+              </div>
+              <div className={`olv-progress-line ${step >= 2 ? 'active' : ''}`}></div>
+              <div className={`olv-progress-step ${step >= 2 ? 'active' : ''}`}>
+                <div className="olv-step-number">2</div>
+                <div className="olv-step-label">Nueva Contraseña</div>
+              </div>
             </div>
 
-            {error && <div className="reset-error-message">{error}</div>}
-            {successMessage && <div className="reset-success-message">{successMessage}</div>}
+            {error && <div className="olv-error-message">{error}</div>}
+            {successMessage && <div className="olv-success-message">{successMessage}</div>}
 
-            {/* Paso 1: Ingresar correo y verificar código */}
             {step === 1 && (
               <form onSubmit={handleSubmit(codigoEnviado ? handleVerificarCodigo : handleEnviarCodigo)}>
-                <div className="reset-input-group">
-                  <label>Correo Electrónico</label>
+                <div className="olv-input-group">
+                  <label className="olv-input-label">Correo Electrónico</label>
                   <input
                     type="email"
+                    className={`olv-input-field ${errors.correo ? 'olv-input-error' : ''}`}
+                    placeholder="ejemplo@correo.com"
                     {...register('correo', {
                       required: 'El correo es obligatorio',
                       pattern: {
@@ -279,48 +343,41 @@ function OlvideContraseña() {
                     })}
                     disabled={codigoEnviado}
                   />
-                  {errors.correo && <span className="reset-error-text">{errors.correo.message}</span>}
+                  {errors.correo && <span className="olv-error-text">{errors.correo.message}</span>}
                 </div>
 
                 {codigoEnviado && (
                   <>
-                    <div className="reset-input-group">
-                      <label>Código de Verificación</label>
+                    <div className="olv-input-group">
+                      <label className="olv-input-label">Código de Verificación</label>
                       <input
                         type="text"
                         inputMode="numeric"
-                        pattern="[0-9]*"
+                        className={`olv-input-field ${errors.codigoVerificacion ? 'olv-input-error' : ''}`}
                         placeholder="Ingresa el código de 6 dígitos"
                         {...register('codigoVerificacion', {
                           required: 'El código es obligatorio',
-                          minLength: {
-                            value: 6,
-                            message: 'El código debe tener 6 dígitos'
-                          },
-                          maxLength: {
-                            value: 6,
-                            message: 'El código debe tener 6 dígitos'
-                          },
-                          pattern: {
-                            value: /^[0-9]{6}$/,
-                            message: 'Solo se permiten números'
-                          }
+                          minLength: { value: 6, message: 'El código debe tener 6 dígitos' },
+                          maxLength: { value: 6, message: 'El código debe tener 6 dígitos' },
+                          pattern: { value: /^[0-9]{6}$/, message: 'Solo se permiten números' }
                         })}
                         disabled={codigoVerificado}
                       />
                       {errors.codigoVerificacion && (
-                        <span className="reset-error-text">{errors.codigoVerificacion.message}</span>
+                        <span className="olv-error-text">{errors.codigoVerificacion.message}</span>
                       )}
                     </div>
 
-                    <div className="reset-timer">
+                    <div className="olv-timer">
                       {tiempoRestante > 0 ? (
-                        <p>Puedes reenviar el código en {tiempoRestante} segundos</p>
+                        <p className="olv-timer-text">
+                          Puedes reenviar el código en {tiempoRestante} segundos
+                        </p>
                       ) : (
                         <button
                           type="button"
                           onClick={handleReenviarCodigo}
-                          className="reset-btn-link"
+                          className="olv-link-btn"
                           disabled={isSubmitting}
                         >
                           Reenviar Código
@@ -332,7 +389,7 @@ function OlvideContraseña() {
 
                 <button
                   type="submit"
-                  className={`reset-btn ${isSubmitting ? 'is-submitting' : ''}`}
+                  className={`olv-primary-btn ${isSubmitting ? 'is-submitting' : ''}`}
                   disabled={isSubmitting || (codigoEnviado && !!errors.codigoVerificacion)}
                 >
                   {isSubmitting ? 'Procesando...' : 
@@ -341,38 +398,39 @@ function OlvideContraseña() {
               </form>
             )}
 
-            {/* Paso 2: Cambiar contraseña */}
             {step === 2 && (
               <form onSubmit={handleSubmit(handleCambiarContraseña)}>
-                <div className="reset-input-group">
-                  <label>Nueva Contraseña</label>
+                <div className="olv-input-group">
+                  <label className="olv-input-label">Nueva Contraseña</label>
                   <input
                     type="password"
+                    className={`olv-input-field ${errors.nuevaContraseña ? 'olv-input-error' : ''}`}
                     placeholder="Ingresa tu nueva contraseña"
                     {...register('nuevaContraseña', {
                       required: 'La contraseña es obligatoria',
-                      minLength: {
-                        value: 8,
-                        message: 'Mínimo 8 caracteres'
-                      },
-                      pattern: {
-                        value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
-                        message: 'Debe incluir mayúscula, minúscula, número y carácter especial'
-                      }
+                      validate: validatePassword
                     })}
                   />
                   {errors.nuevaContraseña && (
-                    <span className="reset-error-text">{errors.nuevaContraseña.message}</span>
+                    <span className="olv-error-text">{errors.nuevaContraseña.message}</span>
                   )}
-                  <small className="reset-hint-text">
-                    La contraseña debe contener al menos 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial (@$!%*?&)
-                  </small>
+                  <div className="olv-hint-text">
+                    <p>Requisitos de contraseña:</p>
+                    <ul>
+                      <li>Mínimo 8 caracteres</li>
+                      <li>Al menos una mayúscula y una minúscula</li>
+                      <li>Al menos un número</li>
+                      <li>Al menos un carácter especial (@$!%*?&)</li>
+                      <li>No puede ser una contraseña anterior</li>
+                    </ul>
+                  </div>
                 </div>
 
-                <div className="reset-input-group">
-                  <label>Confirmar Contraseña</label>
+                <div className="olv-input-group">
+                  <label className="olv-input-label">Confirmar Contraseña</label>
                   <input
                     type="password"
+                    className={`olv-input-field ${errors.confirmarContraseña ? 'olv-input-error' : ''}`}
                     placeholder="Confirma tu nueva contraseña"
                     {...register('confirmarContraseña', {
                       required: 'Debes confirmar la contraseña',
@@ -381,25 +439,21 @@ function OlvideContraseña() {
                     })}
                   />
                   {errors.confirmarContraseña && (
-                    <span className="reset-error-text">{errors.confirmarContraseña.message}</span>
+                    <span className="olv-error-text">{errors.confirmarContraseña.message}</span>
                   )}
                 </div>
 
-                <div className="reset-form-navigation">
+                <div className="olv-form-navigation">
                   <button
                     type="button"
-                    onClick={() => {
-                      setStep(1);
-                      setError('');
-                      setSuccessMessage('');
-                    }}
-                    className="reset-btn reset-btn-secondary"
+                    onClick={handleVolver}
+                    className="olv-secondary-btn"
                   >
                     Volver
                   </button>
                   <button
                     type="submit"
-                    className={`reset-btn ${isSubmitting ? 'is-submitting' : ''}`}
+                    className={`olv-primary-btn ${isSubmitting ? 'is-submitting' : ''}`}
                     disabled={isSubmitting || !!errors.nuevaContraseña || !!errors.confirmarContraseña}
                   >
                     {isSubmitting ? 'Cambiando...' : 'Cambiar Contraseña'}
@@ -408,8 +462,8 @@ function OlvideContraseña() {
               </form>
             )}
 
-            <div className="reset-links">
-              <Link to="/login" className="reset-link">
+            <div className="olv-footer-links">
+              <Link to="/login" className="olv-footer-link">
                 ¿Recordaste tu contraseña? Inicia sesión
               </Link>
             </div>

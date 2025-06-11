@@ -77,6 +77,16 @@ CREATE TABLE citas (
     FOREIGN KEY (id_veterinario) REFERENCES usuarios(id)
 );
 
+CREATE TABLE password_history (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  password_hash VARCHAR(255) NOT NULL,
+  changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES usuarios(id)
+);
+
+
+
 INSERT INTO servicios (nombre, descripcion, precio) VALUES
 ('Consulta General', 'Revisión médica básica para tu mascota.', '$50.000'),
 ('Vacunación', 'Programas de vacunación personalizados para proteger a tu compañero.', '$30.000'),

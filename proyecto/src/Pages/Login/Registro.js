@@ -45,6 +45,8 @@ function Registro() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [registroExitoso, setRegistroExitoso] = useState(false);
     const [isSidebarVisible, setIsSidebarVisible] = useState(true);
+    const [termsAccepted, setTermsAccepted] = useState(false);
+    const [showTermsModal, setShowTermsModal] = useState(false);
 
     useEffect(() => {
         let timer;
@@ -61,7 +63,6 @@ function Registro() {
     const generarCodigo = async () => {
         const nuevoCodigo = Math.random().toString(36).substring(2, 8).toUpperCase();
         setCodigoGenerado(nuevoCodigo);
-        console.log("Código de verificación generado:", nuevoCodigo);
         try {
             await enviarCodigoPorCorreo(nuevoCodigo);
             setCodigoEnviado(true);
@@ -86,11 +87,9 @@ function Registro() {
             user_name: `${formData.nombre} ${formData.apellido}`
         };
 
-        console.log("Enviando EmailJS con params:", templateParams);
         
         try {
             const response = await send(serviceId, templateId, templateParams, publicKey);
-            console.log('Correo electrónico enviado exitosamente:', response);
             setError('Se ha enviado un código de verificación a tu correo electrónico.');
             return response;
         } catch (error) {
@@ -313,7 +312,6 @@ function Registro() {
         
         if (formData.codigoIngresado.toUpperCase() === codigoGenerado) {
             setCodigoVerificado(true);
-            setError('Código verificado correctamente.');
         } else {
             setError('El código ingresado no coincide.');
         }
@@ -325,6 +323,11 @@ function Registro() {
         if (!codigoVerificado) {
           setError('Por favor, verifique el código antes de enviar.');
           return;
+        }
+
+        if (!termsAccepted) {
+            setError('Debes aceptar los términos y condiciones para continuar.');
+            return;
         }
       
         const userData = {
@@ -339,9 +342,9 @@ function Registro() {
           fechaNacimiento: formData.fechaNacimiento
         };
       
-        console.log("Enviando datos al backend:", userData);
       
         try {
+          setIsSubmitting(true);
           const response = await fetch('http://localhost:5000/register', {
             method: 'POST',
             headers: {
@@ -356,14 +359,15 @@ function Registro() {
             throw new Error(data.message || 'Error en el registro');
           }
       
-          console.log("Registro exitoso:", data);
           setRegistroExitoso(true);
           
         } catch (error) {
           console.error("Error en el registro:", error);
           setError(error.message || 'Hubo un error al registrar. Por favor, inténtalo de nuevo.');
+        } finally {
+          setIsSubmitting(false);
         }
-      };
+    };
 
     useEffect(() => {
         if (registroExitoso) {
@@ -373,6 +377,15 @@ function Registro() {
             return () => clearTimeout(timer);
         }
     }, [registroExitoso, navigate]);
+
+    const toggleTermsModal = () => {
+        setShowTermsModal(!showTermsModal);
+    };
+
+    const acceptTerms = () => {
+        setTermsAccepted(true);
+        setShowTermsModal(false);
+    };
 
     const renderStep = () => {
         switch (step) {
@@ -590,7 +603,7 @@ function Registro() {
                                         disabled={codigoVerificado || !!fieldErrors.codigoIngresado}
                                         className={codigoVerificado ? 'reg-btn-verified' : 'reg-btn-verify'}
                                     >
-                                        {codigoVerificado ? '✓ Código Verificado' : 'Verificar Código'}
+                                        {codigoVerificado ? '' : 'Verificar Código'}
                                     </button>
                                     {tiempoRestante > 0 && !codigoVerificado && (
                                         <p className="reg-timer-text">Tiempo restante: {tiempoRestante}s</p>
@@ -613,6 +626,20 @@ function Registro() {
                                 )}
                             </div>
                         )}
+
+                        {/* Términos y condiciones */}
+                        <div className="reg-terms-checkbox">
+                            <input 
+                                type="checkbox" 
+                                id="terms" 
+                                name="terms" 
+                                checked={termsAccepted}
+                                onChange={() => setTermsAccepted(!termsAccepted)}
+                            />
+                            <label htmlFor="terms">
+                                Acepto los <button type="button" className="reg-terms-link" onClick={toggleTermsModal}>Términos y Condiciones</button>
+                            </label>
+                        </div>
                     </div>
                 );
             default:
@@ -620,6 +647,9 @@ function Registro() {
         }
     };
 
+    
+
+    
     const renderProgressCircles = () => {
         const circles = [1, 2, 3];
         return (
@@ -692,7 +722,7 @@ function Registro() {
                                 {step === 3 && codigoVerificado && (
                                     <button 
                                         type="submit" 
-                                        disabled={isSubmitting}
+                                        disabled={isSubmitting || !termsAccepted}
                                         className="reg-btn-submit"
                                     >
                                         {isSubmitting ? 'Registrando...' : 'Finalizar Registro'}
@@ -707,6 +737,44 @@ function Registro() {
                     </div>
                 </div>
             </div>
+
+            {/* Modal de Términos y Condiciones */}
+            {showTermsModal && (
+                <div className="reg-modal-overlay">
+                    <div className="reg-terms-modal">
+                        <div className="reg-modal-header">
+                            <h2>Términos y Condiciones</h2>
+                            <button className="reg-close-modal" onClick={toggleTermsModal}>&times;</button>
+                        </div>
+                        <div className="reg-modal-content">
+                            <h3>1. Aceptación de los Términos</h3>
+                            <p>Al registrarte en Flooky Pets, aceptas cumplir con estos términos y condiciones, así como con nuestra política de privacidad.</p>
+
+                            <h3>2. Uso de la Plataforma</h3>
+                            <p>La plataforma está destinada exclusivamente para el uso personal y no comercial relacionado con el cuidado de mascotas.</p>
+
+                            <h3>3. Responsabilidades del Usuario</h3>
+                            <p>Eres responsable de mantener la confidencialidad de tu cuenta y contraseña, así como de todas las actividades que ocurran bajo tu cuenta.</p>
+
+                            <h3>4. Privacidad y Protección de Datos</h3>
+                            <p>Tus datos personales serán tratados de acuerdo con nuestra Política de Privacidad y la legislación aplicable.</p>
+
+                            <h3>5. Contenido Generado por Usuarios</h3>
+                            <p>Eres responsable de cualquier contenido que publiques en la plataforma, incluyendo fotos, comentarios y reseñas.</p>
+
+                            <h3>6. Limitación de Responsabilidad</h3>
+                            <p>Flooky Pets no se hace responsable por daños directos o indirectos resultantes del uso de la plataforma.</p>
+
+                            <h3>7. Modificaciones</h3>
+                            <p>Nos reservamos el derecho de modificar estos términos en cualquier momento. Las modificaciones entrarán en vigor inmediatamente después de su publicación.</p>
+                        </div>
+                        <div className="reg-modal-actions">
+                            <button className="reg-btn-cancel" onClick={toggleTermsModal}>Cancelar</button>
+                            <button className="reg-btn-accept" onClick={acceptTerms}>Aceptar Términos</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
