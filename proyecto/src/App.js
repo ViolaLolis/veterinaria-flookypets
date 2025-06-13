@@ -47,7 +47,7 @@ import EditarPerfilVeterinario from "./Pages/InicioVeterinario/EditarPerfilVeter
 import MainVeterinario from "./Pages/InicioVeterinario/MainVeterinario";
 import NavegacionVeterinario from "./Pages/InicioVeterinario/NavegacionVeterinario";
 import ConfiguracionVeterinario from "./Pages/InicioVeterinario/ConfiguracionVeterinario";
-import LlamadaVeterinario from "./Pages/InicioVeterinario/LlamadaVeterinario";
+
 
 // Componentes de Administrador
 import AdminDashboard from "./Pages/InicioAdministrador/AdminDashboard";
@@ -142,7 +142,7 @@ function App() {
             <Route path="configuracion" element={<ConfiguracionVeterinario />} />
             
             {/* Comunicación */}
-            <Route path="llamada" element={<LlamadaVeterinario />} />
+          
           </Route>
         </Route>
 

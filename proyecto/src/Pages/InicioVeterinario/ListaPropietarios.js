@@ -1,6 +1,7 @@
+// No changes needed for ListaPropietarios.js - it's already set up for veteStyles
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import styles from '../InicioVeterinario/Style/ListaPropietariosStyles.module.css';
+import { useNavigate } from 'react-router-dom'; // Importamos useNavigate
+import veteStyles from '../InicioVeterinario/Style/ListaPropietariosStyles.module.css'; // This path is correct
 import { motion, AnimatePresence } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEdit, faPlus, faBan, faUser, faSync, faSearch } from '@fortawesome/free-solid-svg-icons';
@@ -67,13 +68,14 @@ const itemVariants = {
   },
   hover: {
     scale: 1.02,
-    boxShadow: "0 8px 15px rgba(0, 188, 212, 0.2)",
+    boxShadow: "0 8px 15px rgba(0, 172, 193, 0.2)", // Using the teal color for shadow
     transition: { duration: 0.2 }
   },
   tap: { scale: 0.98 }
 };
 
 const ListaPropietarios = () => {
+  const navigate = useNavigate(); // Inicializamos useNavigate
   const [propietarios, setPropietarios] = useState([]);
   const [filteredPropietarios, setFilteredPropietarios] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -83,16 +85,14 @@ const ListaPropietarios = () => {
 
   // Modified fetchPropietarios to use local data
   const fetchPropietarios = async () => {
-    setLoading(true); // Ensure loading state is true when fetching (even local)
-    setError(null); // Clear previous errors
-    // Simulate an API call delay
-    await new Promise(resolve => setTimeout(resolve, 500)); // Simulate 0.5 second delay
+    setLoading(true);
+    setError(null);
+    await new Promise(resolve => setTimeout(resolve, 500));
 
     try {
       setPropietarios(localPropietariosData);
       setFilteredPropietarios(localPropietariosData);
     } catch (err) {
-      // This catch might not be strictly necessary for local data, but good practice
       setError("Error al cargar los propietarios desde los datos locales.");
       console.error("Error loading local data:", err);
     } finally {
@@ -110,8 +110,8 @@ const ListaPropietarios = () => {
     if (searchTerm.trim() === '') {
       setFilteredPropietarios(propietarios);
     } else {
+      const searchLower = searchTerm.toLowerCase();
       const filtered = propietarios.filter(propietario => {
-        const searchLower = searchTerm.toLowerCase();
         return (
           propietario.nombre.toLowerCase().includes(searchLower) ||
           propietario.apellido.toLowerCase().includes(searchLower) ||
@@ -126,31 +126,44 @@ const ListaPropietarios = () => {
 
   const handleRefresh = () => {
     setRefreshing(true);
-    fetchPropietarios(); // Re-fetch (or re-load local data)
+    fetchPropietarios();
   };
 
   const handleDisable = (id) => {
     if (window.confirm('¿Estás seguro de que deseas deshabilitar este propietario? (Esta acción es solo de ejemplo para datos locales)')) {
       setRefreshing(true);
-      // Simulate an API call for disabling
       setTimeout(() => {
         setPropietarios(prevPropietarios =>
           prevPropietarios.filter(prop => prop.id !== id)
         );
-        // Also update filtered list
         setFilteredPropietarios(prevFiltered =>
           prevFiltered.filter(prop => prop.id !== id)
         );
         alert('Propietario deshabilitado (simulado) correctamente');
         setRefreshing(false);
-      }, 500); // Simulate network delay for disabling
+      }, 500);
     }
   };
 
+  // --- Nuevas funciones de navegación ---
+  const handleViewDetails = (id) => {
+    navigate(`/veterinario/propietarios/${id}`);
+  };
+
+  const handleEditPropietario = (id) => {
+    navigate(`/veterinario/propietarios/editar/${id}`);
+  };
+
+  const handleRegisterNewPropietario = () => {
+    navigate('/veterinario/propietarios/registrar');
+  };
+  // --- Fin de funciones de navegación ---
+
+
   if (loading) {
     return (
-      <div className={styles.loadingContainer}>
-        <div className={styles.spinner}></div>
+      <div className={veteStyles.veteLoadingContainer}>
+        <div className={veteStyles.veteSpinner}></div>
         <p>Cargando propietarios...</p>
       </div>
     );
@@ -159,15 +172,15 @@ const ListaPropietarios = () => {
   if (error) {
     return (
       <motion.div
-        className={styles.errorContainer}
+        className={veteStyles.veteErrorContainer}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
       >
-        <div className={styles.errorMessage}>
+        <div className={veteStyles.veteErrorMessage}>
           Error al cargar los propietarios: {error}
         </div>
         <button
-          className={styles.retryButton}
+          className={veteStyles.veteRetryButton}
           onClick={handleRefresh}
           disabled={refreshing}
         >
@@ -185,26 +198,26 @@ const ListaPropietarios = () => {
 
   return (
     <motion.div
-      className={styles.container}
+      className={veteStyles.veteContainer}
       variants={containerVariants}
       initial="hidden"
       animate="visible"
     >
       <motion.div
-        className={styles.header}
+        className={veteStyles.veteHeader}
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.4 }}
       >
         <h1>
-          <FontAwesomeIcon icon={faUser} className={styles.titleIcon} />
+          <FontAwesomeIcon icon={faUser} className={veteStyles.veteTitleIcon} />
           Lista de Propietarios
         </h1>
 
-        <div className={styles.headerActions}>
+        <div className={veteStyles.veteHeaderActions}>
           <motion.button
             onClick={handleRefresh}
-            className={styles.refreshButton}
+            className={veteStyles.veteRefreshButton}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             disabled={refreshing}
@@ -214,26 +227,27 @@ const ListaPropietarios = () => {
           </motion.button>
 
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            {/* Note: The "Registrar" link will still navigate, but without a backend,
-                the registration won't persist locally. */}
-            <Link to="/veterinario/propietarios/registrar" className={styles.addButton}>
+            <button // Cambiado de Link a button
+              onClick={handleRegisterNewPropietario} // Usamos la nueva función
+              className={veteStyles.veteAddButton}
+            >
               <FontAwesomeIcon icon={faPlus} /> Nuevo Propietario
-            </Link>
+            </button>
           </motion.div>
         </div>
       </motion.div>
 
       {/* Barra de búsqueda */}
       <motion.div
-        className={styles.searchContainer}
+        className={veteStyles.veteSearchContainer}
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
       >
-        <FontAwesomeIcon icon={faSearch} className={styles.searchIcon} />
+        <FontAwesomeIcon icon={faSearch} className={veteStyles.veteSearchIcon} />
         <input
           type="text"
-          className={styles.searchInput}
+          className={veteStyles.veteSearchInput}
           placeholder="Buscar propietarios por nombre, email o documento..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
@@ -242,21 +256,21 @@ const ListaPropietarios = () => {
 
       <AnimatePresence>
         {filteredPropietarios.length > 0 ? (
-          <ul className={styles.propietariosList}>
+          <ul className={veteStyles.vetePropietariosList}>
             {filteredPropietarios.map((propietario) => (
               <motion.li
                 key={propietario.id}
-                className={styles.propietarioCard}
+                className={veteStyles.vetePropietarioCard}
                 variants={itemVariants}
                 whileHover="hover"
                 whileTap="tap"
                 layout
               >
-                <div className={styles.propietarioInfo}>
-                  <div className={styles.avatar}>
+                <div className={veteStyles.vetePropietarioInfo}>
+                  <div className={veteStyles.veteAvatar}>
                     {propietario.nombre.charAt(0)}
                   </div>
-                  <div className={styles.details}>
+                  <div className={veteStyles.veteDetails}>
                     <h3>{propietario.nombre} {propietario.apellido}</h3>
                     <p><strong>Teléfono:</strong> {propietario.telefono}</p>
                     <p><strong>Email:</strong> {propietario.email}</p>
@@ -264,32 +278,30 @@ const ListaPropietarios = () => {
                   </div>
                 </div>
 
-                <div className={styles.actions}>
+                <div className={veteStyles.veteActions}>
                   <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-                    {/* These links will still navigate, but detail/edit pages
-                        will need similar local data handling or mock data */}
-                    <Link
-                      to={`/veterinario/propietarios/${propietario.id}`}
-                      className={styles.actionButton}
+                    <button // Cambiado de Link a button
+                      onClick={() => handleViewDetails(propietario.id)} // Usamos la nueva función
+                      className={veteStyles.veteActionButton}
                       title="Ver detalles"
                     >
                       <FontAwesomeIcon icon={faEye} />
-                    </Link>
+                    </button>
                   </motion.div>
 
                   <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-                    <Link
-                      to={`/veterinario/propietarios/editar/${propietario.id}`}
-                      className={`${styles.actionButton} ${styles.editButton}`}
+                    <button // Cambiado de Link a button
+                      onClick={() => handleEditPropietario(propietario.id)} // Usamos la nueva función
+                      className={`${veteStyles.veteActionButton} ${veteStyles.veteEditButton}`}
                       title="Editar"
                     >
                       <FontAwesomeIcon icon={faEdit} />
-                    </Link>
+                    </button>
                   </motion.div>
 
                   <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
                     <button
-                      className={`${styles.actionButton} ${styles.disableButton}`}
+                      className={`${veteStyles.veteActionButton} ${veteStyles.veteDisableButton}`}
                       title="Deshabilitar"
                       onClick={() => handleDisable(propietario.id)}
                     >
@@ -302,20 +314,23 @@ const ListaPropietarios = () => {
           </ul>
         ) : (
           <motion.div
-            className={styles.emptyState}
+            className={veteStyles.veteEmptyState}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
             exit={{ opacity: 0 }}
           >
-            <div className={styles.emptyIllustration}>
+            <div className={veteStyles.veteEmptyIllustration}>
               <FontAwesomeIcon icon={faUser} size="3x" />
             </div>
             <h3>No se encontraron propietarios</h3>
             <p>No hay resultados que coincidan con "{searchTerm}"</p>
-            <Link to="/veterinario/propietarios/registrar" className={styles.addButton}>
+            <button // Cambiado de Link a button
+              onClick={handleRegisterNewPropietario} // Usamos la nueva función
+              className={veteStyles.veteAddButton}
+            >
               <FontAwesomeIcon icon={faPlus} /> Registrar nuevo propietario
-            </Link>
+            </button>
           </motion.div>
         )}
       </AnimatePresence>

@@ -288,16 +288,7 @@ const ListaMascotasVeterinario = () => {
             <FontAwesomeIcon icon={faSync} spin={refreshing} />
             {refreshing ? ' Actualizando...' : ' Actualizar'}
           </motion.button>
-
-          <motion.button 
-            className={styles.vetNewButton}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            
-          >
-            <FontAwesomeIcon icon={faPlus} />
-            <span>Nueva Mascota</span>
-          </motion.button>
+          
         </div>
       </div>
 

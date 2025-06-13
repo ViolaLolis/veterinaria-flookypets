@@ -1,197 +1,342 @@
-:root {
-    --color-primary: #00bcd4;
-    --color-secondary: #00acc1;
-    --color-light: #e0f7fa;
-    --color-white: #ffffff;
-    --color-dark: #333;
-    --color-muted: #666;
-    --color-border: #b2ebf2;
-    --color-warning: #54b2ff;
+/* veteConfiguracionVeterinarioStyles.module.css */
+
+.veteConfiguracionContainer {
+  max-width: 800px;
+  margin: 50px auto;
+  padding: 35px;
+  background-color: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+  font-family: 'Poppins', sans-serif;
+  color: #333;
+  animation: fadeInSlideUp 0.6s ease-out;
+  border-top: 5px solid #00acc1; /* Accent top border */
+}
+
+@keyframes fadeInSlideUp {
+  from { opacity: 0; transform: translateY(20px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Header Section */
+.veteHeader {
+  text-align: center;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e0f7fa; /* Light blue subtle separator */
+}
+
+.veteHeader h2 {
+  font-size: 2.5em;
+  color: #00acc1;
+  margin: 0 0 10px 0;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+}
+
+.veteHeaderIcon {
+  font-size: 1.1em;
+}
+
+.veteSubtitle {
+  font-size: 1.1em;
+  color: #666;
+  margin: 0;
+}
+
+/* Form Sections */
+.veteConfigForm {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.veteConfigSection {
+  background-color: #f8fcfc; /* Very light background for sections */
+  padding: 25px;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  border-left: 5px solid #00acc1; /* Teal accent left border */
+}
+
+.veteSectionTitle {
+  font-size: 1.6em;
+  color: #00acc1;
+  margin-top: 0;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+}
+
+/* Form Groups and Inputs */
+.veteFormGroup {
+  margin-bottom: 15px;
+}
+
+.veteFormGroup:last-child {
+  margin-bottom: 0;
+}
+
+/* Switch Styles */
+.veteSwitchLabel {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: 1.1em;
+  color: #444;
+  position: relative;
+  padding-left: 60px; /* Space for the custom switch */
+  min-height: 30px; /* Ensure label aligns with switch */
+}
+
+.veteSwitchInput {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute; /* Hide default checkbox */
+}
+
+.veteSlider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 34px;
+  width: 50px;
+  height: 28px;
+}
+
+.veteSlider:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+.veteSwitchInput:checked + .veteSlider {
+  background-color: #00acc1; /* Teal when checked */
+}
+
+.veteSwitchInput:checked + .veteSlider:before {
+  transform: translateX(22px);
+}
+
+.veteLabelText {
+  margin-left: 10px; /* Space between slider and text */
+}
+
+/* Select Styles */
+.veteSelectLabel {
+  font-size: 1.1em;
+  color: #00acc1; /* Teal label color */
+  margin-bottom: 8px;
+  font-weight: 600;
+  display: block; /* Ensures label is on its own line */
+}
+
+.veteSelectInput {
+  width: 100%;
+  padding: 12px 15px;
+  border: 2px solid #e0f7fa; /* Light blue border */
+  border-radius: 10px;
+  font-size: 1em;
+  color: #555;
+  background-color: #fcfdfe; /* Slightly off-white background */
+  transition: all 0.3s ease;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+  -webkit-appearance: none; /* Remove default arrow on WebKit */
+  -moz-appearance: none; /* Remove default arrow on Mozilla */
+  appearance: none; /* Remove default arrow */
+  background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2300ACC1%22%20d%3D%22M287%2C114.7L159.2%2C222.8c-3.2%2C2.4-7.4%2C2.4-10.6%2C0L5.4%2C114.7c-3.8-2.8-3.8-8.2%2C0-11s9.6-2.8%2C13.4%2C0l140.2%2C105.4l140.2-105.4c3.8-2.8%2C9.6-2.8%2C13.4%2C0S290.8%2C111.9%2C287%2C114.7z%22%2F%3E%3C%2Fsvg%3E'); /* Custom arrow */
+  background-repeat: no-repeat;
+  background-position: right 15px center;
+  background-size: 12px;
+  padding-right: 40px; /* Space for custom arrow */
+}
+
+.veteSelectInput:focus {
+  outline: none;
+  border-color: #00acc1; /* Teal border on focus */
+  background-color: #ffffff;
+  box-shadow: 0 0 0 4px rgba(0, 172, 193, 0.15); /* Soft teal glow */
+}
+
+/* Buttons */
+.veteButtonGroup {
+  display: flex;
+  justify-content: flex-end; /* Align buttons to the right */
+  gap: 15px;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #e0f7fa;
+}
+
+.veteActionButton {
+  padding: 12px 25px;
+  border-radius: 10px;
+  font-size: 1.05em;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.3s ease;
+  border: none;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.veteSaveButton {
+  background-color: #00acc1; /* Teal */
+  color: white;
+}
+
+.veteSaveButton:hover:not(:disabled) {
+  background-color: #008fa7; /* Darker teal */
+  transform: translateY(-2px);
+}
+
+.veteSaveButton:disabled {
+  background-color: #b0e0e6; /* Lighter teal when disabled */
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+.veteCancelButton {
+  background-color: #e0f7fa; /* Light blue */
+  color: #00acc1; /* Teal text */
+  border: 1px solid #b2ebf2; /* Lighter teal border */
+}
+
+.veteCancelButton:hover:not(:disabled) {
+  background-color: #b2ebf2; /* Slightly darker light blue */
+  transform: translateY(-2px);
+}
+
+.veteCancelButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Messages */
+.veteMessage {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 15px 20px;
+  border-radius: 10px;
+  margin-top: 20px;
+  font-size: 1em;
+  font-weight: 500;
+  text-align: center;
+  justify-content: center;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.veteSuccessMessage {
+  background-color: #e6ffe6; /* Light green */
+  color: #28a745; /* Dark green */
+  border: 1px solid #a3e6a3;
+}
+
+.veteErrorMessage {
+  background-color: #ffe6e6; /* Light red */
+  color: #dc3545; /* Dark red */
+  border: 1px solid #e6a3a3;
+}
+
+.veteInfoMessage {
+  background-color: #e0f7fa; /* Light blue */
+  color: #00acc1; /* Teal */
+  border: 1px solid #b2ebf2;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .veteConfiguracionContainer {
+      margin: 30px 20px;
+      padding: 25px;
   }
-  
-  .vetContainer {
-    background-color: var(--color-light);
-    padding: 30px;
-    border-radius: 16px;
-    box-shadow: 0 4px 12px rgba(0, 172, 193, 0.1);
-    font-family: 'Segoe UI', sans-serif;
-    color: var(--color-dark);
-    max-width: 900px;
-    margin: auto;
+  .veteHeader h2 {
+      font-size: 2em;
   }
-  
-  .vetHeader {
-    text-align: center;
-    margin-bottom: 30px;
+  .veteSubtitle {
+      font-size: 1em;
   }
-  
-  .vetHeaderIcon {
-    color: var(--color-primary);
-    margin-right: 8px;
+  .veteConfigSection {
+      padding: 20px;
   }
-  
-  .vetSubtitle {
-    color: var(--color-muted);
-    margin-top: 8px;
+  .veteSectionTitle {
+      font-size: 1.4em;
+      margin-bottom: 15px;
   }
-  
-  .vetForm {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
+  .veteSwitchLabel, .veteSelectLabel {
+      font-size: 1em;
   }
-  
-  .vetSection {
-    background-color: var(--color-white);
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 172, 193, 0.08);
-    border: 1px solid var(--color-border);
+  .veteSelectInput {
+      padding: 10px 12px;
+      font-size: 0.95em;
   }
-  
-  .vetSectionTitle {
-    color: var(--color-secondary);
-    margin-bottom: 16px;
-    font-size: 1.2rem;
-    display: flex;
-    align-items: center;
-    gap: 10px;
+  .veteButtonGroup {
+      flex-direction: column;
+      gap: 10px;
   }
-  
-  .vetFormGroup {
-    margin-bottom: 16px;
+  .veteActionButton {
+      width: 100%;
+      font-size: 1em;
+      padding: 10px 15px;
   }
-  
-  .vetSelectLabel {
-    display: block;
-    font-weight: 600;
-    margin-bottom: 8px;
-    color: var(--color-dark);
+}
+
+@media (max-width: 480px) {
+  .veteConfiguracionContainer {
+      margin: 20px 15px;
+      padding: 20px;
   }
-  
-  .vetSelectInput {
-    width: 100%;
-    padding: 10px 12px;
-    border: 1px solid var(--color-border);
-    border-radius: 8px;
-    background-color: var(--color-light);
-    transition: border-color 0.3s;
+  .veteHeader h2 {
+      font-size: 1.8em;
+      gap: 10px;
   }
-  
-  .vetSelectInput:focus {
-    outline: none;
-    border-color: var(--color-primary);
+  .veteSectionTitle {
+      font-size: 1.2em;
+      gap: 8px;
   }
-  
-  .vetSwitchLabel {
-    position: relative;
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    user-select: none;
-    gap: 12px;
+  .veteSwitchLabel {
+      padding-left: 50px;
   }
-  
-  .vetSwitchInput {
-    display: none;
+  .veteSlider {
+      width: 40px;
+      height: 24px;
   }
-  
-  .vetSlider {
-    position: relative;
-    width: 46px;
-    height: 24px;
-    background-color: var(--color-muted);
-    border-radius: 50px;
-    transition: background-color 0.3s;
+  .veteSlider:before {
+      height: 16px;
+      width: 16px;
+      left: 4px;
+      bottom: 4px;
   }
-  
-  .vetSlider::before {
-    content: "";
-    position: absolute;
-    width: 20px;
-    height: 20px;
-    background-color: var(--color-white);
-    border-radius: 50%;
-    top: 2px;
-    left: 2px;
-    transition: transform 0.3s;
+  .veteSwitchInput:checked + .veteSlider:before {
+      transform: translateX(16px);
   }
-  
-  .vetSwitchInput:checked + .vetSlider {
-    background-color: var(--color-primary);
+  .veteActionButton {
+      font-size: 0.95em;
+      padding: 8px 12px;
   }
-  
-  .vetSwitchInput:checked + .vetSlider::before {
-    transform: translateX(22px);
-  }
-  
-  .vetLabelText {
-    color: var(--color-dark);
-    font-weight: 500;
-  }
-  
-  .vetButtonGroup {
-    display: flex;
-    justify-content: flex-end;
-    gap: 16px;
-    margin-top: 20px;
-  }
-  
-  .vetActionButton {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 10px;
-    font-weight: 600;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: background-color 0.3s, box-shadow 0.3s;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  
-  .vetSaveButton {
-    background-color: var(--color-primary);
-    color: var(--color-white);
-  }
-  
-  .vetSaveButton:disabled {
-    background-color: var(--color-border);
-    cursor: not-allowed;
-  }
-  
-  .vetCancelButton {
-    background-color: var(--color-muted);
-    color: var(--color-white);
-  }
-  
-  .vetCancelButton:disabled {
-    background-color: #aaa;
-    cursor: not-allowed;
-  }
-  
-  .vetMessage {
-    margin-top: 20px;
-    padding: 12px 16px;
-    border-radius: 8px;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  
-  .vetSuccessMessage {
-    background-color: #d0f8f5;
-    color: #00796b;
-  }
-  
-  .vetErrorMessage {
-    background-color: #fdecea;
-    color: #c62828;
-  }
-  
-  .vetInfoMessage {
-    background-color: #e3f2fd;
-    color: #1565c0;
-  }
-  
+}
