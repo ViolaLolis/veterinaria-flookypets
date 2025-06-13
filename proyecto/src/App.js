@@ -80,32 +80,14 @@ function App() {
         <Route element={<Protegida user={user} allowedRoles={['admin']} />}>
           <Route path="/admin" element={<AdminDashboard user={user} setUser={setUser} />}>
             <Route index element={<AdminStats />} />
-            
-            {/* Dashboard y estadísticas */}
             <Route path="dashboard" element={<AdminStats />} />
-            
-            {/* Gestión de servicios */}
             <Route path="services" element={<AdminServices />} />
-            
-            {/* Gestión de veterinarios */}
             <Route path="veterinarians" element={<AdminVets />} />
-            
-            {/* Gestión de administradores */}
             <Route path="administrators" element={<AdminAdmins />} />
-            
-            {/* Gestión de usuarios */}
             <Route path="users" element={<AdminUsers />} />
-            
-            {/* Gestión de citas */}
             <Route path="appointments" element={<AdminAppointments />} />
-            
-            {/* Historiales médicos */}
             <Route path="medical-records" element={<AdminMedicalRecords />} />
-            
-            {/* Configuración */}
             <Route path="settings" element={<AdminSettings />} />
-            
-            {/* Perfil */}
             <Route path="profile" element={<AdminProfile user={user} setUser={setUser} />} />
           </Route>
         </Route>
@@ -115,70 +97,70 @@ function App() {
           <Route path="/veterinario" element={<MainVeterinario />}>
             <Route index element={<NavegacionVeterinario />} />
             <Route path="navegacion" element={<NavegacionVeterinario />} />
-            
-            {/* Gestión de propietarios */}
             <Route path="propietarios" element={<ListaPropietarios />} />
             <Route path="propietarios/:id" element={<DetallePropietario />} />
             <Route path="propietarios/registrar" element={<RegistrarPropietario />} />
             <Route path="propietarios/editar/:id" element={<EditarPropietario />} />
-            
-            {/* Gestión de mascotas */}
             <Route path="mascotas" element={<ListaMascotasVeterinario />} />
             <Route path="mascotas/:id" element={<DetalleMascotaVeterinario />} />
             <Route path="mascotas/registrar" element={<RegistrarMascotaVeterinario />} />
             <Route path="mascotas/editar/:id" element={<EditarMascotaVeterinario />} />
-            
-            {/* Gestión de citas */}
             <Route path="citas" element={<ListaCitasVeterinario />} />
             <Route path="citas/:id" element={<DetalleCitaVeterinario />} />
-            
-            {/* Historiales médicos */}
             <Route path="historiales" element={<ListaHistorialesVeterinario />} />
             <Route path="historiales/:id" element={<DetalleHistorialVeterinario />} />
-            
-            {/* Perfil y configuración */}
             <Route path="perfil" element={<VerPerfilVeterinario setUser={setUser} />} />
             <Route path="perfil/editar" element={<EditarPerfilVeterinario />} />
             <Route path="configuracion" element={<ConfiguracionVeterinario />} />
-            
-            {/* Comunicación */}
             <Route path="llamada" element={<LlamadaVeterinario />} />
           </Route>
         </Route>
 
         {/* Rutas de usuario */}
         <Route element={<Protegida user={user} allowedRoles={['usuario']} />}>
+          {/* Rutas de Perfil (ahora de nivel superior) */}
+          <Route path="/usuario/perfil" element={<PerfilUsuario />} />
+          <Route path="/usuario/perfil/editar" element={<EditarPerfil />} />
+          <Route path="/usuario/perfil/configuracion" element={<ConfiguracionPerfil />} />
+          <Route path="/usuario/perfil/pagos" element={<MetodosPago />} />
+          <Route path="/usuario/perfil/pagos/agregar" element={<AgregarMetodoPago />} />
+          <Route path="/usuario/perfil/pagos/eliminar/:id" element={<EliminarMetodoPago />} />
+
+          {/* Rutas de Ayuda y Soporte (ahora de nivel superior) */}
+          <Route path="/usuario/ayuda" element={<AyudaSoporte />} />
+          <Route path="/usuario/ayuda/chat" element={<ChatSoporte />} />
+
+          {/* Rutas de Historial Médico (MOVIDAS FUERA DE LA ANIDACIÓN) */}
+          <Route path="/usuario/historial/:mascotaId" element={<HistorialMedico />} />
+          <Route path="/usuario/historial/:mascotaId/agregar" element={<AgregarHistorial />} />
+          <Route path="/usuario/historial/:mascotaId/:historialId" element={<DetalleHistorial />} />
+          <Route path="/usuario/historial/:mascotaId/editar/:historialId" element={<EditarHistorial />} />
+
+          {/*
+            Rutas anidadas bajo InicioUsuario. El contenido de estas rutas
+            se cargará dentro del <Outlet /> de InicioUsuario.
+          */}
           <Route path="/usuario" element={<InicioUsuario user={user} setUser={setUser} />}>
-            {/* Rutas anidadas */}
             <Route index element={<Navigate to="inicio" replace />} />
             <Route path="inicio" element={<CitasUsuario />} />
             <Route path="citas" element={<CitasUsuario />} />
             <Route path="citas/agendar" element={<AgendarCita />} />
             <Route path="citas/:id" element={<DetalleCita />} />
             <Route path="citas/editar/:id" element={<EditarCita />} />
-            
+
             <Route path="servicios" element={<ServiciosVeterinaria />} />
             <Route path="servicios/:id" element={<DetalleServicio />} />
-            
+
+            {/*
+              Dejo esta redirección para "mascotas" porque tu InicioUsuario ya muestra
+              la TarjetaMascota directamente, y la navegación "Mis Mascotas" en el nav
+              de InicioUsuario apunta a "mascotas", que luego redirige a "inicio".
+              Esto mantiene el comportamiento actual si es lo que deseas.
+            */}
             <Route path="mascotas" element={<Navigate to="/usuario/inicio" replace />} />
             <Route path="mascotas/agregar" element={<AgregarMascota />} />
             <Route path="mascotas/:id" element={<DetalleMascota />} />
             <Route path="mascotas/editar/:id" element={<EditarMascota />} />
-            
-            <Route path="historial/:mascotaId" element={<HistorialMedico />} />
-            <Route path="historial/:mascotaId/agregar" element={<AgregarHistorial />} />
-            <Route path="historial/:mascotaId/:historialId" element={<DetalleHistorial />} />
-            <Route path="historial/:mascotaId/editar/:historialId" element={<EditarHistorial />} />
-            
-            <Route path="perfil" element={<PerfilUsuario />} />
-            <Route path="perfil/editar" element={<EditarPerfil />} />
-            <Route path="perfil/configuracion" element={<ConfiguracionPerfil />} />
-            <Route path="perfil/pagos" element={<MetodosPago />} />
-            <Route path="perfil/pagos/agregar" element={<AgregarMetodoPago />} />
-            <Route path="perfil/pagos/eliminar/:id" element={<EliminarMetodoPago />} />
-            
-            <Route path="ayuda" element={<AyudaSoporte />} />
-            <Route path="ayuda/chat" element={<ChatSoporte />} />
           </Route>
         </Route>
 
