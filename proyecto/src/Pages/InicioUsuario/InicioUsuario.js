@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { FaPaw, FaCalendarPlus, FaShoppingCart, FaBell, FaClipboardList, FaHeart, FaQuestionCircle, FaUserCog, FaChevronDown, FaChevronLeft, FaChevronRight, FaSignOutAlt, FaUserEdit, FaCog } from 'react-icons/fa';
+import { useNavigate, Outlet } from 'react-router-dom';
+import {
+  FaPaw, FaCalendarPlus, FaShoppingCart, FaBell, FaClipboardList,
+  FaHeart, FaQuestionCircle, FaChevronDown,
+  FaChevronLeft, FaChevronRight, FaSignOutAlt, FaCog, FaUserCog
+} from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
-import CitasUsuario from './CitasUsuario';
-import ServiciosVeterinaria from './ServiciosVeterinaria';
+import CitasUsuario from './CitasUsuario'; // Asegúrate de que estos componentes existan
+import ServiciosVeterinaria from './ServiciosVeterinaria'; // Asegúrate de que estos componentes existan
+import TarjetaMascota from './TarjetaMascota'; // Asegúrate de que estos componentes existan
 import styles from './Styles/InicioUsuario.module.css';
 import logo from '../Inicio/Imagenes/flooty.png';
 
-const InicioUsuario = () => {
+const InicioUsuario = ({ user, setUser }) => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('mascotas');
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -16,10 +21,28 @@ const InicioUsuario = () => {
   const [showPetsDropdown, setShowPetsDropdown] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-  // Datos del usuario con múltiples mascotas
-  const [userData, setUserData] = useState({
-    nombre: "Juan Pérez",
-    email: "juan.perez@example.com",
+  // Nuevos estados para los modales de cita
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showRescheduleModal, setShowRescheduleModal] = useState(false);
+
+  // useEffect para controlar el overflow del body cuando los modales están abiertos
+  useEffect(() => {
+    if (showConfirmModal || showRescheduleModal) {
+      document.body.classList.add(styles['modal-open']);
+    } else {
+      document.body.classList.remove(styles['modal-open']);
+    }
+
+    // Cleanup function: Asegura que la clase se remueva si el componente se desmonta
+    return () => {
+      document.body.classList.remove(styles['modal-open']);
+    };
+  }, [showConfirmModal, showRescheduleModal]);
+
+  // Datos del usuario con múltiples mascotas (datos de ejemplo)
+  const userData = {
+    nombre: user?.nombre || "Usuario",
+    email: user?.email || "usuario@example.com",
     membresia: "Premium",
     mascotas: [
       {
@@ -28,7 +51,7 @@ const InicioUsuario = () => {
         tipo: "Perro",
         raza: "Golden Retriever",
         edad: "3 años",
-        imagen: "https://images.unsplash.com/photo-1633722715463-d30f4f325e24?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=774&q=80"
+        imagen: "https://images.unsplash.com/photo-1633722715463-d30f4f325e24?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVu"
       },
       {
         id: 2,
@@ -39,7 +62,7 @@ const InicioUsuario = () => {
         imagen: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=774&q=80"
       }
     ]
-  });
+  };
 
   const proximaCita = {
     fecha: "15 de Abril",
@@ -56,102 +79,35 @@ const InicioUsuario = () => {
     { id: 4, texto: "Renovar membresía premium - Vence en 1 mes", importante: true }
   ];
 
-  // Animaciones
+  // Animaciones de Framer Motion
   const fadeIn = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { duration: 0.3 } }
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 }
   };
 
   const slideUp = {
-    hidden: { y: 20, opacity: 0 },
-    visible: { y: 0, opacity: 1, transition: { type: 'spring', stiffness: 100 } }
+    hidden: { opacity: 0, y: 30 },
+    visible: { opacity: 1, y: 0 }
   };
 
   // Función para manejar el cierre de sesión
   const handleLogout = () => {
     setIsLoggingOut(true);
-    // Simular proceso de logout
     setTimeout(() => {
-      // Aquí deberías reemplazar con tu lógica real de logout
-      // Por ejemplo: limpiar tokens, contexto, etc.
-      navigate('/login'); // Redirigir a la página de login
-    }, 1500);
-  };
-
-  // Función para navegar a perfil
-  const goToProfile = () => {
-    navigate('/perfil'); // Reemplaza con tu ruta de perfil
-  };
-
-  // Función para navegar a configuración
-  const goToSettings = () => {
-    navigate('/configuracion'); // Reemplaza con tu ruta de configuración
-  };
-
-  const renderContent = () => {
-    switch(activeTab) {
-      case 'citas':
-        return <CitasUsuario />;
-      case 'servicios':
-        return <ServiciosVeterinaria />;
-      default:
-        return (
-          <motion.div 
-            initial="hidden"
-            animate="visible"
-            variants={fadeIn}
-            className={styles.petsContent}
-          >
-            <h2>Tus Mascotas</h2>
-            <div className={styles.petsGrid}>
-              {userData.mascotas.map((pet, index) => (
-                <motion.div 
-                  key={pet.id}
-                  className={styles.petCard}
-                  variants={slideUp}
-                  whileHover={{ y: -5 }}
-                >
-                  <img src={pet.imagen} alt={pet.nombre} className={styles.petCardImage} />
-                  <div className={styles.petCardInfo}>
-                    <h3>{pet.nombre}</h3>
-                    <p>{pet.tipo} • {pet.raza}</p>
-                    <p>{pet.edad}</p>
-                  </div>
-                  <button 
-                    className={styles.petCardButton}
-                    onClick={() => {
-                      setCurrentPetIndex(index);
-                      setShowPetsDropdown(false);
-                    }}
-                  >
-                    Ver detalles
-                  </button>
-                </motion.div>
-              ))}
-              <motion.div 
-                className={styles.addPetCard}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <div className={styles.addPetContent}>
-                  <div className={styles.addPetIcon}>+</div>
-                  <p>Agregar nueva mascota</p>
-                </div>
-              </motion.div>
-            </div>
-          </motion.div>
-        );
-    }
+      localStorage.removeItem('user');
+      setUser(null);
+      navigate('/');
+    }, 1500); // Simula un delay para el cierre de sesión
   };
 
   const handlePrevPet = () => {
-    setCurrentPetIndex(prev => 
+    setCurrentPetIndex(prev =>
       prev === 0 ? userData.mascotas.length - 1 : prev - 1
     );
   };
 
   const handleNextPet = () => {
-    setCurrentPetIndex(prev => 
+    setCurrentPetIndex(prev =>
       prev === userData.mascotas.length - 1 ? 0 : prev + 1
     );
   };
@@ -161,7 +117,60 @@ const InicioUsuario = () => {
     setShowPetsDropdown(false);
   };
 
+  // Funciones para los nuevos modales
+  const handleConfirmAssistance = () => {
+    setShowConfirmModal(true);
+    // Aquí se agregaría la lógica para enviar la confirmación al backend
+  };
+
+  const handleReschedule = () => {
+    setShowRescheduleModal(true);
+    // Aquí se agregaría la lógica para iniciar el proceso de reagendar
+  };
+
   const currentPet = userData.mascotas[currentPetIndex];
+
+  // Función para renderizar el contenido dinámico según la pestaña activa
+  const renderContent = () => {
+    switch(activeTab) {
+      case 'mascotas':
+        return (
+          <motion.div
+            className={styles.mascotasContainer}
+            key="mascotas-content" // Key para animaciones de AnimatePresence
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <TarjetaMascota mascota={currentPet} />
+          </motion.div>
+        );
+      case 'citas':
+        return (
+          <motion.div
+            key="citas-content"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <CitasUsuario />
+          </motion.div>
+        );
+      case 'servicios':
+        return (
+          <motion.div
+            key="servicios-content"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <ServiciosVeterinaria />
+          </motion.div>
+        );
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className={styles.container}>
@@ -171,9 +180,9 @@ const InicioUsuario = () => {
           <img src={logo} alt="Logo Flooky Pets" className={styles.logo} />
           <div className={styles.logoText}>Flooky Pets</div>
         </div>
-        
+
         <div className={styles.userWelcome}>
-          <motion.h1 
+          <motion.h1
             className={styles.welcome}
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -181,7 +190,7 @@ const InicioUsuario = () => {
           >
             ¡Hola, <span>{userData.nombre}</span>!
           </motion.h1>
-          <motion.p 
+          <motion.p
             className={styles.subtitle}
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -190,18 +199,19 @@ const InicioUsuario = () => {
             ¿Qué vamos a hacer hoy?
           </motion.p>
         </div>
-        
+
         <div className={styles.userActions}>
-          <motion.button 
+          <motion.button
             className={styles.helpButton}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
+            onClick={() => navigate('/usuario/ayuda')}
           >
             <FaQuestionCircle /> <span>Ayuda</span>
           </motion.button>
-          
+
           <div className={styles.profileContainer}>
-            <motion.button 
+            <motion.button
               className={styles.profileButton}
               onClick={() => setShowProfileMenu(!showProfileMenu)}
               whileHover={{ scale: 1.05 }}
@@ -210,10 +220,10 @@ const InicioUsuario = () => {
               <div className={styles.profileInitial}>{userData.nombre.charAt(0)}</div>
               <FaChevronDown className={`${styles.profileArrow} ${showProfileMenu ? styles.rotated : ''}`} />
             </motion.button>
-            
+
             <AnimatePresence>
               {showProfileMenu && (
-                <motion.div 
+                <motion.div
                   className={styles.profileMenu}
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -230,21 +240,28 @@ const InicioUsuario = () => {
                   <div className={styles.profileStatus}>
                     <span className={styles.membershipBadge}>{userData.membresia}</span>
                   </div>
-                  <motion.button 
+                  <motion.button
                     className={styles.menuItem}
-                    onClick={goToProfile}
+                    onClick={() => navigate('/usuario/perfil')}
                     whileHover={{ x: 5 }}
                   >
-                    <FaUserEdit className={styles.menuIcon} /> Mi perfil
+                    <FaUserCog className={styles.menuIcon} /> Mi perfil
                   </motion.button>
-                  <motion.button 
+                  <motion.button
                     className={styles.menuItem}
-                    onClick={goToSettings}
+                    onClick={() => navigate('/usuario/perfil/configuracion')}
                     whileHover={{ x: 5 }}
                   >
                     <FaCog className={styles.menuIcon} /> Configuración
                   </motion.button>
-                  <motion.button 
+                  <motion.button
+                    className={styles.menuItem}
+                    onClick={() => navigate('/usuario/perfil/pagos')}
+                    whileHover={{ x: 5 }}
+                  >
+                    <FaHeart className={styles.menuIcon} /> Métodos de Pago
+                  </motion.button>
+                  <motion.button
                     className={styles.menuItem}
                     onClick={handleLogout}
                     whileHover={{ x: 5 }}
@@ -260,7 +277,7 @@ const InicioUsuario = () => {
 
       {/* Sección de mascota destacada y próxima cita */}
       <div className={styles.highlightSection}>
-        <motion.div 
+        <motion.div
           className={styles.petHighlight}
           initial="hidden"
           animate="visible"
@@ -270,16 +287,16 @@ const InicioUsuario = () => {
             <img src={currentPet.imagen} alt={currentPet.nombre} className={styles.petImage} />
             <div className={styles.petImageOverlay}></div>
             <div className={styles.petNavigation}>
-              <motion.button 
-                className={styles.navArrow} 
+              <motion.button
+                className={styles.navArrow}
                 onClick={handlePrevPet}
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
               >
                 <FaChevronLeft />
               </motion.button>
-              <motion.button 
-                className={styles.navArrow} 
+              <motion.button
+                className={styles.navArrow}
                 onClick={handleNextPet}
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
@@ -292,7 +309,7 @@ const InicioUsuario = () => {
             <div className={styles.petSelectorContainer}>
               <h3>Mi compañero:</h3>
               <div className={styles.petSelectorWrapper}>
-                <motion.button 
+                <motion.button
                   className={styles.petSelectorButton}
                   onClick={() => setShowPetsDropdown(!showPetsDropdown)}
                   whileHover={{ scale: 1.02 }}
@@ -302,7 +319,7 @@ const InicioUsuario = () => {
                 </motion.button>
                 <AnimatePresence>
                   {showPetsDropdown && (
-                    <motion.div 
+                    <motion.div
                       className={styles.petsDropdown}
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -321,6 +338,7 @@ const InicioUsuario = () => {
                       <motion.button
                         className={styles.addPetOption}
                         whileHover={{ x: 5 }}
+                        onClick={() => navigate('/usuario/mascotas/agregar')}
                       >
                         + Agregar mascota
                       </motion.button>
@@ -330,36 +348,37 @@ const InicioUsuario = () => {
               </div>
             </div>
             <div className={styles.petDetails}>
-              <motion.span 
+              <motion.span
                 className={styles.petDetail}
                 whileHover={{ scale: 1.05 }}
               >
                 {currentPet.tipo}
               </motion.span>
-              <motion.span 
+              <motion.span
                 className={styles.petDetail}
                 whileHover={{ scale: 1.05 }}
               >
                 {currentPet.raza}
               </motion.span>
-              <motion.span 
+              <motion.span
                 className={styles.petDetail}
                 whileHover={{ scale: 1.05 }}
               >
                 {currentPet.edad}
               </motion.span>
             </div>
-            <motion.button 
+            <motion.button
               className={styles.careButton}
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
+              onClick={() => navigate(`/usuario/historial/${currentPet.id}`)}
             >
               <FaHeart /> <span>Historial de salud</span>
             </motion.button>
           </div>
         </motion.div>
 
-        <motion.div 
+        <motion.div
           className={styles.nextAppointment}
           initial="hidden"
           animate="visible"
@@ -388,17 +407,19 @@ const InicioUsuario = () => {
             </div>
           </div>
           <div className={styles.appointmentActions}>
-            <motion.button 
+            <motion.button
               className={styles.primaryButton}
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
+              onClick={handleConfirmAssistance}
             >
               Confirmar asistencia
             </motion.button>
-            <motion.button 
+            <motion.button
               className={styles.secondaryButton}
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
+              onClick={handleReschedule}
             >
               Reagendar
             </motion.button>
@@ -408,7 +429,7 @@ const InicioUsuario = () => {
 
       {/* Barra de navegación integrada */}
       <nav className={styles.integratedNav}>
-        <motion.button 
+        <motion.button
           className={`${styles.navButton} ${activeTab === 'mascotas' ? styles.active : ''}`}
           onClick={() => setActiveTab('mascotas')}
           whileHover={{ scale: 1.05 }}
@@ -418,7 +439,7 @@ const InicioUsuario = () => {
           <span>Mis Mascotas</span>
           <div className={styles.navIndicator}></div>
         </motion.button>
-        <motion.button 
+        <motion.button
           className={`${styles.navButton} ${activeTab === 'citas' ? styles.active : ''}`}
           onClick={() => setActiveTab('citas')}
           whileHover={{ scale: 1.05 }}
@@ -428,7 +449,7 @@ const InicioUsuario = () => {
           <span>Mis Citas</span>
           <div className={styles.navIndicator}></div>
         </motion.button>
-        <motion.button 
+        <motion.button
           className={`${styles.navButton} ${activeTab === 'servicios' ? styles.active : ''}`}
           onClick={() => setActiveTab('servicios')}
           whileHover={{ scale: 1.05 }}
@@ -445,11 +466,12 @@ const InicioUsuario = () => {
         <AnimatePresence mode='wait'>
           {renderContent()}
         </AnimatePresence>
+        <Outlet /> {/* Para renderizar las rutas hijas si aún las usas, si no, puedes quitarlo */}
       </div>
 
       {/* Sidebar con recordatorios y más información */}
       <div className={styles.sidebar}>
-        <motion.div 
+        <motion.div
           className={styles.remindersCard}
           initial="hidden"
           animate="visible"
@@ -461,8 +483,8 @@ const InicioUsuario = () => {
           </div>
           <ul className={styles.remindersList}>
             {recordatorios.filter(r => r.importante).map(item => (
-              <motion.li 
-                key={item.id} 
+              <motion.li
+                key={item.id}
                 className={styles.importantReminder}
                 whileHover={{ x: 5 }}
               >
@@ -473,27 +495,27 @@ const InicioUsuario = () => {
           </ul>
         </motion.div>
 
-        <motion.div 
+        <motion.div
           className={styles.remindersCard}
           initial="hidden"
           animate="visible"
           variants={slideUp}
         >
-          <div 
-            className={styles.cardHeader} 
+          <div
+            className={styles.cardHeader}
             onClick={() => setExpandedReminders(!expandedReminders)}
           >
             <h3>Tus recordatorios</h3>
             <FaChevronDown className={`${styles.expandIcon} ${expandedReminders ? styles.expanded : ''}`} />
           </div>
-          <motion.ul 
+          <motion.ul
             className={`${styles.remindersList} ${expandedReminders ? styles.expanded : ''}`}
             initial={{ height: 0 }}
             animate={{ height: expandedReminders ? 'auto' : 0 }}
           >
             {recordatorios.map(item => (
-              <motion.li 
-                key={item.id} 
+              <motion.li
+                key={item.id}
                 className={item.importante ? styles.importantReminder : ''}
                 whileHover={{ x: 5 }}
               >
@@ -504,7 +526,7 @@ const InicioUsuario = () => {
           </motion.ul>
         </motion.div>
 
-        <motion.div 
+        <motion.div
           className={styles.tipCard}
           initial="hidden"
           animate="visible"
@@ -521,7 +543,7 @@ const InicioUsuario = () => {
       {/* Overlay de logout */}
       <AnimatePresence>
         {isLoggingOut && (
-          <motion.div 
+          <motion.div
             className={styles.logoutOverlay}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -535,6 +557,102 @@ const InicioUsuario = () => {
             >
               <div className={styles.spinner}></div>
               <p>Cerrando sesión...</p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Modal para Confirmar Asistencia */}
+      <AnimatePresence>
+        {showConfirmModal && (
+          <motion.div
+            className={styles.modalOverlay}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowConfirmModal(false)}
+          >
+            <motion.div
+              className={styles.modalContent}
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()} // Evita que el clic en el modal cierre el overlay
+            >
+              <h3>Confirmar Asistencia</h3>
+              <p>¿Estás seguro de que quieres confirmar tu asistencia a la cita del {proximaCita.fecha} a las {proximaCita.hora}?</p>
+              <div className={styles.modalActions}>
+                <motion.button
+                  className={styles.primaryButton}
+                  onClick={() => {
+                    // Aquí podrías enviar la confirmación al backend
+                    // En un entorno de producción, reemplaza el alert con una notificación (ej: Toast)
+                    alert('Asistencia confirmada!');
+                    setShowConfirmModal(false);
+                  }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Sí, confirmar
+                </motion.button>
+                <motion.button
+                  className={styles.secondaryButton}
+                  onClick={() => setShowConfirmModal(false)}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Cancelar
+                </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Modal para Reagendar */}
+      <AnimatePresence>
+        {showRescheduleModal && (
+          <motion.div
+            className={styles.modalOverlay}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowRescheduleModal(false)}
+          >
+            <motion.div
+              className={styles.modalContent}
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()} // Evita que el clic en el modal cierre el overlay
+            >
+              <h3>Reagendar Cita</h3>
+              <p>Por favor, selecciona una nueva fecha y hora para tu cita con el {proximaCita.veterinario}.</p>
+              <input type="date" className={styles.modalInput} />
+              <input type="time" className={styles.modalInput} />
+              <div className={styles.modalActions}>
+                <motion.button
+                  className={styles.primaryButton}
+                  onClick={() => {
+                    // Aquí podrías enviar la solicitud de reagendamiento al backend
+                    // En un entorno de producción, reemplaza el alert con una notificación (ej: Toast)
+                    alert('Solicitud de reagendamiento enviada!');
+                    setShowRescheduleModal(false);
+                  }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Enviar Solicitud
+                </motion.button>
+                <motion.button
+                  className={styles.secondaryButton}
+                  onClick={() => setShowRescheduleModal(false)}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Cancelar
+                </motion.button>
+              </div>
             </motion.div>
           </motion.div>
         )}

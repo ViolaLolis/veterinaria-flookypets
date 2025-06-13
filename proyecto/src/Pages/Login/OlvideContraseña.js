@@ -121,10 +121,14 @@ function OlvideContraseña() {
       }
   
       const codigo = data.resetToken || generarCodigo();
-  
       // 👇 Línea agregada para mostrar el código en consola (solo para pruebas)
       console.log( `Codigo de verificación para ${email}: ${codigo}`);
       console.log(`🔐 Código de verificación para ${email}: ${codigo}`);
+      // 👇 Línea agregada para mostrar el código en consola (solo para pruebas) HEAD
+      console.log( `Codigo de verificación para ${email}: ${codigo}`);
+
+      console.log(`🔐 Código de verificación para ${email}: ${codigo}`);
+
   
       const emailEnviado = await enviarCodigoPorCorreo(codigo, email);
   

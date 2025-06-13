@@ -1,37 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import styles from './Style/EditarPerfilVeterinarioStyles.module.css';
+import veteStyles from './Style/EditarPerfilVeterinarioStyles.module.css';
 import { motion } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowLeft, faUserCog, faSave } from '@fortawesome/free-solid-svg-icons';
+import { faArrowLeft, faUserCog, faSave, faSpinner } from '@fortawesome/free-solid-svg-icons'; // Added faSpinner
 
 const containerVariants = {
   hidden: { opacity: 0, x: '-100vw' },
-  visible: { 
-    opacity: 1, 
-    x: 0, 
-    transition: { 
-      type: 'spring', 
-      delay: 0.2, 
-      damping: 20, 
-      stiffness: 100 
-    } 
+  visible: {
+    opacity: 1,
+    x: 0,
+    transition: {
+      type: 'spring',
+      delay: 0.2,
+      damping: 20,
+      stiffness: 100
+    }
   },
-  exit: { 
-    x: '100vw', 
-    transition: { 
+  exit: {
+    x: '100vw',
+    transition: {
       ease: 'easeInOut',
-      duration: 0.3 
-    } 
+      duration: 0.3
+    }
   },
 };
 
 const buttonVariants = {
-  hover: { 
+  hover: {
     scale: 1.05,
     boxShadow: "0 5px 15px rgba(0, 172, 193, 0.4)"
   },
-  tap: { 
+  tap: {
     scale: 0.95,
     boxShadow: "0 2px 5px rgba(0, 172, 193, 0.2)"
   },
@@ -39,8 +39,9 @@ const buttonVariants = {
 
 const inputVariants = {
   focus: {
-    scale: 1.02,
-    boxShadow: "0 0 0 3px rgba(0, 172, 193, 0.2)"
+    scale: 1.005, // Slightly less scale for inputs, more subtle
+    boxShadow: "0 0 0 4px rgba(0, 172, 193, 0.15)", // Teal glow
+    borderColor: "#00acc1" // Teal border on focus
   }
 };
 
@@ -59,11 +60,11 @@ const EditarPerfilVeterinario = () => {
     // Simulación de llamada a la API
     setTimeout(() => {
       const veterinarioData = {
-        nombre: 'Dra. Sofia Vargas',
-        especialidad: 'Medicina General Veterinaria',
-        email: 'sofia.vargas@example.com',
-        telefono: '3001234567',
-        direccion: 'Carrera 10 # 20-30',
+        nombre: '',
+        especialidad: '',
+        email: '',
+        telefono: '',
+        direccion: '',
       };
       setNombre(veterinarioData.nombre);
       setEspecialidad(veterinarioData.especialidad);
@@ -81,22 +82,22 @@ const EditarPerfilVeterinario = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setIsSubmitting(true);
-    
+
     // Simulación de envío a la API
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 1500)); // Increased delay for visual feedback
       console.log('Datos actualizados:', { nombre, especialidad, email, telefono, direccion });
       navigate('/veterinario/perfil');
     } catch (err) {
-      setError('Error al guardar los cambios');
+      setError('Error al guardar los cambios. Por favor, inténtalo de nuevo.');
       setIsSubmitting(false);
     }
   };
 
   if (loading) {
     return (
-      <div className={styles.loadingContainer}>
-        <div className={styles.loadingSpinner}></div>
+      <div className={veteStyles.veteLoadingContainer}> {/* Corrected class */}
+        <div className={veteStyles.veteLoadingSpinner}></div> {/* Corrected class */}
         <p>Cargando datos del perfil...</p>
       </div>
     );
@@ -104,12 +105,12 @@ const EditarPerfilVeterinario = () => {
 
   if (error) {
     return (
-      <div className={styles.errorContainer}>
+      <div className={veteStyles.veteErrorContainer}> {/* Corrected class */}
         <h3>Error</h3>
         <p>{error}</p>
-        <motion.button 
-          onClick={() => navigate('/veterinario/perfil')} 
-          className={styles.volverBtn}
+        <motion.button
+          onClick={() => navigate('/veterinario/perfil')}
+          className={veteStyles.veteVolverBtn} /* Reused style for consistency */
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
@@ -121,26 +122,27 @@ const EditarPerfilVeterinario = () => {
 
   return (
     <motion.div
-      className={styles.editarPerfilContainer}
+      className={veteStyles.veteEditarPerfilContainer} // Corrected class
       variants={containerVariants}
       initial="hidden"
       animate="visible"
       exit="exit"
     >
-      <div className={styles.header}>
-        <motion.button 
-          onClick={handleVolver} 
-          className={styles.volverBtn}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+      <div className={veteStyles.veteHeader}> {/* Corrected class */}
+        <motion.button
+          onClick={handleVolver}
+          className={veteStyles.veteVolverBtn} // Corrected class
+          variants={buttonVariants} // Using shared button variants
+          whileHover="hover"
+          whileTap="tap"
         >
           <FontAwesomeIcon icon={faArrowLeft} /> Volver
         </motion.button>
         <h2><FontAwesomeIcon icon={faUserCog} /> Editar Perfil</h2>
       </div>
-      
-      <form onSubmit={handleSubmit} className={styles.formulario}>
-        <motion.div className={styles.formGroup}>
+
+      <form onSubmit={handleSubmit} className={veteStyles.veteFormulario}> {/* Corrected class */}
+        <motion.div className={veteStyles.veteFormGroup}> {/* Corrected class */}
           <label htmlFor="nombre">Nombre:</label>
           <motion.input
             type="text"
@@ -152,8 +154,8 @@ const EditarPerfilVeterinario = () => {
             variants={inputVariants}
           />
         </motion.div>
-        
-        <motion.div className={styles.formGroup}>
+
+        <motion.div className={veteStyles.veteFormGroup}> {/* Corrected class */}
           <label htmlFor="especialidad">Especialidad:</label>
           <motion.input
             type="text"
@@ -164,8 +166,8 @@ const EditarPerfilVeterinario = () => {
             variants={inputVariants}
           />
         </motion.div>
-        
-        <motion.div className={styles.formGroup}>
+
+        <motion.div className={veteStyles.veteFormGroup}> {/* Corrected class */}
           <label htmlFor="email">Email:</label>
           <motion.input
             type="email"
@@ -177,8 +179,8 @@ const EditarPerfilVeterinario = () => {
             variants={inputVariants}
           />
         </motion.div>
-        
-        <motion.div className={styles.formGroup}>
+
+        <motion.div className={veteStyles.veteFormGroup}> {/* Corrected class */}
           <label htmlFor="telefono">Teléfono:</label>
           <motion.input
             type="tel"
@@ -189,8 +191,8 @@ const EditarPerfilVeterinario = () => {
             variants={inputVariants}
           />
         </motion.div>
-        
-        <motion.div className={styles.formGroup}>
+
+        <motion.div className={veteStyles.veteFormGroup}> {/* Corrected class */}
           <label htmlFor="direccion">Dirección:</label>
           <motion.input
             type="text"
@@ -201,17 +203,17 @@ const EditarPerfilVeterinario = () => {
             variants={inputVariants}
           />
         </motion.div>
-        
+
         <motion.button
           type="submit"
-          className={styles.guardarBtn}
+          className={veteStyles.veteGuardarBtn} // Corrected class
           variants={buttonVariants}
           whileHover="hover"
           whileTap="tap"
           disabled={isSubmitting}
         >
           {isSubmitting ? (
-            'Guardando...'
+            <><FontAwesomeIcon icon={faSpinner} spin /> Guardando...</> // Added spinner
           ) : (
             <>
               <FontAwesomeIcon icon={faSave} /> Guardar Cambios

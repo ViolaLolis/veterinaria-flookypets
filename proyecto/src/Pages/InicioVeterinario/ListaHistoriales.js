@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faEye, faPlus, faNotesMedical, faSearch, 
   faSync, faDog, faCat, faCalendarAlt,
-  faUser, faStethoscope, faPaw
+  faUser, faStethoscope
 } from '@fortawesome/free-solid-svg-icons';
 
 const containerVariants = {
@@ -269,16 +269,7 @@ const ListaHistoriales = () => {
             {refreshing ? ' Actualizando...' : ' Actualizar'}
           </motion.button>
 
-          <motion.button 
-            className={styles.vetNewButton}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <Link to="/veterinario/nuevo-historial" className={styles.vetNewButtonLink}>
-              <FontAwesomeIcon icon={faPlus} />
-              <span>Nuevo Historial</span>
-            </Link>
-          </motion.button>
+           
         </div>
       </div>
 
