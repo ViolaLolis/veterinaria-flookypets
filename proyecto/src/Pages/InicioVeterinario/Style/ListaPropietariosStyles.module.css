@@ -1,0 +1,280 @@
+/* Estilos generales */
+.vetContainer {
+    padding: 2rem;
+    background-color: #f9f9f9;
+    min-height: 100vh;
+  }
+  
+  /* Encabezado */
+  .vetHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  
+  .vetTitle {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: #333;
+    margin: 0;
+    font-size: 1.8rem;
+  }
+  
+  .vetTitleIcon {
+    color: #00bcd4;
+    font-size: 1.5rem;
+  }
+  
+  .vetHeaderActions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+  }
+  
+  /* Botones */
+  .vetRefreshButton {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.7rem 1.2rem;
+    background-color: #f0f0f0;
+    border: none;
+    border-radius: 30px;
+    color: #555;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .vetRefreshButton:hover {
+    background-color: #e0e0e0;
+  }
+  
+  .vetAddButton {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.7rem 1.5rem;
+    background-color: #00bcd4;
+    color: white;
+    border-radius: 30px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+  
+  .vetAddButton:hover {
+    background-color: #0097a7;
+    color: white;
+  }
+  
+  /* Barra de búsqueda */
+  .vetSearchContainer {
+    position: relative;
+    margin-bottom: 2rem;
+    max-width: 800px;
+  }
+  
+  .vetSearchIcon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #00bcd4;
+  }
+  
+  .vetSearchInput {
+    width: 100%;
+    padding: 0.8rem 1rem 0.8rem 3rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 30px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    outline: none;
+  }
+  
+  .vetSearchInput:focus {
+    border-color: #00bcd4;
+    box-shadow: 0 0 0 2px rgba(0, 188, 212, 0.3);
+  }
+  
+  /* Lista de propietarios */
+  .vetPropietariosList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  .vetPropietarioCard {
+    background-color: white;
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .vetPropietarioInfo {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1rem;
+    flex: 1;
+  }
+  
+  .vetAvatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    flex-shrink: 0;
+  }
+  
+  .vetDetails {
+    flex: 1;
+  }
+  
+  .vetDetails h3 {
+    margin: 0 0 0.5rem 0;
+    color: #333;
+  }
+  
+  .vetDetails p {
+    margin: 0.3rem 0;
+    color: #555;
+    font-size: 0.9rem;
+  }
+  
+  .vetDetails strong {
+    color: #333;
+  }
+  
+  .vetActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.8rem;
+    border-top: 1px solid #eee;
+    padding-top: 1rem;
+  }
+  
+  .vetActionButton {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #f5f5f5;
+    color: #555;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+  }
+  
+  .vetActionButton:hover {
+    background-color: #e0e0e0;
+  }
+  
+  .vetEditButton {
+    background-color: rgba(255, 193, 7, 0.1);
+    color: #FFC107;
+  }
+  
+  .vetEditButton:hover {
+    background-color: rgba(255, 193, 7, 0.2);
+  }
+  
+  .vetDisableButton {
+    background-color: rgba(255, 82, 82, 0.1);
+    color: #FF5252;
+  }
+  
+  .vetDisableButton:hover {
+    background-color: rgba(255, 82, 82, 0.2);
+  }
+  
+  /* Estado vacío */
+  .vetEmptyState {
+    text-align: center;
+    padding: 3rem 2rem;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    margin-top: 2rem;
+  }
+  
+  .vetEmptyIllustration {
+    margin-bottom: 1.5rem;
+    color: #00bcd4;
+  }
+  
+  .vetEmptyState h3 {
+    margin: 0 0 0.5rem 0;
+    color: #333;
+  }
+  
+  .vetEmptyState p {
+    margin: 0 0 1.5rem 0;
+    color: #777;
+  }
+  
+  /* Loading y errores */
+  .vetLoadingContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f9f9f9;
+  }
+  
+  .vetLoadingSpinner {
+    margin-bottom: 2rem;
+  }
+  
+  .vetLoadingText {
+    color: #00bcd4;
+    font-weight: 500;
+  }
+  
+  .vetErrorContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f9f9f9;
+    text-align: center;
+  }
+  
+  .vetErrorMessage {
+    margin: 1rem 0;
+    color: #333;
+  }
+  
+  .vetRetryButton {
+    padding: 0.8rem 1.5rem;
+    background-color: #00bcd4;
+    color: white;
+    border: none;
+    border-radius: 30px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .vetRetryButton:hover {
+    background-color: #0097a7;
+  }

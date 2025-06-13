@@ -1,0 +1,289 @@
+/* Estilos generales */
+.veteContainer {
+    padding: 2rem;
+    background-color: #f9f9f9;
+    min-height: 100vh;
+  }
+  
+  /* Encabezado */
+  .veteHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 2rem;
+  }
+  
+  .veteTitle {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: #333;
+    margin: 0 0 1rem 0;
+    font-size: 1.8rem;
+  }
+  
+  .veteTitleIcon {
+    color: #00bcd4;
+    font-size: 1.5rem;
+  }
+  
+  /* Barra de búsqueda */
+  .veteSearchContainer {
+    position: relative;
+    max-width: 600px;
+    margin-bottom: 1rem;
+  }
+  
+  .veteSearchIcon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #00bcd4;
+  }
+  
+  .veteSearchInput {
+    width: 100%;
+    padding: 0.8rem 1rem 0.8rem 3rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 30px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    outline: none;
+  }
+  
+  .veteSearchInput:focus {
+    border-color: #00bcd4;
+    box-shadow: 0 0 0 2px rgba(0, 188, 212, 0.3);
+  }
+  
+  /* Calendario */
+  .veteCalendarContainer {
+    background-color: white;
+    padding: 1rem;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  }
+  
+  .veteCalendar {
+    border: none;
+    width: 100%;
+  }
+  
+  .veteCalendarDot {
+    width: 6px;
+    height: 6px;
+    background-color: #00bcd4;
+    border-radius: 50%;
+    margin: 0 auto;
+  }
+  
+  .react-calendar__tile--now {
+    background-color: #e0f7fa !important;
+  }
+  
+  .react-calendar__tile--active {
+    background-color: #00bcd4 !important;
+    color: white !important;
+  }
+  
+  /* Lista de citas */
+  .veteLista {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  .veteItem {
+    background-color: white;
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+  }
+  
+  .veteCitaInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .veteInfoRow {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+  
+  .veteInfoIcon {
+    color: #00bcd4;
+    width: 20px;
+    text-align: center;
+  }
+  
+  .veteFecha {
+    font-weight: bold;
+    color: #333;
+  }
+  
+  .vetePropietario, .veteMascota, .veteServicio, .veteTelefono, .veteDireccion {
+    color: #555;
+  }
+  
+  .veteVerButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.2rem;
+    background-color: #00bcd4;
+    color: white;
+    border-radius: 20px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+  }
+  
+  .veteVerButton:hover {
+    background-color: #0097a7;
+  }
+  
+  /* Estado vacío */
+  .veteEmptyState {
+    text-align: center;
+    padding: 3rem 2rem;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    margin-top: 2rem;
+    grid-column: 1 / -1;
+  }
+  
+  .veteEmptyIllustration {
+    margin-bottom: 1.5rem;
+    color: #00bcd4;
+  }
+  
+  .veteEmptyState h3 {
+    margin: 0 0 0.5rem 0;
+    color: #333;
+  }
+  
+  .veteEmptyState p {
+    margin: 0 0 1.5rem 0;
+    color: #777;
+  }
+  
+  .veteAddButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.7rem 1.5rem;
+    background-color: #00bcd4;
+    color: white;
+    border-radius: 30px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+  
+  .veteAddButton:hover {
+    background-color: #0097a7;
+    color: white;
+  }
+  
+  /* Sección de servicios */
+  .veteServiciosSection {
+    margin-top: 3rem;
+  }
+  
+  .veteServiciosTitle {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: #333;
+    margin-bottom: 1.5rem;
+  }
+  
+  .veteServiciosLista {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  .veteServicioItem {
+    background-color: white;
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+  }
+  
+  .veteServicioItem h3 {
+    margin: 0 0 0.5rem 0;
+    color: #333;
+  }
+  
+  .veteServicioItem p {
+    margin: 0 0 1rem 0;
+    color: #555;
+  }
+  
+  .veteServicioButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.2rem;
+    background-color: #00bcd4;
+    color: white;
+    border-radius: 20px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+  }
+  
+  .veteServicioButton:hover {
+    background-color: #0097a7;
+  }
+  
+  /* Loading y errores */
+  .veteLoadingContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f9f9f9;
+  }
+  
+  .veteLoadingSpinner {
+    margin-bottom: 2rem;
+  }
+  
+  .veteLoadingText {
+    color: #00bcd4;
+    font-weight: 500;
+  }
+  
+  .veteErrorContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f9f9f9;
+    text-align: center;
+  }
+  
+  .veteErrorMessage {
+    margin: 1rem 0;
+    color: #333;
+    max-width: 500px;
+  }

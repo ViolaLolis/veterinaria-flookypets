@@ -1,0 +1,989 @@
+/* Estilos generales */
+.vetMainContainer {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: #f5f5f5;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  
+  /* Barra superior */
+  .vetTopBar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background-color: white;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    z-index: 10;
+  }
+  
+  .vetSearchBar {
+    position: relative;
+    width: 40%;
+  }
+  
+  .vetSearchIcon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #00bcd4;
+  }
+  
+  .vetSearchInput {
+    width: 100%;
+    padding: 0.8rem 1rem 0.8rem 3rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 30px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    outline: none;
+  }
+  
+  .vetSearchInput:focus {
+    border-color: #00bcd4;
+    box-shadow: 0 0 0 2px rgba(0, 188, 212, 0.3);
+  }
+  
+  .vetTopBarActions {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+  
+  .vetNotificationButton {
+    position: relative;
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: #555;
+    padding: 0.5rem;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+  }
+  
+  .vetNotificationButton:hover {
+    background-color: #e0f7fa;
+  }
+  
+  .vetNotificationBadge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: #FF5252;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.7rem;
+    font-weight: bold;
+  }
+  
+  .vetNewAppointmentButton {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: #00bcd4;
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 30px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .vetNewAppointmentButton:hover {
+    background-color: #0097a7;
+  }
+  
+  /* Panel de notificaciones */
+  .vetNotificationPanel {
+    position: absolute;
+    right: 0;
+    top: 120%;
+    width: 350px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+    overflow: hidden;
+  }
+  
+  .vetNotificationHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .vetNotificationHeader h4 {
+    margin: 0;
+    color: #333;
+  }
+  
+  .vetMarkAsRead {
+    background: none;
+    border: none;
+    color: #00bcd4;
+    font-size: 0.8rem;
+    cursor: pointer;
+  }
+  
+  .vetNotificationList {
+    max-height: 400px;
+    overflow-y: auto;
+  }
+  
+  .vetNotificationItem {
+    display: flex;
+    padding: 1rem;
+    gap: 1rem;
+    transition: all 0.3s ease;
+  }
+  
+  .vetNotificationItem:hover {
+    background-color: #f9f9f9;
+  }
+  
+  .vetUnread {
+    background-color: #f5fdff;
+  }
+  
+  .vetNotificationIcon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1rem;
+  }
+  
+  .vetNotificationContent {
+    flex: 1;
+  }
+  
+  .vetNotificationContent h5 {
+    margin: 0 0 0.3rem 0;
+    font-size: 0.9rem;
+  }
+  
+  .vetNotificationContent p {
+    margin: 0 0 0.3rem 0;
+    font-size: 0.8rem;
+    color: #666;
+  }
+  
+  .vetNotificationContent span {
+    font-size: 0.7rem;
+    color: #999;
+  }
+  
+  .vetNoNotifications {
+    padding: 2rem;
+    text-align: center;
+    color: #777;
+  }
+  
+  .vetNoNotifications p {
+    margin-top: 1rem;
+  }
+  
+  /* Contenedor principal */
+  .vetContentWrapper {
+    display: flex;
+    flex: 1;
+  }
+  
+  /* Barra lateral */
+  .vetSidebar {
+    width: 280px;
+    background-color: white;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+  }
+  
+  .vetSidebarHeader {
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+  
+  .vetLogoContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+  }
+  
+  .vetLogoIcon {
+    font-size: 1.8rem;
+    color: #00bcd4;
+  }
+  
+  .vetSidebarHeader h2 {
+    margin: 0;
+    color: #333;
+  }
+  
+  .vetClinicName {
+    margin: 0;
+    color: #777;
+    font-size: 0.9rem;
+  }
+  
+  .vetUserProfile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .vetAvatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background-color: #e0f7fa;
+    color: #00bcd4;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+    cursor: pointer;
+  }
+  
+  .vetUserInfo {
+    text-align: center;
+  }
+  
+  .vetUserInfo h3 {
+    margin: 0 0 0.3rem 0;
+    color: #333;
+  }
+  
+  .vetUserInfo p {
+    margin: 0;
+    color: #777;
+    font-size: 0.9rem;
+  }
+  
+  .vetNavMenu ul {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 2rem 0;
+  }
+  
+  .vetNavMenu li {
+    padding: 0.8rem 1rem;
+    margin-bottom: 0.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    color: #555;
+    transition: all 0.3s ease;
+  }
+  
+  .vetNavMenu li:hover {
+    background-color: #e0f7fa;
+    color: #00bcd4;
+  }
+  
+  .vetNavMenu li svg {
+    width: 20px;
+  }
+  
+  .vetActive {
+    background-color: #e0f7fa;
+    color: #00bcd4 !important;
+    font-weight: 600;
+  }
+  
+  .vetQuickActions {
+    margin-bottom: 2rem;
+  }
+  
+  .vetQuickActions h4 {
+    margin-bottom: 1rem;
+    color: #555;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  
+  .vetQuickButton {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.8rem 1rem;
+    margin-bottom: 0.5rem;
+    border: none;
+    border-radius: 8px;
+    background-color: #f5f5f5;
+    color: #333;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .vetQuickButton:hover {
+    color: white;
+  }
+  
+  .vetSidebarFooter {
+    margin-top: auto;
+  }
+  
+  .vetStatusCard {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background-color: #f5f5f5;
+    border-radius: 8px;
+    color: #333;
+  }
+  
+  .vetStatusCard svg {
+    font-size: 1.2rem;
+  }
+  
+  .vetStatusCard div span {
+    display: block;
+    font-size: 0.8rem;
+    color: #777;
+  }
+  
+  .vetStatusCard div p {
+    margin: 0.2rem 0 0 0;
+    font-weight: 600;
+    color: #00bcd4;
+  }
+  
+  /* Contenido principal */
+  .vetMainContent {
+    flex: 1;
+    padding: 2rem;
+    background-color: #f9f9f9;
+    overflow-y: auto;
+  }
+  
+  .vetHeader {
+    margin-bottom: 2rem;
+  }
+  
+  .vetWelcomeTitle {
+    font-size: 2rem;
+    color: #333;
+    margin-bottom: 0.5rem;
+  }
+  
+  .vetWelcomeTitle span {
+    color: #00bcd4;
+  }
+  
+  .vetSubtitle {
+    color: #777;
+    margin: 0;
+  }
+  
+  /* Tarjetas de estadísticas */
+  .vetStatsContainer {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+  }
+  
+  .vetStatCard {
+    background-color: white;
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .vetStatCard:hover {
+    transform: translateY(-5px);
+  }
+  
+  .vetStatIcon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  
+  .vetStatIcon svg {
+    font-size: 1.3rem;
+  }
+  
+  .vetStatContent h3 {
+    font-size: 1.8rem;
+    margin: 0 0 0.3rem 0;
+    color: #333;
+  }
+  
+  .vetStatContent p {
+    margin: 0;
+    color: #777;
+    font-size: 0.9rem;
+  }
+  
+  .vetTrendUp {
+    display: inline-block;
+    margin-top: 0.5rem;
+    color: #4CAF50;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+  
+  .vetTrendSteady {
+    display: inline-block;
+    margin-top: 0.5rem;
+    color: #FF9800;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+  
+  /* Sección de citas */
+  .vetCitasSection {
+    margin-bottom: 3rem;
+  }
+  
+  .vetSectionHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+  
+  .vetSectionTitle {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .vetSectionTitle h2 {
+    margin: 0;
+    color: #333;
+  }
+  
+  .vetSectionIcon {
+    font-size: 1.5rem;
+    color: #00bcd4;
+  }
+  
+  .vetTabsContainer {
+    display: flex;
+    gap: 0.5rem;
+    background-color: #f0f0f0;
+    padding: 0.3rem;
+    border-radius: 30px;
+  }
+  
+  .vetTabButton {
+    position: relative;
+    padding: 0.5rem 1.2rem;
+    border: none;
+    background: none;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #555;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .vetActiveTab {
+    color: white;
+    background-color: #00bcd4;
+  }
+  
+  .vetTabIndicator {
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background-color: white;
+    border-radius: 3px;
+  }
+  
+  .vetCitasGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  .vetCitaCard {
+    background-color: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+  }
+  
+  .vetCitaCard:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 188, 212, 0.2);
+  }
+  
+  .vetCompleted {
+    opacity: 0.8;
+    border-left: 4px solid #4CAF50;
+  }
+  
+  .vetHighPriority {
+    border-left: 4px solid #FF5252;
+  }
+  
+  .vetCitaHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    background-color: #f9f9f9;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .vetCitaTime {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #00bcd4;
+    font-weight: 600;
+  }
+  
+  .vetCitaDate {
+    color: #777;
+    font-size: 0.8rem;
+  }
+  
+  .vetPriorityBadge {
+    padding: 0.3rem 0.6rem;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: white;
+    background-color: #FF5252;
+  }
+  
+  .vetCitaContent {
+    padding: 1.5rem;
+  }
+  
+  .vetPetInfo {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .vetPetImage {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    overflow: hidden;
+  }
+  
+  .vetPetImage img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .vetPetDetails h3 {
+    margin: 0 0 0.3rem 0;
+    color: #333;
+  }
+  
+  .vetPetDetails p {
+    margin: 0 0 0.5rem 0;
+    color: #777;
+    font-size: 0.9rem;
+  }
+  
+  .vetPetMeta {
+    display: flex;
+    gap: 0.8rem;
+  }
+  
+  .vetPetMeta span {
+    font-size: 0.8rem;
+    color: #555;
+    background-color: #f0f0f0;
+    padding: 0.3rem 0.6rem;
+    border-radius: 20px;
+  }
+  
+  .vetCitaDetails {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+  
+  .vetDetailItem {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.8rem;
+    color: #555;
+  }
+  
+  .vetDetailItem svg {
+    color: #00bcd4;
+    margin-top: 0.2rem;
+  }
+  
+  .vetNotes {
+    font-size: 0.9rem;
+    color: #666;
+  }
+  
+  .vetCitaFooter {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    background-color: #f9f9f9;
+    border-top: 1px solid #eee;
+  }
+  
+  .vetCompleteButton {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.2rem;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 30px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .vetCompleteButton:hover {
+    background-color: #3d8b40;
+  }
+  
+  .vetCompletedLabel {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #4CAF50;
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+  
+  .vetMoreOptions {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    border: none;
+    background-color: #f0f0f0;
+    color: #777;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s ease;
+  }
+  
+  .vetMoreOptions:hover {
+    background-color: #e0e0e0;
+  }
+  
+  .vetNoCitas {
+    padding: 3rem 2rem;
+    text-align: center;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  }
+  
+  .vetNoCitasIcon {
+    color: #00bcd4;
+    margin-bottom: 1.5rem;
+  }
+  
+  .vetNoCitas h3 {
+    margin: 0 0 1rem 0;
+    color: #333;
+  }
+  
+  .vetNoCitas p {
+    margin: 0 0 2rem 0;
+    color: #777;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .vetScheduleButton {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.8rem 1.5rem;
+    background-color: #00bcd4;
+    color: white;
+    border: none;
+    border-radius: 30px;
+    font-weight: 500;
+    cursor: pointer;
+    margin: 0 auto;
+    transition: all 0.3s ease;
+  }
+  
+  .vetScheduleButton:hover {
+    background-color: #0097a7;
+  }
+  
+  /* Sección inferior */
+  .vetBottomSection {
+    margin-top: 3rem;
+  }
+  
+  .vetTipsSection h3 {
+    margin-bottom: 1.5rem;
+    color: #333;
+  }
+  
+  .vetTipsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+  }
+  
+  .vetTipCard {
+    background-color: white;
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+  }
+  
+  .vetTipCard:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 188, 212, 0.2);
+  }
+  
+  .vetTipIcon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
+  }
+  
+  .vetTipCard h4 {
+    margin: 0 0 0.5rem 0;
+    color: #333;
+  }
+  
+  .vetTipCard p {
+    margin: 0;
+    color: #777;
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+  
+  .vetRemindersCommentsContainer {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+  
+  .vetRemindersSection, .vetCommentsSection {
+    background-color: white;
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  }
+  
+  .vetRemindersSection h3, .vetCommentsSection h3 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    color: #333;
+  }
+  
+  .vetReminderItem {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .vetReminderItem:last-child {
+    border-bottom: none;
+  }
+  
+  .vetReminderIcon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+  
+  .vetReminderContent h4 {
+    margin: 0 0 0.3rem 0;
+    color: #333;
+  }
+  
+  .vetReminderContent p {
+    margin: 0 0 0.8rem 0;
+    color: #777;
+    font-size: 0.9rem;
+  }
+  
+  .vetReminderButton {
+    padding: 0.5rem 1rem;
+    background-color: #00bcd4;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .vetReminderButton:hover {
+    background-color: #0097a7;
+  }
+  
+  .vetCommentItem {
+    padding: 1rem 0;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .vetCommentItem:last-child {
+    border-bottom: none;
+  }
+  
+  .vetCommentHeader {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.8rem;
+  }
+  
+  .vetCommentAvatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    flex-shrink: 0;
+  }
+  
+  .vetCommentHeader h4 {
+    margin: 0;
+    color: #333;
+  }
+  
+  .vetRating {
+    display: flex;
+    gap: 0.2rem;
+  }
+  
+  .vetStarActive {
+    color: #FFC107;
+    font-size: 0.8rem;
+  }
+  
+  .vetStarInactive {
+    color: #e0e0e0;
+    font-size: 0.8rem;
+  }
+  
+  .vetCommentText {
+    margin: 0 0 0.5rem 0;
+    color: #555;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    font-style: italic;
+  }
+  
+  .vetCommentDate {
+    font-size: 0.7rem;
+    color: #999;
+  }
+  
+  /* Loading y errores */
+  .vetLoadingContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f9f9f9;
+  }
+  
+  .vetLoadingSpinner {
+    margin-bottom: 2rem;
+  }
+  
+  .vetLoadingText {
+    color: #00bcd4;
+    font-weight: 500;
+  }
+  
+  .vetErrorContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f9f9f9;
+    text-align: center;
+  }
+  
+  .vetErrorMessage {
+    margin: 1rem 0;
+    color: #333;
+  }
+  
+  .vetRetryButton {
+    padding: 0.8rem 1.5rem;
+    background-color: #00bcd4;
+    color: white;
+    border: none;
+    border-radius: 30px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .vetRetryButton:hover {
+    background-color: #0097a7;
+  }
