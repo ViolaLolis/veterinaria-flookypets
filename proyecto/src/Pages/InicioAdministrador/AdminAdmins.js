@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { FaUserShield, FaEdit, FaTrash, FaPlus, FaSearch, FaTimes, FaSave, FaSpinner } from 'react-icons/fa';
+import { FaUserShield, FaPlus, FaSearch, FaTimes, FaSave, FaSpinner } from 'react-icons/fa';
 import './Styles/AdminStyles.css';
 
-function AdminAdmins({ user }) {
+const AdminAdmins = ({ user }) => {
   const [admins, setAdmins] = useState([]);
   const [filteredAdmins, setFilteredAdmins] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -11,71 +11,140 @@ function AdminAdmins({ user }) {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [currentAdmin, setCurrentAdmin] = useState(null);
   const [formData, setFormData] = useState({
-    name: '',
+    nombre: '',
+    apellido: '',
     email: '',
-    phone: '',
-    role: 'Administrador'
+    telefono: '',
+    direccion: '',
+    password: '',
+    confirmPassword: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [notification, setNotification] = useState(null);
 
-  useEffect(() => {
-    const fetchAdmins = async () => {
-      try {
-        // Simulación de datos con retraso para mostrar loading
-        await new Promise(resolve => setTimeout(resolve, 800));
-        
-        const mockAdmins = [
-          { id: 1, name: 'Admin Principal', email: 'admin@flookypets.com', phone: '3001234567', role: 'Super Admin' },
-          { id: 2, name: 'Carlos Admin', email: 'carlos@flookypets.com', phone: '3102345678', role: 'Administrador' },
-          { id: 3, name: 'Laura Admin', email: 'laura@flookypets.com', phone: '3203456789', role: 'Administrador' }
-        ];
-        
-        setAdmins(mockAdmins);
-        setFilteredAdmins(mockAdmins);
-        setIsLoading(false);
-      } catch (err) {
-        setError('Error al cargar los administradores');
-        setIsLoading(false);
+  // Función para obtener token de autenticación
+  const getAuthToken = () => {
+    return localStorage.getItem('token');
+  };
+
+  // Función mejorada para hacer fetch con autenticación
+  const authFetch = async (url, options = {}) => {
+    const token = getAuthToken();
+    if (!token) {
+      throw new Error('No se encontró token de autenticación');
+    }
+
+    const defaultHeaders = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    };
+
+    const config = {
+      ...options,
+      headers: {
+        ...defaultHeaders,
+        ...options.headers
       }
     };
 
+    if (options.body) {
+      config.body = JSON.stringify(options.body);
+    }
+
+    const response = await fetch(`http://localhost:5000/api/admin${url}`, config);
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const errorMessage = errorData.message || `Error ${response.status}: ${response.statusText}`;
+      throw new Error(errorMessage);
+    }
+
+    return response.json();
+  };
+
+  // Cargar administradores
+  const fetchAdmins = async () => {
+    setIsLoading(true);
+    setError('');
+    try {
+      const { data } = await authFetch('/administrators');
+      
+      const formattedAdmins = data.map(admin => ({
+        id: admin.id,
+        nombre: admin.nombre,
+        apellido: admin.apellido,
+        email: admin.email,
+        telefono: admin.telefono,
+        direccion: admin.direccion,
+        active: admin.active,
+        created_at: admin.created_at,
+        name: `${admin.nombre} ${admin.apellido || ''}`.trim(),
+        role: 'Administrador'
+      }));
+
+      setAdmins(formattedAdmins);
+      setFilteredAdmins(formattedAdmins);
+    } catch (err) {
+      setError(`Error al cargar administradores: ${err.message}`);
+      console.error('Error fetching admins:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchAdmins();
   }, []);
 
   useEffect(() => {
     const results = admins.filter(admin =>
       admin.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      admin.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      admin.role.toLowerCase().includes(searchTerm.toLowerCase())
+      admin.email.toLowerCase().includes(searchTerm.toLowerCase())
     );
     setFilteredAdmins(results);
   }, [searchTerm, admins]);
 
   const showNotification = (message, type = 'success') => {
     setNotification({ message, type });
-    setTimeout(() => setNotification(null), 3000);
+    setTimeout(() => setNotification(null), 5000);
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (id === user.id) {
       showNotification('No puedes eliminar tu propio usuario', 'error');
       return;
     }
     
-    if (window.confirm('¿Estás seguro de eliminar este administrador?')) {
+    if (!window.confirm('¿Estás seguro de eliminar este administrador?')) {
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      await authFetch(`/administrators/${id}`, {
+        method: 'DELETE'
+      });
+      
       setAdmins(admins.filter(admin => admin.id !== id));
       showNotification('Administrador eliminado correctamente');
+    } catch (err) {
+      showNotification(`Error al eliminar: ${err.message}`, 'error');
+      console.error('Error deleting admin:', err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleEdit = (admin) => {
     setCurrentAdmin(admin);
     setFormData({
-      name: admin.name,
+      nombre: admin.nombre,
+      apellido: admin.apellido || '',
       email: admin.email,
-      phone: admin.phone,
-      role: admin.role
+      telefono: admin.telefono,
+      direccion: admin.direccion || '',
+      password: '',
+      confirmPassword: ''
     });
     setIsFormOpen(true);
   };
@@ -83,10 +152,13 @@ function AdminAdmins({ user }) {
   const handleAddNew = () => {
     setCurrentAdmin(null);
     setFormData({
-      name: '',
+      nombre: '',
+      apellido: '',
       email: '',
-      phone: '',
-      role: 'Administrador'
+      telefono: '',
+      direccion: '',
+      password: '',
+      confirmPassword: ''
     });
     setIsFormOpen(true);
   };
@@ -101,36 +173,81 @@ function AdminAdmins({ user }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validaciones del formulario
+    if (!formData.nombre || !formData.telefono) {
+      showNotification('Nombre y teléfono son requeridos', 'error');
+      return;
+    }
+    
+    if (!currentAdmin) {
+      if (!formData.email) {
+        showNotification('Email es requerido', 'error');
+        return;
+      }
+      
+      if (!formData.password || formData.password.length < 6) {
+        showNotification('La contraseña debe tener al menos 6 caracteres', 'error');
+        return;
+      }
+      
+      if (formData.password !== formData.confirmPassword) {
+        showNotification('Las contraseñas no coinciden', 'error');
+        return;
+      }
+    }
+    
     setIsSubmitting(true);
     
     try {
-      // Simulación de API call
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
       if (currentAdmin) {
-        // Editar administrador existente
-        const updatedAdmins = admins.map(admin => 
-          admin.id === currentAdmin.id ? { ...admin, ...formData } : admin
-        );
-        setAdmins(updatedAdmins);
-        showNotification('Administrador actualizado correctamente');
+        // Actualizar administrador existente
+        const { password, confirmPassword, ...updateData } = formData;
+        const { data } = await authFetch(`/administrators/${currentAdmin.id}`, {
+          method: 'PUT',
+          body: updateData
+        });
+        
+        setAdmins(admins.map(admin => 
+          admin.id === currentAdmin.id ? { 
+            ...admin, 
+            ...updateData, 
+            name: `${updateData.nombre} ${updateData.apellido || ''}`.trim() 
+          } : admin
+        ));
+        
+        showNotification(data.message);
       } else {
-        // Agregar nuevo administrador
+        // Crear nuevo administrador
+        const { confirmPassword, ...newAdminData } = formData;
+        const { data } = await authFetch('/administrators', {
+          method: 'POST',
+          body: newAdminData
+        });
+        
         const newAdmin = {
-          id: Math.max(...admins.map(a => a.id)) + 1,
-          ...formData
+          id: data.data.id,
+          ...newAdminData,
+          name: `${newAdminData.nombre} ${newAdminData.apellido || ''}`.trim(),
+          role: 'Administrador',
+          active: 1,
+          created_at: data.data.created_at
         };
+        
         setAdmins([...admins, newAdmin]);
-        showNotification('Administrador agregado correctamente');
+        showNotification(data.message);
       }
       
       setIsFormOpen(false);
+    } catch (err) {
+      showNotification(err.message, 'error');
+      console.error('Error submitting form:', err);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  if (isLoading) {
+  if (isLoading && admins.length === 0) {
     return (
       <div className="loading-container">
         <div className="loading-spinner">
@@ -147,18 +264,20 @@ function AdminAdmins({ user }) {
 
   return (
     <div className="admin-dashboard">
-      {/* Notificación */}
       {notification && (
         <div className={`notification ${notification.type}`}>
           {notification.message}
         </div>
       )}
 
-      {/* Modal de formulario */}
       {isFormOpen && (
         <div className="modal-overlay">
           <div className="modal-form">
-            <button className="close-modal" onClick={() => setIsFormOpen(false)}>
+            <button 
+              className="close-modal" 
+              onClick={() => setIsFormOpen(false)}
+              disabled={isSubmitting}
+            >
               <FaTimes />
             </button>
             <h3>
@@ -168,73 +287,36 @@ function AdminAdmins({ user }) {
             
             <form onSubmit={handleSubmit}>
               <div className="form-grid">
-                <div className="form-group">
-                  <label>Nombre Completo</label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    placeholder="Ej: Admin Principal"
-                    required
-                  />
-                </div>
-                
-                <div className="form-group">
-                  <label>Correo Electrónico</label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    placeholder="admin@flookypets.com"
-                    required
-                    disabled={!!currentAdmin}
-                  />
-                </div>
-                
-                <div className="form-group">
-                  <label>Teléfono</label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    placeholder="3001234567"
-                    required
-                  />
-                </div>
-                
-                <div className="form-group">
-                  <label>Rol</label>
-                  <select
-                    name="role"
-                    value={formData.role}
-                    onChange={handleInputChange}
-                    required
-                    disabled={currentAdmin?.role === 'Super Admin'}
-                  >
-                    <option value="Administrador">Administrador</option>
-                    <option value="Super Admin">Super Admin</option>
-                  </select>
-                </div>
+                {/* Campos del formulario */}
+                {/* ... (mantener los mismos campos del formulario que ya tenías) ... */}
               </div>
               
-              <button 
-                type="submit" 
-                className="submit-btn"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <>
-                    <FaSpinner className="spinner-icon" /> Procesando...
-                  </>
-                ) : (
-                  <>
-                    <FaSave /> {currentAdmin ? 'Actualizar' : 'Guardar'}
-                  </>
-                )}
-              </button>
+              <div className="form-actions">
+                <button 
+                  type="button" 
+                  className="cancel-btn"
+                  onClick={() => setIsFormOpen(false)}
+                  disabled={isSubmitting}
+                >
+                  <FaTimes /> Cancelar
+                </button>
+                
+                <button 
+                  type="submit" 
+                  className="submit-btn"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <FaSpinner className="spinner-icon" /> Procesando...
+                    </>
+                  ) : (
+                    <>
+                      <FaSave /> {currentAdmin ? 'Actualizar' : 'Guardar'}
+                    </>
+                  )}
+                </button>
+              </div>
             </form>
           </div>
         </div>
@@ -244,6 +326,7 @@ function AdminAdmins({ user }) {
         <div className="header-title">
           <FaUserShield className="header-icon" />
           <h2>Gestión de Administradores</h2>
+          <span className="badge">{admins.length} administradores</span>
         </div>
         
         <div className="header-actions">
@@ -255,11 +338,13 @@ function AdminAdmins({ user }) {
                 placeholder="Buscar administradores..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
+                disabled={isLoading}
               />
               {searchTerm && (
                 <button 
                   className="clear-search"
                   onClick={() => setSearchTerm('')}
+                  disabled={isLoading}
                 >
                   <FaTimes />
                 </button>
@@ -269,6 +354,7 @@ function AdminAdmins({ user }) {
             <button 
               className="add-btn"
               onClick={handleAddNew}
+              disabled={isLoading}
             >
               <FaPlus /> Nuevo Administrador
             </button>
@@ -280,53 +366,29 @@ function AdminAdmins({ user }) {
         {filteredAdmins.length > 0 ? (
           <div className="admins-grid">
             {filteredAdmins.map(admin => (
-              <div key={admin.id} className="admin-card">
-                <div className="card-header">
-                  <h3>{admin.name}</h3>
-                  <span className={`role-badge ${admin.role === 'Super Admin' ? 'super-admin' : ''}`}>
-                    {admin.role}
-                  </span>
-                </div>
-                
-                <div className="card-body">
-                  <div className="info-item">
-                    <span className="info-label">Email:</span>
-                    <span className="info-value">{admin.email}</span>
-                  </div>
-                  
-                  <div className="info-item">
-                    <span className="info-label">Teléfono:</span>
-                    <span className="info-value">{admin.phone}</span>
-                  </div>
-                </div>
-                
-                <div className="card-footer">
-                  <button 
-                    className="edit-btn"
-                    onClick={() => handleEdit(admin)}
-                  >
-                    <FaEdit /> Editar
-                  </button>
-                  
-                  <button 
-                    className={`delete-btn ${admin.id === user.id ? 'disabled' : ''}`}
-                    onClick={() => handleDelete(admin.id)}
-                    disabled={admin.id === user.id}
-                  >
-                    <FaTrash /> Eliminar
-                  </button>
-                </div>
+              <div key={admin.id} className={`admin-card ${admin.id === user.id ? 'current-user' : ''}`}>
+                {/* Tarjeta de administrador */}
+                {/* ... (mantener la misma estructura de tarjeta que ya tenías) ... */}
               </div>
             ))}
           </div>
         ) : (
           <div className="no-results">
-            No se encontraron administradores
+            {searchTerm ? 
+              'No se encontraron administradores que coincidan con la búsqueda' : 
+              'No hay administradores registrados'}
+            <button 
+              className="add-btn"
+              onClick={handleAddNew}
+              disabled={isLoading}
+            >
+              <FaPlus /> Agregar Administrador
+            </button>
           </div>
         )}
       </div>
     </div>
   );
-}
+};
 
 export default AdminAdmins;
