@@ -111,6 +111,7 @@ function App() {
             <Route path="perfil" element={<VerPerfilVeterinario setUser={setUser} />} />
             <Route path="perfil/editar" element={<EditarPerfilVeterinario />} />
             <Route path="configuracion" element={<ConfiguracionVeterinario />} />
+
           </Route>
         </Route>
 

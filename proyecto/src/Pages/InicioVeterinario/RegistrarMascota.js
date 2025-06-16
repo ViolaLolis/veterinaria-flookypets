@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import styles from './Style/RegistrarMascotaStyles.module.css';
+import styles from './Style/RegistrarMascotaStyles.module.css'; // Asegúrate de que esta ruta sea correcta
 import { motion } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faPaw } from '@fortawesome/free-solid-svg-icons';
@@ -30,45 +30,47 @@ const RegistrarMascota = () => {
   const handleSubmit = (event) => {
     event.preventDefault();
     console.log('Datos de la mascota a registrar:', { nombre, especie, raza, propietarioId });
+    // Aquí es donde normalmente enviarías los datos a tu backend.
+    // Por ahora, solo navegamos.
     navigate('/veterinario/mascotas');
   };
 
   return (
     <motion.div
-      className={styles.registrarContainer}
+      className={styles.veteRegistrarContainer} // ¡Clase actualizada!
       variants={containerVariants}
       initial="hidden"
       animate="visible"
       exit="exit"
     >
-      <div className={styles.header}>
-        <button onClick={handleVolver} className={styles.volverBtn}>
+      <div className={styles.veteHeader}> {/* ¡Clase actualizada! */}
+        <button onClick={handleVolver} className={styles.veteVolverBtn}> {/* ¡Clase actualizada! */}
           <FontAwesomeIcon icon={faArrowLeft} /> Volver
         </button>
         <h2><FontAwesomeIcon icon={faPaw} /> Registrar Nueva Mascota</h2>
       </div>
-      <form onSubmit={handleSubmit} className={styles.formulario}>
-        <div className={styles.formGroup}>
+      <form onSubmit={handleSubmit} className={styles.veteFormulario}> {/* ¡Clase actualizada! */}
+        <div className={styles.veteFormGroup}> {/* ¡Clase actualizada! */}
           <label htmlFor="nombre">Nombre:</label>
           <input type="text" id="nombre" value={nombre} onChange={(e) => setNombre(e.target.value)} required />
         </div>
-        <div className={styles.formGroup}>
+        <div className={styles.veteFormGroup}> {/* ¡Clase actualizada! */}
           <label htmlFor="especie">Especie:</label>
           <input type="text" id="especie" value={especie} onChange={(e) => setEspecie(e.target.value)} required />
         </div>
-        <div className={styles.formGroup}>
+        <div className={styles.veteFormGroup}> {/* ¡Clase actualizada! */}
           <label htmlFor="raza">Raza:</label>
           <input type="text" id="raza" value={raza} onChange={(e) => setRaza(e.target.value)} />
         </div>
-        <div className={styles.formGroup}>
+        <div className={styles.veteFormGroup}> {/* ¡Clase actualizada! */}
           <label htmlFor="propietarioId">ID del Propietario:</label>
           <input type="text" id="propietarioId" value={propietarioId} onChange={(e) => setPropietarioId(e.target.value)} required />
-          {/* En la realidad, esto sería un selector de propietarios */}
+          {/* En la realidad, esto sería un selector de propietarios, quizás un autocompletar o un modal */}
         </div>
-        <motion.button type="submit" className={styles.registrarBtn} variants={buttonVariants} whileHover="hover" whileTap="tap">
+        <motion.button type="submit" className={styles.veteRegistrarBtn} variants={buttonVariants} whileHover="hover" whileTap="tap"> {/* ¡Clase actualizada! */}
           Registrar Mascota
         </motion.button>
-        <Link to="/veterinario/mascotas" className={styles.cancelarBtn}>
+        <Link to="/veterinario/mascotas" className={styles.veteCancelarBtn}> {/* ¡Clase actualizada! */}
           Cancelar
         </Link>
       </form>

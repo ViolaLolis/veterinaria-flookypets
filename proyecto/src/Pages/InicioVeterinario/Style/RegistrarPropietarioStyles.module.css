@@ -1,0 +1,165 @@
+/* RegistrarPropietarioStyles.module.css */
+
+.veteRegistrarContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem;
+    background-color: #e0f7fa; /* Fondo azul claro */
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Fuente moderna */
+    color: #333;
+    overflow: hidden; /* Evita barras de desplazamiento no deseadas */
+  }
+  
+  .veteHeader {
+    width: 100%;
+    max-width: 650px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 3px solid #00acc1; /* Línea de acento fuerte */
+    animation: slideInFromTop 0.8s ease-out forwards; /* Animación de entrada */
+  }
+  
+  .veteHeader h2 {
+    color: #00acc1; /* Teal vibrante para el título principal */
+    font-size: 2.5rem; /* Título más grande */
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 700; /* Texto más audaz */
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.05); /* Sombra de texto sutil */
+  }
+  
+  .veteVolverBtn {
+    background: none;
+    border: none;
+    color: #00acc1; /* Color teal para el texto del botón */
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0.5rem 0.8rem;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+    font-weight: 600;
+  }
+  
+  .veteVolverBtn:hover {
+    background-color: rgba(0, 172, 193, 0.1); /* Fondo sutil al pasar el ratón */
+    color: #008ba3; /* Teal ligeramente más oscuro */
+    transform: translateX(-8px); /* Efecto de deslizamiento dinámico */
+  }
+  
+  .veteFormulario {
+    background-color: #ffffff;
+    padding: 3rem;
+    border-radius: 20px; /* Bordes más redondeados */
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15); /* Sombra más pronunciada */
+    width: 100%;
+    max-width: 650px;
+    display: flex;
+    flex-direction: column;
+    gap: 1.8rem; /* Espaciado aumentado entre grupos de formulario */
+    animation: fadeIn 1s ease-out forwards; /* Animación de desvanecimiento para el formulario */
+  }
+  
+  .veteFormGroup {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .veteFormGroup label {
+    margin-bottom: 0.6rem;
+    font-weight: 600; /* Etiquetas seminegrita */
+    color: #00acc1; /* Teal para las etiquetas */
+    font-size: 1.05rem;
+  }
+  
+  .veteFormGroup input[type="text"],
+  .veteFormGroup input[type="tel"],
+  .veteFormGroup input[type="email"] { /* Incluye los nuevos tipos de input */
+    padding: 1rem 1.2rem;
+    border: 2px solid #b2ebf2; /* Borde más grueso y claro */
+    border-radius: 10px; /* Campos de entrada redondeados */
+    font-size: 1.1rem;
+    color: #444;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .veteFormGroup input[type="text"]:focus,
+  .veteFormGroup input[type="tel"]:focus,
+  .veteFormGroup input[type="email"]:focus { /* Efecto al enfocar */
+    outline: none;
+    border-color: #00acc1; /* Borde teal vibrante al enfocar */
+    box-shadow: 0 0 0 4px rgba(0, 172, 193, 0.3); /* Efecto de brillo suave */
+  }
+  
+  .veteRegistrarBtn,
+  .veteCancelarBtn {
+    padding: 1.2rem 1.8rem; /* Relleno más generoso */
+    border: none;
+    border-radius: 10px; /* Bordes redondeados consistentes */
+    font-size: 1.2rem; /* Tamaño de fuente más grande para los botones */
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    text-decoration: none;
+    display: block;
+    width: 100%;
+    letter-spacing: 0.5px; /* Espaciado ligero entre letras */
+  }
+  
+  .veteRegistrarBtn {
+    background-color: #00acc1; /* Botón principal teal */
+    color: white;
+    margin-top: 1.5rem;
+    box-shadow: 0 5px 15px rgba(0, 172, 193, 0.2); /* Sombra inicial */
+  }
+  
+  .veteRegistrarBtn:hover {
+    background-color: #008ba3; /* Teal más oscuro al pasar el ratón */
+    box-shadow: 0 8px 20px rgba(0, 172, 193, 0.4); /* Sombra mejorada al pasar el ratón */
+    transform: translateY(-3px); /* Efecto de elevación sutil */
+  }
+  
+  .veteCancelarBtn {
+    background-color: #e0f7fa; /* Fondo azul claro para cancelar */
+    color: #00acc1; /* Texto teal para cancelar */
+    border: 2px solid #00acc1; /* Borde teal para cancelar */
+    margin-top: 1rem;
+  }
+  
+  .veteCancelarBtn:hover {
+    background-color: #b2ebf2; /* Azul claro ligeramente más oscuro al pasar el ratón */
+    box-shadow: 0 5px 15px rgba(0, 172, 193, 0.15);
+    transform: translateY(-2px); /* Elevación sutil */
+  }
+  
+  /* Animaciones de Keyframe */
+  @keyframes slideInFromTop {
+    from {
+      opacity: 0;
+      transform: translateY(-50px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
