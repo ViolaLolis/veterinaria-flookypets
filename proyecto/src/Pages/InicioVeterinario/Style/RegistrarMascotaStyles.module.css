@@ -1,161 +1,381 @@
-/* RegistrarMascotaStyles.module.css */
+/* Style/RegistrarMascotaStyles.module.css */
 
-.veteRegistrarContainer {
-    display: flex;
+/* Contenedor principal */
+.registrarMascotaContainer {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: var(--color-white);
+  border-radius: 15px;
+  box-shadow: 0 8px 24px rgba(0, 188, 212, 0.15);
+  font-family: 'Segoe UI', sans-serif;
+  border: 1px solid var(--color-border);
+}
+
+/* Encabezado */
+.header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.header h2 {
+  flex: 1;
+  font-size: 1.8rem;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: linear-gradient(to right, var(--color-primary), var(--color-secondary));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Botones */
+.volverBtn {
+  background-color: var(--color-white);
+  color: var(--color-secondary);
+  border: 2px solid var(--color-border);
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0, 188, 212, 0.1);
+}
+
+.volverBtn:hover {
+  background-color: var(--color-light);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 172, 193, 0.2);
+}
+
+/* Formulario */
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.formSection {
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  box-shadow: 0 4px 12px rgba(0, 188, 212, 0.1);
+}
+
+.formSection h3 {
+  color: var(--color-secondary);
+  font-size: 1.3rem;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--color-primary);
+}
+
+.formRow {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.formRow .formGroup {
+  flex: 1;
+}
+
+.formGroup {
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--color-secondary);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.formGroup input,
+.formGroup select,
+.formGroup textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background-color: var(--color-white);
+}
+
+.formGroup input:focus,
+.formGroup select:focus,
+.formGroup textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(0, 188, 212, 0.15);
+}
+
+/* Estilos para textarea */
+.formGroup textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+/* Estilos para errores */
+.inputError {
+  border-color: #ff4757 !important;
+  background-color: rgba(255, 71, 87, 0.05) !important;
+}
+
+.inputError:focus {
+  box-shadow: 0 0 0 3px rgba(255, 71, 87, 0.15) !important;
+}
+
+.errorMessageField {
+  display: block;
+  color: #ff4757;
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+  font-weight: 500;
+  animation: shake 0.5s ease;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-3px); }
+  40%, 80% { transform: translateX(3px); }
+}
+
+/* Inputs especiales */
+.uppercaseInput {
+  text-transform: uppercase;
+}
+
+.selectInput {
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2300acc1'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1rem;
+}
+
+/* Contenedor de iconos en inputs */
+.inputWithIcon {
+  position: relative;
+}
+
+.inputIcon {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-muted);
+}
+
+/* Búsqueda de propietarios */
+.propietarioSearchContainer {
+  margin-top: 1.5rem;
+}
+
+.searchInputContainer {
+  position: relative;
+  margin-bottom: 0.5rem;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-muted);
+}
+
+.searchInput {
+  width: 100%;
+  padding: 0.75rem 1rem 0.75rem 2.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(0, 188, 212, 0.15);
+}
+
+.searchResults {
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  margin-top: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.searchResultItem {
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid var(--color-light);
+}
+
+.searchResultItem:last-child {
+  border-bottom: none;
+}
+
+.searchResultItem:hover {
+  background-color: var(--color-light);
+}
+
+.searchResultItem.selected {
+  background-color: rgba(0, 188, 212, 0.1);
+  font-weight: 600;
+  color: var(--color-secondary);
+}
+
+.selectedOwner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  background-color: rgba(0, 188, 212, 0.05);
+  border-radius: 8px;
+  border: 1px dashed var(--color-primary);
+}
+
+.selectedOwnerText {
+  font-weight: 500;
+  color: var(--color-secondary);
+}
+
+.clearSelection {
+  color: var(--color-primary);
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.clearSelection:hover {
+  text-decoration: underline;
+}
+
+/* Botones de acción */
+.formActions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+}
+
+.registrarBtn {
+  background: linear-gradient(to right, var(--color-primary), var(--color-secondary));
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 172, 193, 0.25);
+}
+
+.registrarBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 172, 193, 0.35);
+}
+
+.registrarBtn:disabled {
+  background: var(--color-border);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.cancelarBtn {
+  background-color: var(--color-white);
+  color: var(--color-muted);
+  border: 2px solid #e0e0e0;
+  padding: 0.8rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.cancelarBtn:hover {
+  background-color: #f5f5f5;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Mensajes */
+.message {
+  padding: 1rem;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 1rem;
+  font-weight: 500;
+  border-left: 4px solid;
+  background-color: rgba(255, 255, 255, 0.9);
+  margin: 1rem 0;
+}
+
+.successMessage {
+  color: var(--color-secondary);
+  border-left-color: var(--color-primary);
+}
+
+.errorMessage {
+  color: #ff4757;
+  border-left-color: #ff4757;
+  background-color: rgba(255, 71, 87, 0.05);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .registrarMascotaContainer {
+    padding: 1.5rem;
+    margin: 1rem auto;
+  }
+  
+  .header {
     flex-direction: column;
-    align-items: center;
-    padding: 2rem;
-    background-color: #e0f7fa; /* Light blue background for a fresh feel */
-    min-height: 100vh;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Modern font */
-    color: #333;
-    overflow: hidden; /* Ensures animations don't cause scrollbars */
+    align-items: flex-start;
+    gap: 1rem;
   }
   
-  .veteHeader {
-    width: 100%;
-    max-width: 650px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2.5rem;
-    padding-bottom: 1rem;
-    border-bottom: 3px solid #00acc1; /* Stronger accent line */
-    animation: slideInFromTop 0.8s ease-out forwards; /* Entry animation */
+  .header h2 {
+    font-size: 1.5rem;
   }
   
-  .veteHeader h2 {
-    color: #00acc1; /* Vibrant teal for the main heading */
-    font-size: 2.5rem; /* Larger heading */
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-weight: 700; /* Bolder text */
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.05);
-  }
-  
-  .veteVolverBtn {
-    background: none;
-    border: none;
-    color: #00acc1; /* Teal color for the button text */
-    font-size: 1.1rem;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 0.5rem 0.8rem;
-    border-radius: 5px;
-    transition: all 0.3s ease;
-    font-weight: 600;
-  }
-  
-  .veteVolverBtn:hover {
-    background-color: rgba(0, 172, 193, 0.1); /* Subtle hover background */
-    color: #008ba3; /* Slightly darker teal */
-    transform: translateX(-8px); /* Dynamic slide effect */
-  }
-  
-  .veteFormulario {
-    background-color: #ffffff;
-    padding: 3rem;
-    border-radius: 20px; /* More rounded corners */
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15); /* More pronounced shadow */
-    width: 100%;
-    max-width: 650px;
-    display: flex;
+  .formRow {
     flex-direction: column;
-    gap: 1.8rem; /* Increased spacing between form groups */
-    animation: fadeIn 1s ease-out forwards; /* Fade in animation for the form */
+    gap: 1rem;
   }
   
-  .veteFormGroup {
-    display: flex;
+  .formActions {
     flex-direction: column;
   }
   
-  .veteFormGroup label {
-    margin-bottom: 0.6rem;
-    font-weight: 600; /* Semi-bold labels */
-    color: #00acc1; /* Teal for labels */
-    font-size: 1.05rem;
-  }
-  
-  .veteFormGroup input[type="text"] {
-    padding: 1rem 1.2rem;
-    border: 2px solid #b2ebf2; /* Slightly thicker, light border */
-    border-radius: 10px; /* Rounded input fields */
-    font-size: 1.1rem;
-    color: #444;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
-  }
-  
-  .veteFormGroup input[type="text"]:focus {
-    outline: none;
-    border-color: #00acc1; /* Vibrant teal border on focus */
-    box-shadow: 0 0 0 4px rgba(0, 172, 193, 0.3); /* Soft glow effect */
-  }
-  
-  .veteRegistrarBtn,
-  .veteCancelarBtn {
-    padding: 1.2rem 1.8rem; /* More generous padding */
-    border: none;
-    border-radius: 10px; /* Consistent rounded corners */
-    font-size: 1.2rem; /* Larger font size for buttons */
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-align: center;
-    text-decoration: none;
-    display: block;
+  .registrarBtn,
+  .cancelarBtn {
     width: 100%;
-    letter-spacing: 0.5px; /* Slightly spaced letters */
+    justify-content: center;
   }
-  
-  .veteRegistrarBtn {
-    background-color: #00acc1; /* Primary teal button */
-    color: white;
-    margin-top: 1.5rem;
-    box-shadow: 0 5px 15px rgba(0, 172, 193, 0.2); /* Initial shadow */
-  }
-  
-  .veteRegistrarBtn:hover {
-    background-color: #008ba3; /* Darker teal on hover */
-    box-shadow: 0 8px 20px rgba(0, 172, 193, 0.4); /* Enhanced shadow on hover */
-    transform: translateY(-3px); /* Subtle lift effect */
-  }
-  
-  .veteCancelarBtn {
-    background-color: #e0f7fa; /* Light blue background for cancel */
-    color: #00acc1; /* Teal text for cancel */
-    border: 2px solid #00acc1; /* Teal border for cancel */
-    margin-top: 1rem;
-  }
-  
-  .veteCancelarBtn:hover {
-    background-color: #b2ebf2; /* Slightly darker light blue on hover */
-    box-shadow: 0 5px 15px rgba(0, 172, 193, 0.15);
-    transform: translateY(-2px); /* Subtle lift */
-  }
-  
-  /* Keyframe Animations */
-  @keyframes slideInFromTop {
-    from {
-      opacity: 0;
-      transform: translateY(-50px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: scale(0.95);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
+}
