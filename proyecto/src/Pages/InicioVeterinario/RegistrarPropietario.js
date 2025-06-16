@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import styles from './Style/RegistrarPropietarioStyles.module.css';
+import styles from './Style/RegistrarPropietarioStyles.module.css'; // Asegúrate de que esta ruta sea correcta
 import { motion } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faUserPlus } from '@fortawesome/free-solid-svg-icons';
@@ -31,26 +31,33 @@ const RegistrarPropietario = () => {
     event.preventDefault();
     // Simulación de envío de datos a la API
     console.log('Datos del propietario a registrar:', { nombre, telefono, email, direccion });
-    // Aquí iría la lógica real para enviar los datos
-    navigate('/veterinario/propietarios'); // Redirigir después del registro
+    // Aquí iría la lógica real para enviar los datos, por ejemplo:
+    // try {
+    //   await api.post('/propietarios', { nombre, telefono, email, direccion });
+    //   navigate('/veterinario/propietarios'); // Redirigir después del registro exitoso
+    // } catch (error) {
+    //   console.error('Error al registrar propietario:', error);
+    //   // Mostrar un mensaje de error al usuario
+    // }
+    navigate('/veterinario/propietarios'); // Redirigir después del registro (simulado)
   };
 
   return (
     <motion.div
-      className={styles.registrarContainer}
+      className={styles.veteRegistrarContainer} // Clase actualizada
       variants={containerVariants}
       initial="hidden"
       animate="visible"
       exit="exit"
     >
-      <div className={styles.header}>
-        <button onClick={handleVolver} className={styles.volverBtn}>
+      <div className={styles.veteHeader}> {/* Clase actualizada */}
+        <button onClick={handleVolver} className={styles.veteVolverBtn}> {/* Clase actualizada */}
           <FontAwesomeIcon icon={faArrowLeft} /> Volver
         </button>
-        <h2><FontAwesomeIcon icon={faUserPlus} /> Registrar Nuevo Propietario</h2>
+        <h2><FontAwesomeIcon icon={faUserPlus} /> Registrar Propietario</h2>
       </div>
-      <form onSubmit={handleSubmit} className={styles.formulario}>
-        <div className={styles.formGroup}>
+      <form onSubmit={handleSubmit} className={styles.veteFormulario}> {/* Clase actualizada */}
+        <div className={styles.veteFormGroup}> {/* Clase actualizada */}
           <label htmlFor="nombre">Nombre Completo:</label>
           <input
             type="text"
@@ -60,25 +67,25 @@ const RegistrarPropietario = () => {
             required
           />
         </div>
-        <div className={styles.formGroup}>
+        <div className={styles.veteFormGroup}> {/* Clase actualizada */}
           <label htmlFor="telefono">Teléfono:</label>
           <input
-            type="tel"
+            type="tel" // Tipo 'tel' para mejor semántica y teclados móviles
             id="telefono"
             value={telefono}
             onChange={(e) => setTelefono(e.target.value)}
           />
         </div>
-        <div className={styles.formGroup}>
+        <div className={styles.veteFormGroup}> {/* Clase actualizada */}
           <label htmlFor="email">Email:</label>
           <input
-            type="email"
+            type="email" // Tipo 'email' para validación básica de formato
             id="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
         </div>
-        <div className={styles.formGroup}>
+        <div className={styles.veteFormGroup}> {/* Clase actualizada */}
           <label htmlFor="direccion">Dirección:</label>
           <input
             type="text"
@@ -89,14 +96,14 @@ const RegistrarPropietario = () => {
         </div>
         <motion.button
           type="submit"
-          className={styles.registrarBtn}
+          className={styles.veteRegistrarBtn} // Clase actualizada
           variants={buttonVariants}
           whileHover="hover"
           whileTap="tap"
         >
           Registrar Propietario
         </motion.button>
-        <Link to="/veterinario/propietarios" className={styles.cancelarBtn}>
+        <Link to="/veterinario/propietarios" className={styles.veteCancelarBtn}> {/* Clase actualizada */}
           Cancelar
         </Link>
       </form>

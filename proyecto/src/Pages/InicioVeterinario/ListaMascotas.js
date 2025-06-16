@@ -355,11 +355,11 @@ const ListaMascotasVeterinario = () => {
                     animate={{ scale: [1, 1.1, 1] }}
                     transition={{ repeat: Infinity, duration: 1.5 }}
                   >
-                    ↑ 12%
+                    
                   </motion.span>
                 )}
                 {stat.trend === "steady" && (
-                  <span className={styles.vetTrendSteady}>→ 0%</span>
+                  <span className={styles.vetTrendSteady}></span>
                 )}
               </div>
             </motion.div>
