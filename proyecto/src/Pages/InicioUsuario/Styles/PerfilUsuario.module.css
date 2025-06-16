@@ -1,243 +1,266 @@
-/* Variables de color y animación */
-:root {
-  --yellow-light: #fff8e1;
-  --yellow-primary: #ffecb3;
-  --yellow-dark: #ffd54f;
-  --yellow-accent: #00acc1;
-  --text-primary: #5d4037;
-  --text-secondary: #8d6e63;
-  --shadow-sm: 0 2px 10px rgba(255, 213, 79, 0.15);
-  --shadow-md: 0 4px 20px rgba(255, 213, 79, 0.2);
-  --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-}
-
-/* Animaciones */
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
-}
-
-@keyframes pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.03); }
-}
-
-@keyframes gradientBG {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-/* Estilos base */
-.perfilContainer {
-  max-width: 600px;
-  margin: 2rem auto;
-  padding: 2.5rem;
-  background: linear-gradient(135deg, #fffaf0 0%, #fff3e0 100%);
-  border-radius: 20px;
-  box-shadow: var(--shadow-md);
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  overflow: hidden;
-  position: relative;
-  border: 1px solid rgba(255, 213, 79, 0.3);
 }
 
-.perfilContainer::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle, rgba(255, 236, 179, 0.1) 0%, transparent 70%);
-  animation: gradientBG 15s ease infinite;
-  z-index: 0;
-}
-
-/* Header */
 .header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 2rem;
-  position: relative;
-  z-index: 1;
-}
-
-.userIcon {
-  font-size: 5rem;
-  color: var(--yellow-accent);
-  margin-bottom: 1rem;
-  filter: drop-shadow(0 4px 6px rgba(255, 179, 0, 0.2));
-  transition: var(--transition);
-  animation: float 4s ease-in-out infinite;
-}
-
-.userIcon:hover {
-  transform: scale(1.1) rotate(10deg);
-  filter: drop-shadow(0 6px 10px rgba(255, 179, 0, 0.3));
-}
-
-.title {
-  color: var(--text-primary);
-  font-size: 2.2rem;
-  font-weight: 700;
-  margin: 0;
-  background: linear-gradient(to right, var(--yellow-accent), #ff8f00);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-shadow: 1px 1px 2px rgba(0,0,0,0.05);
-}
-
-/* Sección de información */
-.infoSection {
-  background: rgba(255, 255, 255, 0.7);
-  padding: 1.8rem;
+  background: linear-gradient(135deg, #00acc1, #00838f);
+  color: white;
+  padding: 30px;
   border-radius: 15px;
-  margin-bottom: 2rem;
-  backdrop-filter: blur(5px);
-  border: 1px solid rgba(255, 213, 79, 0.2);
-  box-shadow: var(--shadow-sm);
-  transition: var(--transition);
-  position: relative;
-  z-index: 1;
+  margin-bottom: 30px;
+  box-shadow: 0 5px 20px rgba(0, 172, 193, 0.3);
 }
 
-.infoSection:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 25px rgba(255, 179, 0, 0.2);
-}
-
-.infoTitle {
-  color: var(--yellow-accent);
-  font-size: 1.4rem;
-  margin-top: 0;
-  margin-bottom: 1.5rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 2px dashed var(--yellow-primary);
-}
-
-.infoSection p {
-  color: var(--text-primary);
-  font-size: 1.05rem;
-  margin-bottom: 1rem;
-  line-height: 1.6;
-}
-
-.strong {
-  color: var(--text-secondary);
-  font-weight: 600;
-  display: inline-block;
-  min-width: 100px;
-}
-
-/* Sección de opciones */
-.optionsSection {
-  background: rgba(255, 255, 255, 0.7);
-  padding: 1.5rem;
-  border-radius: 15px;
-  backdrop-filter: blur(5px);
-  border: 1px solid rgba(255, 213, 79, 0.2);
-  box-shadow: var(--shadow-sm);
-  position: relative;
-  z-index: 1;
-}
-
-.optionsTitle {
-  color: var(--yellow-accent);
-  font-size: 1.4rem;
-  margin-top: 0;
-  margin-bottom: 1.5rem;
-}
-
-.optionLink {
+.headerContent {
   display: flex;
   align-items: center;
-  padding: 1rem 1.5rem;
-  margin-bottom: 1rem;
-  background: rgba(255, 248, 225, 0.7);
-  border-radius: 12px;
-  color: var(--text-primary);
-  font-weight: 500;
-  font-size: 1.1rem;
+  gap: 30px;
+}
+
+.profileImageContainer {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  position: relative;
+  overflow: hidden;
+  border: 4px solid #e0f7fa;
+}
+
+.profileImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.editProfileButton {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 172, 193, 0.8);
+  color: white;
+  border: none;
+  padding: 8px;
   cursor: pointer;
-  transition: var(--transition);
-  border: 1px solid rgba(255, 213, 79, 0.3);
+  font-size: 1rem;
 }
 
-.optionLink:hover {
+.header h1 {
+  margin: 0;
+  font-size: 1.8rem;
+}
+
+.userEmail {
+  margin: 5px 0;
+  opacity: 0.9;
+}
+
+.membershipBadge {
+  background: #e0f7fa;
+  color: #00796b;
+  padding: 5px 15px;
+  border-radius: 20px;
+  font-weight: bold;
+  display: inline-block;
+  margin-top: 10px;
+}
+
+.statsContainer {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.statCard {
   background: white;
-  box-shadow: 0 5px 15px rgba(255, 179, 0, 0.2);
-  transform: translateX(10px);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 3px 15px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.statCard h3 {
+  margin: 0;
+  font-size: 2rem;
+  color: #00acc1;
+}
+
+.statCard p {
+  margin: 5px 0 0;
+  color: #666;
+}
+
+.infoCard {
+  background: white;
+  border-radius: 12px;
+  padding: 25px;
+  margin-bottom: 30px;
+  box-shadow: 0 3px 15px rgba(0, 0, 0, 0.05);
+}
+
+.cardTitle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #00796b;
+  margin-top: 0;
+  margin-bottom: 20px;
+}
+
+.cardIcon {
+  color: #00acc1;
+  font-size: 1.5rem;
+}
+
+.infoGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.infoItem {
+  margin-bottom: 15px;
+}
+
+.infoItemFull {
+  grid-column: span 2;
+}
+
+.infoItem label {
+  display: block;
+  font-weight: 500;
+  color: #00acc1;
+  margin-bottom: 5px;
+}
+
+.infoItem p, .infoItemFull p {
+  margin: 0;
+  padding: 10px;
+  background: #f5fbfc;
+  border-radius: 8px;
+}
+
+.editButton {
+  background: #00acc1;
+  color: white;
+  border: none;
+  padding: 12px 25px;
+  border-radius: 30px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 20px;
+  transition: all 0.3s;
+}
+
+.editButton:hover {
+  background: #00838f;
+}
+
+.optionsContainer {
+  margin-bottom: 30px;
+}
+
+.sectionTitle {
+  color: #00796b;
+  margin-bottom: 20px;
+}
+
+.optionCard {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s;
 }
 
 .optionIcon {
-  color: var(--yellow-accent);
-  margin-right: 1rem;
-  font-size: 1.2rem;
-  transition: var(--transition);
-}
-
-.optionLink:hover .optionIcon {
-  transform: rotate(15deg) scale(1.2);
-}
-
-/* Botón de cerrar sesión */
-.logoutButton {
+  font-size: 1.5rem;
+  color: #00acc1;
+  width: 50px;
+  height: 50px;
+  background: #e0f7fa;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
-  padding: 1rem;
-  background: linear-gradient(to right, #ffebee, #ffcdd2);
+}
+
+.optionCard h3 {
+  margin: 0 0 5px;
+  color: #333;
+}
+
+.optionCard p {
+  margin: 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.logoutButton {
+  background: #f44336;
+  color: white;
   border: none;
-  border-radius: 12px;
-  color: #d32f2f;
+  padding: 15px 30px;
+  border-radius: 30px;
+  font-size: 1rem;
   font-weight: 500;
-  font-size: 1.1rem;
   cursor: pointer;
-  transition: var(--transition);
-  margin-top: 1.5rem;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 auto;
+  transition: all 0.3s;
 }
 
-.logoutButton:hover {
-  background: linear-gradient(to right, #ffcdd2, #ef9a9a);
-  transform: translateY(-3px);
-  box-shadow: 0 5px 15px rgba(244, 67, 54, 0.2);
-}
-
-.logoutIcon {
-  margin-right: 0.8rem;
-  transition: var(--transition);
-}
-
-.logoutButton:hover .logoutIcon {
-  transform: rotate(15deg);
-}
-
-/* Efectos responsivos */
 @media (max-width: 768px) {
-  .perfilContainer {
-    padding: 1.8rem;
-    margin: 1rem;
-    border-radius: 15px;
+  .headerContent {
+    flex-direction: column;
+    text-align: center;
   }
   
-  .title {
-    font-size: 1.8rem;
+  .infoGrid {
+    grid-template-columns: 1fr;
   }
   
-  .userIcon {
-    font-size: 4rem;
+  .infoItemFull {
+    grid-column: span 1;
   }
   
-  .infoSection, .optionsSection {
-    padding: 1.3rem;
+  .statsContainer {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    padding: 20px;
   }
   
-  .optionLink, .logoutButton {
-    padding: 0.9rem;
-    font-size: 1rem;
+  .header h1 {
+    font-size: 1.5rem;
+  }
+  
+  .optionCard {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .optionIcon {
+    margin-bottom: 10px;
   }
 }
