@@ -121,7 +121,9 @@ function OlvideContraseña() {
       }
   
       const codigo = data.resetToken || generarCodigo();
-  
+      // 👇 Línea agregada para mostrar el código en consola (solo para pruebas)
+      console.log( `Codigo de verificación para ${email}: ${codigo}`);
+      console.log(`🔐 Código de verificación para ${email}: ${codigo}`);
       // 👇 Línea agregada para mostrar el código en consola (solo para pruebas) HEAD
       console.log( `Codigo de verificación para ${email}: ${codigo}`);
 
@@ -140,7 +142,6 @@ function OlvideContraseña() {
       setIsSubmitting(false);
     }
   };
-
   const handleVerificarCodigo = async () => {
     const codigoIngresado = getValues('codigoVerificacion')?.replace(/\D/g,'');
     const email = getValues('correo')?.trim();

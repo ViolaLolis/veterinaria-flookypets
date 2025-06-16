@@ -1,325 +1,599 @@
 import React, { useState, useEffect } from 'react';
-import './Styles/AdminsManagement.css';
+import { FaUserShield, FaEdit, FaTrash, FaPlus, FaSearch, FaSave, FaTimes, FaSpinner, FaInfoCircle } from 'react-icons/fa';
+import './Styles/AdminsManagement.css'; // Asegúrate de que este archivo CSS exista y contenga los estilos necesarios.
 
-function AdminsManagement({ user }) {
-  const [admins, setAdmins] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [editMode, setEditMode] = useState(false);
-  const [currentAdmin, setCurrentAdmin] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
+const AdminsManagement = () => {
+  // Estados para gestionar los datos de los administradores y la UI
+  const [admins, setAdmins] = useState([]); // Lista completa de administradores
+  const [filteredAdmins, setFilteredAdmins] = useState([]); // Lista de administradores filtrados por búsqueda
+  const [searchTerm, setSearchTerm] = useState(''); // Término de búsqueda
+  const [isLoading, setIsLoading] = useState(true); // Indica si los datos están cargando
+  const [error, setError] = useState(''); // Mensaje de error
+  const [isFormOpen, setIsFormOpen] = useState(false); // Controla la visibilidad del modal de formulario
+  const [currentAdmin, setCurrentAdmin] = useState(null); // Administrador actualmente en edición (o null para nuevo)
+  const [formData, setFormData] = useState({ // Datos del formulario de administrador
+    nombre: '',
+    apellido: '',
+    email: '',
+    telefono: '',
+    direccion: '',
+    password: '',
+    confirmPassword: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false); // Indica si el formulario se está enviando
+  const [notification, setNotification] = useState(null); // Para mostrar mensajes de éxito/error temporales
 
+  // Obtener el usuario logueado desde localStorage. Necesario para prevenir que un admin se elimine a sí mismo.
+  const user = JSON.parse(localStorage.getItem('user')) || {};
+
+  // Función auxiliar para obtener el token de autenticación del localStorage
+  const getAuthToken = () => {
+    return localStorage.getItem('token');
+  };
+
+  /**
+   * Función mejorada para realizar peticiones fetch con autenticación JWT.
+   * Agrega automáticamente el token de autorización y maneja errores de respuesta HTTP.
+   * @param {string} url - La URL del endpoint de la API.
+   * @param {object} options - Opciones para la petición fetch (método, body, headers adicionales).
+   * @returns {Promise<object>} Los datos de la respuesta JSON.
+   * @throws {Error} Si no se encuentra el token o la respuesta de la red no es OK.
+   */
+  const authFetch = async (url, options = {}) => {
+    const token = getAuthToken();
+    // Lanza un error si no hay token, lo cual será capturado por las funciones que llaman a authFetch
+    if (!token) {
+      throw new Error('No se encontró token de autenticación. Por favor, inicie sesión nuevamente.');
+    }
+
+    // Encabezados predeterminados para JSON y autorización
+    const defaultHeaders = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    };
+
+    // Configuración de la petición, fusionando encabezados predeterminados con los personalizados
+    const config = {
+      ...options,
+      headers: {
+        ...defaultHeaders,
+        ...options.headers
+      }
+    };
+
+    // Si hay un cuerpo en la petición, asegúrate de que sea JSON stringificado
+    if (options.body) {
+      config.body = JSON.stringify(options.body);
+    }
+
+    // Realiza la petición a la API de administración
+    const response = await fetch(`http://localhost:5000/api/admin${url}`, config);
+
+    // Verifica si la respuesta HTTP no fue exitosa
+    if (!response.ok) {
+      // Intenta parsear el error del servidor, si existe
+      const errorData = await response.json().catch(() => ({}));
+      // Construye un mensaje de error más informativo
+      const errorMessage = errorData.message || `Error ${response.status}: ${response.statusText}`;
+      throw new Error(errorMessage);
+    }
+
+    // Retorna la respuesta JSON si la petición fue exitosa
+    return response.json();
+  };
+
+  /**
+   * Muestra una notificación temporal en la UI.
+   * @param {string} message - El mensaje a mostrar.
+   * @param {string} type - El tipo de notificación ('success' o 'error').
+   */
+  const showNotification = (message, type = 'success') => {
+    setNotification({ message, type });
+    // La notificación desaparecerá automáticamente después de 5 segundos
+    setTimeout(() => setNotification(null), 5000);
+  };
+
+  /**
+   * Carga la lista de administradores desde la API.
+   * Maneja los estados de carga y error.
+   */
+  const fetchAdmins = async () => {
+    setIsLoading(true); // Activa el estado de carga
+    setError(''); // Limpia cualquier error previo
+    try {
+      // Realiza la petición para obtener administradores
+      const { data } = await authFetch('/administrators');
+
+      // Formatea los datos recibidos para el estado local
+      const formattedAdmins = data.map(admin => ({
+        id: admin.id,
+        nombre: admin.nombre,
+        apellido: admin.apellido || '', // Asegura que 'apellido' no sea undefined
+        email: admin.email,
+        telefono: admin.telefono,
+        direccion: admin.direccion || '', // Asegura que 'direccion' no sea undefined
+        active: admin.active,
+        created_at: admin.created_at,
+        // Combina nombre y apellido para una búsqueda y visualización fácil
+        name: `${admin.nombre} ${admin.apellido || ''}`.trim(),
+        role: 'Administrador' // Rol predeterminado para fines de visualización
+      }));
+
+      setAdmins(formattedAdmins); // Actualiza la lista completa de administradores
+      setFilteredAdmins(formattedAdmins); // Inicializa la lista filtrada con todos los administradores
+    } catch (err) {
+      // Establece el mensaje de error para mostrar al usuario
+      setError(`Error al cargar administradores: ${err.message}`);
+      console.error('Error fetching admins:', err);
+      // Sugerencia: Si estás usando un enrutador (como React Router), aquí podrías redirigir al login
+      // if (err.message.includes('token de autenticación')) {
+      //   // Ejemplo con React Router:
+      //   // history.push('/login');
+      //   // Ejemplo directo (no recomendado para SPAs con router):
+      //   // window.location.href = '/login';
+      //   console.log('Token de autenticación ausente o inválido. Redirigiendo al login...');
+      // }
+    } finally {
+      setIsLoading(false); // Desactiva el estado de carga
+    }
+  };
+
+  // useEffect para cargar los administradores cuando el componente se monta
   useEffect(() => {
     fetchAdmins();
-  }, []);
+  }, []); // El array vacío asegura que se ejecuta solo una vez al montar
 
-  const fetchAdmins = async () => {
-    try {
-      const response = await fetch('http://localhost:5000/admin/administrators', {
-        headers: {
-          'Authorization': `Bearer ${user.token}`
-        }
-      });
-      
-      const data = await response.json();
-      
-      if (response.ok) {
-        setAdmins(data);
-      } else {
-        setError(data.message || 'Error al cargar administradores');
-      }
-    } catch (error) {
-      setError('Error de conexión con el servidor');
-      // Datos de ejemplo para desarrollo
-      setAdmins([
-        { id: 1, email: 'admin@example.com', nombre: 'Admin', apellido: 'Principal', telefono: '3001234567', direccion: 'Calle Admin 123', role: 'admin' },
-        { id: 15, email: 'admin2@example.com', nombre: 'Carlos', apellido: 'Admin', telefono: '3156789012', direccion: 'Avenida Admin 456', role: 'admin' }
-      ]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // useEffect para filtrar los administradores cada vez que cambia el término de búsqueda o la lista de administradores
+  useEffect(() => {
+    const results = admins.filter(admin =>
+      admin.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      admin.email.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredAdmins(results);
+  }, [searchTerm, admins]); // Se ejecuta cuando searchTerm o admins cambian
 
-  const handleEdit = (admin) => {
-    setEditMode(true);
-    setCurrentAdmin(admin);
-  };
-
-  const handleCancel = () => {
-    setEditMode(false);
-    setCurrentAdmin(null);
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setCurrentAdmin(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const handleSave = async () => {
-    try {
-      const response = await fetch(`http://localhost:5000/usuarios/${currentAdmin.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${user.token}`
-        },
-        body: JSON.stringify(currentAdmin)
-      });
-      
-      const data = await response.json();
-      
-      if (response.ok) {
-        setAdmins(admins.map(a => 
-          a.id === currentAdmin.id ? currentAdmin : a
-        ));
-        setEditMode(false);
-        setCurrentAdmin(null);
-      } else {
-        setError(data.message || 'Error al actualizar administrador');
-      }
-    } catch (error) {
-      setError('Error de conexión con el servidor');
-    }
-  };
-
+  /**
+   * Maneja la eliminación de un administrador.
+   * @param {number} id - El ID del administrador a eliminar.
+   */
   const handleDelete = async (id) => {
+    // Evita que un administrador se elimine a sí mismo
     if (id === user.id) {
-      setError('No puedes eliminar tu propio usuario administrador');
+      showNotification('No puedes eliminar tu propio usuario.', 'error');
       return;
     }
 
-    if (window.confirm('¿Estás seguro de eliminar este administrador?')) {
-      try {
-        const response = await fetch(`http://localhost:5000/usuarios/${id}`, {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${user.token}`
-          }
-        });
-        
-        if (response.ok) {
-          setAdmins(admins.filter(a => a.id !== id));
-        } else {
-          const data = await response.json();
-          setError(data.message || 'Error al eliminar administrador');
-        }
-      } catch (error) {
-        setError('Error de conexión con el servidor');
-      }
+    // Reemplazando `window.confirm` con una notificación o un modal personalizado sería ideal.
+    // Por ahora, usamos `window.confirm` pero ten en cuenta las directrices de Canvas para evitarlo en producción.
+    if (!window.confirm('¿Estás seguro de que quieres eliminar este administrador? Esta acción es irreversible.')) {
+      return; // Si el usuario cancela, no hacemos nada
+    }
+
+    setIsLoading(true); // Activa el spinner de carga
+    try {
+      // Realiza la petición DELETE a la API
+      await authFetch(`/administrators/${id}`, {
+        method: 'DELETE'
+      });
+
+      // Actualiza el estado para remover el administrador eliminado
+      setAdmins(admins.filter(admin => admin.id !== id));
+      showNotification('Administrador eliminado correctamente.'); // Muestra un mensaje de éxito
+    } catch (err) {
+      showNotification(`Error al eliminar administrador: ${err.message}`, 'error'); // Muestra un mensaje de error
+      console.error('Error deleting admin:', err);
+    } finally {
+      setIsLoading(false); // Desactiva el spinner de carga
     }
   };
 
+  /**
+   * Abre el formulario modal para editar un administrador existente.
+   * @param {object} admin - El objeto administrador a editar.
+   */
+  const handleEdit = (admin) => {
+    setCurrentAdmin(admin); // Establece el administrador a editar
+    setFormData({ // Rellena el formulario con los datos del administrador existente
+      nombre: admin.nombre,
+      apellido: admin.apellido || '',
+      email: admin.email,
+      telefono: admin.telefono,
+      direccion: admin.direccion || '',
+      password: '', // Las contraseñas no se precargan por seguridad
+      confirmPassword: ''
+    });
+    setIsFormOpen(true); // Abre el modal del formulario
+    setError(''); // Limpia cualquier error previo del formulario
+  };
+
+  /**
+   * Abre el formulario modal para agregar un nuevo administrador.
+   */
   const handleAddNew = () => {
-    setCurrentAdmin({
+    setCurrentAdmin(null); // No hay administrador actual para una nueva entrada
+    setFormData({ // Limpia los datos del formulario para una nueva entrada
       nombre: '',
       apellido: '',
       email: '',
       telefono: '',
       direccion: '',
       password: '',
-      role: 'admin'
+      confirmPassword: ''
     });
-    setEditMode(true);
+    setIsFormOpen(true); // Abre el modal del formulario
+    setError(''); // Limpia cualquier error previo del formulario
   };
 
-  const handleCreate = async () => {
-    try {
-      const response = await fetch('http://localhost:5000/usuarios', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${user.token}`
-        },
-        body: JSON.stringify(currentAdmin)
-      });
-      
-      const data = await response.json();
-      
-      if (response.ok) {
-        setAdmins([...admins, data]);
-        setEditMode(false);
-        setCurrentAdmin(null);
-      } else {
-        setError(data.message || 'Error al crear administrador');
+  /**
+   * Maneja los cambios en los campos de entrada del formulario.
+   * @param {object} e - El evento de cambio.
+   */
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  /**
+   * Maneja el envío del formulario, ya sea para crear o actualizar un administrador.
+   * Realiza validaciones y llama a la API correspondiente.
+   * @param {object} e - El evento de envío del formulario.
+   */
+  const handleSubmit = async (e) => {
+    e.preventDefault(); // Previene el comportamiento predeterminado del formulario
+
+    // Validaciones básicas del formulario
+    if (!formData.nombre || !formData.telefono) {
+      showNotification('Nombre y teléfono son campos requeridos.', 'error');
+      return;
+    }
+
+    // Validaciones específicas para la creación de un nuevo administrador
+    if (!currentAdmin) { // Si se está creando un nuevo administrador
+      if (!formData.email) {
+        showNotification('Email es requerido para nuevos administradores.', 'error');
+        return;
       }
-    } catch (error) {
-      setError('Error de conexión con el servidor');
+      if (!formData.password) {
+        showNotification('Contraseña es requerida para nuevos administradores.', 'error');
+        return;
+      }
+      if (formData.password.length < 6) {
+        showNotification('La contraseña debe tener al menos 6 caracteres.', 'error');
+        return;
+      }
+      if (formData.password !== formData.confirmPassword) {
+        showNotification('Las contraseñas no coinciden.', 'error');
+        return;
+      }
+    }
+
+    setIsSubmitting(true); // Indica que el envío está en curso (activa el spinner)
+
+    try {
+      let responseData;
+      if (currentAdmin) {
+        // Lógica para ACTUALIZAR un administrador existente
+        // Excluye password y confirmPassword ya que no se actualizan en esta interfaz (la API no los espera en PUT)
+        const { password, confirmPassword, ...updateData } = formData;
+        responseData = await authFetch(`/administrators/${currentAdmin.id}`, {
+          method: 'PUT',
+          body: updateData // Envía solo los datos actualizables
+        });
+
+        // Actualiza el administrador en el estado local
+        setAdmins(admins.map(admin =>
+          admin.id === currentAdmin.id ? {
+            ...admin,
+            ...updateData,
+            name: `${updateData.nombre} ${updateData.apellido || ''}`.trim() // Actualiza el nombre completo para la búsqueda
+          } : admin
+        ));
+      } else {
+        // Lógica para CREAR un nuevo administrador
+        const { confirmPassword, ...newAdminData } = formData; // Excluye confirmPassword
+        responseData = await authFetch('/administrators', {
+          method: 'POST',
+          body: newAdminData // Envía los datos del nuevo administrador (la API se encargará de hashear la contraseña)
+        });
+
+        // Agrega el nuevo administrador al estado local
+        const newAdmin = {
+          id: responseData.data.id, // Asume que la API devuelve el ID del nuevo administrador
+          ...newAdminData,
+          name: `${newAdminData.nombre} ${newAdminData.apellido || ''}`.trim(),
+          role: 'Administrador', // Asigna el rol predeterminado
+          active: 1, // Por defecto, un nuevo admin está activo
+          created_at: responseData.data.created_at // Asume que la API devuelve la fecha de creación
+        };
+        setAdmins([...admins, newAdmin]);
+      }
+
+      // Muestra un mensaje de éxito general
+      showNotification(responseData.message || 'Operación completada exitosamente.');
+      setIsFormOpen(false); // Cierra el modal del formulario tras el éxito
+    } catch (err) {
+      // Muestra un mensaje de error específico
+      showNotification(`Error al guardar administrador: ${err.message}`, 'error');
+      console.error('Error submitting form:', err);
+    } finally {
+      setIsSubmitting(false); // Desactiva el estado de envío (oculta el spinner)
     }
   };
 
-  const filteredAdmins = admins.filter(admin =>
-    admin.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    admin.apellido.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    admin.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  if (isLoading) {
+  // Renderizado condicional: Muestra spinner mientras carga por primera vez
+  if (isLoading && admins.length === 0 && !error) {
     return (
       <div className="loading-container">
-        <div className="loading-spinner"></div>
+        <FaSpinner className="spinner-icon" />
         <p>Cargando administradores...</p>
       </div>
     );
   }
 
+  // Renderizado condicional: Muestra mensaje de error si la carga inicial falla
+  if (error && admins.length === 0) {
+    return <div className="error-message">{error}</div>;
+  }
+
   return (
     <div className="admins-management">
+      {/* Componente para mostrar notificaciones (éxito/error) */}
+      {notification && (
+        <div className={`notification ${notification.type}`}>
+          <FaInfoCircle className="notification-icon" />
+          {notification.message}
+          <button className="close-notification" onClick={() => setNotification(null)}>
+            <FaTimes />
+          </button>
+        </div>
+      )}
+
+      {/* Modal para el formulario de agregar/editar administrador */}
+      {isFormOpen && (
+        <div className="modal-overlay">
+          <div className="modal-form">
+            {/* Botón para cerrar el modal */}
+            <button
+              className="close-modal"
+              onClick={() => setIsFormOpen(false)}
+              disabled={isSubmitting}
+            >
+              <FaTimes />
+            </button>
+            {/* Título del formulario */}
+            <h3>
+              <FaUserShield className="form-icon" />
+              {currentAdmin ? 'Editar Administrador' : 'Nuevo Administrador'}
+            </h3>
+
+            <form onSubmit={handleSubmit}>
+              <div className="form-grid">
+                {/* Campo: Nombre */}
+                <div className="form-group">
+                  <label htmlFor="nombre">Nombre*</label>
+                  <input
+                    type="text"
+                    id="nombre"
+                    name="nombre"
+                    value={formData.nombre}
+                    onChange={handleInputChange}
+                    disabled={isSubmitting}
+                    required
+                  />
+                </div>
+                {/* Campo: Apellido */}
+                <div className="form-group">
+                  <label htmlFor="apellido">Apellido</label>
+                  <input
+                    type="text"
+                    id="apellido"
+                    name="apellido"
+                    value={formData.apellido}
+                    onChange={handleInputChange}
+                    disabled={isSubmitting}
+                  />
+                </div>
+                {/* Campo: Email (deshabilitado si se edita un admin existente) */}
+                <div className="form-group">
+                  <label htmlFor="email">Email*</label>
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    disabled={!!currentAdmin || isSubmitting} // Deshabilita si es edición
+                    required={!currentAdmin} // Requerido solo si es nuevo
+                  />
+                </div>
+                {/* Campo: Teléfono */}
+                <div className="form-group">
+                  <label htmlFor="telefono">Teléfono*</label>
+                  <input
+                    type="text"
+                    id="telefono"
+                    name="telefono"
+                    value={formData.telefono}
+                    onChange={handleInputChange}
+                    disabled={isSubmitting}
+                    required
+                  />
+                </div>
+                {/* Campo: Dirección */}
+                <div className="form-group">
+                  <label htmlFor="direccion">Dirección</label>
+                  <input
+                    type="text"
+                    id="direccion"
+                    name="direccion"
+                    value={formData.direccion}
+                    onChange={handleInputChange}
+                    disabled={isSubmitting}
+                  />
+                </div>
+                {/* Campos de contraseña (solo visibles para nuevos administradores) */}
+                {!currentAdmin && (
+                  <>
+                    <div className="form-group">
+                      <label htmlFor="password">Contraseña*</label>
+                      <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        value={formData.password}
+                        onChange={handleInputChange}
+                        disabled={isSubmitting}
+                        required
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="confirmPassword">Confirmar Contraseña*</label>
+                      <input
+                        type="password"
+                        id="confirmPassword"
+                        name="confirmPassword"
+                        value={formData.confirmPassword}
+                        onChange={handleInputChange}
+                        disabled={isSubmitting}
+                        required
+                      />
+                    </div>
+                  </>
+                )}
+              </div>
+
+              <div className="form-actions">
+                {/* Botón Cancelar */}
+                <button
+                  type="button"
+                  className="cancel-btn"
+                  onClick={() => setIsFormOpen(false)}
+                  disabled={isSubmitting}
+                >
+                  <FaTimes /> Cancelar
+                </button>
+                {/* Botón Guardar/Actualizar */}
+                <button
+                  type="submit"
+                  className="submit-btn"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <FaSpinner className="spinner-icon" /> Procesando...
+                    </>
+                  ) : (
+                    <>
+                      <FaSave /> {currentAdmin ? 'Actualizar' : 'Guardar'}
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Encabezado del panel de administración */}
       <div className="management-header">
-        <h2>Gestión de Administradores</h2>
+        <h2><FaUserShield /> Gestión de Administradores</h2>
         <div className="header-actions">
+          {/* Barra de búsqueda */}
           <div className="search-bar">
+            <FaSearch className="search-icon" />
             <input
               type="text"
               placeholder="Buscar administradores..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              disabled={isLoading}
             />
-            <i className="fas fa-search"></i>
           </div>
-          <button onClick={handleAddNew} className="add-btn">
-            <i className="fas fa-plus"></i> Nuevo Administrador
+          {/* Botón para agregar nuevo administrador */}
+          <button
+            onClick={handleAddNew}
+            className="add-btn"
+            disabled={isLoading}
+          >
+            <FaPlus /> Nuevo Administrador
           </button>
         </div>
       </div>
 
-      {error && <div className="error-message">{error}</div>}
-
-      {editMode ? (
-        <div className="edit-form">
-          <h3>{currentAdmin.id ? 'Editar Administrador' : 'Nuevo Administrador'}</h3>
-          
-          <div className="form-row">
-            <div className="form-group">
-              <label>Nombre:</label>
-              <input
-                type="text"
-                name="nombre"
-                value={currentAdmin.nombre}
-                onChange={handleInputChange}
-              />
-            </div>
-            
-            <div className="form-group">
-              <label>Apellido:</label>
-              <input
-                type="text"
-                name="apellido"
-                value={currentAdmin.apellido}
-                onChange={handleInputChange}
-              />
-            </div>
-          </div>
-          
-          <div className="form-group">
-            <label>Email:</label>
-            <input
-              type="email"
-              name="email"
-              value={currentAdmin.email}
-              onChange={handleInputChange}
-              disabled={!!currentAdmin.id}
-            />
-          </div>
-          
-          <div className="form-row">
-            <div className="form-group">
-              <label>Teléfono:</label>
-              <input
-                type="text"
-                name="telefono"
-                value={currentAdmin.telefono}
-                onChange={handleInputChange}
-              />
-            </div>
-            
-            <div className="form-group">
-              <label>Dirección:</label>
-              <input
-                type="text"
-                name="direccion"
-                value={currentAdmin.direccion}
-                onChange={handleInputChange}
-              />
-            </div>
-          </div>
-          
-          {!currentAdmin.id && (
-            <div className="form-group">
-              <label>Contraseña:</label>
-              <input
-                type="password"
-                name="password"
-                value={currentAdmin.password}
-                onChange={handleInputChange}
-              />
-            </div>
-          )}
-          
-          <div className="form-actions">
-            <button 
-              onClick={currentAdmin.id ? handleSave : handleCreate} 
-              className="save-btn"
-            >
-              Guardar
-            </button>
-            <button onClick={handleCancel} className="cancel-btn">
-              Cancelar
-            </button>
-          </div>
-        </div>
-      ) : (
-        <div className="admins-table-container">
+      {/* Contenedor de la tabla de administradores */}
+      <div className="admins-table-container">
+        {filteredAdmins.length > 0 ? (
           <table className="admins-table">
             <thead>
               <tr>
                 <th>ID</th>
-                <th>Nombre</th>
+                <th>Nombre Completo</th>
                 <th>Email</th>
                 <th>Teléfono</th>
+                <th>Estado</th>
+                <th>Registro</th>
                 <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
-              {filteredAdmins.length > 0 ? (
-                filteredAdmins.map(admin => (
-                  <tr key={admin.id}>
-                    <td>{admin.id}</td>
-                    <td>{`${admin.nombre} ${admin.apellido}`}</td>
-                    <td>{admin.email}</td>
-                    <td>{admin.telefono}</td>
-                    <td className="actions-cell">
-                      <button 
-                        onClick={() => handleEdit(admin)} 
-                        className="edit-btn"
-                      >
-                        <i className="fas fa-edit"></i>
-                      </button>
-                      <button 
-                        onClick={() => handleDelete(admin.id)} 
-                        className="delete-btn"
-                        disabled={admin.id === user.id}
-                      >
-                        <i className="fas fa-trash"></i>
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="5" className="no-results">
-                    No se encontraron administradores
+              {/* Mapea y renderiza cada administrador en una fila de la tabla */}
+              {filteredAdmins.map(admin => (
+                <tr key={admin.id} className={admin.id === user.id ? 'current-user-row' : ''}>
+                  <td>{admin.id}</td>
+                  <td>{`${admin.nombre} ${admin.apellido || ''}`}</td>
+                  <td>{admin.email}</td>
+                  <td>{admin.telefono}</td>
+                  <td>
+                    <span className={`status-badge ${admin.active ? 'active' : 'inactive'}`}>
+                      {admin.active ? 'Activo' : 'Inactivo'}
+                    </span>
+                  </td>
+                  <td>{admin.created_at}</td>
+                  <td className="actions-cell">
+                    {/* Botón para editar */}
+                    <button
+                      onClick={() => handleEdit(admin)}
+                      className="edit-btn"
+                      disabled={isLoading || isSubmitting}
+                      title="Editar Administrador"
+                    >
+                      <FaEdit />
+                    </button>
+                    {/* Botón para eliminar (deshabilitado si es el propio usuario o si hay carga/envío) */}
+                    <button
+                      onClick={() => handleDelete(admin.id)}
+                      className="delete-btn"
+                      disabled={admin.id === user.id || isLoading || isSubmitting}
+                      title={admin.id === user.id ? 'No puedes eliminar tu propio usuario' : 'Eliminar Administrador'}
+                    >
+                      <FaTrash />
+                    </button>
                   </td>
                 </tr>
-              )}
+              ))}
             </tbody>
           </table>
-        </div>
-      )}
+        ) : (
+          <div className="no-results">
+            {/* Mensaje si no hay resultados de búsqueda o no hay administradores */}
+            {searchTerm ?
+              'No se encontraron administradores que coincidan con la búsqueda.' :
+              'No hay administradores registrados.'}
+            <button
+              className="add-btn"
+              onClick={handleAddNew}
+              disabled={isLoading}
+            >
+              <FaPlus /> Agregar Administrador
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
-}
+};
 
 export default AdminsManagement;

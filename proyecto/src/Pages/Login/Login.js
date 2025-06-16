@@ -86,8 +86,12 @@ function Login({ setUser }) {
 
       // Login exitoso
       setUser(data);
+      // >>>>>>>>>> LÍNEA CRUCIAL AÑADIDA <<<<<<<<<<
+      localStorage.setItem('token', data.token); // <-- ¡Guardando el token!
       localStorage.setItem('user', JSON.stringify(data));
 
+
+      // Redirige según el rol del usuario
       if (data.role === 'admin') {
         navigate('/admin');
       } else if (data.role === 'veterinario') {
@@ -110,15 +114,15 @@ function Login({ setUser }) {
       <div className="auth-wrapper">
         <div className="auth-box">
           <div className="brand-section">
-            <img 
-              src={require('../Inicio/Imagenes/flooty.png')}  
-              alt="Logo de la empresa" 
+            <img
+              src={require('../Inicio/Imagenes/flooty.png')}
+              alt="Logo de la empresa"
               className="auth-logo"
             />
             <h2>Bienvenido</h2>
             <p>Ingresa tus credenciales para acceder a nuestra veterinaria</p>
           </div>
-          
+
           <div className="auth-form">
             <h2>Iniciar Sesión</h2>
             {errors.form && <p className="error-message">⚠ {errors.form} ⚠</p>}
@@ -126,9 +130,9 @@ function Login({ setUser }) {
             <form onSubmit={handleLogin}>
               <div className="form-field">
                 <label>Correo Electrónico:</label>
-                <input 
-                  type="email" 
-                  value={email} 
+                <input
+                  type="email"
+                  value={email}
                   onChange={(e) => {
                     setEmail(e.target.value.slice(0, 63));
                     setErrors(prev => ({ ...prev, form: '' }));
@@ -142,9 +146,9 @@ function Login({ setUser }) {
               <div className="form-field password-field">
                 <label>Contraseña:</label>
                 <div className="password-input-container">
-                  <input 
-                    type={showPassword ? 'text' : 'password'} 
-                    value={password} 
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
                     onChange={(e) => {
                       setPassword(e.target.value.slice(0, 63));
                       setErrors(prev => ({ ...prev, form: '' }));
@@ -152,8 +156,8 @@ function Login({ setUser }) {
                     onBlur={() => handleBlur('password')}
                     className={errors.password ? 'input-error' : ''}
                   />
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     className="toggle-password"
                     onClick={toggleShowPassword}
                   >
@@ -163,8 +167,8 @@ function Login({ setUser }) {
                 {errors.password && <span className="field-error">⚠ {errors.password} ⚠</span>}
               </div>
 
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 className="btn-auth"
                 disabled={!!errors.email || !!errors.password}
               >

@@ -129,8 +129,8 @@ INSERT INTO usuarios (email, password, nombre, apellido, telefono, direccion, ti
 ('vet1@example.com', '$2a$10$xJwL5v5Jz5U5Z5U5Z5U5Ze', 'Laura', 'Gómez', '3101234567', 'Calle Veterinaria 1', 'CC', '11223344', '1985-03-15', 'veterinario'),
 ('vet2@example.com', '$2a$10$xJwL5v5Jz5U5Z5U5Z5U5Ze', 'Mario', 'Hernández', '3152345678', 'Avenida Animales 2', 'CC', '22334455', '1988-07-22', 'veterinario'),
 ('vet3@example.com', '$2a$10$xJwL5v5Jz5U5Z5U5Z5U5Ze', 'Sandra', 'Pérez', '3203456789', 'Carrera Mascotas 3', 'CC', '33445566', '1990-11-30', 'veterinario'),
-('recepcion@example.com', '$2a$10$xJwL5v5Jz5U5Z5U5Z5U5Ze', 'Carolina', 'Díaz', '3004567890', 'Calle Recepción 4', 'CC', '44556677', '1992-05-18', 'recepcionista'),
-('asistente@example.com', '$2a$10$xJwL5v5Jz5U5Z5U5Z5U5Ze', 'Roberto', 'Martínez', '3155678901', 'Avenida Ayudante 5', 'CC', '55667788', '1993-09-25', 'asistente'),
+('admin1@example.com', '$2a$10$xJwL5v5Jz5U5Z5U5Z5U5Ze', 'Carolina', 'Díaz', '3004567890', 'Calle Recepción 4', 'CC', '44556677', '1992-05-18', 'admin'),
+('admin2@example.com', '$2a$10$xJwL5v5Jz5U5Z5U5Z5U5Ze', 'Roberto', 'Martínez', '3155678901', 'Avenida Ayudante 5', 'CC', '55667788', '1993-09-25', 'admin'),
 ('user1@example.com', '$2a$10$xJwL5v5Jz5U5Z5U5Z5U5Ze', 'Alejandro', 'Rojas', '3206789012', 'Carrera Usuario 6', 'CC', '66778899', '1987-02-14', 'usuario'),
 ('user2@example.com', '$2a$10$xJwL5v5Jz5U5Z5U5Z5U5Ze', 'Gabriela', 'Sánchez', '3007890123', 'Calle Cliente 7', 'CC', '77889900', '1995-08-03', 'usuario'),
 ('user3@example.com', '$2a$10$xJwL5v5Jz5U5Z5U5Z5U5Ze', 'Felipe', 'Gutiérrez', '3158901234', 'Avenida Propietario 8', 'CC', '88990011', '1989-12-19', 'usuario'),
@@ -209,7 +209,7 @@ INSERT INTO historial_medico (id_mascota, veterinario, diagnostico, tratamiento,
 (18, 3, 'Control dental', 'Limpieza dental', 'Sarro moderado', 5.4, 38.6, '2024-03-25'),
 (19, 2, 'Control de crecimiento', 'Alimentación para cachorro grande', 'Desarrollo adecuado', 52.0, 38.8, '2023-11-30'),
 (20, 3, 'Problemas de comportamiento', 'Consulta con etólogo', 'Ansiedad por separación', 50.5, 38.7, '2023-08-15');
-SELECT * FROM clientes;
+SELECT * FROM usuarios;
 SELECT * FROM mascotas;
 SELECT email, nombre, apellido, role FROM usuarios;
 
