@@ -1,20 +1,38 @@
-// VeterinarioInicio.js
-import React, { useState } from 'react'; // No need for useEffect here if not fetching data
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import veteStyles from './Style/NavegacionVeterinarioStyles.module.css'; // Asegúrate de que esta ruta sea correcta
+import styles from './Style/NavegacionVeterinarioStyles.module.css'; // Asegúrate de que esta ruta sea correcta
 import { motion } from 'framer-motion';
 
-// Ensure these imports are correct and packages are installed!
+// Asegúrate de que estas importaciones sean correctas y los paquetes estén instalados.
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faPaw, faUser, faCalendarAlt,
   faNotesMedical, faCheckCircle, faClock,
-  faStar, faSyringe, faStethoscope,faDog,
-   // Added for "Ver Historiales Clínicos" quick action
+  faStar, faSyringe, faStethoscope, faDog,
+  faPlus, faUserPlus, faClipboardList
 } from '@fortawesome/free-solid-svg-icons';
 
-const VeterinarioInicio = () => {
+const NavegacionVeterinario = () => { // Cambiado a NavegacionVeterinario
   const navigate = useNavigate();
+
+  // Función para obtener un saludo dinámico según la hora del día
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Buenos días';
+    if (hour < 18) return 'Buenas tardes';
+    return 'Buenas noches';
+  };
+
+  const [greeting, setGreeting] = useState(getGreeting());
+
+  // Actualiza el saludo al montar el componente (si necesitas que cambie durante el día sin recargar)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setGreeting(getGreeting());
+    }, 60 * 60 * 1000); // Actualiza cada hora
+    return () => clearInterval(interval);
+  }, []);
+
   const [stats, setStats] = useState({
     totalCitasHoy: 4,
     citasCompletadasHoy: 1,
@@ -33,7 +51,8 @@ const VeterinarioInicio = () => {
       servicio: "Consulta general",
       estado: "pendiente",
       icon: faPaw,
-      color: "#00acc1"
+      color: "#00acc1",
+      avatar: "https://via.placeholder.com/40/00acc1/FFFFFF?text=M"
     },
     {
       id: 2,
@@ -43,7 +62,8 @@ const VeterinarioInicio = () => {
       servicio: "Vacunación anual",
       estado: "pendiente",
       icon: faSyringe,
-      color: "#FF9800" // Orange for vaccination
+      color: "#FF9800",
+      avatar: "https://via.placeholder.com/40/FF9800/FFFFFF?text=B"
     },
     {
       id: 3,
@@ -53,7 +73,8 @@ const VeterinarioInicio = () => {
       servicio: "Revisión post-operatoria",
       estado: "pendiente",
       icon: faStethoscope,
-      color: "#4CAF50" // Green for check-up
+      color: "#4CAF50",
+      avatar: "https://via.placeholder.com/40/4CAF50/FFFFFF?text=R"
     },
     {
       id: 4,
@@ -62,150 +83,226 @@ const VeterinarioInicio = () => {
       propietario: "Laura Sánchez",
       servicio: "Revisión de piel",
       estado: "pendiente",
-      icon: faDog, // Using dog icon for generic pet issue
-      color: "#F44336" // Red for something potentially urgent
+      icon: faDog,
+      color: "#F44336",
+      avatar: "https://via.placeholder.com/40/F44336/FFFFFF?text=L"
     },
   ]);
 
   const handleCompleteAppointment = (id) => {
-    setCitasPendientes(prevCitas =>
-      prevCitas.filter(cita => cita.id !== id) // Remove from pending
+    const updatedCitas = citasPendientes.map(cita =>
+      cita.id === id ? { ...cita, estado: "completado" } : cita
     );
-    setStats(prevStats => ({
+    setCitasPendientes(updatedCitas);
+
+    setTimeout(() => {
+      setCitasPendientes(prevCitas =>
+        prevCitas.filter(cita => cita.id !== id)
+      );
+      setStats(prevStats => ({
         ...prevStats,
         citasCompletadasHoy: prevStats.citasCompletadasHoy + 1
-    }));
+      }));
+    }, 300);
   };
+
+  const quickActions = [
+    { name: "Registrar Mascota", icon: faPaw, path: "/veterinario/registrar-mascota", color: "#00bcd4" },
+    { name: "Registrar Propietario", icon: faUserPlus, path: "/veterinario/registrar-propietario", color: "#ff7043" },
+    { name: "Ver Historiales Clínicos", icon: faClipboardList, path: "/veterinario/historiales", color: "#4CAF50" },
+    { name: "Ver Todas las Citas", icon: faCalendarAlt, path: "/veterinario/citas", color: "#9c27b0" },
+  ];
 
   return (
     <motion.div
-      className={veteStyles.veteInicioContainer}
+      className={styles.vetHome_container}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
     >
-      <h1 className={veteStyles.veteGreeting}>Estadísticas</h1>
+      <h1 className={styles.vetHome_greeting}>{greeting}, Dr/a. [Nombre Veterinario]!</h1>
+      <p className={styles.vetHome_subHeader}>Aquí tienes un resumen de tu jornada hoy.</p>
 
-      {/* --- Section: Key Metrics Overview (Dashboard Cards) --- */}
-      <div className={veteStyles.veteDashboardGrid}>
-        <motion.div
-          className={veteStyles.veteDashboardCard}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-        >
-          <div className={veteStyles.veteCardHeader}>
-            <FontAwesomeIcon icon={faCalendarAlt} className={veteStyles.veteIcon} />
-            <h3>Citas Pendientes Hoy</h3>
-          </div>
-          <p className={veteStyles.veteCardContent}>{citasPendientes.length}</p>
-        </motion.div>
-
-        <motion.div
-          className={veteStyles.veteDashboardCard}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-        >
-          <div className={veteStyles.veteCardHeader}>
-            <FontAwesomeIcon icon={faCheckCircle} className={veteStyles.veteIcon} />
-            <h3>Citas Completadas Hoy</h3>
-          </div>
-          <p className={veteStyles.veteCardContent}>{stats.citasCompletadasHoy}</p>
-        </motion.div>
-
-        <motion.div
-          className={veteStyles.veteDashboardCard}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-        >
-          <div className={veteStyles.veteCardHeader}>
-            <FontAwesomeIcon icon={faUser} className={veteStyles.veteIcon} />
-            <h3>Nuevos Pacientes (Semana)</h3>
-          </div>
-          <p className={veteStyles.veteCardContent}>{stats.pacientesNuevosSemana}</p>
-        </motion.div>
-
-        <motion.div
-          className={veteStyles.veteDashboardCard}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-        >
-          <div className={veteStyles.veteCardHeader}>
-            <FontAwesomeIcon icon={faPaw} className={veteStyles.veteIcon} />
-            <h3>Mascotas Atendidas (Total)</h3>
-          </div>
-          <p className={veteStyles.veteCardContent}>{stats.mascotasAtendidasTotal}</p>
-        </motion.div>
-
-        <motion.div
-          className={veteStyles.veteDashboardCard}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-        >
-          <div className={veteStyles.veteCardHeader}>
-            <FontAwesomeIcon icon={faStar} className={veteStyles.veteIcon} />
-            <h3>Tu Rating Promedio</h3>
-          </div>
-          <p className={`${veteStyles.veteCardContent} ${veteStyles.smallText}`}>
-            <strong>{stats.ratingPromedio}</strong> / 5.0
-          </p>
-        </motion.div>
-
-        <motion.div
-          className={veteStyles.veteDashboardCard}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-        >
-          <div className={veteStyles.veteCardHeader}>
-            <FontAwesomeIcon icon={faNotesMedical} className={veteStyles.veteIcon} />
-            <h3>Recordatorios Activos</h3>
-          </div>
-          <p className={veteStyles.veteCardContent}>{stats.recordatoriosActivos}</p>
-        </motion.div>
+      {/* --- Sección: Acciones Rápidas (Quick Actions) --- */}
+      <div className={styles.vetHome_section}>
+        <h2>Acciones Rápidas</h2>
+        <div className={styles.vetDashboard_quickActionsGrid}>
+          {quickActions.map((action, index) => (
+            <motion.div
+              key={index}
+              className={styles.vetDashboard_quickActionCard}
+              onClick={() => navigate(action.path)}
+              whileHover={{ scale: 1.05, boxShadow: "0 8px 25px rgba(0,0,0,0.15)" }}
+              whileTap={{ scale: 0.95 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.1 * index }}
+              style={{ '--action-color': action.color }}
+            >
+              <FontAwesomeIcon icon={action.icon} className={styles.vetDashboard_quickActionIcon} />
+              <p>{action.name}</p>
+            </motion.div>
+          ))}
+        </div>
       </div>
 
-    
-      {/* --- Section: Upcoming Appointments List --- */}
-      <div className={veteStyles.veteAppointmentsSection}>
-        <div className={veteStyles.veteSectionHeader}>
-          <h2><FontAwesomeIcon icon={faClock} /> Próximas Citas</h2>
+      {/* --- Sección: Resumen de Estadísticas (Dashboard Cards) --- */}
+      <div className={styles.vetHome_section}>
+        <h2>Estadísticas Clave</h2>
+        <div className={styles.vetDashboard_grid}>
+          {/* Card: Citas Pendientes Hoy */}
+          <motion.div
+            className={styles.vetDashboard_card}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.4, delay: 0.1 }}
+          >
+            <div className={styles.vetDashboard_cardHeader}>
+              <FontAwesomeIcon icon={faCalendarAlt} className={styles.vetDashboard_icon} style={{ color: '#00acc1' }} />
+              <h3>Citas Pendientes Hoy</h3>
+            </div>
+            <p className={styles.vetDashboard_cardContent}>{citasPendientes.length}</p>
+            <span className={styles.vetDashboard_cardFooter}>¡Concéntrate en estas!</span>
+          </motion.div>
+
+          {/* Card: Citas Completadas Hoy */}
+          <motion.div
+            className={styles.vetDashboard_card}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.4, delay: 0.2 }}
+          >
+            <div className={styles.vetDashboard_cardHeader}>
+              <FontAwesomeIcon icon={faCheckCircle} className={styles.vetDashboard_icon} style={{ color: '#4CAF50' }} />
+              <h3>Citas Completadas Hoy</h3>
+            </div>
+            <p className={styles.vetDashboard_cardContent}>{stats.citasCompletadasHoy}</p>
+            <span className={styles.vetDashboard_cardFooter}>¡Excelente trabajo!</span>
+          </motion.div>
+
+          {/* Card: Nuevos Pacientes (Semana) */}
+          <motion.div
+            className={styles.vetDashboard_card}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.4, delay: 0.3 }}
+          >
+            <div className={styles.vetDashboard_cardHeader}>
+              <FontAwesomeIcon icon={faUser} className={styles.vetDashboard_icon} style={{ color: '#ff7043' }} />
+              <h3>Nuevos Pacientes (Semana)</h3>
+            </div>
+            <p className={styles.vetDashboard_cardContent}>{stats.pacientesNuevosSemana}</p>
+            <span className={styles.vetDashboard_cardFooter}>¡Bienvenida la nueva familia!</span>
+          </motion.div>
+
+          {/* Card: Mascotas Atendidas (Total) */}
+          <motion.div
+            className={styles.vetDashboard_card}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.4, delay: 0.4 }}
+          >
+            <div className={styles.vetDashboard_cardHeader}>
+              <FontAwesomeIcon icon={faPaw} className={styles.vetDashboard_icon} style={{ color: '#03a9f4' }} />
+              <h3>Mascotas Atendidas (Total)</h3>
+            </div>
+            <p className={styles.vetDashboard_cardContent}>{stats.mascotasAtendidasTotal}</p>
+            <span className={styles.vetDashboard_cardFooter}>¡Impacto en muchas vidas!</span>
+          </motion.div>
+
+          {/* Card: Tu Rating Promedio */}
+          <motion.div
+            className={styles.vetDashboard_card}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.4, delay: 0.5 }}
+          >
+            <div className={styles.vetDashboard_cardHeader}>
+              <FontAwesomeIcon icon={faStar} className={styles.vetDashboard_icon} style={{ color: '#FFD700' }} />
+              <h3>Tu Rating Promedio</h3>
+            </div>
+            <p className={`${styles.vetDashboard_cardContent} ${styles.vetDashboard_smallText}`}>
+              <strong>{stats.ratingPromedio}</strong> / 5.0
+            </p>
+            <span className={styles.vetDashboard_cardFooter}>¡Mantén el excelente servicio!</span>
+          </motion.div>
+
+          {/* Card: Recordatorios Activos */}
+          <motion.div
+            className={styles.vetDashboard_card}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.4, delay: 0.6 }}
+          >
+            <div className={styles.vetDashboard_cardHeader}>
+              <FontAwesomeIcon icon={faNotesMedical} className={styles.vetDashboard_icon} style={{ color: '#9c27b0' }} />
+              <h3>Recordatorios Activos</h3>
+            </div>
+            <p className={styles.vetDashboard_cardContent}>{stats.recordatoriosActivos}</p>
+            <span className={styles.vetDashboard_cardFooter}>¡No te pierdas nada importante!</span>
+          </motion.div>
+        </div>
+      </div>
+
+      {/* --- Sección: Próximas Citas --- */}
+      <div className={styles.vetHome_appointmentsSection}>
+        <div className={styles.vetHome_sectionHeader}>
+          <h2><FontAwesomeIcon icon={faClock} /> Próximas Citas del Día</h2>
           <motion.button
-            className={veteStyles.veteViewAllButton}
+            className={styles.vetHome_viewAllButton}
             onClick={() => navigate('/veterinario/citas')}
-            whileHover={{ scale: 1.05 }}
+            whileHover={{ scale: 1.05, backgroundColor: 'var(--color-secondary-dark)' }}
             whileTap={{ scale: 0.95 }}
           >
-            Ver Todas
+            Ver Calendario Completo
           </motion.button>
         </div>
 
-        <div className={veteStyles.veteAppointmentsList}>
+        <div className={styles.vetHome_appointmentsList}>
           {citasPendientes.length > 0 ? (
             citasPendientes.map(cita => (
               <motion.div
                 key={cita.id}
-                className={veteStyles.veteAppointmentItem}
-                initial={{ x: -20, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
+                // Aquí está la línea potencialmente problemática, re-escrita con cuidado:
+                className={`${styles.vetHome_appointmentItem} ${cita.estado === 'completado' ? styles.vetHome_completed : ''}`}
+                initial={{ x: 0, opacity: 1 }}
+                animate={{ x: cita.estado === 'completado' ? -100 : 0, opacity: cita.estado === 'completado' ? 0 : 1 }}
+                exit={{ x: -100, opacity: 0 }}
                 transition={{ duration: 0.3 }}
               >
-                <div className={veteStyles.veteAppointmentTime} style={{color: cita.color}}>{cita.time}</div>
-                <div className={veteStyles.veteAppointmentDetails}>
-                  <h4><FontAwesomeIcon icon={cita.icon} style={{color: cita.color, marginRight: '10px'}} /> {cita.mascota} - {cita.servicio}</h4>
-                  <p>Propietario: {cita.propietario}</p>
+                <div className={styles.vetHome_appointmentTimeIcon}>
+                    <img src={cita.avatar} alt={`${cita.mascota} avatar`} className={styles.vetHome_mascotaAvatar} />
+                    <span style={{color: cita.color}}>{cita.time}</span>
                 </div>
-                <div className={veteStyles.veteAppointmentActions}>
+                <div className={styles.vetHome_appointmentDetails}>
+                  <h4><FontAwesomeIcon icon={cita.icon} style={{color: cita.color, marginRight: '10px'}} /> {cita.mascota} <span className={styles.vetHome_serviceType}>- {cita.servicio}</span></h4>
+                  <p className={styles.vetHome_propietarioName}>Propietario: {cita.propietario}</p>
+                </div>
+                <div className={styles.vetHome_appointmentActions}>
                   <motion.button
-                    className={`${veteStyles.veteActionButton} ${veteStyles.veteComplete}`}
+                    className={`${styles.vetHome_actionButton} ${styles.vetHome_complete}`}
                     onClick={() => handleCompleteAppointment(cita.id)}
-                    whileHover={{ scale: 1.05 }}
+                    whileHover={{ scale: 1.05, backgroundColor: '#4CAF50', color: 'white' }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    Completar
+                    Marcar Completada
                   </motion.button>
                   <motion.button
-                    className={`${veteStyles.veteActionButton} ${veteStyles.veteView}`}
+                    className={`${styles.vetHome_actionButton} ${styles.vetHome_view}`}
                     onClick={() => navigate(`/veterinario/citas/${cita.id}`)}
-                    whileHover={{ scale: 1.05 }}
+                    whileHover={{ scale: 1.05, backgroundColor: '#00acc1', color: 'white' }}
                     whileTap={{ scale: 0.95 }}
                   >
                     Ver Detalles
@@ -215,13 +312,21 @@ const VeterinarioInicio = () => {
             ))
           ) : (
             <motion.div
-              className={veteStyles.veteNoAppointments}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
+              className={styles.vetHome_noAppointments}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5, delay: 0.2 }}
             >
-              <FontAwesomeIcon icon={faCheckCircle} className={veteStyles.veteIcon} />
-              <p>¡Todas tus citas pendientes están al día!</p>
+              <FontAwesomeIcon icon={faCheckCircle} className={styles.vetDashboard_icon} />
+              <p>¡Felicitaciones! Todas tus citas pendientes están al día por ahora.</p>
+              <motion.button
+                className={styles.vetHome_scheduleNewButton}
+                onClick={() => navigate('/veterinario/agendar-cita')}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <FontAwesomeIcon icon={faPlus} /> Agendar Nueva Cita
+              </motion.button>
             </motion.div>
           )}
         </div>
@@ -230,4 +335,4 @@ const VeterinarioInicio = () => {
   );
 };
 
-export default VeterinarioInicio;
+export default NavegacionVeterinario; // Cambiado a NavegacionVeterinario

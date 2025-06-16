@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import veteStyles from './Style/ConfiguracionVeterinarioStyles.module.css';
 import { motion } from 'framer-motion';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'; // Ensure this line is present and correct
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faCog, faBell, faSave, faTimesCircle,
-  faPalette, faLanguage, faClock, faCheckCircle,
-  faExclamationTriangle, faSpinner, faInfoCircle
+  faCog, faBell, faSave, faTimesCircle, faArrowLeft,
+  faClock, faCheckCircle, faExclamationTriangle, faSpinner, faInfoCircle
 } from '@fortawesome/free-solid-svg-icons';
+import { useNavigate } from 'react-router-dom';
 
 const containerVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -46,34 +46,46 @@ const ConfiguracionVeterinario = () => {
   const [config, setConfig] = useState({
     notificacionesActivas: true,
     sonidoNotificacion: 'default',
-    temaVisual: 'light',
-    idiomaApp: 'es',
     recordatoriosCita: true,
     intervaloRecordatorio: '30 minutos'
   });
 
   const [guardando, setGuardando] = useState(false);
+  const [cargando, setCargando] = useState(true);
   const [mensaje, setMensaje] = useState({ texto: '', tipo: '' });
   const [originalConfig, setOriginalConfig] = useState(null);
 
-  useEffect(() => {
-    const loadConfig = () => {
-      // Simulate loading from localStorage (or an API) with 'vete' prefix
-      const savedConfig = {
-        notificacionesActivas: localStorage.getItem('veteNotificacionesActivas') === 'true' || true,
-        sonidoNotificacion: localStorage.getItem('veteSonidoNotificacion') || 'default',
-        temaVisual: localStorage.getItem('veteTemaVisual') || 'light',
-        idiomaApp: localStorage.getItem('veteIdiomaApp') || 'es',
-        recordatoriosCita: localStorage.getItem('veteRecordatoriosCita') === 'true' || true,
-        intervaloRecordatorio: localStorage.getItem('veteIntervaloRecordatorio') || '30 minutos'
-      };
+  const navigate = useNavigate();
 
-      setConfig(savedConfig);
-      setOriginalConfig(savedConfig); // Store the initially loaded config
+  useEffect(() => {
+    const loadConfigLocally = () => {
+      setCargando(true);
+      setMensaje({ texto: '', tipo: '' });
+
+      try {
+        const savedConfig = {
+          notificacionesActivas: localStorage.getItem('veteNotificacionesActivas') === 'true' || true,
+          sonidoNotificacion: localStorage.getItem('veteSonidoNotificacion') || 'default',
+          recordatoriosCita: localStorage.getItem('veteRecordatoriosCita') === 'true' || true,
+          intervaloRecordatorio: localStorage.getItem('veteIntervaloRecordatorio') || '30 minutos'
+        };
+
+        setConfig(savedConfig);
+        setOriginalConfig(savedConfig);
+        setMensaje({ texto: 'Configuración cargada.', tipo: 'info' });
+      } catch (error) {
+        console.error('Error al cargar la configuración de localStorage:', error);
+        setMensaje({
+          texto: 'Error al cargar la configuración local.',
+          tipo: 'error'
+        });
+      } finally {
+        setCargando(false);
+        setTimeout(() => setMensaje({ texto: '', tipo: '' }), 3000);
+      }
     };
 
-    const timer = setTimeout(loadConfig, 500); // Simulate loading delay
-    return () => clearTimeout(timer); // Cleanup timeout
+    loadConfigLocally();
   }, []);
 
   const handleChange = (e) => {
@@ -86,37 +98,36 @@ const ConfiguracionVeterinario = () => {
 
   const handleGuardarConfiguracion = async () => {
     setGuardando(true);
-    setMensaje({ texto: '', tipo: '' }); // Clear previous message
+    setMensaje({ texto: '', tipo: '' });
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 1200)); // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 800));
 
-      // Save to localStorage with 'vete' prefix
       Object.entries(config).forEach(([key, value]) => {
-        // Construct the key with 'vete' prefix and capitalize the first letter of the original key
         const localStorageKey = `vete${key.charAt(0).toUpperCase() + key.slice(1)}`;
         localStorage.setItem(localStorageKey, typeof value === 'boolean' ? value.toString() : value);
       });
 
-      setOriginalConfig(config); // Update original config after successful save
+      setOriginalConfig(config);
       setMensaje({
         texto: '¡Configuración guardada exitosamente!',
         tipo: 'exito'
       });
     } catch (error) {
+      console.error('Error al guardar la configuración en localStorage:', error);
       setMensaje({
         texto: 'Error al guardar la configuración. Inténtalo de nuevo.',
         tipo: 'error'
       });
     } finally {
       setGuardando(false);
-      setTimeout(() => setMensaje({ texto: '', tipo: '' }), 3000); // Clear message after 3 seconds
+      setTimeout(() => setMensaje({ texto: '', tipo: '' }), 3000);
     }
   };
 
   const handleCancelar = () => {
     if (originalConfig) {
-      setConfig(originalConfig); // Revert to original settings
+      setConfig(originalConfig);
     }
     setMensaje({
       texto: 'Cambios descartados.',
@@ -125,9 +136,21 @@ const ConfiguracionVeterinario = () => {
     setTimeout(() => setMensaje({ texto: '', tipo: '' }), 3000);
   };
 
-  // Check if current config is different from original loaded config
+  const handleGoBack = () => {
+    navigate(-1);
+  };
+
   const hasChanges = originalConfig &&
     JSON.stringify(config) !== JSON.stringify(originalConfig);
+
+  if (cargando) {
+    return (
+      <div className={veteStyles.veteLoadingContainer}>
+        <FontAwesomeIcon icon={faSpinner} spin size="3x" className={veteStyles.veteLoadingSpinner} />
+        <p>Cargando configuración...</p>
+      </div>
+    );
+  }
 
   return (
     <motion.div
@@ -144,7 +167,7 @@ const ConfiguracionVeterinario = () => {
           <FontAwesomeIcon icon={faCog} className={veteStyles.veteHeaderIcon} />
           Configuración del Veterinario
         </h2>
-        <p className={veteStyles.veteSubtitle}>Personaliza tu experiencia en la aplicación</p>
+        <p className={veteStyles.veteSubtitle}>Personaliza tus preferencias de notificación</p>
       </motion.div>
 
       <motion.form
@@ -231,65 +254,23 @@ const ConfiguracionVeterinario = () => {
           )}
         </motion.div>
 
-        {/* Grupo de Apariencia */}
-        <motion.div
-          className={veteStyles.veteConfigSection}
-          variants={itemVariants}
-        >
-          <h3 className={veteStyles.veteSectionTitle}>
-            <FontAwesomeIcon icon={faPalette} /> Apariencia
-          </h3>
-
-          <div className={veteStyles.veteFormGroup}>
-            <label htmlFor="temaVisual" className={veteStyles.veteSelectLabel}>
-              Tema visual
-            </label>
-            <select
-              id="temaVisual"
-              name="temaVisual"
-              value={config.temaVisual}
-              onChange={handleChange}
-              className={veteStyles.veteSelectInput}
-            >
-              <option value="light">Claro</option>
-              <option value="dark">Oscuro</option>
-              <option value="blue">Azul (personalizado)</option>
-            </select>
-          </div>
-        </motion.div>
-
-        {/* Grupo de Idioma */}
-        <motion.div
-          className={veteStyles.veteConfigSection}
-          variants={itemVariants}
-        >
-          <h3 className={veteStyles.veteSectionTitle}>
-            <FontAwesomeIcon icon={faLanguage} /> Idioma
-          </h3>
-
-          <div className={veteStyles.veteFormGroup}>
-            <label htmlFor="idiomaApp" className={veteStyles.veteSelectLabel}>
-              Idioma de la aplicación
-            </label>
-            <select
-              id="idiomaApp"
-              name="idiomaApp"
-              value={config.idiomaApp}
-              onChange={handleChange}
-              className={veteStyles.veteSelectInput}
-            >
-              <option value="es">Español</option>
-              <option value="en">Inglés</option>
-              <option value="pt">Portugués</option>
-            </select>
-          </div>
-        </motion.div>
-
         {/* Botones de acción */}
         <motion.div
           className={veteStyles.veteButtonGroup}
           variants={itemVariants}
         >
+          <motion.button
+            type="button"
+            className={`${veteStyles.veteActionButton} ${veteStyles.veteBackButton}`}
+            onClick={handleGoBack}
+            variants={buttonVariants}
+            whileHover="hover"
+            whileTap="tap"
+            disabled={guardando}
+          >
+            <FontAwesomeIcon icon={faArrowLeft} /> Volver
+          </motion.button>
+
           <motion.button
             type="button"
             className={`${veteStyles.veteActionButton} ${veteStyles.veteSaveButton}`}
