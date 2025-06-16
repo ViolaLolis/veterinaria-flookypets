@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FaUserShield, FaEdit, FaTrash, FaPlus, FaSearch, FaSave, FaTimes, FaSpinner, FaInfoCircle } from 'react-icons/fa';
-import './Styles/AdminsManagement.css'; // Asegúrate de que este archivo CSS exista y contenga los estilos necesarios.
+// Importa AdminStyles.css que contiene los estilos generales, incluyendo los del modal
+import './Styles/AdminStyles.css'; 
 
 const AdminsManagement = () => {
   // Estados para gestionar los datos de los administradores y la UI
@@ -34,12 +35,12 @@ const AdminsManagement = () => {
   /**
    * Función mejorada para realizar peticiones fetch con autenticación JWT.
    * Agrega automáticamente el token de autorización y maneja errores de respuesta HTTP.
-   * @param {string} url - La URL del endpoint de la API.
+   * @param {string} endpoint - El endpoint de la API relativo a /api/admin.
    * @param {object} options - Opciones para la petición fetch (método, body, headers adicionales).
    * @returns {Promise<object>} Los datos de la respuesta JSON.
    * @throws {Error} Si no se encuentra el token o la respuesta de la red no es OK.
    */
-  const authFetch = async (url, options = {}) => {
+  const authFetch = async (endpoint, options = {}) => {
     const token = getAuthToken();
     // Lanza un error si no hay token, lo cual será capturado por las funciones que llaman a authFetch
     if (!token) {
@@ -67,7 +68,7 @@ const AdminsManagement = () => {
     }
 
     // Realiza la petición a la API de administración
-    const response = await fetch(`http://localhost:5000/api/admin${url}`, config);
+    const response = await fetch(`http://localhost:5000/api/admin${endpoint}`, config);
 
     // Verifica si la respuesta HTTP no fue exitosa
     if (!response.ok) {
@@ -102,21 +103,21 @@ const AdminsManagement = () => {
     setError(''); // Limpia cualquier error previo
     try {
       // Realiza la petición para obtener administradores
-      const { data } = await authFetch('/administrators');
+      const response = await authFetch('/administrators'); // Endpoint para obtener todos los administradores
+      const data = response.data; // Asumiendo que la respuesta tiene un campo 'data'
 
       // Formatea los datos recibidos para el estado local
       const formattedAdmins = data.map(admin => ({
         id: admin.id,
         nombre: admin.nombre,
-        apellido: admin.apellido || '', // Asegura que 'apellido' no sea undefined
+        apellido: admin.apellido || '',
         email: admin.email,
         telefono: admin.telefono,
-        direccion: admin.direccion || '', // Asegura que 'direccion' no sea undefined
+        direccion: admin.direccion || '',
         active: admin.active,
-        created_at: admin.created_at,
-        // Combina nombre y apellido para una búsqueda y visualización fácil
+        created_at: admin.created_at, // Asegurarse de que el backend devuelve created_at
         name: `${admin.nombre} ${admin.apellido || ''}`.trim(),
-        role: 'Administrador' // Rol predeterminado para fines de visualización
+        role: 'Administrador' // Asigna el rol para visualización si tu backend no lo devuelve explícitamente así
       }));
 
       setAdmins(formattedAdmins); // Actualiza la lista completa de administradores
@@ -125,14 +126,6 @@ const AdminsManagement = () => {
       // Establece el mensaje de error para mostrar al usuario
       setError(`Error al cargar administradores: ${err.message}`);
       console.error('Error fetching admins:', err);
-      // Sugerencia: Si estás usando un enrutador (como React Router), aquí podrías redirigir al login
-      // if (err.message.includes('token de autenticación')) {
-      //   // Ejemplo con React Router:
-      //   // history.push('/login');
-      //   // Ejemplo directo (no recomendado para SPAs con router):
-      //   // window.location.href = '/login';
-      //   console.log('Token de autenticación ausente o inválido. Redirigiendo al login...');
-      // }
     } finally {
       setIsLoading(false); // Desactiva el estado de carga
     }
@@ -147,7 +140,9 @@ const AdminsManagement = () => {
   useEffect(() => {
     const results = admins.filter(admin =>
       admin.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      admin.email.toLowerCase().includes(searchTerm.toLowerCase())
+      admin.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      admin.telefono.includes(searchTerm) || // Incluir teléfono en la búsqueda
+      (admin.direccion && admin.direccion.toLowerCase().includes(searchTerm.toLowerCase())) // Incluir dirección
     );
     setFilteredAdmins(results);
   }, [searchTerm, admins]); // Se ejecuta cuando searchTerm o admins cambian
@@ -163,27 +158,30 @@ const AdminsManagement = () => {
       return;
     }
 
-    // Reemplazando `window.confirm` con una notificación o un modal personalizado sería ideal.
-    // Por ahora, usamos `window.confirm` pero ten en cuenta las directrices de Canvas para evitarlo en producción.
+    // Usando una confirmación simple para este ejemplo. En una aplicación real, se usaría un modal personalizado.
     if (!window.confirm('¿Estás seguro de que quieres eliminar este administrador? Esta acción es irreversible.')) {
       return; // Si el usuario cancela, no hacemos nada
     }
 
-    setIsLoading(true); // Activa el spinner de carga
+    setIsSubmitting(true); // Activa el spinner de carga
     try {
       // Realiza la petición DELETE a la API
-      await authFetch(`/administrators/${id}`, {
+      const response = await authFetch(`/administrators/${id}`, {
         method: 'DELETE'
       });
 
-      // Actualiza el estado para remover el administrador eliminado
-      setAdmins(admins.filter(admin => admin.id !== id));
-      showNotification('Administrador eliminado correctamente.'); // Muestra un mensaje de éxito
+      if (response.success) { // Asumiendo que tu API devuelve un campo 'success'
+        // Actualiza el estado para remover el administrador eliminado
+        setAdmins(admins.filter(admin => admin.id !== id));
+        showNotification(response.message || 'Administrador eliminado correctamente.'); // Muestra un mensaje de éxito
+      } else {
+        showNotification(response.message || 'Error al eliminar administrador.', 'error');
+      }
     } catch (err) {
       showNotification(`Error al eliminar administrador: ${err.message}`, 'error'); // Muestra un mensaje de error
       console.error('Error deleting admin:', err);
     } finally {
-      setIsLoading(false); // Desactiva el spinner de carga
+      setIsSubmitting(false); // Desactiva el spinner de carga
     }
   };
 
@@ -245,17 +243,13 @@ const AdminsManagement = () => {
     e.preventDefault(); // Previene el comportamiento predeterminado del formulario
 
     // Validaciones básicas del formulario
-    if (!formData.nombre || !formData.telefono) {
-      showNotification('Nombre y teléfono son campos requeridos.', 'error');
+    if (!formData.nombre || !formData.telefono || !formData.email) { // Email es crítico para ambos casos
+      showNotification('Nombre, email y teléfono son campos requeridos.', 'error');
       return;
     }
 
     // Validaciones específicas para la creación de un nuevo administrador
     if (!currentAdmin) { // Si se está creando un nuevo administrador
-      if (!formData.email) {
-        showNotification('Email es requerido para nuevos administradores.', 'error');
-        return;
-      }
       if (!formData.password) {
         showNotification('Contraseña es requerida para nuevos administradores.', 'error');
         return;
@@ -274,45 +268,64 @@ const AdminsManagement = () => {
 
     try {
       let responseData;
+      // Prepara el payload, excluyendo confirmPassword
+      const payload = { ...formData };
+      delete payload.confirmPassword;
+
       if (currentAdmin) {
         // Lógica para ACTUALIZAR un administrador existente
-        // Excluye password y confirmPassword ya que no se actualizan en esta interfaz (la API no los espera en PUT)
-        const { password, confirmPassword, ...updateData } = formData;
+        // Para PUT, la API generalmente no espera 'password' si no se está cambiando explícitamente.
+        // Si tu API permite cambiar la contraseña con PUT, podrías incluirla aquí.
+        // Por ahora, la excluiremos si es una edición y no se ha tocado el campo password (o se dejó vacío)
+        if (!payload.password) {
+            delete payload.password;
+        }
+
         responseData = await authFetch(`/administrators/${currentAdmin.id}`, {
           method: 'PUT',
-          body: updateData // Envía solo los datos actualizables
+          body: payload // Envía los datos actualizables
         });
 
-        // Actualiza el administrador en el estado local
-        setAdmins(admins.map(admin =>
-          admin.id === currentAdmin.id ? {
-            ...admin,
-            ...updateData,
-            name: `${updateData.nombre} ${updateData.apellido || ''}`.trim() // Actualiza el nombre completo para la búsqueda
-          } : admin
-        ));
+        if (responseData.success && responseData.data) {
+             // Actualiza el administrador en el estado local con los datos recibidos del backend
+            setAdmins(admins.map(admin =>
+                admin.id === currentAdmin.id ? {
+                    ...admin,
+                    ...responseData.data, // Usa los datos actualizados del backend
+                    name: `${responseData.data.nombre} ${responseData.data.apellido || ''}`.trim()
+                } : admin
+            ));
+            showNotification(responseData.message || 'Administrador actualizado correctamente.');
+        } else {
+            showNotification(responseData.message || 'Error al actualizar administrador.', 'error');
+        }
+
       } else {
         // Lógica para CREAR un nuevo administrador
-        const { confirmPassword, ...newAdminData } = formData; // Excluye confirmPassword
+        payload.role = 'administrador'; // Asegura que el rol sea 'administrador'
+        
         responseData = await authFetch('/administrators', {
           method: 'POST',
-          body: newAdminData // Envía los datos del nuevo administrador (la API se encargará de hashear la contraseña)
+          body: payload // Envía los datos del nuevo administrador (la API se encargará de hashear la contraseña)
         });
 
-        // Agrega el nuevo administrador al estado local
-        const newAdmin = {
-          id: responseData.data.id, // Asume que la API devuelve el ID del nuevo administrador
-          ...newAdminData,
-          name: `${newAdminData.nombre} ${newAdminData.apellido || ''}`.trim(),
-          role: 'Administrador', // Asigna el rol predeterminado
-          active: 1, // Por defecto, un nuevo admin está activo
-          created_at: responseData.data.created_at // Asume que la API devuelve la fecha de creación
-        };
-        setAdmins([...admins, newAdmin]);
+        if (responseData.success && responseData.data && responseData.data.id) {
+            // Agrega el nuevo administrador al estado local con el ID y otros datos de la respuesta del backend
+            const newAdmin = {
+                id: responseData.data.id,
+                ...responseData.data, // Usa los datos completos devueltos por el backend
+                name: `${responseData.data.nombre} ${responseData.data.apellido || ''}`.trim(),
+                role: responseData.data.role || 'administrador', // Asegura el rol
+                active: responseData.data.active !== undefined ? responseData.data.active : 1, // Si active no viene, asume 1
+                created_at: responseData.data.created_at || new Date().toISOString() // Si created_at no viene, usa fecha actual
+            };
+            setAdmins([...admins, newAdmin]);
+            showNotification(responseData.message || 'Administrador creado correctamente.');
+        } else {
+            showNotification(responseData.message || 'Error al crear administrador.', 'error');
+        }
       }
 
-      // Muestra un mensaje de éxito general
-      showNotification(responseData.message || 'Operación completada exitosamente.');
       setIsFormOpen(false); // Cierra el modal del formulario tras el éxito
     } catch (err) {
       // Muestra un mensaje de error específico
@@ -339,7 +352,7 @@ const AdminsManagement = () => {
   }
 
   return (
-    <div className="admins-management">
+    <div className="management-section"> {/* Usando la clase general 'management-section' */}
       {/* Componente para mostrar notificaciones (éxito/error) */}
       {notification && (
         <div className={`notification ${notification.type}`}>
@@ -353,8 +366,8 @@ const AdminsManagement = () => {
 
       {/* Modal para el formulario de agregar/editar administrador */}
       {isFormOpen && (
-        <div className="modal-overlay">
-          <div className="modal-form">
+        <div className="modal-overlay"> {/* El overlay cubre toda la pantalla */}
+          <div className="modal-form"> {/* El formulario modal en sí */}
             {/* Botón para cerrar el modal */}
             <button
               className="close-modal"
@@ -371,6 +384,19 @@ const AdminsManagement = () => {
 
             <form onSubmit={handleSubmit}>
               <div className="form-grid">
+                {/* Campo: ID (solo lectura si es edición) */}
+                {currentAdmin && (
+                  <div className="form-group">
+                    <label htmlFor="id">ID</label>
+                    <input
+                      type="text"
+                      id="id"
+                      name="id"
+                      value={currentAdmin.id}
+                      disabled
+                    />
+                  </div>
+                )}
                 {/* Campo: Nombre */}
                 <div className="form-group">
                   <label htmlFor="nombre">Nombre*</label>
@@ -478,7 +504,7 @@ const AdminsManagement = () => {
                 {/* Botón Guardar/Actualizar */}
                 <button
                   type="submit"
-                  className="submit-btn"
+                  className="save-btn" // Usando save-btn para unificar estilos
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? (
@@ -499,10 +525,10 @@ const AdminsManagement = () => {
 
       {/* Encabezado del panel de administración */}
       <div className="management-header">
-        <h2><FaUserShield /> Gestión de Administradores</h2>
+        <h2><FaUserShield className="header-icon" /> Gestión de Administradores</h2> {/* Asegura que el icono tiene la clase header-icon */}
         <div className="header-actions">
           {/* Barra de búsqueda */}
-          <div className="search-bar">
+          <div className="search-bar"> {/* Usando la clase general search-bar */}
             <FaSearch className="search-icon" />
             <input
               type="text"
@@ -511,6 +537,15 @@ const AdminsManagement = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
               disabled={isLoading}
             />
+            {searchTerm && (
+              <button
+                className="clear-search"
+                onClick={() => setSearchTerm('')}
+                disabled={isLoading}
+              >
+                <FaTimes />
+              </button>
+            )}
           </div>
           {/* Botón para agregar nuevo administrador */}
           <button
@@ -524,9 +559,9 @@ const AdminsManagement = () => {
       </div>
 
       {/* Contenedor de la tabla de administradores */}
-      <div className="admins-table-container">
+      <div className="admin-table-container"> {/* Usando la clase general admin-table-container */}
         {filteredAdmins.length > 0 ? (
-          <table className="admins-table">
+          <table className="admin-table"> {/* Usando la clase general admin-table */}
             <thead>
               <tr>
                 <th>ID</th>
@@ -578,7 +613,7 @@ const AdminsManagement = () => {
           </table>
         ) : (
           <div className="no-results">
-            {/* Mensaje si no hay resultados de búsqueda o no hay administradores */}
+            <FaInfoCircle className="info-icon" /> {/* Icono para no results */}
             {searchTerm ?
               'No se encontraron administradores que coincidan con la búsqueda.' :
               'No hay administradores registrados.'}
