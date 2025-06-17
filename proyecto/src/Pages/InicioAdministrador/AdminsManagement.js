@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FaUserShield, FaEdit, FaTrash, FaPlus, FaSearch, FaSave, FaTimes, FaSpinner, FaInfoCircle } from 'react-icons/fa';
-// Importa AdminStyles.css que contiene los estilos generales, incluyendo los del modal
-import './Styles/AdminStyles.css'; 
+import './Styles/AdminStyles.css'; // Importa AdminStyles.css que contiene los estilos generales, incluyendo los del modal
 
 const AdminsManagement = () => {
   // Estados para gestionar los datos de los administradores y la UI
@@ -287,7 +286,7 @@ const AdminsManagement = () => {
         });
 
         if (responseData.success && responseData.data) {
-             // Actualiza el administrador en el estado local con los datos recibidos del backend
+              // Actualiza el administrador en el estado local con los datos recibidos del backend
             setAdmins(admins.map(admin =>
                 admin.id === currentAdmin.id ? {
                     ...admin,
@@ -561,59 +560,49 @@ const AdminsManagement = () => {
       {/* Contenedor de la tabla de administradores */}
       <div className="admin-table-container"> {/* Usando la clase general admin-table-container */}
         {filteredAdmins.length > 0 ? (
-          <table className="admin-table"> {/* Usando la clase general admin-table */}
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Nombre Completo</th>
-                <th>Email</th>
-                <th>Teléfono</th>
-                <th>Estado</th>
-                <th>Registro</th>
-                <th>Acciones</th>
+          <table className="admin-table"><thead>
+            <tr>
+              <th>ID</th>
+              <th>Nombre Completo</th>
+              <th>Email</th>
+              <th>Teléfono</th>
+              <th>Estado</th>
+              <th>Registro</th>
+              <th>Acciones</th>
+            </tr>
+          </thead><tbody>
+            {/* Mapea y renderiza cada administrador en una fila de la tabla */}
+            {filteredAdmins.map(admin => (
+              <tr key={admin.id} className={admin.id === user.id ? 'current-user-row' : ''}>
+                <td>{admin.id}</td><td>{`${admin.nombre} ${admin.apellido || ''}`}</td><td>{admin.email}</td><td>{admin.telefono}</td><td>
+                  <span className={`status-badge ${admin.active ? 'active' : 'inactive'}`}>
+                    {admin.active ? 'Activo' : 'Inactivo'}
+                  </span>
+                </td><td>{admin.created_at}</td><td className="actions-cell">
+                  <button
+                    onClick={() => handleEdit(admin)}
+                    className="edit-btn"
+                    disabled={isLoading || isSubmitting}
+                    title="Editar Administrador"
+                  >
+                    <FaEdit />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(admin.id)}
+                    className="delete-btn"
+                    disabled={admin.id === user.id || isLoading || isSubmitting}
+                    title={admin.id === user.id ? 'No puedes eliminar tu propio usuario' : 'Eliminar Administrador'}
+                  >
+                    <FaTrash />
+                  </button>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {/* Mapea y renderiza cada administrador en una fila de la tabla */}
-              {filteredAdmins.map(admin => (
-                <tr key={admin.id} className={admin.id === user.id ? 'current-user-row' : ''}>
-                  <td>{admin.id}</td>
-                  <td>{`${admin.nombre} ${admin.apellido || ''}`}</td>
-                  <td>{admin.email}</td>
-                  <td>{admin.telefono}</td>
-                  <td>
-                    <span className={`status-badge ${admin.active ? 'active' : 'inactive'}`}>
-                      {admin.active ? 'Activo' : 'Inactivo'}
-                    </span>
-                  </td>
-                  <td>{admin.created_at}</td>
-                  <td className="actions-cell">
-                    {/* Botón para editar */}
-                    <button
-                      onClick={() => handleEdit(admin)}
-                      className="edit-btn"
-                      disabled={isLoading || isSubmitting}
-                      title="Editar Administrador"
-                    >
-                      <FaEdit />
-                    </button>
-                    {/* Botón para eliminar (deshabilitado si es el propio usuario o si hay carga/envío) */}
-                    <button
-                      onClick={() => handleDelete(admin.id)}
-                      className="delete-btn"
-                      disabled={admin.id === user.id || isLoading || isSubmitting}
-                      title={admin.id === user.id ? 'No puedes eliminar tu propio usuario' : 'Eliminar Administrador'}
-                    >
-                      <FaTrash />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+            ))}
+          </tbody></table>
         ) : (
           <div className="no-results">
-            <FaInfoCircle className="info-icon" /> {/* Icono para no results */}
+            {/* Icono para no results */}
+            <FaInfoCircle className="info-icon" />
             {searchTerm ?
               'No se encontraron administradores que coincidan con la búsqueda.' :
               'No hay administradores registrados.'}

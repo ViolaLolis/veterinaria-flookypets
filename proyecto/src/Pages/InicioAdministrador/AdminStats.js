@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { FaUsers, FaUserMd, FaUserShield, FaConciergeBell, FaCalendarAlt, FaChartLine } from 'react-icons/fa';
+import React, { useState, useEffect, useCallback } from 'react';
+import { FaUsers, FaUserMd, FaUserShield, FaConciergeBell, FaCalendarAlt, FaChartLine, FaSpinner, FaInfoCircle } from 'react-icons/fa';
 import { Bar, Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement } from 'chart.js';
+import { authFetch } from './api'; // Importa authFetch
 import './Styles/AdminStats.css';
-
 
 // Registra los componentes necesarios de Chart.js
 ChartJS.register(
@@ -16,73 +16,93 @@ ChartJS.register(
   ArcElement
 );
 
-function AdminStats() {
+function AdminStats({ user }) { // Recibe 'user' como prop
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalVets: 0,
     totalAdmins: 0,
     totalServices: 0,
-    totalAppointments: 0,
-    monthlyGrowth: 0
+    totalAppointments: 0, // Citas este mes
+    monthlyGrowth: 0      // Crecimiento respecto al mes anterior
   });
   
   const [citasPorMes, setCitasPorMes] = useState([]);
   const [serviciosPopulares, setServiciosPopulares] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingStats, setIsLoadingStats] = useState(true); // Nuevo estado para la carga de las estadísticas generales
   const [isLoadingCharts, setIsLoadingCharts] = useState(true);
 
-  useEffect(() => {
-    // Simular carga de estadísticas
-    setTimeout(() => {
-      setStats({
-        totalUsers: 125,
-        totalVets: 8,
-        totalAdmins: 3,
-        totalServices: 12,
-        totalAppointments: 342,
-        monthlyGrowth: 15.7
-      });
-      setIsLoading(false);
-    }, 1000);
-
-    // Cargar datos para gráficos
-    const fetchChartData = async () => {
-      try {
-        // En un proyecto real, harías fetch a tus endpoints API
-        // const citasRes = await fetch('/api/stats/citas-por-mes');
-        // const serviciosRes = await fetch('/api/stats/servicios-populares');
-        // const citasData = await citasRes.json();
-        // const serviciosData = await serviciosRes.json();
-        
-        // Datos de ejemplo (simulando la respuesta de la API)
-        const citasData = [
-          { mes: 'Enero', cantidad: 45 },
-          { mes: 'Febrero', cantidad: 60 },
-          { mes: 'Marzo', cantidad: 55 },
-          { mes: 'Abril', cantidad: 72 },
-          { mes: 'Mayo', cantidad: 85 },
-          { mes: 'Junio', cantidad: 120 }
-        ];
-        
-        const serviciosData = [
-          { servicio: 'Consulta General', cantidad: 150 },
-          { servicio: 'Vacunación', cantidad: 95 },
-          { servicio: 'Estética Canina y Felina', cantidad: 65 },
-          { servicio: 'Diagnóstico por Imagen', cantidad: 42 },
-          { servicio: 'Laboratorio Clínico', cantidad: 30 }
-        ];
-        
-        setCitasPorMes(citasData);
-        setServiciosPopulares(serviciosData);
-        setIsLoadingCharts(false);
-      } catch (error) {
-        console.error('Error al cargar datos para gráficos:', error);
-        setIsLoadingCharts(false);
+  // Función para obtener las estadísticas generales del dashboard
+  const fetchDashboardStats = useCallback(async () => {
+    setIsLoadingStats(true);
+    try {
+      const responseData = await authFetch('/admin/stats');
+      if (responseData.success && responseData.data) {
+        setStats(responseData.data);
+      } else {
+        console.error('Error en fetchDashboardStats:', responseData.message);
+        // Respaldo a 0 si la API falla o devuelve datos inesperados
+        setStats({
+          totalUsers: 0,
+          totalVets: 0,
+          totalAdmins: 0,
+          totalServices: 0,
+          totalAppointments: 0,
+          monthlyGrowth: 0
+        });
       }
-    };
+    } catch (error) {
+      console.error('Error de conexión en fetchDashboardStats:', error);
+      // Respaldo a 0 si la conexión falla
+      setStats({
+        totalUsers: 0,
+        totalVets: 0,
+        totalAdmins: 0,
+        totalServices: 0,
+        totalAppointments: 0,
+        monthlyGrowth: 0
+      });
+    } finally {
+      setIsLoadingStats(false);
+    }
+  }, [authFetch]);
 
-    fetchChartData();
-  }, []);
+  // Función para cargar datos para los gráficos
+  const fetchChartData = useCallback(async () => {
+    setIsLoadingCharts(true);
+    try {
+      // Fetch para citas por mes
+      const citasRes = await authFetch('/api/stats/citas-por-mes');
+      if (citasRes.success && Array.isArray(citasRes.data)) {
+        setCitasPorMes(citasRes.data);
+      } else {
+        console.error('Error en citasPorMes:', citasRes.message);
+        setCitasPorMes([]); // Asegura que sea un array vacío si falla
+      }
+
+      // Fetch para servicios populares
+      const serviciosRes = await authFetch('/api/stats/servicios-populares');
+      if (serviciosRes.success && Array.isArray(serviciosRes.data)) {
+        setServiciosPopulares(serviciosRes.data);
+      } else {
+        console.error('Error en serviciosPopulares:', serviciosRes.message);
+        setServiciosPopulares([]); // Asegura que sea un array vacío si falla
+      }
+    } catch (error) {
+      console.error('Error de conexión en fetchChartData:', error);
+      setCitasPorMes([]);
+      setServiciosPopulares([]);
+    } finally {
+      setIsLoadingCharts(false);
+    }
+  }, [authFetch]);
+
+  useEffect(() => {
+    // Solo cargar datos si el usuario está disponible y autenticado
+    if (user && user.token) {
+      fetchDashboardStats();
+      fetchChartData();
+    }
+  }, [user, fetchDashboardStats, fetchChartData]);
 
   // Configuración del gráfico de barras (citas por mes)
   const citasChartData = {
@@ -135,6 +155,7 @@ function AdminStats() {
           'rgba(255, 206, 86, 0.7)',
           'rgba(75, 192, 192, 0.7)',
           'rgba(153, 102, 255, 0.7)',
+          'rgba(255, 159, 64, 0.7)', // Añadir más colores si hay más de 5 servicios
         ],
         borderColor: [
           'rgba(255, 99, 132, 1)',
@@ -142,6 +163,7 @@ function AdminStats() {
           'rgba(255, 206, 86, 1)',
           'rgba(75, 192, 192, 1)',
           'rgba(153, 102, 255, 1)',
+          'rgba(255, 159, 64, 1)',
         ],
         borderWidth: 1,
       },
@@ -164,7 +186,7 @@ function AdminStats() {
     },
   };
 
-  if (isLoading) {
+  if (isLoadingStats) { // Usar isLoadingStats para el spinner principal
     return (
       <div className="admin-loading">
         <div className="loading-spinner"></div>
@@ -252,7 +274,7 @@ function AdminStats() {
         <div className="chart-container">
           <h3>Citas por Mes</h3>
           {isLoadingCharts ? (
-            <div className="chart-loading">Cargando datos...</div>
+            <div className="chart-loading"><FaSpinner className="spinner-icon" /> Cargando datos...</div>
           ) : (
             <Bar options={citasChartOptions} data={citasChartData} />
           )}
@@ -261,7 +283,7 @@ function AdminStats() {
         <div className="chart-container">
           <h3>Servicios Más Populares</h3>
           {isLoadingCharts ? (
-            <div className="chart-loading">Cargando datos...</div>
+            <div className="chart-loading"><FaSpinner className="spinner-icon" /> Cargando datos...</div>
           ) : (
             <Pie options={serviciosChartOptions} data={serviciosChartData} />
           )}

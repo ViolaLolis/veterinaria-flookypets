@@ -296,49 +296,21 @@ function ServicesManagement({ user }) {
               
               <div className="form-group">
                 <label>Nombre:</label>
-                <input
-                  type="text"
-                  name="nombre"
-                  value={currentService?.nombre || ''}
-                  onChange={handleInputChange}
-                  placeholder="Ej: Consulta General"
-                  required
-                  disabled={isSubmitting}
-                />
+                <input type="text" name="nombre" value={currentService?.nombre || ''} onChange={handleInputChange} placeholder="Ej: Consulta General" required disabled={isSubmitting} />
               </div>
               
               <div className="form-group">
                 <label>Descripción:</label>
-                <textarea
-                  name="descripcion"
-                  value={currentService?.descripcion || ''}
-                  onChange={handleInputChange}
-                  rows="4"
-                  placeholder="Descripción detallada del servicio"
-                  required
-                  disabled={isSubmitting}
-                />
+                <textarea name="descripcion" value={currentService?.descripcion || ''} onChange={handleInputChange} rows="4" placeholder="Descripción detallada del servicio" required disabled={isSubmitting} />
               </div>
               
               <div className="form-group">
                 <label>Precio:</label>
-                <input
-                  type="text"
-                  name="precio"
-                  value={currentService?.precio || ''}
-                  onChange={handleInputChange}
-                  placeholder="Ej: $50.000 o 'Consultar'"
-                  required
-                  disabled={isSubmitting}
-                />
+                <input type="text" name="precio" value={currentService?.precio || ''} onChange={handleInputChange} placeholder="Ej: $50.000 o 'Consultar'" required disabled={isSubmitting} />
               </div>
               
               <div className="form-actions">
-                <button
-                  onClick={currentService?.id_servicio ? handleSave : handleCreate}
-                  className="save-btn"
-                  disabled={isSubmitting}
-                >
+                <button onClick={currentService?.id_servicio ? handleSave : handleCreate} className="save-btn" disabled={isSubmitting}>
                   {isSubmitting ? <FaSpinner className="spinner-icon" /> : <FaSave />}
                   {isSubmitting ? 'Guardando...' : 'Guardar'}
                 </button>
@@ -356,13 +328,7 @@ function ServicesManagement({ user }) {
         <div className="header-actions">
           <div className="search-bar">
             <FaSearch className="search-icon" />
-            <input
-              type="text"
-              placeholder="Buscar servicios..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              disabled={isLoading}
-            />
+            <input type="text" placeholder="Buscar servicios..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} disabled={isLoading} />
             {searchTerm && (
               <button className="clear-search" onClick={() => setSearchTerm('')} disabled={isLoading}>
                 <FaTimes />
@@ -375,49 +341,30 @@ function ServicesManagement({ user }) {
         </div>
       </div>
 
-      {error && services.length === 0 && <div className="error-message">{error}</div>}
-      
-      <div className="admin-table-container"> {/* Usando admin-table-container para consistencia */}
+      <div className="admin-table-container">
         {filteredServices.length > 0 ? (
-          <table className="admin-table"> {/* Usando admin-table para consistencia */}
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Nombre</th>
-                <th>Descripción</th>
-                <th>Precio</th>
-                <th>Acciones</th>
+          <table className="admin-table"><thead>
+            <tr>
+              <th>ID</th>
+              <th>Nombre</th>
+              <th>Descripción</th>
+              <th>Precio</th>
+              <th>Acciones</th>
+            </tr>
+          </thead><tbody>
+            {filteredServices.map(service => (
+              <tr key={service.id_servicio}>
+                <td>{service.id_servicio}</td><td>{service.nombre}</td><td>{service.descripcion}</td><td>{formatPrice(service.precio)}</td><td className="actions-cell">
+                  <button onClick={() => handleEdit(service)} className="edit-btn" disabled={isLoading || isSubmitting} title="Editar Servicio">
+                    <FaEdit />
+                  </button>
+                  <button onClick={() => handleDelete(service.id_servicio)} className="delete-btn" disabled={isLoading || isSubmitting} title="Eliminar Servicio">
+                    <FaTrash />
+                  </button>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {filteredServices.map(service => (
-                <tr key={service.id_servicio}>
-                  <td>{service.id_servicio}</td>
-                  <td>{service.nombre}</td>
-                  <td>{service.descripcion}</td>
-                  <td>{formatPrice(service.precio)}</td>
-                  <td className="actions-cell">
-                    <button
-                      onClick={() => handleEdit(service)}
-                      className="edit-btn"
-                      disabled={isLoading || isSubmitting}
-                      title="Editar Servicio"
-                    >
-                      <FaEdit />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(service.id_servicio)}
-                      className="delete-btn"
-                      disabled={isLoading || isSubmitting}
-                      title="Eliminar Servicio"
-                    >
-                      <FaTrash />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+            ))}
+          </tbody></table>
         ) : (
           <div className="no-results">
             <FaInfoCircle className="info-icon" />
