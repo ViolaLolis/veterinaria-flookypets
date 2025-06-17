@@ -19,7 +19,7 @@ app.use(express.json()); // Habilita el parsing de JSON en el cuerpo de las peti
 const pool = mysql.createPool({
     host: process.env.DB_HOST || "127.0.0.1",
     user: process.env.DB_USER || "root",
-    password: process.env.DB_PASSWORD || "",
+    password: process.env.DB_PASSWORD || "12345678", // Revertido al valor por defecto proporcionado previamente
     database: process.env.DB_NAME || "veterinaria",
     waitForConnections: true,
     connectionLimit: 10, // Número máximo de conexiones en el pool
@@ -293,7 +293,7 @@ app.post("/reset-password", async (req, res) => {
 });
 
 // =============================================
-// RUTAS DEL PANEL DE ADMINISTRADOR
+// RUTAS DEL PANEL DE ADMINISTRADOR (MÁS ESPECÍFICAS PRIMERO)
 // =============================================
 
 /**
@@ -331,7 +331,7 @@ app.get("/admin/stats", authenticateToken, isAdmin, async (req, res) => {
             : 100;
 
         res.json({
-            success: true, // Añadido para consistencia
+            success: true,
             data: {
                 totalUsers,
                 totalVets,
@@ -565,7 +565,7 @@ app.delete("/api/admin/administrators/:id", authenticateToken, isAdmin, async (r
         if (error.code === 'ER_ROW_IS_REFERENCED_2') {
             return res.status(400).json({
                 success: false,
-                message: "No se puede eliminar porque tiene registros asociados"
+                message: "No se puede eliminar porque tiene registros asociados (clave foránea)"
             });
         }
 
@@ -859,7 +859,6 @@ app.put("/admin/usuarios/:id/status", authenticateToken, isAdmin, async (req, re
     }
 });
 
-
 // ### **VISUALIZACIÓN DE CITAS**
 
 app.get("/admin/citas", authenticateToken, isAdmin, async (req, res) => {
@@ -882,7 +881,6 @@ app.get("/admin/citas", authenticateToken, isAdmin, async (req, res) => {
     }
 });
 
-
 // ### **VISUALIZACIÓN DE HISTORIALES MÉDICOS**
 
 app.get("/admin/historiales", authenticateToken, isAdmin, async (req, res) => {
@@ -902,6 +900,94 @@ app.get("/admin/historiales", authenticateToken, isAdmin, async (req, res) => {
     } catch (error) {
         console.error("Error al obtener historiales médicos:", error);
         res.status(500).json({ success: false, message: "Error al obtener historiales médicos" });
+    }
+});
+
+// =============================================
+// RUTAS DE PERFIL DE USUARIO INDIVIDUAL (MÁS GENERALES AL FINAL)
+// =============================================
+
+/**
+ * OBTENER DETALLES DE UN USUARIO POR ID
+ * GET /usuarios/:id
+ * Esta ruta permite a un usuario autenticado obtener sus propios datos de perfil.
+ * Un administrador también podría usarla para obtener los datos de cualquier usuario.
+ */
+app.get("/usuarios/:id", authenticateToken, async (req, res) => {
+    const userId = parseInt(req.params.id); // ID del usuario solicitado
+    const authenticatedUserId = req.user.id; // ID del usuario que hace la solicitud (del token)
+    const authenticatedUserRole = req.user.role; // Rol del usuario que hace la solicitud
+
+    // Seguridad: Permite al propio usuario acceder a su perfil o a un admin acceder a cualquier perfil
+    if (userId !== authenticatedUserId && authenticatedUserRole !== 'admin') {
+        return res.status(403).json({ success: false, message: "Acceso denegado. No tienes permiso para ver este perfil." });
+    }
+
+    try {
+        const [users] = await pool.query(
+            `SELECT id, nombre, apellido, email, telefono, direccion, role
+             FROM usuarios
+             WHERE id = ?`,
+            [userId]
+        );
+
+        if (users.length === 0) {
+            return res.status(404).json({ success: false, message: "Usuario no encontrado." });
+        }
+
+        res.json({ success: true, data: users[0] });
+    } catch (error) {
+        console.error("Error al obtener perfil de usuario por ID:", error);
+        res.status(500).json({ success: false, message: "Error al obtener datos del perfil." });
+    }
+});
+
+/**
+ * ACTUALIZAR DETALLES DE UN USUARIO POR ID
+ * PUT /usuarios/:id
+ * Permite a un usuario actualizar su propio perfil (no cambia rol ni email)
+ * Los administradores también pueden usarla para actualizar usuarios.
+ */
+app.put("/usuarios/:id", authenticateToken, async (req, res) => {
+    const userId = parseInt(req.params.id);
+    const authenticatedUserId = req.user.id;
+    const authenticatedUserRole = req.user.role;
+    const { nombre, apellido, telefono, direccion } = req.body; // No se permite actualizar email ni password directamente aquí.
+
+    // Seguridad: Permite al propio usuario actualizar su perfil o a un admin actualizar cualquier perfil
+    if (userId !== authenticatedUserId && authenticatedUserRole !== 'admin') {
+        return res.status(403).json({ success: false, message: "Acceso denegado. No tienes permiso para actualizar este perfil." });
+    }
+
+    if (!nombre || !telefono) {
+        return res.status(400).json({ success: false, message: "Nombre y teléfono son requeridos." });
+    }
+
+    try {
+        const [result] = await pool.query(
+            `UPDATE usuarios
+             SET nombre = ?, apellido = ?, telefono = ?, direccion = ?
+             WHERE id = ?`,
+            [nombre, apellido, telefono, direccion, userId]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ success: false, message: "Usuario no encontrado o no se pudo actualizar." });
+        }
+
+        // Recuperar los datos actualizados para enviar al frontend
+        const [updatedUser] = await pool.query(
+            `SELECT id, nombre, apellido, email, telefono, direccion, role
+             FROM usuarios
+             WHERE id = ?`,
+            [userId]
+        );
+
+        res.json({ success: true, message: "Perfil actualizado correctamente.", data: updatedUser[0] });
+
+    } catch (error) {
+        console.error("Error al actualizar perfil de usuario:", error);
+        res.status(500).json({ success: false, message: "Error interno del servidor al actualizar perfil." });
     }
 });
 

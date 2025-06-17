@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 // Importa los iconos de Font Awesome para una mejor interfaz de usuario
 import { FaUserMd, FaEdit, FaTrash, FaPlus, FaSearch, FaTimes, FaSave, FaSpinner, FaInfoCircle } from 'react-icons/fa';
 import './Styles/AdminStyles.css'; // Asegúrate de que este archivo CSS existe y contiene los estilos necesarios
@@ -13,8 +13,8 @@ function VetsManagement() { // Nombre del componente cambiado a VetsManagement
   // Estado para indicar si los datos están siendo cargados desde la API
   const [isLoading, setIsLoading] = useState(true);
   // Estado para almacenar y mostrar mensajes de error
-  const [error, setError] = useState('');
-  // Estado para controlar la visibilidad del formulario de edición/creación
+  const [error, setError] = useState(''); // CORREGIDO: Inicialización correcta de useState
+  // Estado para controlar la visibilidad del modal de formulario
   const [isFormOpen, setIsFormOpen] = useState(false);
   // Estado para almacenar los datos del veterinario que se está editando (o null si es uno nuevo)
   const [currentVet, setCurrentVet] = useState(null);
@@ -42,20 +42,20 @@ function VetsManagement() { // Nombre del componente cambiado a VetsManagement
    * @param {string} message - El mensaje a mostrar en la notificación.
    * @param {string} type - El tipo de notificación ('success' o 'error'), para aplicar estilos.
    */
-  const showNotification = (message, type = 'success') => {
+  const showNotification = useCallback((message, type = 'success') => {
     setNotification({ message, type });
     // La notificación desaparecerá automáticamente después de 5 segundos
     setTimeout(() => setNotification(null), 5000);
-  };
+  }, []);
 
   /**
    * Obtiene el token de autenticación del almacenamiento local.
    * Esta función es interna al componente, como se solicitó, para no usar un archivo 'api.js'.
    * @returns {string|null} El token JWT o null si no se encuentra.
    */
-  const getAuthToken = () => {
+  const getAuthToken = useCallback(() => {
     return localStorage.getItem('token');
-  };
+  }, []);
 
   /**
    * Realiza una petición fetch a la API con autenticación JWT.
@@ -66,11 +66,12 @@ function VetsManagement() { // Nombre del componente cambiado a VetsManagement
    * @returns {Promise<object>} Los datos de la respuesta JSON.
    * @throws {Error} Si no se encuentra el token o si la respuesta de la red no es OK.
    */
-  const authFetch = async (endpoint, options = {}) => {
+  const authFetch = useCallback(async (endpoint, options = {}) => {
     const token = getAuthToken();
     if (!token) {
       // Si no hay token, lanza un error que será capturado por el bloque catch
-      throw new Error('No se encontró token de autenticación. Por favor, inicie sesión nuevamente.');
+      showNotification('No se encontró token de autenticación. Por favor, inicie sesión nuevamente.', 'error');
+      throw new Error('No se encontró token de autenticación.');
     }
 
     // Encabezados predeterminados para todas las peticiones autenticadas
@@ -89,33 +90,36 @@ function VetsManagement() { // Nombre del componente cambiado a VetsManagement
     };
 
     // Si hay un cuerpo en la petición, asegúrate de que sea JSON stringificado
-    if (options.body) {
+    if (options.body && typeof options.body !== 'string') {
       config.body = JSON.stringify(options.body);
     }
-
-    // Realiza la petición a tu servidor backend
+    
+    console.log(`AuthFetch: Solicitando a ${endpoint}`); // Log para depuración
     const response = await fetch(`http://localhost:5000${endpoint}`, config);
+    console.log(`AuthFetch: Respuesta para ${endpoint} - Status: ${response.status}, StatusText: ${response.statusText}`); // Log para depuración
 
     // Si la respuesta no es exitosa (ej. 401, 403, 404, 500), lanza un error
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({})); // Intenta parsear el error del servidor
+      console.error(`AuthFetch Error:`, errorData); // Log para ver el cuerpo del error
       const errorMessage = errorData.message || `Error ${response.status}: ${response.statusText}`;
+      showNotification(`Error de API: ${errorMessage}`, 'error'); // Muestra notificación de error
       throw new Error(errorMessage);
     }
 
     // Retorna la respuesta JSON si la petición fue exitosa
     return response.json();
-  };
+  }, [getAuthToken, showNotification]);
 
   /**
    * Función asíncrona para cargar la lista de veterinarios desde el backend.
    * Actualiza los estados de carga, error y la lista de veterinarios.
    */
-  const fetchVets = async () => {
+  const fetchVets = useCallback(async () => {
     setIsLoading(true); // Activa el estado de carga
     setError(''); // Limpia cualquier error previo
     try {
-      // *** RUTA CORRECTA A TU BACKEND: /usuarios/veterinarios ***
+      // RUTA CORRECTA A TU BACKEND: /usuarios/veterinarios
       // Llama a la API para obtener todos los usuarios con rol 'veterinario'
       const responseData = await authFetch('/usuarios/veterinarios');
       
@@ -124,24 +128,23 @@ function VetsManagement() { // Nombre del componente cambiado a VetsManagement
         setVets(responseData.data); // Actualiza la lista completa de veterinarios
         setFilteredVets(responseData.data); // Inicializa la lista filtrada también
       } else {
+        // Si la respuesta no es exitosa pero no lanzó un error HTTP (ej. success: false en el cuerpo)
         setError(responseData.message || 'Formato de datos de veterinarios incorrecto.');
+        showNotification(responseData.message || 'Error al cargar veterinarios: Formato de datos incorrecto.', 'error');
       }
     } catch (err) {
       setError(`Error al cargar veterinarios: ${err.message}`);
       console.error('Error fetching vets:', err);
-      // Opcional: Si el error es por autenticación, redirige al login
-      if (err.message.includes('token de autenticación') || err.message.includes('Token inválido')) {
-        // window.location.href = '/login'; // Descomentar y ajustar si tienes una ruta de login
-      }
+      // La notificación ya se maneja en authFetch si es un error de red o de API
     } finally {
       setIsLoading(false); // Desactiva el estado de carga
     }
-  };
+  }, [authFetch, showNotification, setError, setIsLoading]);
 
   // useEffect para cargar los veterinarios al montar el componente (una sola vez)
   useEffect(() => {
     fetchVets();
-  }, []);
+  }, [fetchVets]); // Añadido fetchVets a las dependencias para evitar warnings de ESLint
 
   // useEffect para filtrar la lista de veterinarios cada vez que el término de búsqueda o la lista original cambian
   useEffect(() => {
@@ -160,7 +163,7 @@ function VetsManagement() { // Nombre del componente cambiado a VetsManagement
    * Muestra un cuadro de confirmación antes de proceder.
    * @param {number} id - El ID del veterinario a eliminar.
    */
-  const handleDelete = async (id) => {
+  const handleDelete = useCallback(async (id) => {
     // Reemplazar `window.confirm` con un modal de confirmación personalizado para mejor UX
     if (!window.confirm('¿Estás seguro de que quieres eliminar este veterinario? Esta acción es irreversible y puede fallar si tiene citas o historiales médicos asociados.')) {
       return; // Si el usuario cancela, no se hace nada
@@ -169,7 +172,7 @@ function VetsManagement() { // Nombre del componente cambiado a VetsManagement
     setIsSubmitting(true); // Activa el estado de envío para mostrar spinner
     setError(''); // Limpia errores previos
     try {
-      // *** RUTA CORRECTA A TU BACKEND: /usuarios/veterinarios/:id ***
+      // RUTA CORRECTA A TU BACKEND: /usuarios/veterinarios/:id
       const responseData = await authFetch(`/usuarios/veterinarios/${id}`, {
         method: 'DELETE'
       });
@@ -178,21 +181,22 @@ function VetsManagement() { // Nombre del componente cambiado a VetsManagement
         setVets(vets.filter(vet => vet.id !== id)); // Actualiza el estado local para reflejar la eliminación
         showNotification(responseData.message || 'Veterinario eliminado correctamente.');
       } else {
+        // Esto captura mensajes de error específicos del backend (ej: "No se puede eliminar porque tiene citas asignadas")
         showNotification(responseData.message || 'Error al eliminar veterinario.', 'error');
       }
     } catch (err) {
-      showNotification(`Error de conexión al eliminar: ${err.message}`, 'error');
+      // La notificación ya se maneja en authFetch si es un error de red o de API
       console.error('Error deleting vet:', err);
     } finally {
       setIsSubmitting(false); // Desactiva el estado de envío
     }
-  };
+  }, [authFetch, showNotification, setError, setVets, vets]); // Añadidas dependencias
 
   /**
    * Prepara el formulario para editar un veterinario existente.
    * @param {object} vet - El objeto veterinario a editar.
    */
-  const handleEdit = (vet) => {
+  const handleEdit = useCallback((vet) => {
     setCurrentVet(vet); // Establece el veterinario actual para la edición
     setFormData({ // Rellena el formulario con los datos del veterinario
       nombre: vet.nombre,
@@ -205,12 +209,12 @@ function VetsManagement() { // Nombre del componente cambiado a VetsManagement
     });
     setIsFormOpen(true); // Abre el modal del formulario
     setError(''); // Limpia cualquier error anterior del formulario
-  };
+  }, [setError, setCurrentVet, setFormData, setIsFormOpen]); // Añadidas dependencias
 
   /**
    * Prepara el formulario para agregar un nuevo veterinario.
    */
-  const handleAddNew = () => {
+  const handleAddNew = useCallback(() => {
     setCurrentVet(null); // No hay veterinario actual, es una nueva entrada
     setFormData({ // Limpia el formulario
       nombre: '',
@@ -223,26 +227,26 @@ function VetsManagement() { // Nombre del componente cambiado a VetsManagement
     });
     setIsFormOpen(true); // Abre el modal del formulario
     setError(''); // Limpia cualquier error anterior del formulario
-  };
+  }, [setError, setCurrentVet, setFormData, setIsFormOpen]); // Añadidas dependencias
 
   /**
    * Maneja los cambios en los campos del formulario.
    * @param {object} e - El evento de cambio del input.
    */
-  const handleInputChange = (e) => {
+  const handleInputChange = useCallback((e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
-  };
+  }, []);
 
   /**
    * Maneja el envío del formulario, ya sea para crear o actualizar un veterinario.
    * Incluye validaciones y llamadas a la API.
    * @param {object} e - El evento de envío del formulario.
    */
-  const handleSubmit = async (e) => {
+  const handleSubmit = useCallback(async (e) => {
     e.preventDefault(); // Evita que la página se recargue
 
     // Validaciones básicas del formulario
@@ -271,50 +275,56 @@ function VetsManagement() { // Nombre del componente cambiado a VetsManagement
 
     try {
       let responseData;
+      // Los datos a enviar al backend
+      const payload = { ...formData };
+      delete payload.confirmPassword; // Siempre elimina confirmPassword del payload
+
       if (currentVet) {
         // Lógica para ACTUALIZAR un veterinario existente
-        const { password, confirmPassword, ...updateData } = formData; // Excluye las contraseñas para la actualización
-        // *** RUTA CORRECTA A TU BACKEND: /usuarios/veterinarios/:id ***
+        delete payload.password; // No enviar la contraseña si no se está actualizando explícitamente
+        // RUTA CORRECTA A TU BACKEND: /usuarios/veterinarios/:id
         responseData = await authFetch(`/usuarios/veterinarios/${currentVet.id}`, {
           method: 'PUT',
-          body: updateData // Envía solo los campos actualizables
+          body: payload // Envía solo los campos actualizables
         });
 
         if (responseData.success && responseData.data) {
           // Actualiza el veterinario en el estado local con los datos del backend
-          setVets(vets.map(vet =>
+          setVets(prevVets => prevVets.map(vet =>
             vet.id === currentVet.id ? { ...vet, ...responseData.data } : vet
           ));
+          showNotification(responseData.message || 'Veterinario actualizado correctamente.');
         } else {
-          showNotification(responseData.message || 'Error al actualizar veterinario.', 'error');
+            showNotification(responseData.message || 'Error al actualizar veterinario.', 'error');
         }
       } else {
         // Lógica para CREAR un nuevo veterinario
         const { confirmPassword, ...newVetData } = formData; // Excluye confirmPassword
         newVetData.role = 'veterinario'; // Asegura que el rol sea 'veterinario'
-        // *** RUTA CORRECTA A TU BACKEND: /usuarios/veterinarios ***
-        responseData = await authFetch('/usuarios/veterinarios', {
+        // RUTA CORRECTA A TU BACKEND: /usuarios/veterinarios
+        responseData = await authFetch('/usuarios/veterinarios', { // RUTA CORREGIDA: /usuarios/veterinarios (plural)
           method: 'POST',
           body: newVetData // Envía todos los datos necesarios para un nuevo veterinario
         });
 
         if (responseData.success && responseData.data && responseData.data.id) {
           // Agrega el nuevo veterinario a la lista con el ID recibido del backend
-          setVets([...vets, responseData.data]);
+          setVets(prevVets => [...prevVets, responseData.data]);
+          showNotification(responseData.message || 'Veterinario creado correctamente.');
         } else {
           showNotification(responseData.message || 'Error al crear veterinario.', 'error');
         }
       }
 
-      showNotification(responseData.message || 'Operación completada exitosamente.');
       setIsFormOpen(false); // Cierra el modal después de una operación exitosa
+      setCurrentVet(null); // Limpia el veterinario actual
     } catch (err) {
-      showNotification(`Error al guardar veterinario: ${err.message}`, 'error');
+      // La notificación ya se maneja en authFetch si es un error de red o de API
       console.error('Error submitting form:', err);
     } finally {
       setIsSubmitting(false); // Desactiva el estado de envío
     }
-  };
+  }, [authFetch, currentVet, formData, showNotification, setError, setIsSubmitting, setIsFormOpen, setCurrentVet, setVets, vets]); // Añadidas dependencias
 
   // Muestra un spinner de carga mientras se obtienen los datos iniciales
   if (isLoading && vets.length === 0 && !error) {
@@ -332,7 +342,7 @@ function VetsManagement() { // Nombre del componente cambiado a VetsManagement
   }
 
   return (
-    <div className="vets-management"> {/* Usé vets-management como clase principal aquí */}
+    <div className="management-section"> {/* Usé management-section como clase principal aquí para consistencia */}
       {/* Área para mostrar notificaciones */}
       {notification && (
         <div className={`notification ${notification.type}`}>
@@ -364,6 +374,19 @@ function VetsManagement() { // Nombre del componente cambiado a VetsManagement
 
             <form onSubmit={handleSubmit}>
               <div className="form-grid">
+                {/* Campo: ID (solo lectura si es edición) */}
+                {currentVet && (
+                  <div className="form-group">
+                    <label htmlFor="id">ID</label>
+                    <input
+                      type="text"
+                      id="id"
+                      name="id"
+                      value={currentVet.id}
+                      disabled
+                    />
+                  </div>
+                )}
                 {/* Campo: Nombre */}
                 <div className="form-group">
                   <label htmlFor="nombre">Nombre*</label>
@@ -471,7 +494,7 @@ function VetsManagement() { // Nombre del componente cambiado a VetsManagement
                 {/* Botón para guardar (crear o actualizar) */}
                 <button
                   type="submit"
-                  className="submit-btn"
+                  className="save-btn" // Cambiado de 'submit-btn' a 'save-btn' para consistencia con estilos
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? (
@@ -491,7 +514,7 @@ function VetsManagement() { // Nombre del componente cambiado a VetsManagement
       )}
 
       {/* Encabezado del panel de gestión de veterinarios */}
-      <div className="management-header"> {/* Clase específica para VetsManagement */}
+      <div className="management-header">
         <div className="header-title">
           <FaUserMd className="header-icon" />
           <h2>Gestión de Veterinarios</h2>
@@ -499,42 +522,40 @@ function VetsManagement() { // Nombre del componente cambiado a VetsManagement
         </div>
 
         <div className="header-actions">
-          <div className="search-container">
-            <div className="search-box">
-              <FaSearch className="search-icon" />
-              <input
-                type="text"
-                placeholder="Buscar veterinarios..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                disabled={isLoading}
-              />
-              {searchTerm && (
-                <button
-                  className="clear-search"
-                  onClick={() => setSearchTerm('')}
-                  disabled={isLoading}
-                >
-                  <FaTimes />
-                </button>
-              )}
-            </div>
-
-            <button
-              className="add-btn"
-              onClick={handleAddNew}
+          <div className="search-bar"> {/* Usando la clase search-bar consistente */}
+            <FaSearch className="search-icon" />
+            <input
+              type="text"
+              placeholder="Buscar veterinarios..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               disabled={isLoading}
-            >
-              <FaPlus /> Nuevo Veterinario
-            </button>
+            />
+            {searchTerm && (
+              <button
+                className="clear-search"
+                onClick={() => setSearchTerm('')}
+                disabled={isLoading}
+              >
+                <FaTimes />
+              </button>
+            )}
           </div>
+
+          <button
+            className="add-btn"
+            onClick={handleAddNew}
+            disabled={isLoading}
+          >
+            <FaPlus /> Nuevo Veterinario
+          </button>
         </div>
       </div>
 
       {/* Contenedor de la tabla de veterinarios */}
-      <div className="vets-table-container"> {/* Clase específica para VetsManagement */}
+      <div className="admin-table-container"> {/* Clase genérica para contenedor de tabla */}
         {filteredVets.length > 0 ? (
-          <table className="vets-table">
+          <table className="admin-table">
             <thead>
               <tr>
                 <th>ID</th>
@@ -546,16 +567,14 @@ function VetsManagement() { // Nombre del componente cambiado a VetsManagement
               </tr>
             </thead>
             <tbody>
-              {/* Mapea y renderiza cada veterinario en una fila de la tabla */}
               {filteredVets.map(vet => (
                 <tr key={vet.id}>
                   <td>{vet.id}</td>
                   <td>{`${vet.nombre} ${vet.apellido || ''}`}</td>
                   <td>{vet.email}</td>
                   <td>{vet.telefono}</td>
-                  <td>{vet.direccion || 'N/A'}</td> {/* Muestra 'N/A' si no hay dirección */}
+                  <td>{vet.direccion || 'N/A'}</td>
                   <td className="actions-cell">
-                    {/* Botón para editar */}
                     <button
                       onClick={() => handleEdit(vet)}
                       className="edit-btn"
@@ -564,7 +583,6 @@ function VetsManagement() { // Nombre del componente cambiado a VetsManagement
                     >
                       <FaEdit />
                     </button>
-                    {/* Botón para eliminar */}
                     <button
                       onClick={() => handleDelete(vet.id)}
                       className="delete-btn"
@@ -580,7 +598,7 @@ function VetsManagement() { // Nombre del componente cambiado a VetsManagement
           </table>
         ) : (
           <div className="no-results">
-            {/* Mensaje si no hay resultados de búsqueda o si la lista está vacía */}
+            <FaInfoCircle className="info-icon" />
             {searchTerm ?
               'No se encontraron veterinarios que coincidan con la búsqueda.' :
               'No hay veterinarios registrados.'}

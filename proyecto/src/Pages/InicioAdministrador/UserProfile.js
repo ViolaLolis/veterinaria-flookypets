@@ -1,113 +1,229 @@
-import React, { useState, useEffect } from 'react';
-import { FaEdit, FaSave, FaTimes, FaLock, FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaShieldAlt } from 'react-icons/fa';
-import './Styles/UserProfile.css';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { FaUserCog, FaEdit, FaSave, FaTimes, FaLock, FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaShieldAlt, FaSpinner, FaInfoCircle } from 'react-icons/fa';
+import { motion, AnimatePresence } from 'framer-motion'; // Importar motion y AnimatePresence
+import './Styles/AdminProfile.css';
 
-function UserProfile({ user, setUser }) {
+function AdminProfile({ user, setUser }) {
+  const navigate = useNavigate();
   const [editMode, setEditMode] = useState(false);
-  const [currentUser, setCurrentUser] = useState(user);
+  const [currentAdminData, setCurrentAdminData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-  const [passwordForm, setPasswordForm] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: ''
-  });
-  const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [notification, setNotification] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    setCurrentUser(user);
-  }, [user]);
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setCurrentUser(prev => ({
-      ...prev,
-      [name]: value
-    }));
+  const getAuthToken = () => {
+    return localStorage.getItem('token');
   };
 
-  const handlePasswordChange = (e) => {
-    const { name, value } = e.target;
-    setPasswordForm(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
+  /**
+   * Muestra una notificación temporal en la UI.
+   * @param {string} message - El mensaje a mostrar.
+   * @param {string} type - El tipo de notificación ('success' o 'error').
+   */
+  const showNotification = useCallback((message, type = 'success') => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 5000);
+  }, []);
 
-  const showNotification = (message, type = 'success') => {
-    if (type === 'success') {
-      setSuccess(message);
-      setTimeout(() => setSuccess(''), 3000);
-    } else {
-      setError(message);
-      setTimeout(() => setError(''), 3000);
+  /**
+   * Función mejorada para realizar peticiones fetch con autenticación JWT.
+   * @param {string} endpoint - El endpoint de la API relativo.
+   * @param {object} options - Opciones para la petición fetch.
+   * @returns {Promise<object>} Los datos de la respuesta JSON.
+   * @throws {Error} Si no se encontró el token o la respuesta de la red no es OK.
+   */
+  const authFetch = useCallback(async (endpoint, options = {}) => {
+    const token = getAuthToken();
+    if (!token) {
+      showNotification('No se encontró token de autenticación. Por favor, inicie sesión nuevamente.', 'error');
+      throw new Error('No se encontró token de autenticación.');
     }
-  };
 
-  const handleSave = async () => {
+    const defaultHeaders = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    };
+
+    const config = {
+      ...options,
+      headers: {
+        ...defaultHeaders,
+        ...options.headers
+      }
+    };
+
+    if (options.body && typeof options.body !== 'string') {
+      config.body = JSON.stringify(options.body);
+    }
+
+    // Logging para depurar la URL que se está solicitando
+    console.log(`AuthFetch: Realizando solicitud a: http://localhost:5000${endpoint}`);
+    const response = await fetch(`http://localhost:5000${endpoint}`, config); 
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const errorMessage = errorData.message || `Error ${response.status}: ${response.statusText}`;
+      showNotification(`Error de API: ${errorMessage}`, 'error');
+      throw new Error(errorMessage);
+    }
+
+    return response.json();
+  }, [showNotification]);
+
+  /**
+   * Carga los datos del perfil del administrador desde el backend.
+   */
+  const fetchAdminProfile = useCallback(async () => {
+    if (!user || !user.id) {
+      console.warn("AdminProfile: ID de administrador no disponible en el prop 'user'. No se cargará el perfil.");
+      setError('ID de administrador no disponible para cargar el perfil.');
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+    setError('');
     try {
-      setIsSubmitting(true);
-      // Simulación de API call
-      await new Promise(resolve => setTimeout(resolve, 800));
+      // Este es el endpoint al que se está haciendo la llamada.
+      // Asegúrate de que tu backend tenga una ruta GET que responda a /usuarios/:id
+      const responseData = await authFetch(`/usuarios/${user.id}`); 
       
-      setUser(currentUser);
-      localStorage.setItem('user', JSON.stringify(currentUser));
-      setEditMode(false);
-      showNotification('Perfil actualizado correctamente');
-    } catch (error) {
-      showNotification('Error al actualizar perfil', 'error');
+      if (responseData.success && responseData.data) {
+        setCurrentAdminData(responseData.data);
+      } else {
+        setError(responseData.message || 'Formato de datos de perfil incorrecto recibido del servidor.');
+        console.error("Error: Formato de datos de perfil incorrecto:", responseData);
+      }
+    } catch (err) {
+      setError(`Error al cargar perfil: ${err.message}`);
+      console.error('Error fetching admin profile:', err);
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
     }
-  };
+  }, [user, authFetch, setError, setIsLoading]);
 
-  const handlePasswordUpdate = async (e) => {
-    e.preventDefault();
-    
-    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      showNotification('Las contraseñas no coinciden', 'error');
+  useEffect(() => {
+    if (user?.id) {
+      fetchAdminProfile();
+    }
+  }, [user?.id, fetchAdminProfile]);
+
+  const handleInputChange = useCallback((e) => {
+    const { name, value } = e.target;
+    setCurrentAdminData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  }, []);
+
+  const handleSave = useCallback(async () => {
+    if (!currentAdminData) {
+      showNotification('No hay datos para guardar.', 'error');
       return;
     }
 
     try {
       setIsSubmitting(true);
-      // Simulación de API call
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      showNotification('Contraseña actualizada correctamente');
-      setPasswordForm({
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: ''
+      setError('');
+
+      const dataToUpdate = {
+        nombre: currentAdminData.nombre,
+        apellido: currentAdminData.apellido,
+        telefono: currentAdminData.telefono,
+        direccion: currentAdminData.direccion
+      };
+
+      const responseData = await authFetch(`/usuarios/${currentAdminData.id}`, {
+        method: 'PUT',
+        body: dataToUpdate
       });
-      setShowPasswordForm(false);
+      
+      if (responseData.success && responseData.data) {
+        const updatedGlobalUser = { 
+            ...user, 
+            ...responseData.data 
+        };
+        setUser(updatedGlobalUser); 
+        localStorage.setItem('user', JSON.stringify(updatedGlobalUser));
+
+        setEditMode(false);
+        showNotification('Perfil actualizado correctamente.');
+      } else {
+        showNotification(responseData.message || 'Error al actualizar perfil.', 'error');
+      }
     } catch (error) {
-      showNotification('Error al actualizar contraseña', 'error');
+      showNotification(`Error al actualizar perfil: ${error.message}`, 'error');
+      console.error('Error updating admin profile:', error);
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [authFetch, currentAdminData, showNotification, setUser, user, setEditMode, setIsSubmitting, setError]);
 
-  return (
-    <div className="user-profile-container">
-      {/* Notificaciones */}
-      {error && (
-        <div className="notification error">
+  const handlePasswordChangeRedirect = useCallback(() => {
+    navigate('/olvidar-contrasena');
+  }, [navigate]);
+
+  if (isLoading) {
+    return (
+      <div className="admin-profile-container loading-state">
+        <div className="loading-spinner">
+          <FaSpinner className="spinner-icon" />
+          <p>Cargando perfil...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="admin-profile-container error-state">
+        <div className="error-message">
+          <FaInfoCircle className="info-icon" />
           {error}
         </div>
-      )}
-      
-      {success && (
-        <div className="notification success">
-          {success}
-        </div>
-      )}
+      </div>
+    );
+  }
 
-      <div className="profile-header">
+  if (!currentAdminData) {
+    return (
+      <div className="admin-profile-container no-data-state">
+        <div className="info-message">
+          <FaInfoCircle className="info-icon" />
+          <p>No se pudo cargar la información del perfil del administrador.</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="admin-profile-container">
+      {/* Notificaciones con AnimatePresence para animaciones de entrada/salida */}
+      <AnimatePresence>
+        {notification && (
+          <motion.div
+            key="admin-profile-notification" // Clave única para AnimatePresence
+            className={`notification ${notification.type}`}
+            initial={{ opacity: 0, y: -20, pointerEvents: 'none' }} // Comienza invisible y ligeramente arriba, no interactivo
+            animate={{ opacity: 1, y: 0, pointerEvents: 'auto' }} // Anima a visible, posición normal, interactivo
+            exit={{ opacity: 0, y: -20, pointerEvents: 'none' }} // Anima a invisible y ligeramente arriba al salir, no interactivo
+            transition={{ duration: 0.3 }} // Duración de la transición
+          >
+            <FaInfoCircle className="notification-icon" />
+            {notification.message}
+            <button className="close-notification" onClick={() => setNotification(null)}>
+              <FaTimes />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="admin-content-header">
         <h2>
-          <FaUser className="header-icon" />
-          Mi Perfil
+          <FaUserCog className="header-icon" />
+          Mi Perfil de Administrador
         </h2>
       </div>
 
@@ -119,6 +235,7 @@ function UserProfile({ user, setUser }) {
               <button 
                 onClick={() => setEditMode(true)} 
                 className="edit-btn"
+                disabled={isSubmitting}
               >
                 <FaEdit /> Editar
               </button>
@@ -126,6 +243,7 @@ function UserProfile({ user, setUser }) {
               <button 
                 onClick={() => setEditMode(false)} 
                 className="cancel-btn"
+                disabled={isSubmitting}
               >
                 <FaTimes /> Cancelar
               </button>
@@ -140,9 +258,11 @@ function UserProfile({ user, setUser }) {
                   <input
                     type="text"
                     name="nombre"
-                    value={currentUser.nombre}
+                    value={currentAdminData.nombre || ''}
                     onChange={handleInputChange}
                     placeholder="Tu nombre"
+                    disabled={isSubmitting}
+                    required
                   />
                 </div>
                 
@@ -151,16 +271,17 @@ function UserProfile({ user, setUser }) {
                   <input
                     type="text"
                     name="apellido"
-                    value={currentUser.apellido || ''}
+                    value={currentAdminData.apellido || ''}
                     onChange={handleInputChange}
                     placeholder="Tu apellido"
+                    disabled={isSubmitting}
                   />
                 </div>
                 
                 <div className="form-group">
                   <label>Email</label>
                   <div className="disabled-input">
-                    {currentUser.email}
+                    {currentAdminData.email}
                   </div>
                 </div>
                 
@@ -169,9 +290,10 @@ function UserProfile({ user, setUser }) {
                   <input
                     type="text"
                     name="telefono"
-                    value={currentUser.telefono}
+                    value={currentAdminData.telefono || ''}
                     onChange={handleInputChange}
                     placeholder="Tu teléfono"
+                    disabled={isSubmitting}
                   />
                 </div>
                 
@@ -180,9 +302,10 @@ function UserProfile({ user, setUser }) {
                   <input
                     type="text"
                     name="direccion"
-                    value={currentUser.direccion || ''}
+                    value={currentAdminData.direccion || ''}
                     onChange={handleInputChange}
                     placeholder="Tu dirección"
+                    disabled={isSubmitting}
                   />
                 </div>
               </div>
@@ -192,7 +315,7 @@ function UserProfile({ user, setUser }) {
                 className="save-btn"
                 disabled={isSubmitting}
               >
-                {isSubmitting ? 'Guardando...' : <><FaSave /> Guardar Cambios</>}
+                {isSubmitting ? <><FaSpinner className="spinner-icon" /> Guardando...</> : <><FaSave /> Guardar Cambios</>}
               </button>
             </div>
           ) : (
@@ -201,7 +324,7 @@ function UserProfile({ user, setUser }) {
                 <FaUser className="info-icon" />
                 <div>
                   <span className="info-label">Nombre completo</span>
-                  <span className="info-value">{user.nombre} {user.apellido}</span>
+                  <span className="info-value">{currentAdminData.nombre} {currentAdminData.apellido}</span>
                 </div>
               </div>
               
@@ -209,7 +332,7 @@ function UserProfile({ user, setUser }) {
                 <FaEnvelope className="info-icon" />
                 <div>
                   <span className="info-label">Email</span>
-                  <span className="info-value">{user.email}</span>
+                  <span className="info-value">{currentAdminData.email}</span>
                 </div>
               </div>
               
@@ -217,7 +340,7 @@ function UserProfile({ user, setUser }) {
                 <FaPhone className="info-icon" />
                 <div>
                   <span className="info-label">Teléfono</span>
-                  <span className="info-value">{user.telefono || 'No especificado'}</span>
+                  <span className="info-value">{currentAdminData.telefono || 'No especificado'}</span>
                 </div>
               </div>
               
@@ -225,7 +348,7 @@ function UserProfile({ user, setUser }) {
                 <FaMapMarkerAlt className="info-icon" />
                 <div>
                   <span className="info-label">Dirección</span>
-                  <span className="info-value">{user.direccion || 'No especificada'}</span>
+                  <span className="info-value">{currentAdminData.direccion || 'No especificada'}</span>
                 </div>
               </div>
               
@@ -233,7 +356,7 @@ function UserProfile({ user, setUser }) {
                 <FaShieldAlt className="info-icon" />
                 <div>
                   <span className="info-label">Rol</span>
-                  <span className="info-value">Administrador</span>
+                  <span className="info-value">{currentAdminData.role || 'Administrador'}</span>
                 </div>
               </div>
             </div>
@@ -247,64 +370,17 @@ function UserProfile({ user, setUser }) {
               Seguridad
             </h3>
             <button 
-              onClick={() => setShowPasswordForm(!showPasswordForm)}
-              className={`toggle-btn ${showPasswordForm ? 'active' : ''}`}
+              onClick={handlePasswordChangeRedirect}
+              className="toggle-btn"
+              disabled={isSubmitting}
             >
-              {showPasswordForm ? 'Cancelar' : 'Cambiar Contraseña'}
+              Cambiar Contraseña
             </button>
           </div>
-          
-          {showPasswordForm && (
-            <form onSubmit={handlePasswordUpdate} className="password-form">
-              <div className="form-group">
-                <label>Contraseña Actual</label>
-                <input
-                  type="password"
-                  name="currentPassword"
-                  value={passwordForm.currentPassword}
-                  onChange={handlePasswordChange}
-                  required
-                  placeholder="Ingresa tu contraseña actual"
-                />
-              </div>
-              
-              <div className="form-group">
-                <label>Nueva Contraseña</label>
-                <input
-                  type="password"
-                  name="newPassword"
-                  value={passwordForm.newPassword}
-                  onChange={handlePasswordChange}
-                  required
-                  placeholder="Ingresa tu nueva contraseña"
-                />
-              </div>
-              
-              <div className="form-group">
-                <label>Confirmar Contraseña</label>
-                <input
-                  type="password"
-                  name="confirmPassword"
-                  value={passwordForm.confirmPassword}
-                  onChange={handlePasswordChange}
-                  required
-                  placeholder="Confirma tu nueva contraseña"
-                />
-              </div>
-              
-              <button 
-                type="submit" 
-                className="save-btn"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? 'Actualizando...' : 'Actualizar Contraseña'}
-              </button>
-            </form>
-          )}
         </div>
       </div>
     </div>
   );
 }
 
-export default UserProfile;
+export default AdminProfile;
