@@ -1,299 +1,336 @@
-/* Styles/AgendarCita.module.css */
-
 .container {
-  max-width: 850px;
-  margin: 2rem auto;
-  padding: 2rem;
-  background: linear-gradient(135deg, #ffffffd9, #fff5e6d9);
-  border-radius: 15px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08),
-              0 0 0 1px rgba(255, 179, 71, 0.2);
-  animation: fadeInUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-  position: relative;
-  overflow: hidden;
-  border: 1px solid rgba(255, 179, 71, 0.15);
-}
-
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.container::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: linear-gradient(
-    to bottom right,
-    rgba(255, 179, 71, 0) 0%,
-    rgba(255, 179, 71, 0.05) 50%,
-    rgba(255, 179, 71, 0) 100%
-  );
-  transform: rotate(30deg);
-  transition: all 0.8s ease;
-  z-index: 0;
-}
-
-.container:hover::before {
-  left: 100%;
-  top: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f5fbfc;
 }
 
 .header {
+  background: linear-gradient(135deg, #00acc1, #00838f);
+  color: white;
+  padding: 25px;
+  border-radius: 12px;
+  margin-bottom: 30px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
-  padding-bottom: 1rem;
-  border-bottom: 2px solid #fff3bf;
-  position: relative;
-  z-index: 2;
+  box-shadow: 0 5px 20px rgba(0, 172, 193, 0.2);
 }
 
-.header h3 {
+.headerContent {
+  flex: 1;
+}
+
+.header h2 {
   margin: 0;
-  color: #5a4a3a;
   font-size: 1.8rem;
-  font-weight: 600;
 }
 
-.volverBtn {
-  background: #fff9db;
+.header p {
+  margin: 5px 0 0;
+  opacity: 0.9;
+  font-size: 1rem;
+}
+
+.headerIcon {
+  font-size: 2rem;
+  margin-right: 15px;
+  color: #e0f7fa;
+}
+
+.backButton {
+  background: rgba(255, 255, 255, 0.2);
   border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 50px;
-  color: #f59f00;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 30px;
   cursor: pointer;
   display: flex;
   align-items: center;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 5px rgba(255, 212, 59, 0.2);
+  gap: 8px;
+  font-weight: 500;
+  transition: all 0.3s;
 }
 
-.volverBtn:hover {
-  background: #ffec99;
-  transform: translateX(-5px);
-  box-shadow: 0 4px 8px rgba(255, 212, 59, 0.3);
+.backButton:hover {
+  background: rgba(255, 255, 255, 0.3);
 }
 
-.volverIcon {
-  margin-right: 0.5rem;
-}
-
-.calendarContainer {
-  margin: 1rem 0;
-  position: relative;
-  z-index: 2;
-  animation: slideIn 0.5s ease-out forwards;
-  opacity: 0;
-  animation-delay: 0.1s;
-
+.loadingContainer, .errorContainer {
   display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
+  height: 100vh;
+  text-align: center;
 }
 
-@keyframes slideIn {
-  from { opacity: 0; transform: translateX(-20px); }
-  to { opacity: 1; transform: translateX(0); }
+.spinner {
+  font-size: 3rem;
+  color: #00acc1;
+  margin-bottom: 20px;
 }
 
-/* Estilos personalizados para react-calendar */
-.react-calendar {
-  width: 100%;
-  max-width: 500px;
-  margin: 0 auto;
-  border: 1px solid #ffec99;
-  border-radius: 10px;
-  box-shadow: 0 3px 10px rgba(255, 179, 71, 0.1);
-  padding: 1rem;
+.errorContainer {
+  color: #e53935;
+}
+
+.serviceCard {
   background: white;
-  font-family: 'Nunito Sans', sans-serif;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 30px;
+  box-shadow: 0 3px 15px rgba(0, 0, 0, 0.05);
 }
 
-.react-calendar__navigation button {
-  background: #fff9db;
-  color: #5a4a3a;
-  border-radius: 5px;
-  min-width: 44px;
-  margin:  0.5rem;
-  transition: all 0.3s ease;
+.serviceHeader {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+  border-bottom: 2px solid #e0f7fa;
+  padding-bottom: 10px;
 }
 
-.react-calendar__navigation button:hover {
-  background: #ffec99;
-}
-
-.react-calendar__navigation button:disabled {
-  background: #f5f5f5;
-}
-
-.react-calendar__tile {
-  padding: 0.75em 0.5em;
-  border-radius: 5px;
-  transition: all 0.3s ease;
-}
-
-.react-calendar__tile--now {
-  background: #ffec99;
-}
-
-.react-calendar__tile--active {
-  background: #ff9500;
-  color: white;
-}
-
-.react-calendar__tile--active:enabled:hover,
-.react-calendar__tile--active:enabled:focus {
-  background: #ff8c00;
-}
-
-.react-calendar__tile:enabled:hover,
-.react-calendar__tile:enabled:focus {
-  background: #ffec99;
-}
-
-.horariosContainer {
-  margin: 2rem 0;
-  position: relative;
-  z-index: 2;
-  animation: slideIn 0.5s ease-out forwards;
-  opacity: 0;
-  animation-delay: 0.2s;
-}
-
-.horariosContainer h4 {
-  color: #ff9500;
+.serviceIcon {
+  color: #00acc1;
   font-size: 1.5rem;
-  margin-bottom: 1rem;
+  margin-right: 10px;
+}
+
+.serviceHeader h3 {
+  margin: 0;
+  color: #00796b;
+}
+
+.serviceDetails h4 {
+  margin: 0 0 10px;
+  color: #333;
+}
+
+.serviceDetails p {
+  margin: 0 0 15px;
+  color: #666;
+}
+
+.servicePrice {
+  background: #e0f7fa;
+  display: inline-block;
+  padding: 5px 15px;
+  border-radius: 20px;
+  font-weight: bold;
+  color: #00796b;
+}
+
+.servicePrice span {
+  font-size: 1.2rem;
+}
+
+.formContainer {
+  display: flex;
+  gap: 30px;
+  margin-bottom: 30px;
+}
+
+.formSection {
+  flex: 1;
+  background: white;
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0 3px 15px rgba(0, 0, 0, 0.05);
+}
+
+.scheduleSection {
+  flex: 2;
+  background: white;
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0 3px 15px rgba(0, 0, 0, 0.05);
+}
+
+.formGroup {
+  margin-bottom: 20px;
+}
+
+.formLabel {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #00796b;
+  display: flex;
+  align-items: center;
+}
+
+.inputIcon {
+  color: #00acc1;
+  margin-right: 10px;
+  font-size: 1rem;
+}
+
+.selectInput {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid #e0f7fa;
+  border-radius: 8px;
+  font-size: 1rem;
+  background: #f5fbfc;
+  transition: all 0.3s;
+}
+
+.selectInput:focus {
+  border-color: #00acc1;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 172, 193, 0.1);
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.sectionIcon {
+  color: #00acc1;
+  font-size: 1.5rem;
+  margin-right: 10px;
+}
+
+.sectionHeader h3 {
+  margin: 0;
+  color: #00796b;
+}
+
+.calendar {
+  width: 100%;
+  border: none;
+  font-family: inherit;
+}
+
+
+
+.timeSlots {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.timeSlot {
+  background: #e0f7fa;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.3s;
   text-align: center;
 }
 
-.horariosLista {
-  list-style: none;
-  padding: 0;
-  margin: 1.5rem 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-  gap: 1rem;
-  justify-content: center;
+.timeSlot:hover {
+  background: #b2ebf2;
 }
 
-.horariosLista li {
+.selectedTime {
+  background: #00acc1;
+  color: white;
+}
+
+.errorMessage {
+  background: #ffebee;
+  color: #e53935;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.successMessage {
+  background: #e8f5e9;
+  color: #2e7d32;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.actions {
   display: flex;
   justify-content: center;
+  margin-bottom: 30px;
 }
 
-.horariosLista button {
-  width: 100%;
-  padding: 0.8rem;
-  background: #fff9db;
-  border: none;
-  border-radius: 8px;
-  color: #5a4a3a;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 5px rgba(255, 212, 59, 0.1);
-}
-
-.horariosLista button:hover {
-  background: #ffec99;
-  transform: translateY(-3px);
-  box-shadow: 0 4px 8px rgba(255, 212, 59, 0.2);
-}
-
-.horariosLista .selected button {
-  background: linear-gradient(to right, #ff9500, #ffb347);
-  color: white;
-  box-shadow: 0 4px 8px rgba(255, 149, 0, 0.3);
-}
-
-.error {
-  color: #ff6b6b;
-  text-align: center;
-  margin: 1rem 0;
-  animation: shake 0.5s ease;
-}
-
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  20%, 60% { transform: translateX(-5px); }
-  40%, 80% { transform: translateX(5px); }
-}
-
-.exito {
-  color: #51cf66;
-  text-align: center;
-  margin: 1rem 0;
-  animation: bounceIn 0.5s ease;
-}
-
-@keyframes bounceIn {
-  0% { transform: scale(0.9); opacity: 0; }
-  50% { transform: scale(1.05); }
-  100% { transform: scale(1); opacity: 1; }
-}
-
-.agendarBtn {
-  display: block;
-  width: 100%;
-  max-width: 300px;
-  margin: 2rem auto;
-  padding: 1rem;
-  background: linear-gradient(to right, #ff9500, #ffb347);
+.submitButton {
+  background: #00acc1;
   color: white;
   border: none;
-  border-radius: 50px;
+  padding: 15px 40px;
+  border-radius: 30px;
   font-size: 1.1rem;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(255, 149, 0, 0.3);
-  position: relative;
-  overflow: hidden;
-  z-index: 2;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.agendarBtn:disabled {
-  background: #ccc;
+.submitButton:disabled {
+  background: #b2ebf2;
   cursor: not-allowed;
-  box-shadow: none;
 }
 
-.agendarBtn:not(:disabled):hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 20px rgba(255, 149, 0, 0.4);
+.submitButton:hover:not(:disabled) {
+  background: #00838f;
+  transform: translateY(-2px);
+  box-shadow: 0 3px 10px rgba(0, 140, 158, 0.3);
 }
 
-.agendarBtn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(to right, #ffb347, #ff9500);
-  transition: all 0.6s ease;
-  z-index: -1;
+.additionalInfo {
+  background: #e0f7fa;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
 }
 
-.agendarBtn:not(:disabled):hover::before {
-  left: 0;
+.additionalInfo h3 {
+  color: #00796b;
+  margin-top: 0;
 }
 
-.container:hover {
-  animation: containerShine 2s infinite alternate;
-  background-image: 
-    linear-gradient(
-      90deg,
-      rgba(255,255,255,0) 0%,
-      rgba(255,255,255,0.2) 50%,
-      rgba(255,255,255,0) 100%
-    ),
-    linear-gradient(135deg, #ffffffd9, #fff5e6d9);
-  background-size: 200px 100%, auto;
-  background-repeat: no-repeat;
+.contactInfo {
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  display: inline-block;
+  margin-top: 10px;
+}
+
+@media (max-width: 992px) {
+  .formContainer {
+    flex-direction: column;
+  }
+  
+  .timeSlots {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 576px) {
+  .header {
+    flex-direction: column;
+    text-align: center;
+    gap: 15px;
+  }
+  
+  .backButton {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .timeSlots {
+    grid-template-columns: 1fr;
+  }
 }

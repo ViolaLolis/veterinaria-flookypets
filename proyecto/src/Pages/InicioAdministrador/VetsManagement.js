@@ -50,7 +50,7 @@ function VetsManagement() { // Nombre del componente cambiado a VetsManagement
 
   /**
    * Obtiene el token de autenticación del almacenamiento local.
-   * Esta función es interna al componente, como se solicitó, para no usar un archivo 'api.js'.
+   * Esta función es interna al componente.
    * @returns {string|null} El token JWT o null si no se encuentra.
    */
   const getAuthToken = useCallback(() => {
@@ -135,7 +135,10 @@ function VetsManagement() { // Nombre del componente cambiado a VetsManagement
     } catch (err) {
       setError(`Error al cargar veterinarios: ${err.message}`);
       console.error('Error fetching vets:', err);
-      // La notificación ya se maneja en authFetch si es un error de red o de API
+      // Opcional: Si el error es por autenticación, redirige al login
+      if (err.message.includes('token de autenticación') || err.message.includes('Token inválido')) {
+        // window.location.href = '/login'; // Descomentar y ajustar si tienes una ruta de login
+      }
     } finally {
       setIsLoading(false); // Desactiva el estado de carga
     }
@@ -165,6 +168,7 @@ function VetsManagement() { // Nombre del componente cambiado a VetsManagement
    */
   const handleDelete = useCallback(async (id) => {
     // Reemplazar `window.confirm` con un modal de confirmación personalizado para mejor UX
+    // NOTA: Para este entorno, se ha dejado window.confirm, pero en una app real se usaría un modal
     if (!window.confirm('¿Estás seguro de que quieres eliminar este veterinario? Esta acción es irreversible y puede fallar si tiene citas o historiales médicos asociados.')) {
       return; // Si el usuario cancela, no se hace nada
     }
@@ -301,16 +305,15 @@ function VetsManagement() { // Nombre del componente cambiado a VetsManagement
         // Lógica para CREAR un nuevo veterinario
         const { confirmPassword, ...newVetData } = formData; // Excluye confirmPassword
         newVetData.role = 'veterinario'; // Asegura que el rol sea 'veterinario'
-        // RUTA CORRECTA A TU BACKEND: /usuarios/veterinarios
-        responseData = await authFetch('/usuarios/veterinarios', { // RUTA CORREGIDA: /usuarios/veterinarios (plural)
+        // *** RUTA CORRECTA A TU BACKEND: /usuarios/veterinarios ***
+        responseData = await authFetch('/usuarios/veterinarios', {
           method: 'POST',
-          body: newVetData // Envía todos los datos necesarios para un nuevo veterinario
+          body: payload // Envía todos los datos necesarios para un nuevo veterinario
         });
 
         if (responseData.success && responseData.data && responseData.data.id) {
           // Agrega el nuevo veterinario a la lista con el ID recibido del backend
-          setVets(prevVets => [...prevVets, responseData.data]);
-          showNotification(responseData.message || 'Veterinario creado correctamente.');
+          setVets([...vets, responseData.data]);
         } else {
           showNotification(responseData.message || 'Error al crear veterinario.', 'error');
         }
@@ -573,7 +576,7 @@ function VetsManagement() { // Nombre del componente cambiado a VetsManagement
                   <td>{`${vet.nombre} ${vet.apellido || ''}`}</td>
                   <td>{vet.email}</td>
                   <td>{vet.telefono}</td>
-                  <td>{vet.direccion || 'N/A'}</td>
+                  <td>{vet.direccion || 'N/A'}</td> {/* Muestra 'N/A' si no hay dirección */}
                   <td className="actions-cell">
                     <button
                       onClick={() => handleEdit(vet)}
@@ -598,7 +601,7 @@ function VetsManagement() { // Nombre del componente cambiado a VetsManagement
           </table>
         ) : (
           <div className="no-results">
-            <FaInfoCircle className="info-icon" />
+            {/* Mensaje si no hay resultados de búsqueda o si la lista está vacía */}
             {searchTerm ?
               'No se encontraron veterinarios que coincidan con la búsqueda.' :
               'No hay veterinarios registrados.'}

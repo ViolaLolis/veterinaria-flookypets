@@ -48,7 +48,6 @@ import MainVeterinario from "./Pages/InicioVeterinario/MainVeterinario";
 import NavegacionVeterinario from "./Pages/InicioVeterinario/NavegacionVeterinario";
 import ConfiguracionVeterinario from "./Pages/InicioVeterinario/ConfiguracionVeterinario";
 
-
 // Componentes de Administrador
 import AdminDashboard from "./Pages/InicioAdministrador/AdminDashboard";
 import AdminServices from "./Pages/InicioAdministrador/AdminServices";
@@ -113,13 +112,15 @@ function App() {
             <Route path="perfil/editar" element={<EditarPerfilVeterinario />} />
             <Route path="configuracion" element={<ConfiguracionVeterinario />} />
 
+<<<<<<< HEAD
             {/* <Route path="llamada" element={<LlamadaVeterinario />} /> */}
+=======
+>>>>>>> 79e215c63f268c9a748809d07fed2e32315bd8fd
           </Route>
         </Route>
 
         {/* Rutas de usuario */}
         <Route element={<Protegida user={user} allowedRoles={['usuario']} />}>
-          {/* Rutas de Perfil (ahora de nivel superior) */}
           <Route path="/usuario/perfil" element={<PerfilUsuario />} />
           <Route path="/usuario/perfil/editar" element={<EditarPerfil />} />
           <Route path="/usuario/perfil/configuracion" element={<ConfiguracionPerfil />} />
@@ -127,20 +128,14 @@ function App() {
           <Route path="/usuario/perfil/pagos/agregar" element={<AgregarMetodoPago />} />
           <Route path="/usuario/perfil/pagos/eliminar/:id" element={<EliminarMetodoPago />} />
 
-          {/* Rutas de Ayuda y Soporte (ahora de nivel superior) */}
           <Route path="/usuario/ayuda" element={<AyudaSoporte />} />
           <Route path="/usuario/ayuda/chat" element={<ChatSoporte />} />
 
-          {/* Rutas de Historial Médico (MOVIDAS FUERA DE LA ANIDACIÓN) */}
           <Route path="/usuario/historial/:mascotaId" element={<HistorialMedico />} />
           <Route path="/usuario/historial/:mascotaId/agregar" element={<AgregarHistorial />} />
           <Route path="/usuario/historial/:mascotaId/:historialId" element={<DetalleHistorial />} />
           <Route path="/usuario/historial/:mascotaId/editar/:historialId" element={<EditarHistorial />} />
 
-          {/*
-            Rutas anidadas bajo InicioUsuario. El contenido de estas rutas
-            se cargará dentro del <Outlet /> de InicioUsuario.
-          */}
           <Route path="/usuario" element={<InicioUsuario user={user} setUser={setUser} />}>
             <Route index element={<Navigate to="inicio" replace />} />
             <Route path="inicio" element={<CitasUsuario />} />
@@ -152,12 +147,6 @@ function App() {
             <Route path="servicios" element={<ServiciosVeterinaria />} />
             <Route path="servicios/:id" element={<DetalleServicio />} />
 
-            {/*
-              Dejo esta redirección para "mascotas" porque tu InicioUsuario ya muestra
-              la TarjetaMascota directamente, y la navegación "Mis Mascotas" en el nav
-              de InicioUsuario apunta a "mascotas", que luego redirige a "inicio".
-              Esto mantiene el comportamiento actual si es lo que deseas.
-            */}
             <Route path="mascotas" element={<Navigate to="/usuario/inicio" replace />} />
             <Route path="mascotas/agregar" element={<AgregarMascota />} />
             <Route path="mascotas/:id" element={<DetalleMascota />} />
@@ -165,7 +154,7 @@ function App() {
           </Route>
         </Route>
 
-        {/* Ruta de fallback para páginas no encontradas */}
+        {/* Ruta de fallback */}
         <Route path="*" element={<Main />} />
       </Routes>
     </Router>
