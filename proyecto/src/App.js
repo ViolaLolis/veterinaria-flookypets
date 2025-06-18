@@ -111,11 +111,6 @@ function App() {
             <Route path="perfil" element={<VerPerfilVeterinario setUser={setUser} />} />
             <Route path="perfil/editar" element={<EditarPerfilVeterinario />} />
             <Route path="configuracion" element={<ConfiguracionVeterinario />} />
-
-<<<<<<< HEAD
-            {/* <Route path="llamada" element={<LlamadaVeterinario />} /> */}
-=======
->>>>>>> 79e215c63f268c9a748809d07fed2e32315bd8fd
           </Route>
         </Route>
 
