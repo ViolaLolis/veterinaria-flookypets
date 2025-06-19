@@ -54,9 +54,6 @@ function AdminNavbar({ user, handleLogout }) {
             
             {isMenuOpen && (
               <div className="dropdown-menu">
-                <Link to="/admin/profile" className="dropdown-item">
-                  Mi Perfil
-                </Link>
                 <button 
                   onClick={handleLogout} 
                   className="dropdown-item logout-item"

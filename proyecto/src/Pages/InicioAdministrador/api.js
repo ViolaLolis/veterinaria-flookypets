@@ -45,14 +45,18 @@ export const authFetch = async (endpoint, options = {}) => {
         if (!response.ok) {
             let errorData = {};
             try {
-                errorData = await response.json(); // Intenta parsear el cuerpo del error
+                // Intenta parsear el cuerpo del error como JSON
+                errorData = await response.json(); 
             } catch (jsonError) {
                 // Si no se puede parsear JSON, usa el texto de la respuesta o un mensaje genérico
                 const textError = await response.text();
                 errorData = { message: textError || response.statusText };
             }
             
-            const errorMessage = errorData.message || `Error ${response.status}: ${response.statusText}`;
+            // Si el backend envía un 'error' (stack trace en development) o un 'message', úsalo.
+            // Si no, usa el mensaje de estado HTTP.
+            const errorMessage = errorData.error || errorData.message || `Error ${response.status}: ${response.statusText}`;
+            
             console.error(`API Error for ${endpoint}:`, errorMessage, errorData);
             throw new Error(errorMessage);
         }

@@ -50,15 +50,21 @@ import ConfiguracionVeterinario from "./Pages/InicioVeterinario/ConfiguracionVet
 
 // Componentes de Administrador
 import AdminDashboard from "./Pages/InicioAdministrador/AdminDashboard";
-import AdminServices from "./Pages/InicioAdministrador/AdminServices";
-import AdminVets from "./Pages/InicioAdministrador/AdminVets";
-import AdminAdmins from "./Pages/InicioAdministrador/AdminAdmins";
-import AdminProfile from "./Pages/InicioAdministrador/AdminProfile";
-import AdminStats from "./Pages/InicioAdministrador/AdminStats";
-import AdminUsers from "./Pages/InicioAdministrador/AdminUsers";
+import AdminServices from "./Pages/InicioAdministrador/AdminServices"; // Ya importado desde components
+import AdminVets from "./Pages/InicioAdministrador/AdminVets";         // Ya importado desde components
+import AdminAdmins from "./Pages/InicioAdministrador/AdminAdmins";     // Ya importado desde components
+import AdminProfile from "./Pages/InicioAdministrador/AdminProfile";   // Ya importado desde components
+import AdminStats from "./Pages/InicioAdministrador/AdminStats";       // Ya importado desde components
+import AdminUsers from "./Pages/InicioAdministrador/AdminUsers"; // Ruta corregida si está en Components
+import AdminUserDetail from "./Pages/InicioAdministrador/AdminUserDetail"; // Nuevo componente
 import AdminAppointments from "./Pages/InicioAdministrador/AdminAppointments";
 import AdminMedicalRecords from "./Pages/InicioAdministrador/AdminMedicalRecords";
 import AdminSettings from "./Pages/InicioAdministrador/AdminSettings";
+import ServicesManagement from "./Pages/InicioAdministrador/ServicesManagement"; // Asegúrate de que la ruta sea correcta
+import VetsManagement from "./Pages/InicioAdministrador/VetsManagement"; // Asegúrate de que la ruta sea correcta
+import AdminsManagement from "./Pages/InicioAdministrador/AdminsManagement"; // Asegúrate de que la ruta sea correcta
+import UserProfile from "./Pages/InicioAdministrador/UserProfile"; // Asegúrate de que la ruta sea correcta
+
 
 function App() {
   const [user, setUser] = React.useState(() => {
@@ -78,16 +84,17 @@ function App() {
         {/* Rutas de administrador */}
         <Route element={<Protegida user={user} allowedRoles={['admin']} />}>
           <Route path="/admin" element={<AdminDashboard user={user} setUser={setUser} />}>
-            <Route index element={<AdminStats />} />
-            <Route path="dashboard" element={<AdminStats />} />
-            <Route path="services" element={<AdminServices />} />
-            <Route path="veterinarians" element={<AdminVets />} />
-            <Route path="administrators" element={<AdminAdmins />} />
-            <Route path="users" element={<AdminUsers />} />
-            <Route path="appointments" element={<AdminAppointments />} />
-            <Route path="medical-records" element={<AdminMedicalRecords />} />
-            <Route path="settings" element={<AdminSettings />} />
-            <Route path="profile" element={<AdminProfile user={user} setUser={setUser} />} />
+            <Route index element={<AdminStats user={user} />} /> {/* Pasar user a AdminStats */}
+            <Route path="dashboard" element={<AdminStats user={user} />} /> {/* Pasar user a AdminStats */}
+            <Route path="services" element={<ServicesManagement user={user} />} /> {/* Pasar user */}
+            <Route path="veterinarians" element={<VetsManagement user={user} />} /> {/* Pasar user */}
+            <Route path="administrators" element={<AdminsManagement user={user} />} /> {/* Pasar user */}
+            <Route path="users" element={<AdminUsers user={user} />} /> {/* Nueva ruta para Usuarios, pasar user */}
+            <Route path="users/:userId" element={<AdminUserDetail user={user} />} /> {/* Nueva ruta para detalle de usuario */}
+            <Route path="appointments" element={<AdminAppointments user={user} />} />
+            <Route path="medical-records" element={<AdminMedicalRecords user={user} />} />
+            <Route path="settings" element={<AdminSettings user={user} />} />
+            <Route path="profile" element={<UserProfile user={user} setUser={setUser} />} />
           </Route>
         </Route>
 
@@ -111,11 +118,6 @@ function App() {
             <Route path="perfil" element={<VerPerfilVeterinario setUser={setUser} />} />
             <Route path="perfil/editar" element={<EditarPerfilVeterinario />} />
             <Route path="configuracion" element={<ConfiguracionVeterinario />} />
-
-<<<<<<< HEAD
-            {/* <Route path="llamada" element={<LlamadaVeterinario />} /> */}
-=======
->>>>>>> 79e215c63f268c9a748809d07fed2e32315bd8fd
           </Route>
         </Route>
 
