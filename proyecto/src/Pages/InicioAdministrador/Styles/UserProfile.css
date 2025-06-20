@@ -1,252 +1,470 @@
-/* Estilos base */
-.user-profile-container {
+/* src/Styles/AdminProfile.css - Diseño para el perfil del Administrador */
+
+/* Definición de variables CSS para consistencia, si no están ya en AdminStyles.css */
+:root {
+  --primary-color: #00acc1; /* Azul cian vibrante (principal) */
+  --primary-light: #4dd0e1; /* Azul cian más claro */
+  --primary-dark: #007c91;  /* Azul cian más oscuro para sombras profundas */
+  --primary-glow: rgba(0, 172, 193, 0.3); /* Efecto de brillo para enfoque */
+
+  --secondary-background: #ecf0f1; /* Gris muy claro para fondos generales */
+  --surface-white: #ffffff;      /* Blanco puro para tarjetas y modales */
+
+  --text-dark: #2c3e50; /* Gris oscuro para texto principal */
+  --text-medium: #546e7a; /* Gris medio para texto secundario/labels */
+  --text-light: #90a4ae; /* Gris claro para placehoders/bordes suaves */
+
+  --success-color: #2ecc71; /* Verde brillante para éxito */
+  --danger-color: #e74c3c;  /* Rojo intenso para errores/eliminar */
+  --warning-color: #f39c12; /* Naranja para advertencias */
+
+  /* Sombras y Elevación */
+  --shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 5px 15px rgba(0, 0, 0, 0.12);
+  --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+/* Contenedor principal de la página de perfil del administrador */
+.admin-profile-container {
     padding: 2rem;
-    max-width: 800px;
-    margin: 0 auto;
-  }
-  
-  .profile-header {
-    margin-bottom: 2rem;
+    max-width: 850px; /* Ancho máximo un poco mayor para mejor distribución del contenido */
+    margin: 3rem auto; /* Margen superior/inferior, centrado horizontalmente */
+    min-height: calc(100vh - 6rem); /* Asegura que ocupe al menos la altura de la ventana (ajustar si hay nav/footer) */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centra el contenido horizontalmente */
+    background-color: var(--secondary-background); /* Fondo suave */
+    border-radius: 12px; /* Bordes más redondeados para un aspecto moderno */
+    box-shadow: var(--shadow-lg); /* Sombra prominente para el contenedor general */
+}
+
+/* Encabezado principal de la página de perfil */
+.admin-content-header {
+    margin-bottom: 2.5rem; /* Más espacio debajo del título principal */
     text-align: center;
-  }
-  
-  .profile-header h2 {
-    color: #00acc1;
-    font-size: 2rem;
+    width: 100%;
+}
+
+.admin-content-header h2 {
+    color: var(--text-dark); /* Color de texto oscuro para un encabezado fuerte */
+    font-size: 2.2rem;
+    font-weight: 700; /* Texto más audaz */
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 0.8rem;
-  }
-  
-  .header-icon {
-    font-size: 1.5rem;
-  }
-  
-  /* Tarjeta de perfil */
-  .profile-card {
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-    overflow: hidden;
-  }
-  
-  .profile-section, .password-section {
-    padding: 1.5rem 2rem;
-  }
-  
-  .profile-section {
-    border-bottom: 1px solid #ecf0f1;
-  }
-  
-  .section-header {
+    margin: 0; /* Elimina márgenes predeterminados */
+}
+
+.admin-content-header .header-icon {
+    font-size: 1.8rem; /* Icono más grande para el encabezado principal */
+    color: var(--primary-color); /* Color primario para el icono */
+}
+
+/* Tarjeta de información del perfil */
+.profile-card {
+    background: var(--surface-white); /* Blanco puro para las tarjetas */
+    border-radius: 12px; /* Bordes más redondeados */
+    box-shadow: var(--shadow-md); /* Sombra media para la tarjeta */
+    overflow: hidden; /* Asegura que los bordes redondeados se apliquen al contenido */
+    width: 100%; /* Ocupa todo el ancho del contenedor padre */
+    max-width: 680px; /* Ancho máximo para la tarjeta */
+    border: 1px solid var(--text-light); /* Borde sutil */
+    display: flex;
+    flex-direction: column; /* Apila las secciones verticalmente */
+}
+
+/* Secciones dentro de la tarjeta de perfil (información personal, seguridad) */
+.profile-section, .password-section {
+    padding: 2rem 2.5rem; /* Mayor relleno para más espacio */
+}
+
+.profile-section {
+    border-bottom: 1px solid var(--secondary-background); /* Separador sutil */
+}
+
+.password-section {
+    padding-top: 1.5rem; /* Menor relleno superior para esta sección */
+}
+
+/* Encabezados de las subsecciones */
+.section-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 1.5rem;
-  }
-  
-  .section-header h3 {
-    color: #00acc1;
-    font-size: 1.3rem;
+    padding-bottom: 0.8rem;
+    border-bottom: 1px solid var(--text-light); /* Borde sutil */
+}
+
+.section-header h3 {
+    color: var(--text-dark); /* Texto oscuro para los subtítulos */
+    font-size: 1.5rem;
+    font-weight: 600;
     display: flex;
     align-items: center;
     gap: 0.8rem;
     margin: 0;
-  }
-  
-  .section-icon {
-    font-size: 1.1rem;
-  }
-  
-  /* Información del perfil */
-  .profile-info {
+}
+
+.section-header .section-icon {
+    font-size: 1.3rem; /* Icono más grande para los encabezados de sección */
+    color: var(--primary-color);
+}
+
+/* Visualización de la información del perfil (modo lectura) */
+.profile-info {
     display: flex;
     flex-direction: column;
-    gap: 1.2rem;
-  }
-  
-  .info-item {
+    gap: 1.5rem; /* Espacio aumentado entre los elementos de información */
+}
+
+.info-item {
     display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
-  
-  .info-icon {
-    color: #00acc1;
-    font-size: 1.2rem;
-    min-width: 24px;
-  }
-  
-  .info-label {
+    align-items: flex-start; /* Alinea el icono y el texto en la parte superior */
+    gap: 1.2rem; /* Más espacio entre el icono y el texto */
+    padding-bottom: 1rem;
+    border-bottom: 1px dashed var(--text-light); /* Separador punteado para un aspecto más suave */
+}
+
+.info-item:last-child {
+    border-bottom: none; /* Elimina el borde del último elemento */
+    padding-bottom: 0;
+}
+
+.info-icon {
+    color: var(--primary-color);
+    font-size: 1.5rem; /* Iconos de información más grandes */
+    min-width: 30px; /* Asegura un ancho mínimo para una alineación consistente */
+    text-align: center;
+}
+
+.info-label {
     display: block;
-    font-size: 0.9rem;
-    color: #777;
-    margin-bottom: 0.2rem;
-  }
-  
-  .info-value {
+    font-size: 0.95rem; /* Ligeramente más grande */
+    color: var(--text-medium);
+    margin-bottom: 0.3rem; /* Espacio debajo de la etiqueta */
+    font-weight: 600; /* Etiqueta más audaz */
+}
+
+.info-value {
     font-weight: 500;
-    color: #333;
-  }
-  
-  /* Formularios */
-  .edit-form, .password-form {
-    margin-top: 1.5rem;
-  }
-  
-  .form-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 1.2rem;
-    margin-bottom: 1.5rem;
-  }
-  
-  .form-group {
-    margin-bottom: 1rem;
-  }
-  
-  .form-group label {
-    display: block;
-    margin-bottom: 0.5rem;
-    color: #555;
-    font-weight: 500;
-  }
-  
-  .form-group input, .disabled-input {
-    width: 100%;
-    padding: 0.8rem;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    transition: all 0.3s;
-    font-family: inherit;
-  }
-  
-  .disabled-input {
-    background-color: #f5f5f5;
-    color: #666;
-  }
-  
-  .form-group input:focus {
-    border-color: #00acc1;
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(0, 172, 193, 0.2);
-  }
-  
-  /* Botones */
-  .edit-btn, .toggle-btn, .cancel-btn, .save-btn {
-    padding: 0.6rem 1.2rem;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: all 0.3s;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-weight: 500;
-  }
-  
-  .edit-btn {
-    background-color: rgba(0, 172, 193, 0.1);
-    color: #00acc1;
-  }
-  
-  .edit-btn:hover {
-    background-color: rgba(0, 172, 193, 0.2);
-  }
-  
-  .toggle-btn {
-    background-color: rgba(0, 172, 193, 0.1);
-    color: #00acc1;
-  }
-  
-  .toggle-btn:hover, .toggle-btn.active {
-    background-color: rgba(0, 172, 193, 0.2);
-  }
-  
-  .cancel-btn {
-    background-color: #ecf0f1;
-    color: #555;
-  }
-  
-  .cancel-btn:hover {
-    background-color: #e0e0e0;
-  }
-  
-  .save-btn {
-    background-color: #00acc1;
-    color: white;
+    color: var(--text-dark);
+    font-size: 1.05rem; /* Texto de valor ligeramente más grande */
+    word-break: break-word; /* Asegura que las palabras largas se rompan en varias líneas */
+}
+
+/* Formulario de edición */
+.edit-form {
     margin-top: 1rem;
-  }
-  
-  .save-btn:hover {
-    background-color: #008fa1;
-  }
-  
-  .save-btn:disabled {
-    background-color: #b2ebf2;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Columnas autoajustables, mínimo 280px */
+    gap: 1.5rem; /* Mayor espacio entre elementos de la cuadrícula */
+    margin-bottom: 2rem; /* Más espacio antes del botón de guardar */
+}
+
+.form-group {
+    margin-bottom: 0; /* Elimina el margen predeterminado, la cuadrícula maneja el espaciado */
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.6rem; /* Más espacio debajo de la etiqueta */
+    color: var(--text-dark);
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.form-group input, .disabled-input {
+    width: 100%;
+    padding: 0.9rem 1rem; /* Mayor relleno */
+    border: 1px solid var(--text-light); /* Color de borde sutil */
+    border-radius: 8px; /* Más redondeado */
+    transition: all 0.3s ease;
+    font-family: 'Inter', sans-serif; /* Fuente consistente */
+    font-size: 1rem;
+    background-color: var(--surface-white);
+    color: var(--text-dark);
+}
+
+.disabled-input {
+    background-color: var(--secondary-background); /* Gris más claro para campos deshabilitados */
+    color: var(--text-medium);
     cursor: not-allowed;
-  }
-  
-  /* Notificaciones */
-  .notification {
+}
+
+.form-group input:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 0 3px var(--primary-glow); /* Efecto de brillo mejorado */
+}
+
+/* Mensajes de error en línea */
+.error-message-inline {
+    color: var(--danger-color);
+    font-size: 0.85rem;
+    margin-top: 0.4rem;
+    display: block;
+}
+
+/* Botones de acción */
+.edit-btn, .toggle-btn, .cancel-btn, .save-btn {
+    padding: 0.7rem 1.4rem;
+    border: none;
+    border-radius: 8px; /* Bordes redondeados consistentes */
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem; /* Más espacio entre icono y texto */
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-decoration: none; /* Para botones que podrían ser enlaces (como el de cambiar contraseña) */
+    justify-content: center; /* Centra el contenido en los botones */
+}
+
+.edit-btn {
+    background-color: var(--primary-color); /* Color primario más fuerte para editar */
+    color: white;
+}
+
+.edit-btn:hover {
+    background-color: var(--primary-dark);
+    transform: translateY(-2px); /* Efecto de elevación sutil */
+    box-shadow: var(--shadow-sm);
+}
+
+.toggle-btn { /* Para el botón "Cambiar Contraseña" */
+    background-color: var(--text-medium); /* Gris más oscuro, distinto del botón de edición */
+    color: white;
+}
+
+.toggle-btn:hover {
+    background-color: var(--text-dark); /* Más oscuro al pasar el ratón */
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+.cancel-btn {
+    background-color: var(--text-light); /* Gris claro para cancelar */
+    color: var(--text-dark);
+}
+
+.cancel-btn:hover {
+    background-color: var(--text-medium);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+.save-btn {
+    background-color: var(--success-color); /* Verde para acciones de guardar */
+    color: white;
+    margin-top: 1.5rem; /* Espacio encima del botón de guardar */
+    /* Este botón necesita estar dentro de un flexbox para align-self */
+}
+
+.save-btn:hover {
+    background-color: #27ae60; /* Verde más oscuro al pasar el ratón */
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+.save-btn:disabled {
+    background-color: var(--success-color);
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none; /* Sin transformación cuando está deshabilitado */
+    box-shadow: none;
+}
+
+/* Contenedor de botones para el formulario de edición */
+.form-actions {
+    display: flex;
+    justify-content: flex-end; /* Alinea los botones a la derecha */
+    gap: 1rem;
+    margin-top: 1.5rem; /* Espacio encima de los botones de acción */
+}
+
+
+/* Estilo de notificaciones flotantes */
+.notification {
     position: fixed;
     bottom: 2rem;
     right: 2rem;
     padding: 1rem 1.5rem;
-    border-radius: 5px;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    box-shadow: var(--shadow-md);
     z-index: 1000;
-    animation: slideIn 0.3s ease-out;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-  }
-  
-  .notification.success {
-    background-color: #00acc1;
+    gap: 0.75rem;
+    font-weight: 500;
+}
+
+.notification.success {
+    background-color: var(--success-color);
     color: white;
-  }
-  
-  .notification.error {
-    background-color: #ff4444;
+}
+
+.notification.error {
+    background-color: var(--danger-color);
     color: white;
-  }
-  
-  @keyframes slideIn {
-    from {
-      transform: translateX(100%);
-      opacity: 0;
+}
+
+.notification-icon {
+    font-size: 1.3rem;
+}
+
+.close-notification {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    margin-left: 0.5rem;
+    opacity: 0.8;
+}
+
+.close-notification:hover {
+    opacity: 1;
+}
+
+/* Estilos para los estados de carga y error */
+.loading-state, .error-state, .no-data-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    text-align: center;
+    background-color: var(--surface-white); /* Fondo de la tarjeta */
+    border-radius: 12px;
+    box-shadow: var(--shadow-md);
+    padding: 2rem;
+    margin: 3rem auto;
+    max-width: 500px;
+}
+
+.loading-spinner .spinner-icon {
+    font-size: 3rem;
+    color: var(--primary-color);
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+
+.loading-spinner p, .error-message, .info-message p {
+    font-size: 1.2rem;
+    color: var(--text-dark);
+}
+
+.error-message .info-icon, .no-data-state .info-icon {
+    font-size: 2rem;
+    color: var(--danger-color);
+    margin-bottom: 1rem;
+}
+
+/* Animación de spinner */
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Ajustes responsivos */
+@media (max-width: 768px) {
+    .admin-profile-container {
+        padding: 1rem;
+        margin: 1.5rem auto;
+        border-radius: 8px; /* Menos redondeado en pantallas pequeñas */
     }
-    to {
-      transform: translateX(0);
-      opacity: 1;
+
+    .profile-card {
+        border-radius: 8px;
     }
-  }
-  
-  /* Responsive */
-  @media (max-width: 768px) {
-    .user-profile-container {
-      padding: 1rem;
-    }
-    
+
     .profile-section, .password-section {
-      padding: 1.2rem;
+        padding: 1.5rem; /* Relleno reducido */
     }
-    
+
     .section-header {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 1rem;
+        flex-direction: column; /* Apila título y botón en columna */
+        align-items: flex-start;
+        gap: 0.8rem;
     }
-    
+
+    .section-header h3 {
+        font-size: 1.3rem;
+    }
+
     .form-grid {
-      grid-template-columns: 1fr;
+        grid-template-columns: 1fr; /* Una sola columna en pantallas pequeñas */
+        gap: 1rem;
     }
-    
+
     .notification {
-      width: calc(100% - 2rem);
-      right: 1rem;
-      bottom: 1rem;
+        width: calc(100% - 2rem); /* Ocupa casi todo el ancho */
+        right: 1rem;
+        bottom: 1rem;
+        padding: 0.8rem 1rem;
+        font-size: 0.9rem;
     }
-  }
+
+    .notification-icon {
+        font-size: 1.1rem;
+    }
+
+    .close-notification {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .admin-profile-container {
+        padding: 0.5rem;
+        margin: 1rem auto;
+    }
+
+    .admin-content-header h2 {
+        font-size: 1.8rem;
+        gap: 0.6rem;
+    }
+    .admin-content-header .header-icon {
+        font-size: 1.5rem;
+    }
+    .profile-section, .password-section {
+        padding: 1rem;
+    }
+    .info-item {
+        flex-direction: column; /* Apila icono y texto en columna */
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    .info-icon {
+        font-size: 1.3rem;
+    }
+    .info-label {
+        font-size: 0.85rem;
+    }
+    .info-value {
+        font-size: 1rem;
+    }
+    .edit-btn, .toggle-btn, .cancel-btn, .save-btn {
+        width: 100%; /* Botones a ancho completo en pantallas muy pequeñas */
+        font-size: 0.9rem;
+        padding: 0.6rem 1rem;
+    }
+    .form-actions {
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+    .loading-state, .error-state, .no-data-state {
+        padding: 1rem;
+        margin: 1rem auto;
+        max-width: 95%;
+    }
+}
+

@@ -103,15 +103,6 @@ function AdminSidebar({ activeTab, setActiveTab }) {
                         <FaConciergeBell className="sidebar-icon" />
                         <span>Servicios</span>
                     </li>
-                    
-                    {/* Configuración */}
-                    <li
-                        className={activeTab === 'settings' ? 'active' : ''}
-                        onClick={() => handleMenuItemClick('settings')}
-                    >
-                        <FaCog className="sidebar-icon" />
-                        <span>Configuración</span>
-                    </li>
 
                     {/* Mi Perfil */}
                     <li

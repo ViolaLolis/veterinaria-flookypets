@@ -1,79 +1,141 @@
-/* src/Styles/AdminStyles.css - Diseño Premium y Moderno */
+/* src/Styles/AdminStyles.css - Diseño Premium, Moderno y Detallado */
 
+/* ===================================================================== */
+/* 0. Variables CSS Personalizadas (Custom CSS Properties)               */
+/* Define la paleta de colores, sombras, radios de borde y transiciones */
+/* ===================================================================== */
 :root {
-  /* Paleta de Colores Inspirada en la Imagen */
+  /* Paleta de Colores Principal: Inspirada en un tono cian vibrante */
   --primary-color: #00acc1; /* Azul cian vibrante (principal) */
-  --primary-light: #4dd0e1; /* Azul cian más claro */
-  --primary-dark: #007c91;  /* Azul cian más oscuro para sombras profundas */
+  --primary-light: #4dd0e1; /* Azul cian más claro para acentos y hover */
+  --primary-dark: #007c91;  /* Azul cian más oscuro para sombras profundas y texto principal */
   --primary-glow: rgba(0, 172, 193, 0.3); /* Efecto de brillo para enfoque */
+  --primary-border: rgba(0, 172, 193, 0.5); /* Borde para elementos primarios */
 
-  --secondary-background: #ecf0f1; /* Gris muy claro para fondos generales */
-  --surface-white: #ffffff;      /* Blanco puro para tarjetas y modales */
+  /* Colores de Fondo y Superficie */
+  --secondary-background: #ecf0f1; /* Gris muy claro para fondos generales (suave) */
+  --surface-white: #ffffff;      /* Blanco puro para tarjetas, modales y superficies */
+  --surface-light-grey: #f4f6f9; /* Gris muy claro para fondos sutiles de componentes */
 
-  --text-dark: #2c3e50; /* Gris oscuro para texto principal */
-  --text-medium: #546e7a; /* Gris medio para texto secundario/labels */
-  --text-light: #90a4ae; /* Gris claro para placehoders/bordes suaves */
+  /* Colores de Texto */
+  --text-dark: #2c3e50;    /* Gris oscuro profundo para texto principal */
+  --text-medium: #546e7a;  /* Gris medio para texto secundario, etiquetas y placehoders */
+  --text-light: #90a4ae;   /* Gris claro para placehoders, bordes suaves y texto menos prominente */
+  --text-link: #3498db;    /* Azul para enlaces */
 
-  --success-color: #2ecc71; /* Verde brillante para éxito */
-  --danger-color: #e74c3c;  /* Rojo intenso para errores/eliminar */
-  --warning-color: #f39c12; /* Naranja para advertencias */
+  /* Colores de Estado (Feedback para el usuario) */
+  --success-color: #2ecc71;   /* Verde brillante para éxito y confirmación */
+  --success-light: rgba(46, 204, 113, 0.15); /* Verde claro para fondos de éxito */
+  --danger-color: #e74c3c;    /* Rojo intenso para errores, eliminar y acciones críticas */
+  --danger-light: rgba(231, 76, 60, 0.15);   /* Rojo claro para fondos de error */
+  --warning-color: #f39c12;   /* Naranja para advertencias y estados pendientes */
+  --warning-light: rgba(243, 156, 18, 0.15);  /* Naranja claro para fondos de advertencia */
+  --info-color: #3498db;      /* Azul claro para información y estados de progreso */
+  --info-light: rgba(52, 152, 219, 0.15);    /* Azul claro para fondos de información */
+  --neutral-color: #7f8c8d;   /* Gris para estados neutrales o deshabilitados */
+  --neutral-light: rgba(127, 140, 141, 0.15); /* Gris claro para fondos neutrales */
 
-  /* Sombras y Elevación */
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
-  --shadow-md: 0 6px 20px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.15);
+  /* Sombras y Elevación (para dar profundidad y jerarquía) */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08); /* Sombra pequeña */
+  --shadow-md: 0 6px 20px rgba(0, 0, 0, 0.1); /* Sombra mediana */
+  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.15); /* Sombra grande */
   --inner-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.06); /* Sombra interna para inputs */
 
-  /* Bordes y Transiciones */
-  --border-radius-pill: 50px;
-  --border-radius-lg: 16px;
-  --border-radius-md: 10px;
-  --border-radius-sm: 6px;
-  --transition-ease: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  /* Bordes y Radios de Borde (para estética y usabilidad) */
+  --border-radius-pill: 50px;    /* Bordes muy redondeados (píldora) */
+  --border-radius-lg: 16px;      /* Bordes grandes */
+  --border-radius-md: 10px;      /* Bordes medianos (más comunes) */
+  --border-radius-sm: 6px;       /* Bordes pequeños */
+
+  /* Transiciones (para animaciones suaves) */
+  --transition-ease: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); /* Transición con "rebote" */
+  --transition-fast: all 0.2s ease-out; /* Transición rápida */
 }
 
-/* Estilos Generales y Reseteo */
-* {
-  box-sizing: border-box;
+/* ===================================================================== */
+/* 1. Estilos Generales y Reseteo (Base Styles and Reset)                */
+/* Define reglas básicas para el HTML y el Body para asegurar consistencia */
+/* ===================================================================== */
+*, *::before, *::after {
+  box-sizing: border-box; /* Asegura que padding y border no aumenten el tamaño final */
+  margin: 0;             /* Elimina márgenes por defecto */
+  padding: 0;            /* Elimina paddings por defecto */
+}
+
+html {
+  font-size: 16px; /* Base para unidades rem */
+  scroll-behavior: smooth; /* Desplazamiento suave para anclas */
 }
 
 body {
-  font-family: 'Inter', sans-serif; /* Preferencia por Inter o sans-serif genérico */
-  margin: 0;
-  padding: 0;
-  background-color: var(--secondary-background);
-  color: var(--text-dark);
-  line-height: 1.6;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+  line-height: 1.6; /* Altura de línea legible */
+  color: var(--text-dark); /* Color de texto principal */
+  background-color: var(--secondary-background); /* Color de fondo general */
+  -webkit-font-smoothing: antialiased; /* Suavizado de fuentes para WebKit */
+  -moz-osx-font-smoothing: grayscale; /* Suavizado de fuentes para Firefox */
+  min-height: 100vh; /* Asegura que el body ocupe al menos la altura de la ventana */
+  display: flex; /* Permite una distribución flexible del contenido principal */
+  flex-direction: column; /* Contenido apilado verticalmente */
 }
 
-/* Estilos para la barra de navegación */
+a {
+  text-decoration: none; /* Elimina el subrayado de los enlaces */
+  color: var(--text-link); /* Color de enlace por defecto */
+  transition: color 0.2s ease; /* Transición suave al cambiar color */
+}
+
+a:hover {
+  color: var(--primary-color); /* Color de enlace al pasar el ratón */
+}
+
+button {
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: var(--transition-ease);
+  user-select: none; /* Evita que el texto del botón sea seleccionado */
+}
+
+button:focus-visible {
+  outline: 2px solid var(--primary-color); /* Outline para accesibilidad */
+  outline-offset: 2px;
+}
+
+/* ===================================================================== */
+/* 2. Estructura de Layout (Layout Structure)                            */
+/* Estilos para la barra de navegación, sidebar y contenedor principal */
+/* ===================================================================== */
+
+/* --- 2.1. Barra de Navegación Superior (Admin Navbar) --- */
 .admin-navbar {
-  position: fixed;
+  position: fixed; /* Fija la barra de navegación en la parte superior */
   top: 0;
   left: 0;
   right: 0;
-  background-color: var(--primary-color);
-  color: var(--surface-white);
-  padding: 0.9rem 2.5rem; /* Aumentar padding para un look más robusto */
-  box-shadow: var(--shadow-md);
-  z-index: 1000;
-  transition: var(--transition-ease);
+  background-color: var(--primary-color); /* Fondo primario */
+  color: var(--surface-white); /* Texto blanco */
+  padding: 0.9rem 2.5rem; /* Padding generoso */
+  box-shadow: var(--shadow-md); /* Sombra para elevarlo */
+  z-index: 1000; /* Asegura que esté por encima de otros elementos */
+  transition: var(--transition-ease); /* Transición suave para scroll/hover */
 }
 
+/* Efecto de scroll para la barra de navegación */
 .admin-navbar.scrolled {
-  padding: 0.7rem 2.5rem;
-  background-color: var(--primary-dark);
-  box-shadow: var(--shadow-lg); /* Sombra más pronunciada al hacer scroll */
+  padding: 0.7rem 2.5rem; /* Padding reducido al hacer scroll */
+  background-color: var(--primary-dark); /* Color más oscuro al hacer scroll */
+  box-shadow: var(--shadow-lg); /* Sombra más pronunciada */
 }
 
 .navbar-container {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  max-width: 1400px; /* Aumentar ancho máximo para coincidir con dashboard */
-  margin: 0 auto;
+  justify-content: space-between; /* Espacia los elementos */
+  align-items: center; /* Centra verticalmente */
+  max-width: 1400px; /* Ancho máximo para el contenido de la barra */
+  margin: 0 auto; /* Centra la barra horizontalmente */
+  width: 100%;
 }
 
 .navbar-brand {
@@ -81,67 +143,95 @@ body {
   align-items: center;
   text-decoration: none;
   color: var(--surface-white);
-  font-weight: 700; /* Más audaz */
-  font-size: 1.3rem; /* Más grande */
+  font-weight: 700;
+  font-size: 1.3rem;
   letter-spacing: 0.5px;
+  transition: var(--transition-ease);
+}
+
+.navbar-brand:hover {
+  opacity: 0.9;
+  transform: translateX(3px); /* Pequeño desplazamiento al pasar el ratón */
 }
 
 .navbar-logo {
-  height: 45px; /* Aumentar tamaño del logo */
+  height: 45px;
   margin-right: 15px;
-  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3)); /* Sutil glow para el logo */
+  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3)); /* Sutil brillo en el logo */
+  transition: var(--transition-ease);
 }
 
+.navbar-logo:hover {
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.5));
+}
+
+/* --- 2.2. Perfil de Usuario en Navbar (User Profile) --- */
 .user-profile {
   display: flex;
   align-items: center;
-  position: relative;
+  position: relative; /* Para el menú desplegable */
   cursor: pointer;
   padding: 0.6rem 1.2rem;
-  border-radius: var(--border-radius-pill); /* Bordes más suaves */
-  transition: background-color 0.3s ease, box-shadow 0.3s ease;
-  background-color: rgba(255, 255, 255, 0.05); /* Fondo sutil para el perfil */
+  border-radius: var(--border-radius-pill);
+  transition: var(--transition-ease);
+  background-color: rgba(255, 255, 255, 0.05); /* Fondo sutil */
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .user-profile:hover {
   background-color: rgba(255, 255, 255, 0.15);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  transform: translateY(-1px);
 }
 
 .user-avatar {
-  width: 40px; /* Aumentar tamaño del avatar */
+  width: 40px;
   height: 40px;
   border-radius: 50%;
-  background-color: var(--primary-light); /* Color de fondo del avatar */
+  background-color: var(--primary-light);
   display: flex;
   align-items: center;
   justify-content: center;
   margin-right: 12px;
-  border: 2px solid var(--surface-white); /* Borde blanco alrededor del avatar */
-  flex-shrink: 0; /* Evitar que el avatar se encoja */
+  border: 2px solid var(--surface-white);
+  flex-shrink: 0;
+  overflow: hidden; /* Asegura que la imagen de perfil se recorte */
+}
+
+.user-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Asegura que la imagen cubra el espacio sin distorsión */
 }
 
 .user-icon {
-  color: var(--primary-color);
-  font-size: 1.3rem; /* Tamaño del icono dentro del avatar */
+  color: var(--primary-color); /* Color del icono si no hay avatar */
+  font-size: 1.3rem;
 }
 
 .user-info {
   display: flex;
   flex-direction: column;
   margin-right: 10px;
-  color: var(--surface-white); /* Color de texto blanco para el perfil */
+  color: var(--surface-white);
 }
 
 .user-name {
-  font-weight: 600; /* Más audaz */
+  font-weight: 600;
   font-size: 0.95rem;
+  white-space: nowrap; /* Evita que el nombre se rompa en varias líneas */
+  overflow: hidden;
+  text-overflow: ellipsis; /* Agrega puntos suspensivos si el texto es muy largo */
+  max-width: 150px; /* Ancho máximo para el nombre */
 }
 
 .user-role {
   font-size: 0.85rem;
   opacity: 0.9;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
 }
 
 .dropdown-menu {
@@ -150,15 +240,17 @@ body {
   right: 0;
   background-color: var(--surface-white);
   border-radius: var(--border-radius-md);
-  box-shadow: var(--shadow-lg); /* Sombra más fuerte para el dropdown */
-  min-width: 200px; /* Ancho un poco mayor */
+  box-shadow: var(--shadow-lg);
+  min-width: 200px;
   overflow: hidden;
   z-index: 1001;
-  animation: fadeInScale 0.3s ease-out forwards; /* Nueva animación */
-  transform-origin: top right; /* Animar desde la esquina superior derecha */
+  animation: fadeInScale 0.3s ease-out forwards;
+  transform-origin: top right;
   border: 1px solid rgba(0, 0, 0, 0.05);
+  padding: 0.5rem 0; /* Padding interno para los items */
 }
 
+/* Animación para el menú desplegable */
 @keyframes fadeInScale {
   from { opacity: 0; transform: scale(0.9) translateY(-10px); }
   to { opacity: 1; transform: scale(1) translateY(0); }
@@ -167,7 +259,7 @@ body {
 .dropdown-item {
   display: flex;
   align-items: center;
-  padding: 0.9rem 1.5rem; /* Aumentar padding */
+  padding: 0.9rem 1.5rem;
   text-decoration: none;
   color: var(--text-dark);
   font-size: 0.95rem;
@@ -183,22 +275,25 @@ body {
 .dropdown-item:hover {
   background-color: var(--primary-light);
   color: var(--primary-dark);
-  padding-left: 1.8rem; /* Pequeño efecto de desplazamiento */
+  padding-left: 1.8rem; /* Efecto de desplazamiento */
 }
 
-.dropdown-item i { /* Estilo para iconos dentro del dropdown */
+.dropdown-item i {
   font-size: 1.1rem;
   color: var(--text-medium);
-  transition: color 0.3s ease;
+  transition: color 0.3s ease, transform 0.3s ease;
 }
 
 .dropdown-item:hover i {
   color: var(--primary-dark);
+  transform: translateX(3px);
 }
 
 .logout-item {
   color: var(--danger-color);
-  border-top: 1px solid var(--secondary-background); /* Separador para logout */
+  border-top: 1px solid var(--secondary-background); /* Separador visual */
+  margin-top: 0.5rem;
+  padding-top: 0.8rem;
 }
 
 .logout-item:hover {
@@ -206,27 +301,35 @@ body {
   color: var(--danger-color);
 }
 
-/* Estilos para el sidebar */
+/* --- 2.3. Sidebar de Navegación Lateral (Admin Sidebar) --- */
 .admin-sidebar {
   position: fixed;
-  top: 75px; /* Ajustar según la altura de la navbar */
+  top: 75px; /* Ajusta según la altura de tu navbar */
   left: 0;
   bottom: 0;
-  width: 280px; /* Más ancho */
+  width: 280px; /* Ancho del sidebar */
   background-color: var(--surface-white);
-  box-shadow: 2px 0 15px rgba(0, 0, 0, 0.08); /* Sombra más suave */
+  box-shadow: 2px 0 15px rgba(0, 0, 0, 0.08); /* Sombra suave lateral */
   z-index: 900;
-  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); /* Transición más fluida */
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
   border-right: 1px solid rgba(0, 0, 0, 0.03);
+  padding-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-sidebar nav {
+  flex-grow: 1; /* Ocupa el espacio restante */
 }
 
 .admin-sidebar nav ul {
   list-style: none;
-  padding: 1.5rem 0; /* Mayor padding */
+  padding: 0;
+  margin: 0;
 }
 
 .admin-sidebar nav ul li {
-  padding: 1rem 2rem; /* Mayor padding */
+  padding: 1rem 2rem;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -234,11 +337,12 @@ body {
   color: var(--text-medium);
   font-weight: 500;
   position: relative;
-  overflow: hidden; /* Para el efecto de fondo */
-  margin-bottom: 0.2rem; /* Pequeño espacio entre items */
+  overflow: hidden;
+  margin-bottom: 0.2rem;
+  border-left: 5px solid transparent; /* Borde para el estado activo/hover */
 }
 
-.admin-sidebar nav ul li::before { /* Efecto hover elegante */
+.admin-sidebar nav ul li::before {
   content: '';
   position: absolute;
   top: 0;
@@ -246,25 +350,28 @@ body {
   width: 100%;
   height: 100%;
   background-color: var(--primary-light);
-  transition: left 0.3s ease;
+  opacity: 0.1; /* Sutil opacidad para el efecto */
+  transition: left 0.3s ease, opacity 0.3s ease;
   z-index: 0;
 }
 
 .admin-sidebar nav ul li:hover::before {
   left: 0;
+  opacity: 0.2;
 }
 
 .admin-sidebar nav ul li i {
-  margin-right: 15px; /* Más espacio para el icono */
+  margin-right: 15px;
   color: var(--primary-color);
-  font-size: 1.2rem; /* Icono un poco más grande */
+  font-size: 1.2rem;
   transition: var(--transition-ease);
-  z-index: 1; /* Asegurar que el icono esté por encima del ::before */
+  z-index: 1;
 }
 
 .admin-sidebar nav ul li span {
   font-size: 1rem;
-  z-index: 1; /* Asegurar que el texto esté por encima del ::before */
+  z-index: 1;
+  white-space: nowrap; /* Evita que el texto se rompa */
 }
 
 .admin-sidebar nav ul li:hover {
@@ -273,28 +380,30 @@ body {
 
 .admin-sidebar nav ul li.active {
   background-color: var(--primary-light);
-  border-left: 5px solid var(--primary-color); /* Borde más grueso y vibrante */
+  border-left: 5px solid var(--primary-color);
   color: var(--primary-dark);
   font-weight: 600;
-  box-shadow: inset 5px 0 15px rgba(0, 172, 193, 0.1); /* Sombra interna en activo */
+  box-shadow: inset 5px 0 15px rgba(0, 172, 193, 0.1);
 }
 
-.admin-sidebar nav ul li.active::before { /* Remover efecto en el activo */
-  left: -100%; /* Asegurarse de que no haya un efecto de deslizado cuando ya está activo */
+.admin-sidebar nav ul li.active::before {
+  left: -100%; /* Asegura que el efecto de hover no esté activo al estar ya activo */
+  opacity: 0;
 }
 .admin-sidebar nav ul li.active:hover::before {
-  left: 0; /* Volver a poner el efecto de hover en activo */
-  background-color: rgba(0, 172, 193, 0.2); /* Un poco más oscuro */
+  left: 0;
+  opacity: 0.15; /* Sutil efecto al hacer hover sobre el elemento activo */
+  background-color: var(--primary-dark);
 }
 
-
-/* Contenido principal */
+/* --- 2.4. Contenedor Principal de Contenido (Admin Container) --- */
 .admin-container {
-  margin-left: 280px; /* Ajustar según el ancho del sidebar */
-  margin-top: 75px; /* Ajustar según la altura de la navbar */
+  margin-left: 280px; /* Ajusta según el ancho del sidebar */
+  margin-top: 75px; /* Ajusta según la altura de la navbar */
   padding: 2.5rem;
   min-height: calc(100vh - 75px);
   transition: margin-left 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  background-color: var(--secondary-background);
 }
 
 .admin-content {
@@ -302,11 +411,15 @@ body {
   border-radius: var(--border-radius-lg);
   padding: 2.5rem;
   box-shadow: var(--shadow-md);
-  border: 1px solid rgba(0, 0, 0, 0.05); /* Borde suave */
+  border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
-/* Estilos comunes para los dashboards */
-.dashboard-header {
+/* ===================================================================== */
+/* 3. Estilos Comunes de Encabezado de Contenido (Content Header Styles) */
+/* Encabezados de secciones, barras de búsqueda y botones de acción */
+/* ===================================================================== */
+
+.admin-content-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -317,36 +430,41 @@ body {
   border-bottom: 2px solid rgba(0, 172, 193, 0.1);
 }
 
-.header-title {
+.admin-content-header h2 {
+  color: var(--primary-dark);
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin: 0;
   display: flex;
   align-items: center;
-  gap: 1rem;
+  flex-shrink: 0; /* Evita que el título se encoja */
 }
 
 .header-icon {
   color: var(--primary-color);
-  font-size: 2.2rem;
+  margin-right: 1rem;
+  font-size: 2.5rem; /* Icono grande en el encabezado */
 }
 
 .header-actions {
   display: flex;
-  gap: 1.5rem;
-  align-items: center;
+  gap: 1rem;
   flex-wrap: wrap;
-  flex-grow: 1;
-  justify-content: flex-end;
+  align-items: center;
+  flex-grow: 1; /* Permite que las acciones ocupen espacio */
+  justify-content: flex-end; /* Alinea a la derecha por defecto */
 }
 
+/* --- 3.1. Caja de Búsqueda (Search Box) --- */
 .search-box {
   position: relative;
-  display: flex;
-  align-items: center;
+  flex-grow: 1;
+  min-width: 280px;
+  max-width: 450px;
   background-color: var(--surface-white);
   border-radius: var(--border-radius-pill);
   box-shadow: var(--inner-shadow);
   transition: var(--transition-ease);
-  flex-grow: 1;
-  max-width: 350px; /* Ajuste para el search */
 }
 
 .search-box:focus-within {
@@ -355,7 +473,7 @@ body {
 }
 
 .search-box input {
-  border: 1px solid var(--text-light); /* Borde para el input */
+  border: 1px solid var(--text-light);
   outline: none;
   padding: 0.9rem 1.5rem 0.9rem 3rem; /* Espacio para el icono */
   width: 100%;
@@ -363,11 +481,18 @@ body {
   font-size: 1rem;
   border-radius: var(--border-radius-pill);
   color: var(--text-dark);
+  transition: var(--transition-fast);
+}
+
+.search-box input:focus {
+  border-color: var(--primary-color);
 }
 
 .search-icon {
   position: absolute;
   left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
   color: var(--primary-color);
   font-size: 1.15rem;
 }
@@ -375,6 +500,8 @@ body {
 .clear-search {
   position: absolute;
   right: 0.8rem;
+  top: 50%;
+  transform: translateY(-50%);
   background: none;
   border: none;
   color: var(--text-medium);
@@ -382,17 +509,21 @@ body {
   padding: 0.3rem;
   border-radius: 50%;
   transition: var(--transition-ease);
+  font-size: 1.1rem;
 }
 
 .clear-search:hover {
   color: var(--danger-color);
   background-color: rgba(231, 76, 60, 0.1);
+  transform: translateY(-50%) scale(1.1);
 }
 .clear-search:disabled {
   opacity: 0.4;
   cursor: not-allowed;
+  transform: translateY(-50%);
 }
 
+/* --- 3.2. Botones de Acción (Add Button) --- */
 .add-btn {
   background-color: var(--primary-color);
   color: var(--surface-white);
@@ -419,14 +550,17 @@ body {
 .add-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
-  background: linear-gradient(45deg, #a0dce5 0%, #ccebf0 100%);
+  background: linear-gradient(45deg, #a0dce5 0%, #ccebf0 100%); /* Degradado deshabilitado */
   box-shadow: none;
+  transform: none;
 }
 
+/* --- 3.3. Botones de Filtro (Filter Buttons) --- */
 .filter-buttons {
   display: flex;
-  gap: 0.7rem; /* Espacio entre botones de filtro */
+  gap: 0.7rem;
   flex-wrap: wrap;
+  justify-content: flex-end; /* Alinea a la derecha */
 }
 
 .filter-btn {
@@ -440,6 +574,7 @@ body {
   font-weight: 500;
   font-size: 0.9rem;
   box-shadow: var(--shadow-sm);
+  text-transform: capitalize; /* Capitaliza el texto del botón de filtro */
 }
 
 .filter-btn:hover {
@@ -455,525 +590,311 @@ body {
   color: var(--surface-white);
   border-color: var(--primary-color);
   box-shadow: 0 4px 10px rgba(0, 172, 193, 0.25);
+  font-weight: 600;
 }
 
-/* Estilos para tablas */
+.filter-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: var(--secondary-background);
+  color: var(--text-light);
+  box-shadow: none;
+  transform: none;
+}
+
+/* ===================================================================== */
+/* 4. Estilos de Tablas (Table Styles)                                  */
+/* Diseño para mostrar listados de datos en formato tabular         */
+/* ===================================================================== */
+.admin-table-container {
+  overflow-x: auto; /* Permite scroll horizontal en tablas grandes */
+  background-color: var(--surface-white);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-md);
+  border: 1px solid rgba(44, 62, 80, 0.05);
+  margin-top: 1.5rem;
+}
+
 .admin-table {
   width: 100%;
-  border-collapse: separate;
+  border-collapse: separate; /* Permite border-radius en th/td */
   border-spacing: 0;
-  margin-top: 1.5rem;
-  border-radius: var(--border-radius-md); /* Bordes redondeados para la tabla */
-  overflow: hidden; /* Para que el border-radius funcione */
-  box-shadow: var(--shadow-md);
-}
-
-.admin-table th, .admin-table td {
-  padding: 1.2rem 1.5rem; /* Aumentar padding */
-  text-align: left;
-  border-bottom: 1px solid var(--secondary-background); /* Bordes más suaves */
-  vertical-align: middle;
+  min-width: 900px; /* Ancho mínimo para la tabla */
 }
 
 .admin-table th {
-  background: linear-gradient(to right, rgba(0, 172, 193, 0.1), rgba(0, 172, 193, 0.05));
+  background: linear-gradient(to right, rgba(0, 172, 193, 0.1), rgba(0, 172, 193, 0.05)); /* Degradado sutil */
   color: var(--primary-dark);
+  padding: 1.2rem 1.5rem;
+  text-align: left;
   font-weight: 700;
+  font-size: 0.95rem;
   text-transform: uppercase;
   letter-spacing: 0.8px;
+  border-bottom: 1px solid var(--primary-light);
+  white-space: nowrap; /* Evita que los encabezados se rompan */
+}
+
+/* Redondeo de bordes para la cabecera de la tabla */
+.admin-table th:first-child { border-top-left-radius: var(--border-radius-md); }
+.admin-table th:last-child { border-top-right-radius: var(--border-radius-md); }
+
+.admin-table td {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--secondary-background); /* Bordes más suaves */
+  color: var(--text-dark);
   font-size: 0.9rem;
+  vertical-align: middle;
+  white-space: nowrap; /* Evita que el contenido de la celda se rompa */
 }
 
-.admin-table tr:hover {
-  background-color: rgba(0, 172, 193, 0.04);
-}
-
-.admin-table tr:last-child td {
+/* Eliminar borde inferior de la última fila */
+.admin-table tbody tr:last-child td {
   border-bottom: none;
 }
 
+.admin-table tbody tr:hover {
+  background-color: rgba(52, 152, 219, 0.03); /* Efecto hover sutil en las filas */
+}
+
+.icon {
+  margin-right: 0.6rem;
+  color: var(--primary-color);
+  font-size: 1.1rem;
+  vertical-align: middle;
+}
+
+/* --- 4.1. Celdas de Acciones en Tablas (Action Cells) --- */
 .actions-cell {
   display: flex;
-  gap: 0.7rem; /* Más espacio entre botones de acción */
-  justify-content: center;
+  gap: 0.7rem;
+  flex-wrap: wrap; /* Permite que los botones se envuelvan */
   align-items: center;
+  justify-content: flex-start;
+  min-width: 180px; /* Ancho mínimo para evitar que se aplasten */
 }
 
-/* Botones genéricos con estilos base de la paleta */
-.btn-primary {
-  background-color: var(--primary-color);
-  color: var(--surface-white);
+.actions-cell button {
+  padding: 0.5rem 0.8rem;
+  border-radius: var(--border-radius-sm);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition-ease);
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
   border: none;
-  padding: 0.8rem 1.6rem;
-  border-radius: var(--border-radius-sm);
-  cursor: pointer;
-  transition: var(--transition-ease);
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
-  font-weight: 500;
-  font-size: 0.95rem;
-  box-shadow: 0 3px 10px rgba(0, 172, 193, 0.2);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  white-space: nowrap; /* Evita que el texto del botón se rompa */
 }
 
-.btn-primary:hover {
-  background-color: var(--primary-dark);
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(0, 172, 193, 0.3);
-}
-
-.btn-secondary {
-  background-color: var(--secondary-background);
-  color: var(--text-dark);
-  border: 1px solid var(--text-light);
-  padding: 0.8rem 1.6rem;
-  border-radius: var(--border-radius-sm);
-  cursor: pointer;
-  transition: var(--transition-ease);
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
-  font-weight: 500;
-  font-size: 0.95rem;
-  box-shadow: var(--shadow-sm);
-}
-
-.btn-secondary:hover {
-  background-color: var(--text-light);
+/* Estilos específicos para los botones de acción en tabla */
+.btn-details {
+  background-color: var(--info-color);
   color: var(--surface-white);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+.btn-details:hover {
+  background-color: var(--info-light);
+  color: var(--info-color);
+  box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
 }
 
 .btn-edit {
-  background-color: rgba(255, 152, 0, 0.1); /* Naranja suave */
-  color: var(--warning-color);
-  border: none;
-  padding: 0.8rem 1.6rem;
-  border-radius: var(--border-radius-sm);
-  cursor: pointer;
-  transition: var(--transition-ease);
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
-  font-weight: 500;
-  font-size: 0.95rem;
-  box-shadow: var(--shadow-sm);
-}
-
-.btn-edit:hover {
-  background-color: var(--warning-color);
-  color: var(--surface-white);
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(255, 152, 0, 0.3);
-}
-
-.btn-delete {
-  background-color: rgba(229, 57, 53, 0.1); /* Rojo suave */
-  color: var(--danger-color);
-  border: none;
-  padding: 0.8rem 1.6rem;
-  border-radius: var(--border-radius-sm);
-  cursor: pointer;
-  transition: var(--transition-ease);
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
-  font-weight: 500;
-  font-size: 0.95rem;
-  box-shadow: var(--shadow-sm);
-}
-
-.btn-delete:hover {
-  background-color: var(--danger-color);
-  color: var(--surface-white);
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(229, 57, 53, 0.3);
-}
-
-.btn-status {
-  background-color: rgba(67, 160, 71, 0.15); /* Verde suave */
-  color: var(--success-color);
-  border: none;
-  padding: 0.6rem 1.2rem;
-  border-radius: var(--border-radius-pill);
-  cursor: pointer;
-  transition: var(--transition-ease);
-  font-weight: 600;
-  font-size: 0.85rem;
-  box-shadow: var(--shadow-sm);
-}
-
-.btn-status.inactive {
-  background-color: rgba(229, 57, 53, 0.15);
-  color: var(--danger-color);
-}
-
-.btn-status:hover {
-  opacity: 0.9;
-  transform: translateY(-1px);
-}
-.btn-status:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  box-shadow: none;
-}
-
-.status-badge {
-  padding: 0.4rem 0.8rem; /* Mayor padding */
-  border-radius: var(--border-radius-pill);
-  font-size: 0.8rem;
-  font-weight: 600;
-  display: inline-block;
-  letter-spacing: 0.3px;
-  text-transform: uppercase;
-}
-
-.status-badge.active {
-  background-color: #e8f5e9;
-  color: #2e7d32;
-}
-
-.status-badge.inactive {
-  background-color: #ffebee;
-  color: #c62828;
-}
-
-.status-badge.completed {
-  background-color: #e8f5e9;
-  color: #2e7d32;
-}
-
-.status-badge.pending {
-  background-color: #fff8e1;
-  color: #ff8f00;
-}
-
-.status-badge.canceled {
-  background-color: #ffebee;
-  color: #c62828;
-}
-
-.no-results {
-  padding: 3rem;
-  text-align: center;
-  color: var(--text-light);
-  font-size: 1.2rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1.5rem;
-}
-
-/* Estilos para tarjetas (stats, admins, vets, services) */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Más espacio para tarjetas */
-  gap: 1.8rem;
-  margin-bottom: 2.5rem;
-}
-
-.stat-card {
-  background-color: var(--surface-white);
-  border-radius: var(--border-radius-lg);
-  padding: 1.8rem; /* Mayor padding */
-  box-shadow: var(--shadow-md);
-  display: flex;
-  align-items: center;
-  gap: 1.2rem;
-  transition: var(--transition-ease);
-  border: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-.stat-card:hover {
-  transform: translateY(-5px);
-  box-shadow: var(--shadow-lg);
-}
-
-.stat-icon {
-  width: 60px; /* Icono más grande */
-  height: 60px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.8rem; /* Tamaño del icono */
-  color: var(--surface-white);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-}
-
-.stat-icon.users {
-  background: linear-gradient(45deg, #5c6bc0, #3f51b5); /* Degradado para iconos */
-}
-
-.stat-icon.vets {
-  background: linear-gradient(45deg, #26a69a, #00897b);
-}
-
-.stat-icon.admins {
-  background: linear-gradient(45deg, #7e57c2, #673ab7);
-}
-
-.stat-icon.services {
-  background: linear-gradient(45deg, #ffa726, #fb8c00);
-}
-
-.stat-icon.appointments {
-  background: linear-gradient(45deg, #66bb6a, #43a047);
-}
-
-.stat-icon.growth {
-  background: linear-gradient(45deg, #ef5350, #d32f2f);
-}
-
-.stat-info h3 {
-  font-size: 1rem;
-  color: var(--text-medium);
-  margin-bottom: 0.4rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.stat-info p {
-  font-size: 2rem; /* Número más grande */
-  font-weight: 700;
-  color: var(--primary-dark);
-  margin: 0;
-}
-
-.stat-description {
-  font-size: 0.85rem;
-  color: var(--text-light);
-  margin-top: 0.4rem;
-}
-
-/* Estilos para grids de elementos (admin-card, service-card, vet-card) */
-.admins-grid, .services-grid, .vets-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); /* Tarjetas un poco más grandes */
-  gap: 1.8rem;
-  margin-top: 2rem;
-}
-
-.admin-card, .service-card, .vet-card {
-  background-color: var(--surface-white);
-  border-radius: var(--border-radius-lg);
-  overflow: hidden;
-  box-shadow: var(--shadow-md);
-  transition: var(--transition-ease);
-  border: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-.admin-card:hover, .service-card:hover, .vet-card:hover {
-  transform: translateY(-5px);
-  box-shadow: var(--shadow-lg);
-}
-
-.card-header {
-  padding: 1.2rem 1.5rem;
-  background: linear-gradient(to right, rgba(0, 172, 193, 0.1), rgba(0, 172, 193, 0.05)); /* Degradado sutil */
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.card-header h3 {
-  color: var(--primary-dark);
-  font-size: 1.3rem;
-  font-weight: 600;
-  margin: 0;
-}
-
-.role-badge, .category-badge, .vet-id, .price-badge {
-  padding: 0.4rem 0.9rem;
-  border-radius: var(--border-radius-pill);
-  font-size: 0.8rem;
-  font-weight: 600;
-  background-color: var(--primary-light);
-  color: var(--primary-dark);
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-}
-
-.role-badge.super-admin {
-  background-color: rgba(255, 215, 0, 0.15); /* Oro suave */
-  color: #ffb300;
-}
-
-.card-body {
-  padding: 1.5rem;
-}
-
-.info-item {
-  margin-bottom: 1rem;
-  display: flex;
-  align-items: center;
-  gap: 0.8rem; /* Más espacio entre label y value */
-}
-
-.info-item i { /* Estilo para iconos dentro de info-item */
-  color: var(--primary-color);
-  font-size: 1rem;
-  flex-shrink: 0; /* Evitar que el icono se encoja */
-}
-
-.info-label {
-  font-weight: 600;
-  color: var(--text-medium);
-  min-width: 90px; /* Asegurar ancho mínimo para labels */
-  flex-shrink: 0;
-  font-size: 0.9rem;
-}
-
-.info-value {
-  color: var(--text-dark);
-  font-size: 0.95rem;
-  flex-grow: 1;
-}
-
-.specialty-badge {
-  padding: 0.4rem 0.9rem;
-  border-radius: var(--border-radius-pill);
-  font-size: 0.8rem;
-  font-weight: 600;
-  background-color: rgba(2, 136, 209, 0.15);
-  color: #0288d1;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-}
-
-.card-footer {
-  padding: 1.2rem 1.5rem;
-  border-top: 1px solid rgba(0, 0, 0, 0.05);
-  display: flex;
-  gap: 0.8rem;
-  justify-content: flex-end; /* Alinea los botones al final */
-}
-
-/* Botones de acción en tarjetas */
-.card-footer .edit-btn, .card-footer .delete-btn {
-  flex: none; /* No ocupar todo el espacio, permitir tamaño automático */
-  padding: 0.7rem 1.2rem;
-  width: auto; /* Desactivar ancho fijo */
-  height: auto; /* Desactivar alto fijo */
-  border-radius: var(--border-radius-sm); /* Bordes cuadrados */
-  font-size: 0.9rem;
-}
-
-.card-footer .edit-btn {
-  background-color: rgba(0, 172, 193, 0.15);
-  color: var(--primary-color);
-}
-
-.card-footer .edit-btn:hover {
   background-color: var(--primary-color);
   color: var(--surface-white);
 }
-
-.card-footer .delete-btn {
-  background-color: rgba(231, 76, 60, 0.15);
-  color: var(--danger-color);
+.btn-edit:hover {
+  background-color: var(--primary-dark);
+  box-shadow: 0 4px 8px rgba(0, 172, 193, 0.3);
 }
 
-.card-footer .delete-btn:hover:not(:disabled) {
+.btn-status.active { /* Para botón de Desactivar (cuando el usuario/item está activo) */
   background-color: var(--danger-color);
   color: var(--surface-white);
 }
+.btn-status.active:hover {
+  background-color: var(--danger-light);
+  color: var(--danger-color);
+  box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
+}
 
-/* Estilos para formularios modales */
+.btn-status.inactive { /* Para botón de Activar (cuando el usuario/item está inactivo) */
+  background-color: var(--success-color);
+  color: var(--surface-white);
+}
+.btn-status.inactive:hover {
+  background-color: var(--success-light);
+  color: var(--success-color);
+  box-shadow: 0 4px 8px rgba(39, 174, 96, 0.3);
+}
+
+.btn-delete {
+  background-color: var(--danger-color);
+  color: var(--surface-white);
+}
+.btn-delete:hover {
+  background-color: var(--danger-light);
+  color: var(--danger-color);
+  box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
+}
+
+/* Estado deshabilitado para todos los botones de acción */
+.actions-cell button:disabled {
+  background-color: var(--neutral-light);
+  color: var(--neutral-color);
+  cursor: not-allowed;
+  opacity: 0.7;
+  transform: none;
+  box-shadow: none;
+}
+
+/* --- 4.2. Badges de Estado (Status Badges) --- */
+.status-badge {
+  display: inline-block;
+  padding: 0.45rem 1rem;
+  border-radius: var(--border-radius-pill);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: capitalize;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  white-space: nowrap; /* Evita que el badge se rompa */
+}
+
+/* Colores para diferentes estados */
+.status-badge.active, .status-badge.completa { 
+  background-color: var(--success-light); 
+  color: var(--success-color); 
+}
+.status-badge.inactive, .status-badge.rechazada, .status-badge.cancelada { 
+  background-color: var(--danger-light); 
+  color: var(--danger-color); 
+}
+.status-badge.pendiente { 
+  background-color: var(--warning-light); 
+  color: var(--warning-color); 
+}
+.status-badge.aceptada { 
+  background-color: var(--info-light); 
+  color: var(--info-color); 
+}
+
+/* ===================================================================== */
+/* 5. Modales (Modals)                                                   */
+/* Estilos para ventanas emergentes de formularios o detalles       */
+/* ===================================================================== */
+
+/* --- 5.1. Overlay del Modal (Modal Overlay) --- */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.7); /* Fondo más oscuro */
+  background-color: rgba(0, 0, 0, 0.7); /* Fondo más oscuro y translúcido */
   display: flex;
-  align-items: center;
   justify-content: center;
-  z-index: 1000;
-  backdrop-filter: blur(10px); /* Más desenfoque */
+  align-items: center;
+  z-index: 1000; /* Asegura que cubra todo */
+  backdrop-filter: blur(8px); /* Desenfoque del fondo */
   animation: fadeIn 0.3s ease forwards;
 }
 
-.modal-form, .modal-content {
+/* --- 5.2. Contenido del Modal (Modal Content) --- */
+.modal-content {
   background-color: var(--surface-white);
   border-radius: var(--border-radius-lg);
-  padding: 3rem; /* Más padding */
   width: 90%;
-  max-width: 700px; /* Más ancho para el modal */
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3); /* Sombra más fuerte */
+  max-width: 750px; /* Ancho un poco más grande para formularios detallados */
+  max-height: 90vh; /* Altura máxima para permitir scroll interno */
+  overflow-y: auto; /* Scroll si el contenido excede la altura */
+  box-shadow: var(--shadow-lg);
+  animation: slideUpFadeIn 0.5s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
   position: relative;
-  animation: slideUpFadeIn 0.5s cubic-bezier(0.25, 0.8, 0.25, 1) forwards; /* Animación con rebote */
-  border: 3px solid var(--primary-color); /* Borde vibrante */
+  border: 3px solid var(--primary-color); /* Borde distintivo */
+  padding: 2.5rem; /* Padding generoso dentro del modal */
 }
 
+/* Animación de entrada para modales */
 @keyframes slideUpFadeIn {
   from { opacity: 0; transform: translateY(30px) scale(0.95); }
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-.close-modal {
-  position: absolute;
-  top: 1.5rem;
-  right: 1.5rem;
-  background: none;
-  border: none;
-  font-size: 1.8rem; /* Icono de cierre más grande */
-  cursor: pointer;
-  color: var(--text-light);
-  transition: var(--transition-ease);
-  padding: 0.5rem;
-  border-radius: 50%;
+/* --- 5.3. Encabezado del Modal (Modal Header) --- */
+.modal-header {
+  padding: 0 0 1.5rem 0; /* Padding inferior para separar del contenido */
+  border-bottom: 1px solid var(--secondary-background);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem; /* Espacio antes del formulario */
 }
 
-.close-modal:hover {
-  color: var(--danger-color);
-  background-color: rgba(231, 76, 60, 0.1);
-  transform: rotate(90deg); /* Rotación al pasar el ratón */
-}
-
-.close-modal:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-.modal-form h3 {
+.modal-header h3 {
+  margin: 0;
   color: var(--primary-dark);
-  margin-top: 0;
-  margin-bottom: 2rem;
-  font-size: 2.2rem; /* Título del modal más grande */
-  font-weight: 700;
+  font-size: 1.8rem;
+  font-weight: 600;
   display: flex;
   align-items: center;
-  gap: 1rem;
-  border-bottom: 2px solid rgba(0, 172, 193, 0.15); /* Borde inferior más robusto */
-  padding-bottom: 1rem;
+  gap: 0.8rem;
 }
 
 .form-icon {
   color: var(--primary-color);
-  font-size: 2.5rem; /* Icono del formulario más grande */
+  font-size: 2.2rem;
+}
+
+/* --- 5.4. Botón de Cierre del Modal (Close Modal Button) --- */
+.close-modal-btn {
+  background: none;
+  border: none;
+  color: var(--text-light);
+  font-size: 1.8rem;
+  cursor: pointer;
+  transition: var(--transition-ease);
+  position: absolute; /* Posicionado absolutamente en la esquina del modal */
+  top: 1.2rem;
+  right: 1.2rem;
+  z-index: 1010; /* Asegura que esté por encima de todo el contenido */
+  padding: 0.5rem;
+  border-radius: 50%;
+}
+
+.close-modal-btn:hover {
+  color: var(--danger-color);
+  background-color: rgba(231, 76, 60, 0.1);
+  transform: rotate(90deg);
+}
+.close-modal-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  background: none;
+}
+
+/* --- 5.5. Formulario dentro del Modal (Modal Form) --- */
+.modal-form {
+  padding: 0; /* Ya se maneja con el padding del modal-content */
 }
 
 .form-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Flexible, 2 columnas en pantallas medianas/grandes */
-  gap: 1.8rem; /* Mayor espacio entre campos */
-  margin-bottom: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.8rem;
+  margin-bottom: 2rem; /* Espacio antes de las acciones del formulario */
 }
 
 .form-group {
-  margin-bottom: 0.5rem; /* Pequeño ajuste para el espacio */
+  margin-bottom: 0; /* El gap de la grid lo maneja */
+  display: flex;
+  flex-direction: column;
 }
 
 .form-group label {
   display: block;
-  margin-bottom: 0.6rem; /* Más espacio entre label y input */
+  margin-bottom: 0.6rem;
   font-weight: 600;
   color: var(--text-medium);
   font-size: 0.95rem;
@@ -985,7 +906,7 @@ body {
 .form-group select, 
 .form-group textarea {
   width: 100%;
-  padding: 1.1rem 1.4rem; /* Mayor padding para inputs/selects/textareas */
+  padding: 1.1rem 1.4rem;
   border: 1px solid var(--text-light);
   border-radius: var(--border-radius-md);
   transition: var(--transition-ease);
@@ -1001,7 +922,7 @@ body {
 .form-group textarea:focus {
   border-color: var(--primary-color);
   outline: none;
-  box-shadow: 0 0 0 4px var(--primary-glow); /* Glow más fuerte */
+  box-shadow: 0 0 0 4px var(--primary-glow);
 }
 
 .form-group input:disabled, 
@@ -1011,13 +932,43 @@ body {
   opacity: 0.7;
   cursor: not-allowed;
   box-shadow: none;
+  color: var(--text-light); /* Texto más claro para deshabilitados */
 }
 
+/* Estilo para inputs de texto deshabilitados, para que no parezcan input de verdad */
+.disabled-input-text {
+  background-color: var(--secondary-background);
+  opacity: 0.9;
+  cursor: default;
+  color: var(--text-medium);
+  border: 1px solid var(--secondary-background); /* Borde sutil para disabled */
+  box-shadow: none;
+}
+
+/* --- 5.6. Mensajes de Error en Línea (Inline Error Messages) --- */
+.error-message-inline {
+  color: var(--danger-color);
+  font-size: 0.85rem;
+  margin-top: 0.4rem;
+  display: block; /* Ocupa su propia línea */
+  animation: fadeInError 0.3s ease-out;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+}
+
+@keyframes fadeInError {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- 5.7. Acciones del Formulario (Form Actions) --- */
 .form-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 1.2rem; /* Espacio entre botones de acción del formulario */
+  gap: 1.2rem;
   margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--secondary-background);
 }
 
 .save-btn, .cancel-btn {
@@ -1034,6 +985,7 @@ body {
   border: none;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  box-shadow: var(--shadow-sm);
 }
 
 .save-btn {
@@ -1052,13 +1004,13 @@ body {
   cursor: not-allowed;
   background: linear-gradient(45deg, #a0dce5 0%, #ccebf0 100%);
   box-shadow: none;
+  transform: none;
 }
 
 .cancel-btn {
   background-color: var(--secondary-background);
   color: var(--text-medium);
   border: 1px solid var(--text-light);
-  box-shadow: var(--shadow-sm);
 }
 
 .cancel-btn:hover {
@@ -1070,25 +1022,34 @@ body {
 .cancel-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  transform: none;
 }
 
-.checkbox-group {
+/* --- 5.8. Checkboxes y Radio Buttons (personalizados) --- */
+.checkbox-group, .radio-group {
   display: flex;
   align-items: center;
-  margin-bottom: 1.5rem; /* Más espacio */
+  margin-bottom: 1rem;
   gap: 0.8rem;
+  flex-wrap: wrap;
 }
 
-.checkbox-group input[type="checkbox"] {
-  width: 20px; /* Tamaño del checkbox */
+.checkbox-group input[type="checkbox"],
+.radio-group input[type="radio"] {
+  width: 20px;
   height: 20px;
-  appearance: none; /* Ocultar apariencia por defecto */
+  appearance: none;
   border: 2px solid var(--text-light);
-  border-radius: 4px;
+  border-radius: 4px; /* Cuadrado para checkbox */
   cursor: pointer;
   position: relative;
   transition: var(--transition-ease);
   flex-shrink: 0;
+  background-color: var(--surface-white);
+}
+
+.radio-group input[type="radio"] {
+  border-radius: 50%; /* Redondo para radio */
 }
 
 .checkbox-group input[type="checkbox"]:checked {
@@ -1096,17 +1057,36 @@ body {
   border-color: var(--primary-color);
 }
 
+.radio-group input[type="radio"]:checked {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
 .checkbox-group input[type="checkbox"]:checked::after {
-  content: '\2713'; /* Símbolo de checkmark */
+  content: '\2713'; /* Símbolo de checkmark (✓) */
   font-size: 14px;
   color: var(--surface-white);
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  line-height: 1; /* Asegura que el checkmark se centre correctamente */
 }
 
-.checkbox-group label {
+.radio-group input[type="radio"]:checked::after {
+  content: '';
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: var(--surface-white);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.checkbox-group label,
+.radio-group label {
   margin-bottom: 0;
   display: flex;
   align-items: center;
@@ -1114,26 +1094,211 @@ body {
   color: var(--text-dark);
   font-size: 1rem;
   cursor: pointer;
+  user-select: none; /* Evita selección de texto al hacer clic en label */
 }
 
-/* Estilos para notificaciones */
+/* --- 5.9. Contenido del Modal de Detalles (Modal Details Content) --- */
+.modal-detail-content {
+  /* No padding aquí, el padding se maneja en .modal-content */
+  width: 95%;
+  max-width: 900px; /* Aumentar ancho máximo para acomodar más contenido horizontal */
+}
+
+.user-detail-header h3 {
+  color: var(--primary-dark);
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  font-size: 2rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  border-bottom: 2px solid rgba(0, 172, 193, 0.15);
+  padding-bottom: 1rem;
+}
+
+.user-detail-header .form-icon {
+  font-size: 2.5rem;
+}
+
+.user-detail-info {
+  display: grid;
+  /* Fuerza 2 columnas en pantallas grandes, auto-ajuste y colapsa en 1 en móviles */
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+  gap: 1.5rem 2.5rem; /* Gap vertical y horizontal */
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--secondary-background);
+}
+
+.user-detail-info .info-item {
+  margin-bottom: 0; /* Resetea el margin-bottom para el grid */
+  display: flex;
+  flex-direction: column; /* Apila label y value */
+  align-items: flex-start;
+  padding: 0.8rem; /* Padding dentro de cada item de info */
+  background-color: var(--surface-light-grey); /* Fondo sutil para cada item */
+  border-radius: var(--border-radius-sm);
+  border: 1px solid rgba(0,0,0,0.02);
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.03); /* Sombra interna sutil */
+}
+
+.user-detail-info .info-item strong {
+  font-size: 0.9rem;
+  color: var(--text-medium);
+  margin-bottom: 0.3rem;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  display: flex; /* Para alinear el texto con el icono si lo tiene */
+  align-items: center;
+  gap: 0.5rem;
+}
+.user-detail-info .info-item strong .icon { /* Iconos dentro de strong */
+  font-size: 1.1rem;
+  color: var(--primary-color);
+  margin-right: 0; /* Elimina el margen default del .icon */
+}
+
+
+.user-detail-info .info-item span {
+  font-size: 1rem;
+  color: var(--text-dark);
+  font-weight: 500;
+}
+/* Estilo para el estado activo/inactivo dentro de los detalles */
+.user-detail-info .info-item .status-badge {
+    margin-top: 0.2rem; /* Pequeño ajuste si es necesario */
+}
+
+
+.user-detail-pets {
+  margin-top: 2rem;
+}
+
+.user-detail-pets h4 {
+  color: var(--primary-dark);
+  margin-bottom: 1.5rem;
+  font-size: 1.6rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  border-bottom: 1px solid var(--secondary-background);
+  padding-bottom: 0.8rem;
+}
+
+.user-detail-pets h4 .icon {
+  font-size: 1.8rem;
+}
+
+.pets-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* Múltiples columnas para mascotas */
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.pet-card {
+  background-color: var(--surface-light-grey);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  border: 1px solid rgba(0,0,0,0.03);
+  transition: var(--transition-fast);
+}
+
+.pet-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--primary-light);
+}
+
+.pet-card .card-header {
+  background-color: var(--primary-light);
+  color: var(--primary-dark);
+  padding: 0.8rem 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pet-card .card-header h3 {
+  font-size: 1.1rem;
+  margin: 0;
+  color: var(--primary-dark);
+}
+
+.pet-card .card-header .vet-id { /* Reutilizando vet-id para el ID de mascota */
+  background-color: rgba(255,255,255,0.3);
+  color: var(--primary-dark);
+  padding: 0.2rem 0.6rem;
+  font-size: 0.75rem;
+}
+
+.pet-card .card-body {
+  padding: 1rem;
+  background-color: var(--surface-white);
+}
+
+.pet-card .info-item {
+  margin-bottom: 0.6rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.9rem;
+  color: var(--text-dark);
+}
+.pet-card .info-item:last-child {
+  margin-bottom: 0;
+}
+
+.pet-card .info-item strong {
+  color: var(--text-medium);
+  font-weight: 600;
+  min-width: 80px; /* Alineación de labels */
+}
+
+.pet-card .info-item i {
+  color: var(--info-color); /* Un color diferente para los iconos de mascota */
+  font-size: 0.9rem;
+}
+
+.modal-footer {
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--secondary-background);
+  text-align: right;
+  margin-top: 2rem;
+}
+
+/* ===================================================================== */
+/* 6. Notificaciones y Mensajes Globales (Notifications & Global Messages) */
+/* Pop-ups de notificación, mensajes de carga y error */
+/* ===================================================================== */
+
+/* --- 6.1. Notificaciones Flotantes (Toast Notifications) --- */
 .notification {
   position: fixed;
   bottom: 2.5rem;
   right: 2.5rem;
-  padding: 1.3rem 2rem; /* Mayor padding */
-  border-radius: var(--border-radius-lg); /* Bordes más redondeados */
+  padding: 1.3rem 2rem;
+  border-radius: var(--border-radius-lg);
   box-shadow: var(--shadow-lg);
-  z-index: 1100;
-  animation: slideInFromRight 0.5s cubic-bezier(0.25, 0.8, 0.25, 1) forwards; /* Animación más suave */
+  z-index: 1100; /* Por encima de modales */
+  animation: slideInFromRight 0.5s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
   display: flex;
   align-items: center;
   gap: 1rem;
   font-size: 1rem;
   font-weight: 600;
-  max-width: 450px; /* Ancho máximo para notificaciones */
-  border-left: 6px solid; /* Borde de color más pronunciado */
-  color: var(--surface-white); /* Texto blanco para todas las notificaciones */
+  max-width: 450px;
+  border-left: 6px solid; /* Borde de color pronunciado */
+  color: var(--surface-white);
+}
+
+/* Animación de entrada para notificaciones */
+@keyframes slideInFromRight {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
 }
 
 .notification.success {
@@ -1151,9 +1316,15 @@ body {
   border-color: #ffc107;
 }
 
+.notification.info {
+  background-color: var(--info-color);
+  border-color: #17a2b8;
+}
+
 .notification .notification-icon {
-  font-size: 1.6rem; /* Icono más grande */
+  font-size: 1.6rem;
   color: var(--surface-white);
+  flex-shrink: 0; /* Evita que el icono se achique */
 }
 
 .notification .close-notification {
@@ -1162,7 +1333,7 @@ body {
   cursor: pointer;
   font-size: 1.3rem;
   color: rgba(255, 255, 255, 0.85);
-  margin-left: 1rem;
+  margin-left: auto; /* Mueve el botón de cierre a la derecha */
   transition: var(--transition-ease);
 }
 
@@ -1171,12 +1342,7 @@ body {
   transform: rotate(90deg);
 }
 
-@keyframes slideInFromRight {
-  from { transform: translateX(100%); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
-}
-
-/* Estados de Carga y Error */
+/* --- 6.2. Mensaje de Carga Global (Loading Indicator) --- */
 .loading-container {
   display: flex;
   flex-direction: column;
@@ -1184,32 +1350,37 @@ body {
   justify-content: center;
   min-height: 300px;
   gap: 1.5rem;
-  color: var(--primary-color);
+  color: var(--primary-dark);
   font-size: 1.2rem;
   font-weight: 500;
 }
 
-.loading-spinner { /* Ahora es solo el contenedor del icono, el icono es el que rota */
+.loading-spinner {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 60px;
   height: 60px;
-  border: 5px solid rgba(0, 172, 193, 0.15); /* Borde sutil del spinner */
-  border-top-color: var(--primary-color); /* Color de la parte que gira */
+  border: 5px solid rgba(0, 172, 193, 0.15);
+  border-top-color: var(--primary-color);
   border-radius: 50%;
-  animation: spin 1.2s linear infinite;
+  animation: spin 1.2s cubic-bezier(0.5, 0.2, 0.5, 0.8) infinite; /* Animación de spinner con easing */
 }
-.loading-container .spinner-icon { /* Eliminar la animación del icono si el contenedor ya la tiene */
-  font-size: 3rem; /* Tamaño del icono dentro del spinner */
-  color: var(--primary-color); /* Color del icono */
-  animation: none; /* El contenedor ya anima */
+.loading-container .spinner-icon {
+  font-size: 3rem;
+  color: var(--primary-color);
+  animation: none; /* Evita doble animación si ya el contenedor rota */
 }
 
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
 
+/* --- 6.3. Mensaje de Error Global (Error Message) --- */
 .error-message {
-  padding: 1.8rem; /* Mayor padding */
-  background-color: rgba(229, 57, 53, 0.1);
+  padding: 1.8rem;
+  background-color: var(--danger-light);
   color: var(--danger-color);
   border-radius: var(--border-radius-md);
   text-align: center;
@@ -1220,255 +1391,947 @@ body {
   box-shadow: var(--shadow-md);
   animation: fadeIn 0.4s ease-out forwards;
   font-size: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8rem;
+}
+.error-message .info-icon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+.error-message p {
+  margin: 0;
+  line-height: 1.5;
 }
 
-/* Animaciones (revisadas para consistencia) */
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+/* ===================================================================== */
+/* 7. Estilos para Tarjetas (Cards)                                      */
+/* Usados para estadísticas, administradores, veterinarios y servicios */
+/* ===================================================================== */
+
+/* --- 7.1. Grid de Estadísticas (Stats Grid) --- */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.8rem;
+  margin-bottom: 2.5rem;
 }
 
-/* slideUp solo si el modal se desliza desde abajo, sino usar scaleInBounce */
-@keyframes slideUp { 
-  from { 
-      opacity: 0;
-      transform: translateY(20px);
-  }
-  to { 
-      opacity: 1;
-      transform: translateY(0);
-  }
+/* --- 7.2. Tarjeta de Estadísticas (Stat Card) --- */
+.stat-card {
+  background-color: var(--surface-white);
+  border-radius: var(--border-radius-lg);
+  padding: 1.8rem;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  transition: var(--transition-ease);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  position: relative; /* Para efectos sutiles */
+  overflow: hidden; /* Para el ::before */
 }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+.stat-card::before { /* Efecto de fondo sutil al pasar el ratón */
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--primary-color);
+  opacity: 0;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+  z-index: 0;
 }
 
-/* Responsive */
+.stat-card:hover::before {
+  transform: scaleX(1);
+  opacity: 0.05;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-lg);
+}
+
+.stat-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  color: var(--surface-white);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1; /* Asegura que el icono esté encima del ::before */
+}
+
+/* Colores de degradado para los iconos de estadísticas */
+.stat-icon.users { background: linear-gradient(45deg, #5c6bc0, #3f51b5); }
+.stat-icon.vets { background: linear-gradient(45deg, #26a69a, #00897b); }
+.stat-icon.admins { background: linear-gradient(45deg, #7e57c2, #673ab7); }
+.stat-icon.services { background: linear-gradient(45deg, #ffa726, #fb8c00); }
+.stat-icon.appointments { background: linear-gradient(45deg, #66bb6a, #43a047); }
+.stat-icon.growth { background: linear-gradient(45deg, #ef5350, #d32f2f); }
+.stat-icon.pets { background: linear-gradient(45deg, #FF7043, #F4511E); } /* Nuevo color para mascotas */
+.stat-icon.history { background: linear-gradient(45deg, #78909C, #546E7A); } /* Nuevo color para historiales */
+
+
+.stat-info {
+  position: relative;
+  z-index: 1; /* Asegura que el texto esté encima del ::before */
+}
+
+.stat-info h3 {
+  font-size: 1rem;
+  color: var(--text-medium);
+  margin-bottom: 0.4rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-info p {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--primary-dark);
+  margin: 0;
+}
+
+.stat-description {
+  font-size: 0.85rem;
+  color: var(--text-light);
+  margin-top: 0.4rem;
+}
+
+/* --- 7.3. Grids de Tarjetas (Card Grids) --- */
+.admins-grid, .services-grid, .vets-grid, .clients-grid, .pets-grid, .medical-history-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.8rem;
+  margin-top: 2rem;
+}
+
+/* --- 7.4. Tarjetas Individuales (Individual Cards) --- */
+.admin-card, .service-card, .vet-card, .client-card, .pet-card, .medical-history-card {
+  background-color: var(--surface-white);
+  border-radius: var(--border-radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  transition: var(--transition-ease);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.admin-card:hover, .service-card:hover, .vet-card:hover, .client-card:hover, .pet-card:hover, .medical-history-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-lg);
+}
+
+.card-header {
+  padding: 1.2rem 1.5rem;
+  background: linear-gradient(to right, rgba(0, 172, 193, 0.1), rgba(0, 172, 193, 0.05));
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.card-header h3 {
+  color: var(--primary-dark);
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin: 0;
+  flex-grow: 1; /* Permite que el título crezca */
+}
+
+.role-badge, .category-badge, .vet-id, .price-badge {
+  padding: 0.4rem 0.9rem;
+  border-radius: var(--border-radius-pill);
+  font-size: 0.8rem;
+  font-weight: 600;
+  background-color: var(--primary-light);
+  color: var(--primary-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+.role-badge.super-admin {
+  background-color: rgba(255, 215, 0, 0.15);
+  color: #ffb300;
+}
+
+.card-body {
+  padding: 1.5rem;
+}
+
+.info-item {
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: flex-start; /* Alinea al inicio si el contenido es largo */
+  gap: 0.8rem;
+}
+
+.info-item i {
+  color: var(--primary-color);
+  font-size: 1rem;
+  flex-shrink: 0;
+  margin-top: 0.2rem; /* Alineación visual con el texto */
+}
+
+.info-label {
+  font-weight: 600;
+  color: var(--text-medium);
+  min-width: 100px; /* Ancho mínimo para labels */
+  flex-shrink: 0;
+  font-size: 0.9rem;
+}
+
+.info-value {
+  color: var(--text-dark);
+  font-size: 0.95rem;
+  flex-grow: 1;
+  word-break: break-word; /* Permite romper palabras largas */
+}
+
+.specialty-badge {
+  padding: 0.4rem 0.9rem;
+  border-radius: var(--border-radius-pill);
+  font-size: 0.8rem;
+  font-weight: 600;
+  background-color: rgba(2, 136, 209, 0.15);
+  color: #0288d1;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.card-footer {
+  padding: 1.2rem 1.5rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  display: flex;
+  gap: 0.8rem;
+  justify-content: flex-end;
+  flex-wrap: wrap; /* Permite que los botones se envuelvan en el footer */
+}
+
+.card-footer .edit-btn, .card-footer .delete-btn {
+  flex: none;
+  padding: 0.7rem 1.2rem;
+  width: auto;
+  height: auto;
+  border-radius: var(--border-radius-sm);
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.card-footer .edit-btn {
+  background-color: var(--primary-light);
+  color: var(--primary-dark);
+}
+
+.card-footer .edit-btn:hover {
+  background-color: var(--primary-color);
+  color: var(--surface-white);
+  box-shadow: 0 4px 10px rgba(0, 172, 193, 0.2);
+}
+
+.card-footer .delete-btn {
+  background-color: var(--danger-light);
+  color: var(--danger-color);
+}
+
+.card-footer .delete-btn:hover:not(:disabled) {
+  background-color: var(--danger-color);
+  color: var(--surface-white);
+  box-shadow: 0 4px 10px rgba(231, 76, 60, 0.2);
+}
+
+/* ===================================================================== */
+/* 8. Componentes Adicionales de UI (Additional UI Components)           */
+/* Estilos para pestañas, paginación, alertas y tooltips             */
+/* ===================================================================== */
+
+/* --- 8.1. Pestañas (Tabs) --- */
+.tabs-container {
+  display: flex;
+  border-bottom: 2px solid var(--secondary-dark);
+  margin-bottom: 2rem;
+  gap: 0.5rem;
+  overflow-x: auto; /* Permite scroll si hay muchas pestañas */
+  -webkit-overflow-scrolling: touch; /* Desplazamiento suave en móviles */
+}
+
+.tab-button {
+  padding: 1rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-medium);
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: var(--transition-ease);
+  white-space: nowrap; /* Evita que el texto de la pestaña se rompa */
+}
+
+.tab-button:hover {
+  color: var(--primary-color);
+}
+
+.tab-button.active {
+  color: var(--primary-color);
+  border-bottom-color: var(--primary-color);
+  font-weight: 700;
+}
+
+.tab-content {
+  padding: 1.5rem 0;
+}
+
+/* --- 8.2. Paginación (Pagination) --- */
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--secondary-background);
+}
+
+.pagination-button {
+  padding: 0.8rem 1.2rem;
+  border: 1px solid var(--text-light);
+  border-radius: var(--border-radius-sm);
+  background-color: var(--surface-white);
+  color: var(--text-dark);
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition-ease);
+  min-width: 40px;
+  text-align: center;
+}
+
+.pagination-button:hover:not(:disabled):not(.active) {
+  background-color: var(--primary-light);
+  color: var(--primary-dark);
+  border-color: var(--primary-color);
+  transform: translateY(-2px);
+}
+
+.pagination-button.active {
+  background-color: var(--primary-color);
+  color: var(--surface-white);
+  border-color: var(--primary-color);
+  font-weight: 700;
+  box-shadow: var(--shadow-sm);
+}
+
+.pagination-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: var(--secondary-background);
+  color: var(--text-light);
+}
+
+/* --- 8.3. Alertas en Página (In-Page Alerts) --- */
+.alert-message {
+  padding: 1.2rem 1.5rem;
+  border-radius: var(--border-radius-md);
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-weight: 500;
+  border-left: 5px solid;
+  box-shadow: var(--shadow-sm);
+}
+
+.alert-message.success {
+  background-color: var(--success-light);
+  color: var(--success-color);
+  border-color: var(--success-color);
+}
+
+.alert-message.danger {
+  background-color: var(--danger-light);
+  color: var(--danger-color);
+  border-color: var(--danger-color);
+}
+
+.alert-message.warning {
+  background-color: var(--warning-light);
+  color: var(--warning-color);
+  border-color: var(--warning-color);
+}
+
+.alert-message.info {
+  background-color: var(--info-light);
+  color: var(--info-color);
+  border-color: var(--info-color);
+}
+
+.alert-message .icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  margin-right: 0; /* Ya tenemos gap */
+}
+
+/* --- 8.4. Tooltips (Consejos de Herramienta) --- */
+.tooltip-container {
+  position: relative;
+  display: inline-block;
+  cursor: help;
+}
+
+.tooltip-text {
+  visibility: hidden;
+  background-color: var(--primary-dark);
+  color: var(--surface-white);
+  text-align: center;
+  border-radius: var(--border-radius-sm);
+  padding: 0.6rem 0.9rem;
+  position: absolute;
+  z-index: 100;
+  bottom: 125%; /* Posiciona encima del elemento */
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  box-shadow: var(--shadow-sm);
+}
+
+.tooltip-text::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: var(--primary-dark) transparent transparent transparent;
+}
+
+.tooltip-container:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+  transform: translateX(-50%) translateY(-5px); /* Pequeño desplazamiento hacia arriba */
+}
+
+/* ===================================================================== */
+/* 9. Tipografía (Typography)                                            */
+/* Estilos para encabezados, párrafos y elementos de texto           */
+/* ===================================================================== */
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--primary-dark);
+  margin-bottom: 0.8rem;
+  line-height: 1.2;
+}
+
+h1 { font-size: 2.8rem; font-weight: 800; }
+h2 { font-size: 2.2rem; font-weight: 700; }
+h3 { font-size: 1.8rem; font-weight: 600; }
+h4 { font-size: 1.4rem; font-weight: 600; }
+h5 { font-size: 1.1rem; font-weight: 500; }
+h6 { font-size: 0.9rem; font-weight: 500; text-transform: uppercase; color: var(--text-medium); }
+
+p {
+  margin-bottom: 1rem;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--text-dark);
+}
+
+small {
+  font-size: 0.85rem;
+  color: var(--text-light);
+}
+
+/* ===================================================================== */
+/* 10. Utilidades (Utilities)                                            */
+/* Clases reusables para espaciado, texto, visibilidad, etc.        */
+/* ===================================================================== */
+
+/* --- 10.1. Espaciado (Spacing) --- */
+.mb-1 { margin-bottom: 0.5rem; }
+.mb-2 { margin-bottom: 1rem; }
+.mb-3 { margin-bottom: 1.5rem; }
+.mb-4 { margin-bottom: 2rem; }
+.mb-5 { margin-bottom: 2.5rem; }
+
+.mt-1 { margin-top: 0.5rem; }
+.mt-2 { margin-top: 1rem; }
+.mt-3 { margin-top: 1.5rem; }
+.mt-4 { margin-top: 2rem; }
+.mt-5 { margin-top: 2.5rem; }
+
+.py-1 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+.py-2 { padding-top: 1rem; padding-bottom: 1rem; }
+.py-3 { padding-top: 1.5rem; padding-bottom: 1.5rem; }
+.py-4 { padding-top: 2rem; padding-bottom: 2rem; }
+.py-5 { padding-top: 2.5rem; padding-bottom: 2.5rem; }
+
+.px-1 { padding-left: 0.5rem; padding-right: 0.5rem; }
+.px-2 { padding-left: 1rem; padding-right: 1rem; }
+.px-3 { padding-left: 1.5rem; padding-right: 1.5rem; }
+.px-4 { padding-left: 2rem; padding-right: 2rem; }
+.px-5 { padding-left: 2.5rem; padding-right: 2.5rem; }
+
+/* --- 10.2. Alineación de Texto (Text Alignment) --- */
+.text-left { text-align: left; }
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+
+/* --- 10.3. Visibilidad (Visibility) --- */
+.d-none { display: none !important; }
+.d-block { display: block !important; }
+.d-flex { display: flex !important; }
+
+/* --- 10.4. Border Radius (Radius Utilities) --- */
+.rounded-sm { border-radius: var(--border-radius-sm); }
+.rounded-md { border-radius: var(--border-radius-md); }
+.rounded-lg { border-radius: var(--border-radius-lg); }
+.rounded-pill { border-radius: var(--border-radius-pill); }
+.rounded-full { border-radius: 50%; }
+
+/* --- 10.5. Sombras (Shadow Utilities) --- */
+.shadow-sm { box-shadow: var(--shadow-sm); }
+.shadow-md { box-shadow: var(--shadow-md); }
+.shadow-lg { box-shadow: var(--shadow-lg); }
+
+/* --- 10.6. Capitalización de Texto (Text Capitalization) --- */
+.capitalize { text-transform: capitalize; }
+
+
+/* ===================================================================== */
+/* 11. Responsive Design (Diseño Responsivo)                             */
+/* Ajustes para diferentes tamaños de pantalla                       */
+/* ===================================================================== */
+
+/* --- 11.1. Para pantallas de Laptop y Tablets grandes (max-width: 1200px) --- */
 @media (max-width: 1200px) {
-  .admin-dashboard {
-      padding: 2rem;
-      margin: 1.5rem auto;
+  .admin-content-container {
+    padding: 2rem;
+    margin: 1.5rem auto;
+    max-width: 95%; /* Ocupa más espacio horizontal */
   }
   .admin-navbar, .admin-navbar.scrolled {
-      padding: 0.8rem 1.5rem;
+    padding: 0.8rem 1.5rem;
   }
   .navbar-brand {
-      font-size: 1.2rem;
+    font-size: 1.2rem;
   }
   .navbar-logo {
-      height: 35px;
+    height: 35px;
   }
   .user-profile {
-      padding: 0.5rem 1rem;
+    padding: 0.5rem 1rem;
   }
   .user-avatar {
-      width: 32px;
-      height: 32px;
+    width: 32px;
+    height: 32px;
   }
   .user-name, .user-role {
-      font-size: 0.85rem;
+    font-size: 0.85rem;
   }
   .admin-sidebar {
-      width: 250px;
+    width: 250px; /* Sidebar ligeramente más estrecho */
   }
   .admin-container {
-      margin-left: 250px;
+    margin-left: 250px; /* Ajusta según el nuevo ancho del sidebar */
+    padding: 2rem;
   }
-  .dashboard-header, .management-header {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 1rem;
+  .admin-content {
+    padding: 2rem;
+  }
+  .admin-content-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
   }
   .header-actions {
-      width: 100%;
-      flex-direction: column;
-      align-items: stretch;
-      gap: 1rem;
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch; /* Estira los elementos para ocupar el 100% */
+    gap: 1rem;
   }
-  .search-container {
-      max-width: 100%;
-      min-width: unset;
+  .search-box {
+    max-width: 100%; /* El search ocupa todo el ancho disponible */
+    min-width: unset;
   }
   .add-btn {
-      width: 100%;
+    width: 100%; /* El botón Añadir ocupa todo el ancho */
   }
-  .modal-form {
-      padding: 2rem;
+  .modal-content {
+    max-width: 600px; /* Modales ligeramente más estrechos */
+    padding: 2rem;
   }
-  .modal-form h3 {
-      font-size: 1.8rem;
+  .modal-header h3 {
+    font-size: 1.6rem;
   }
   .form-grid {
-      grid-template-columns: 1fr; /* Una columna en tablets y móviles */
-      gap: 1.2rem;
+    grid-template-columns: 1fr; /* Una columna en tablets y móviles */
+    gap: 1.2rem;
   }
-  .vets-table th, .vets-table td,
-  .admins-table th, .admins-table td {
-      padding: 0.9rem 1.2rem;
-      font-size: 0.9rem;
+  .admin-table {
+    min-width: 768px; /* Mantiene un mínimo para el scroll horizontal */
   }
-  .stat-card {
-      padding: 1.5rem;
-  }
-  .stat-icon {
-      width: 50px;
-      height: 50px;
-      font-size: 1.5rem;
-  }
-  .stat-info p {
-      font-size: 1.8rem;
-  }
-  .admins-grid, .services-grid, .vets-grid {
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  }
-}
-
-@media (max-width: 768px) {
-  .admin-dashboard {
-      padding: 1.5rem;
-      margin: 1rem auto;
-      border-radius: var(--border-radius-md);
-  }
-  .admin-sidebar {
-      width: 70px; /* Sidebar colapsado */
-      overflow: hidden;
-  }
-  .admin-sidebar nav ul li {
-      padding: 1rem 0; /* Centrar iconos */
-      justify-content: center;
-  }
-  .admin-sidebar nav ul li i {
-      margin-right: 0; /* Eliminar margen del icono */
-  }
-  .admin-sidebar nav ul li span {
-      display: none; /* Ocultar texto */
-  }
-  .admin-sidebar nav ul li.active {
-      border-left: none; /* Quitar borde lateral en colapsado */
-      background-color: var(--primary-light); /* Mantener fondo */
-  }
-  .admin-sidebar nav ul li.active::before { /* Ajustar efecto de hover */
-      left: 0;
-      width: 100%;
-  }
-  .admin-container {
-      margin-left: 70px; /* Ajustar margen */
-      padding: 1.5rem;
-  }
-  .admin-content {
-      padding: 1.5rem;
-  }
-  .header-title h2 {
-      font-size: 1.6rem;
-  }
-  .header-icon {
-      font-size: 2rem;
-  }
-  .modal-form {
-      padding: 1.8rem;
-      width: 95%;
-      max-width: 500px;
-  }
-  .modal-form h3 {
-      font-size: 1.6rem;
-      margin-bottom: 1.5rem;
-  }
-  .form-actions {
-      flex-direction: column;
-      gap: 0.8rem;
-  }
-  .save-btn, .cancel-btn {
-      width: 100%;
-      padding: 0.9rem 1.5rem;
-      font-size: 0.95rem;
-  }
-  .vets-table, .admins-table {
-      min-width: 550px; /* Ajuste para móviles */
-  }
-  .notification {
-      width: calc(100% - 2rem);
-      right: 1rem;
-      bottom: 1rem;
-      padding: 1rem 1.2rem;
-      font-size: 0.9rem;
+  .admin-table th, .admin-table td {
+    padding: 0.9rem 1.2rem;
+    font-size: 0.9rem;
   }
   .stats-grid {
-      grid-template-columns: 1fr;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
   }
-  .admins-grid, .services-grid, .vets-grid {
-      grid-template-columns: 1fr;
+  .stat-card {
+    padding: 1.5rem;
   }
-  .card-footer {
-      flex-direction: column;
-      gap: 0.6rem;
+  .stat-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 1.5rem;
   }
-  .card-footer .edit-btn, .card-footer .delete-btn {
-      width: 100%;
+  .stat-info p {
+    font-size: 1.8rem;
+  }
+  .admins-grid, .services-grid, .vets-grid, .clients-grid, .pets-grid, .medical-history-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+  .card-header h3 {
+    font-size: 1.2rem;
+  }
+  .card-body {
+    padding: 1.2rem;
+  }
+  .info-item {
+    gap: 0.6rem;
+  }
+  .info-label {
+    min-width: 80px;
+    font-size: 0.85rem;
+  }
+  .info-value {
+    font-size: 0.9rem;
+  }
+
+  /* DETALLES DE USUARIO RESPONSIVE */
+  .modal-detail-content {
+    max-width: 700px;
+  }
+  .user-detail-info {
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+  }
+  .pets-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   }
 }
 
-@media (max-width: 576px) {
+/* --- 11.2. Para pantallas de Tablets pequeñas y Móviles (max-width: 768px) --- */
+@media (max-width: 768px) {
+  body {
+    flex-direction: column; /* Asegura que el contenido se apile */
+  }
+  .admin-content-container {
+    padding: 1.5rem;
+    margin: 1rem auto;
+    border-radius: var(--border-radius-md);
+  }
   .admin-navbar {
-      padding: 0.6rem 1rem;
+    padding: 0.7rem 1rem;
   }
   .navbar-brand .brand-text {
-      display: none;
+    display: none; /* Oculta el texto del logo para ahorrar espacio */
+  }
+  .navbar-logo {
+    height: 30px;
+    margin-right: 10px;
   }
   .user-info {
-      display: none;
+    display: none; /* Oculta el nombre y rol del usuario en la navbar */
   }
+  .user-profile {
+    padding: 0.4rem 0.8rem;
+  }
+  .user-avatar {
+    width: 28px;
+    height: 28px;
+  }
+  /* Sidebar colapsado en móviles */
+  .admin-sidebar {
+    width: 65px; /* Ancho muy reducido para solo mostrar iconos */
+    overflow: hidden; /* Oculta el texto que se desborda */
+    padding-top: 1rem;
+    top: 60px; /* Ajusta según la nueva altura de la navbar */
+  }
+  .admin-sidebar nav ul li {
+    padding: 0.8rem 0; /* Centra los iconos verticalmente */
+    justify-content: center;
+    border-left: none; /* Elimina el borde izquierdo */
+    margin-bottom: 0.1rem;
+  }
+  .admin-sidebar nav ul li i {
+    margin-right: 0; /* Elimina el margen derecho del icono */
+  }
+  .admin-sidebar nav ul li span {
+    display: none; /* Oculta el texto del menú */
+  }
+  .admin-sidebar nav ul li.active {
+    border-left: none; /* Quita el borde de activo */
+    background-color: var(--primary-light); /* Mantiene el fondo de color */
+  }
+  .admin-sidebar nav ul li.active::before {
+    left: 0; /* Permite el efecto de hover */
+    opacity: 0.15;
+  }
+  /* Contenedor principal con margen reducido */
   .admin-container {
-      padding: 1rem;
+    margin-left: 65px; /* Ajusta según el ancho del sidebar colapsado */
+    padding: 1.5rem;
+    margin-top: 60px; /* Ajusta según la nueva altura de la navbar */
   }
   .admin-content {
-      padding: 1rem;
+    padding: 1.5rem;
   }
-  .header-title h2 {
-      font-size: 1.4rem;
+  .admin-content-header h2 {
+    font-size: 1.8rem;
+    width: 100%; /* Título ocupa todo el ancho */
+    text-align: center;
+    justify-content: center; /* Centra el icono y texto */
   }
   .header-icon {
-      font-size: 1.8rem;
+    font-size: 2rem;
+    margin-right: 0.5rem;
   }
-  .badge {
-      font-size: 0.7rem;
-      padding: 0.3rem 0.8rem;
+  .header-actions {
+    flex-direction: column;
+    gap: 0.8rem;
+    align-items: stretch;
   }
-  .search-box input {
-      padding: 0.8rem 1rem 0.8rem 2.5rem;
-      font-size: 0.9rem;
-  }
-  .search-icon {
-      left: 0.8rem;
-      font-size: 1rem;
-  }
-  .clear-search {
-      right: 0.5rem;
-      font-size: 1rem;
+  .search-box {
+    min-width: 100%;
   }
   .add-btn {
-      padding: 0.8rem 1.5rem;
-      font-size: 0.9rem;
+    width: 100%;
   }
-  .modal-form {
-      padding: 1.2rem;
+  .filter-buttons {
+    justify-content: center; /* Centra los botones de filtro */
+    gap: 0.5rem;
+    width: 100%; /* Ocupa todo el ancho disponible */
   }
-  .modal-form h3 {
-      font-size: 1.3rem;
+  .filter-btn {
+    padding: 0.7rem 1.2rem;
+    font-size: 0.8rem;
+    flex-grow: 1; /* Permite que los botones crezcan y ocupen el espacio */
+    text-align: center;
+  }
+  .admin-table {
+    min-width: 100%; /* Permite que la tabla se ajuste al 100% en el contenedor */
+  }
+  .admin-table th, .admin-table td {
+    padding: 0.8rem 0.6rem;
+    font-size: 0.8rem;
+    white-space: normal; /* Permite que el texto se rompa en celdas pequeñas */
+    word-break: break-word;
+  }
+  .actions-cell {
+    flex-direction: column; /* Botones de acción apilados */
+    gap: 0.4rem;
+    align-items: stretch;
+    min-width: unset;
+  }
+  .actions-cell button {
+    width: 100%;
+    padding: 0.6rem 0.8rem;
+    font-size: 0.8rem;
+    justify-content: center; /* Centra el icono y texto del botón */
+  }
+  .modal-content {
+    max-width: 95%;
+    margin: 0.5rem;
+    padding: 1.5rem;
+  }
+  .modal-header h3 {
+    font-size: 1.4rem;
   }
   .form-group label {
-      font-size: 0.85rem;
+    font-size: 0.9rem;
   }
   .form-group input, .form-group select, .form-group textarea {
-      padding: 0.9rem 1rem;
-      font-size: 0.9rem;
+    padding: 0.9rem 1rem;
+    font-size: 0.9rem;
+  }
+  .form-actions {
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+  .save-btn, .cancel-btn {
+    width: 100%;
+    padding: 0.9rem 1.5rem;
+    font-size: 0.95rem;
   }
   .notification {
-      width: calc(100% - 1.5rem);
-      right: 0.75rem;
-      bottom: 0.75rem;
-      padding: 0.8rem 1rem;
-      font-size: 0.85rem;
+    width: calc(100% - 2rem); /* Ocupa el 100% menos los márgenes */
+    right: 1rem;
+    bottom: 1rem;
+    padding: 1rem 1.2rem;
+    font-size: 0.9rem;
+    flex-wrap: wrap; /* Permite que el contenido se envuelva */
+  }
+  .notification .close-notification {
+    position: static; /* No flotar en móviles */
+    margin-left: 0.5rem;
+  }
+  .stats-grid, .admins-grid, .services-grid, .vets-grid, .clients-grid, .pets-grid, .medical-history-grid {
+    grid-template-columns: 1fr; /* Una columna para todas las grids */
+    gap: 1.2rem;
+  }
+  .stat-card {
+    flex-direction: column; /* Apila contenido en tarjetas de estadísticas */
+    text-align: center;
+    padding: 1rem;
+  }
+  .stat-icon {
+    margin-bottom: 0.8rem;
+  }
+  .card-footer {
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+  .card-footer .edit-btn, .card-footer .delete-btn {
+    width: 100%;
+  }
+  .pagination-container {
+    flex-wrap: wrap;
+    gap: 0.3rem;
+  }
+  .pagination-button {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.8rem;
+  }
+
+  /* DETALLES DE USUARIO RESPONSIVE */
+  .modal-detail-content {
+    max-width: 95%;
+  }
+  .user-detail-info {
+    grid-template-columns: 1fr; /* Una columna en móviles */
+  }
+  .pets-grid {
+    grid-template-columns: 1fr; /* Una columna para mascotas en móviles */
   }
 }
+
+/* --- 11.3. Para Móviles muy pequeños (max-width: 480px) --- */
+@media (max-width: 480px) {
+  .admin-content-container {
+    padding: 0.8rem;
+    margin: 0.5rem auto;
+  }
+  .admin-navbar {
+    padding: 0.5rem 0.8rem;
+  }
+  .navbar-logo {
+    height: 25px;
+  }
+  .user-profile {
+    padding: 0.3rem 0.6rem;
+  }
+  .user-avatar {
+    width: 24px;
+    height: 24px;
+  }
+  .admin-sidebar {
+    width: 55px; /* Sidebar aún más estrecho */
+    top: 50px; /* Ajusta según la navbar */
+  }
+  .admin-container {
+    margin-left: 55px;
+    padding: 0.8rem;
+    margin-top: 50px;
+  }
+  .admin-content {
+    padding: 1rem;
+  }
+  .admin-content-header h2 {
+    font-size: 1.5rem;
+  }
+  .header-icon {
+    font-size: 1.8rem;
+  }
+  .search-box input {
+    padding: 0.6rem 1rem 0.6rem 2.2rem;
+    font-size: 0.85rem;
+  }
+  .search-icon {
+    left: 0.6rem;
+    font-size: 0.9rem;
+  }
+  .clear-search {
+    right: 0.4rem;
+    font-size: 0.9rem;
+  }
+  .add-btn {
+    padding: 0.7rem 1.2rem;
+    font-size: 0.85rem;
+    gap: 0.5rem;
+  }
+  .admin-table th, .admin-table td {
+    padding: 0.6rem 0.4rem;
+    font-size: 0.75rem;
+  }
+  .status-badge {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.7rem;
+  }
+  .modal-content {
+    padding: 1rem;
+  }
+  .modal-header h3 {
+    font-size: 1.2rem;
+  }
+  .form-group label {
+    font-size: 0.8rem;
+  }
+  .form-group input, .form-group select, .form-group textarea {
+    padding: 0.8rem 0.8rem;
+    font-size: 0.85rem;
+  }
+  .save-btn, .cancel-btn {
+    padding: 0.8rem 1.2rem;
+    font-size: 0.9rem;
+  }
+  .notification {
+    width: calc(100% - 1rem);
+    right: 0.5rem;
+    bottom: 0.5rem;
+    padding: 0.7rem 0.8rem;
+    font-size: 0.8rem;
+    gap: 0.5rem;
+  }
+  .notification .notification-icon {
+    font-size: 1.2rem;
+  }
+  h1 { font-size: 2.2rem; }
+  h2 { font-size: 1.8rem; }
+  h3 { font-size: 1.5rem; }
+  h4 { font-size: 1.2rem; }
+  p { font-size: 0.9rem; }
+}
+

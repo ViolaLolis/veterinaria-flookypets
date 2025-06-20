@@ -1,418 +1,247 @@
-/* --- AdminSidebar.css --- */
+/* AdminSidebar.css - Versión Mejorada y Profesional */
 
-/* Variables CSS para una fácil personalización y consistencia */
 :root {
-    --sidebar-main-color: #00acc1; /* Color principal del sidebar (azul/cian) */
-    --sidebar-dark-color: #00838f; /* Tono más oscuro para el degradado */
-    --sidebar-text-color: rgba(255, 255, 255, 0.9); /* Color de texto predeterminado (casi blanco) */
-    --sidebar-icon-color: rgba(255, 255, 255, 0.9); /* Color de icono predeterminado */
-
-    --sidebar-hover-bg: rgb(224, 224, 224); /* Fondo al pasar el ratón (gris claro) */
-    --sidebar-hover-text: #333; /* Color de texto al pasar el ratón (gris oscuro para legibilidad) */
-    --sidebar-hover-icon: #333; /* Color de icono al pasar el ratón */
-
-    --sidebar-active-bg: rgb(255, 253, 253); /* Fondo del elemento activo (casi blanco) */
-    --sidebar-active-text: #00796b; /* Color de texto del elemento activo (verde azulado oscuro) */
-    --sidebar-active-border: #e0f7fa; /* Borde del elemento activo (azul muy claro) */
-    --sidebar-active-icon: #00796b; /* Color de icono del elemento activo */
-
-    --sidebar-shadow-color: rgb(255, 255, 255); /* Color de sombra (blanco) */
-    --glow-color: rgba(255, 255, 255, 0.4); /* Color del brillo (blanco semitransparente) */
-
-    --submenu-bg-color: #34495e; /* Fondo del submenú (azul oscuro/gris) */
-    --submenu-hover-bg: #46607a; /* Fondo del submenú al pasar el ratón */
-    --submenu-text-color: rgba(255, 255, 255, 0.8); /* Color de texto del submenú */
-
-    --transition-speed: 0.3s;
-    --transition-ease: ease-in-out;
-}
-
-.admin-sidebar {
+    --sidebar-main: #00acc1;       /* Color principal */
+    --sidebar-dark: #00838f;       /* Tono más oscuro */
+    --sidebar-light: #b2ebf2;      /* Tono más claro */
+    
+    --sidebar-text: rgba(255, 255, 255, 0.95);
+    --sidebar-icon: rgba(255, 255, 255, 0.95);
+    
+    --sidebar-hover-bg: rgba(255, 255, 255, 0.15);
+    --sidebar-active-bg: rgba(255, 255, 255, 0.9);
+    --sidebar-active-text: #00796b;
+    
+    --submenu-bg: #2c3e50;
+    --submenu-hover: #34495e;
+    
+    --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Estructura Principal */
+  .admin-sidebar {
     position: fixed;
     left: 0;
-    top: 70px; /* Altura del navbar */
+    top: 70px;
     bottom: 0;
-    width: 250px;
-    background: linear-gradient(to bottom, var(--sidebar-main-color), var(--sidebar-dark-color));
-    color: var(--sidebar-text-color);
+    width: 260px;
+    background: linear-gradient(135deg, var(--sidebar-main), var(--sidebar-dark));
+    color: var(--sidebar-text);
     z-index: 900;
-    transition: all var(--transition-speed) var(--transition-ease); /* Transición unificada */
-    box-shadow: 2px 0 10px var(--sidebar-shadow-color);
+    transition: var(--transition);
+    box-shadow: var(--shadow);
     overflow-y: auto;
-    transform: translateX(0); /* Estado por defecto para pantallas grandes */
-}
-
-.admin-sidebar nav {
-    padding: 20px 0;
-}
-
-.admin-sidebar ul {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .admin-sidebar nav {
+    padding: 1rem 0;
+    flex-grow: 1;
+  }
+  
+  /* Lista y Elementos */
+  .admin-sidebar ul {
     list-style: none;
     padding: 0;
     margin: 0;
-}
-
-.admin-sidebar li {
+  }
+  
+  .admin-sidebar li {
     position: relative;
-    margin: 5px 15px;
-    border-radius: 8px;
+    margin: 0.25rem 1rem;
+    border-radius: 6px;
     overflow: hidden;
-    /* Elimina animaciones individuales aquí si se gestionan con Framer Motion en React */
-    transition: background-color var(--transition-speed) var(--transition-ease), 
-                color var(--transition-speed) var(--transition-ease), 
-                transform var(--transition-speed) var(--transition-ease),
-                box-shadow var(--transition-speed) var(--transition-ease);
-}
-
-/* Efecto de brillo al pasar el ratón (manteniendo tu estilo) */
-.admin-sidebar li:before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, var(--glow-color), transparent);
-    transition: left 0.7s var(--transition-ease); /* Transición más suave para el brillo */
-    z-index: -1; /* Asegura que el brillo esté detrás del texto/icono */
-}
-
-.admin-sidebar li:hover:before {
-    left: 100%;
-}
-
-.admin-sidebar li a, 
-.admin-sidebar li { /* Estilos comunes para elementos de la lista */
+    transition: var(--transition);
+  }
+  
+  /* Enlaces y Contenido */
+  .admin-sidebar li > div {
     display: flex;
     align-items: center;
-    padding: 12px 20px;
-    color: var(--sidebar-text-color);
+    padding: 0.75rem 1.25rem;
+    color: var(--sidebar-text);
     text-decoration: none;
     font-size: 0.95rem;
     font-weight: 500;
     cursor: pointer;
-    transition: all var(--transition-speed) var(--transition-ease);
-}
-
-/* Estilos para los iconos (Font Awesome SVG) */
-.admin-sidebar li .sidebar-icon,
-.admin-sidebar li .submenu-icon,
-.admin-sidebar li svg { /* Asegura que los estilos se apliquen a los SVGs de Fa */
+    transition: var(--transition);
+  }
+  
+  /* Iconos */
+  .sidebar-icon {
     font-size: 1.1rem;
-    margin-right: 15px;
-    width: 20px; /* Ancho fijo para alineación */
+    margin-right: 1rem;
+    min-width: 1.5rem;
     text-align: center;
-    color: var(--sidebar-icon-color); /* Color de icono predeterminado */
-    transition: color var(--transition-speed) var(--transition-ease);
-}
-
-.admin-sidebar li:hover {
+    color: var(--sidebar-icon);
+    transition: var(--transition);
+  }
+  
+  /* Efectos Hover */
+  .admin-sidebar li:hover {
     background-color: var(--sidebar-hover-bg);
-    color: var(--sidebar-hover-text); /* Texto legible al pasar el ratón */
-    transform: translateX(5px); /* Pequeño desplazamiento */
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); /* Sombra sutil al pasar el ratón */
-}
-
-.admin-sidebar li:hover .sidebar-icon,
-.admin-sidebar li:hover .submenu-icon,
-.admin-sidebar li:hover svg {
-    color: var(--sidebar-hover-icon); /* Icono legible al pasar el ratón */
-}
-
-.admin-sidebar li.active {
+  }
+  
+  .admin-sidebar li:hover .sidebar-icon {
+    transform: scale(1.1);
+  }
+  
+  /* Elemento Activo */
+  .admin-sidebar li.active {
     background-color: var(--sidebar-active-bg);
-    color: var(--sidebar-active-text); /* Texto distinto para activo */
-    font-weight: bold;
-    box-shadow: 0 4px 15px var(--sidebar-shadow-color);
-    border-left: 5px solid var(--sidebar-active-border);
-    padding-left: 15px; /* Ajusta el padding por el borde */
-    transform: translateX(0); /* Evita transformaciones no deseadas en activo */
-}
-
-.admin-sidebar li.active .sidebar-icon,
-.admin-sidebar li.active .submenu-icon,
-.admin-sidebar li.active svg {
-    color: var(--sidebar-active-icon); /* Color de icono para activo */
-}
-
-/* Estilos específicos para el elemento padre del desplegable */
-.sidebar-dropdown-parent {
+    color: var(--sidebar-active-text);
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .admin-sidebar li.active .sidebar-icon {
+    color: var(--sidebar-active-text);
+  }
+  
+  /* Menú Desplegable */
+  .sidebar-dropdown-parent {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    user-select: none; /* Evita la selección de texto al hacer clic */
-}
-
-.sidebar-dropdown-parent .dropdown-arrow {
-    font-size: 0.8em;
-    margin-left: auto; /* Empuja la flecha a la derecha */
-    transition: transform var(--transition-speed) var(--transition-ease);
-}
-
-.sidebar-dropdown-parent.open .dropdown-arrow {
-    transform: rotate(180deg); /* Rota la flecha cuando el menú está abierto */
-}
-
-/* Estilos del submenú */
-.sidebar-submenu {
-    max-height: 0; /* Colapsado por defecto */
+    user-select: none;
+  }
+  
+  .dropdown-arrow {
+    font-size: 0.8rem;
+    transition: var(--transition);
+    margin-left: auto;
+  }
+  
+  .sidebar-dropdown-parent.open .dropdown-arrow {
+    transform: rotate(180deg);
+  }
+  
+  /* Submenú */
+  .sidebar-submenu {
+    max-height: 0;
     overflow: hidden;
-    transition: max-height var(--transition-speed) var(--transition-ease); /* Transición suave de expansión */
-    background-color: var(--submenu-bg-color); /* Fondo más oscuro para el submenú */
-    margin: 0 15px; /* Alinea con el margen del padre */
-    border-radius: 0 0 8px 8px; /* Bordes inferiores redondeados cuando se abre */
-}
-
-.sidebar-submenu.open {
-    max-height: 500px; /* Valor suficientemente grande para contener elementos */
-    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1); /* Sombra interna para profundidad */
-}
-
-.sidebar-submenu ul {
-    padding: 0;
+    transition: max-height 0.3s ease-out;
+    background-color: var(--submenu-bg);
+    margin: 0 1rem;
+    border-radius: 0 0 6px 6px;
+  }
+  
+  .sidebar-submenu.open {
+    max-height: 500px;
+  }
+  
+  .sidebar-submenu li {
     margin: 0;
-}
-
-.sidebar-submenu ul li {
-    margin: 0; /* Elimina márgenes del padre */
-    border-radius: 0; /* No hay border-radius individuales para sub-items */
-}
-
-.sidebar-submenu ul li a, 
-.sidebar-submenu ul li {
-    padding: 10px 20px 10px 40px; /* Indentación para sub-items */
-    font-size: 0.9em;
-    color: var(--submenu-text-color); /* Color de texto más claro para submenú */
-}
-
-.sidebar-submenu ul li:hover {
-    background-color: var(--submenu-hover-bg);
-    color: #fff; /* Texto blanco en hover para submenú */
-    transform: translateX(0); /* Sin transformación en submenú hover */
-    box-shadow: none;
-}
-
-.sidebar-submenu ul li.active {
-    background-color: var(--sidebar-active-bg);
-    color: var(--sidebar-active-text);
-    border-left: 5px solid var(--sidebar-active-border);
-    padding-left: 35px;
-}
-
-.sidebar-submenu ul li.active .submenu-icon,
-.sidebar-submenu ul li.active svg {
-    color: var(--sidebar-active-icon);
-}
-
-.submenu-icon {
-    font-size: 0.9em; /* Iconos ligeramente más pequeños para submenú */
-    margin-right: 10px;
-}
-
-
-/* Animación de entrada para los items (manteniéndola de tu código original) */
-.admin-sidebar li {
-    opacity: 0;
-    transform: translateX(-20px);
-    animation: slideIn var(--transition-speed) forwards;
-}
-
-@keyframes slideIn {
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-/* Retraso en la animación para cada item (ajustado para más elementos) */
-.admin-sidebar li:nth-child(1) { animation-delay: 0.1s; }
-.admin-sidebar li:nth-child(2) { animation-delay: 0.2s; }
-.admin-sidebar li:nth-child(3) { animation-delay: 0.3s; }
-.admin-sidebar li:nth-child(4) { animation-delay: 0.4s; }
-.admin-sidebar li:nth-child(5) { animation-delay: 0.5s; }
-.admin-sidebar li:nth-child(6) { animation-delay: 0.6s; }
-.admin-sidebar li:nth-child(7) { animation-delay: 0.7s; }
-.admin-sidebar li:nth-child(8) { animation-delay: 0.8s; }
-.admin-sidebar li:nth-child(9) { animation-delay: 0.9s; }
-.admin-sidebar li:nth-child(10) { animation-delay: 1.0s; } /* Si hay 10 elementos visibles al inicio */
-
-
-/* Scrollbar personalizada (manteniendo tu estilo) */
-.admin-sidebar::-webkit-scrollbar {
+    border-radius: 0;
+  }
+  
+  .sidebar-submenu li > div {
+    padding: 0.6rem 1.25rem 0.6rem 3rem;
+    font-size: 0.9rem;
+  }
+  
+  .submenu-icon {
+    font-size: 0.9rem;
+    margin-right: 0.75rem;
+  }
+  
+  .sidebar-submenu li:hover {
+    background-color: var(--submenu-hover);
+  }
+  
+  /* Scrollbar Personalizada */
+  .admin-sidebar::-webkit-scrollbar {
     width: 6px;
-}
-
-.admin-sidebar::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.1); /* Track más claro */
-}
-
-.admin-sidebar::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.4); /* Pulgar semitransparente */
+  }
+  
+  .admin-sidebar::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+  }
+  
+  .admin-sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
     border-radius: 3px;
-}
-
-.admin-sidebar::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.6); /* Más visible al pasar el ratón */
-}
-
-/* Responsive (ajustes para la vista colapsada en móvil/pantallas pequeñas) */
-@media (max-width: 992px) {
+  }
+  
+  .admin-sidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+  
+  /* Responsive */
+  @media (max-width: 992px) {
     .admin-sidebar {
-        width: 70px; /* Ancho colapsado */
-        transform: translateX(-100%); /* Oculto por defecto */
-        top: 60px; /* Ajusta según la altura de tu navbar */
-        bottom: 0;
-        left: 0;
-        padding: 0;
-        box-shadow: none; /* Elimina la sombra cuando está colapsado */
+      width: 72px;
+      transform: translateX(-100%);
     }
     
-    .admin-sidebar.active { /* Clase para cuando el sidebar se activa/abre */
-        transform: translateX(0);
-        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2); /* Sombra para el estado abierto */
+    .admin-sidebar.active {
+      transform: translateX(0);
     }
-
-    .admin-sidebar nav li {
-        margin: 0;
-        border-radius: 0;
-        padding: 15px 0;
-        justify-content: center;
-        flex-direction: column;
-        width: 100%;
-        text-align: center;
+  
+    .admin-sidebar li > div {
+      flex-direction: column;
+      padding: 1rem 0.5rem;
+      text-align: center;
     }
-
-    .admin-sidebar nav li span {
-        font-size: 0.7em;
-        margin-top: 5px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+  
+    .sidebar-icon {
+      margin-right: 0;
+      margin-bottom: 0.25rem;
+      font-size: 1.3rem;
     }
-
-    .admin-sidebar nav li .sidebar-icon,
-    .admin-sidebar nav li svg {
-        margin-right: 0;
-        font-size: 1.4em;
+  
+    .admin-sidebar li span {
+      font-size: 0.7rem;
+      line-height: 1.2;
     }
-
-    /* Ajuste para el estado activo en sidebar colapsado */
+  
     .admin-sidebar li.active {
-        border-left: none; /* Elimina el borde izquierdo */
-        border-bottom: 3px solid var(--sidebar-active-border); /* Usa un borde inferior */
-        padding-left: 0;
+      border-left: none;
+      border-bottom: 3px solid var(--sidebar-light);
     }
-
-    /* Ajustes para el submenú en vista colapsada (pop-out) */
+  
+    /* Submenú en móvil */
     .sidebar-submenu {
-        position: absolute; /* Posiciona el submenú sobre el contenido */
-        left: 70px; /* Aparece al lado del sidebar colapsado */
-        top: 0; /* Alinea con el elemento padre */
-        width: 180px; /* Ancho del submenú desplegado */
-        height: auto;
-        max-height: fit-content; /* Se ajusta al contenido */
-        background-color: var(--submenu-bg-color);
-        border-radius: 8px;
-        box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.3); /* Sombra para efecto popup */
-        z-index: 950; /* Asegura que esté por encima del contenido principal */
-        transform: translateX(0); /* No hay transformación inicial */
-        visibility: hidden; /* Oculto por defecto */
-        opacity: 0;
-        transition: transform var(--transition-speed) var(--transition-ease), 
-                    opacity var(--transition-speed) var(--transition-ease),
-                    visibility var(--transition-speed) var(--transition-ease);
+      position: absolute;
+      left: 72px;
+      top: 0;
+      width: 200px;
+      z-index: 950;
+      box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.2);
+      border-radius: 0 6px 6px 0;
     }
-
-    /* Muestra el submenú cuando el padre está abierto */
-    .sidebar-dropdown-parent.open + .sidebar-submenu {
-        transform: translateX(0);
-        visibility: visible;
-        opacity: 1;
-        max-height: 500px; /* Ajustar si es necesario */
+  
+    .sidebar-submenu li > div {
+      flex-direction: row;
+      padding: 0.75rem 1rem;
+      text-align: left;
     }
-
-    .sidebar-submenu ul li {
-        padding: 10px 15px;
-        text-align: left;
-        flex-direction: row; /* Vuelve a diseño de fila para los ítems del submenú */
-        justify-content: flex-start;
-        width: auto;
-        margin: 0;
+  
+    .sidebar-submenu .submenu-icon {
+      margin-right: 0.75rem;
+      font-size: 1rem;
     }
-
-    .sidebar-submenu ul li span {
-        font-size: 0.9em;
-        margin-top: 0;
-    }
-
-    .sidebar-submenu ul li .submenu-icon {
-        margin-right: 10px;
-    }
-}
-
-/* Opcional: Clases para gestionar el colapso del sidebar mediante JS */
-/* Estas clases se añadirían al <body> o a un contenedor padre si tienes un toggle global */
-/* body.sidebar-collapsed para el estado colapsado si no es móvil */
-/* (Se duplican algunas reglas de @media para un control explícito en JS) */
-body.sidebar-collapsed .admin-sidebar {
-    width: 70px;
-}
-
-body.sidebar-collapsed .admin-sidebar nav li {
-    padding: 15px 0;
-    justify-content: center;
-    flex-direction: column;
-    width: 100%;
-    text-align: center;
-}
-
-body.sidebar-collapsed .admin-sidebar nav li span {
-    font-size: 0.7em;
-    margin-top: 5px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-body.sidebar-collapsed .admin-sidebar nav li .sidebar-icon {
-    margin-right: 0;
-    font-size: 1.4em;
-}
-
-body.sidebar-collapsed .sidebar-submenu {
-    position: absolute;
-    left: 70px;
-    top: 0;
-    width: 180px;
-    box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.3);
-    z-index: 950;
-    visibility: hidden;
-    opacity: 0;
-    transition: transform var(--transition-speed) var(--transition-ease), 
-                opacity var(--transition-speed) var(--transition-ease),
-                visibility var(--transition-speed) var(--transition-ease);
-}
-
-body.sidebar-collapsed .sidebar-dropdown-parent.open + .sidebar-submenu {
-    transform: translateX(0);
-    visibility: visible;
-    opacity: 1;
-}
-
-body.sidebar-collapsed .sidebar-submenu ul li {
-    padding: 10px 15px;
-    text-align: left;
-    flex-direction: row;
-    justify-content: flex-start;
-    width: auto;
-    margin: 0;
-}
-
-body.sidebar-collapsed .sidebar-submenu ul li span {
-    font-size: 0.9em;
-    margin-top: 0;
-}
-
-body.sidebar-collapsed .sidebar-submenu ul li .submenu-icon {
-    margin-right: 10px;
-}
+  }
+  
+  /* Animaciones */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateX(-10px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  
+  .admin-sidebar li {
+    animation: fadeIn 0.3s forwards;
+  }
+  
+  .admin-sidebar li:nth-child(1) { animation-delay: 0.05s; }
+  .admin-sidebar li:nth-child(2) { animation-delay: 0.1s; }
+  .admin-sidebar li:nth-child(3) { animation-delay: 0.15s; }
+  .admin-sidebar li:nth-child(4) { animation-delay: 0.2s; }
+  .admin-sidebar li:nth-child(5) { animation-delay: 0.25s; }
+  .admin-sidebar li:nth-child(6) { animation-delay: 0.3s; }
+  .admin-sidebar li:nth-child(7) { animation-delay: 0.35s; }
+  .admin-sidebar li:nth-child(8) { animation-delay: 0.4s; }
+  .admin-sidebar li:nth-child(9) { animation-delay: 0.45s; }
+  .admin-sidebar li:nth-child(10) { animation-delay: 0.5s; }
