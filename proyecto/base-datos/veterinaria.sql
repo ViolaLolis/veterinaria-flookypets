@@ -20,7 +20,7 @@ CREATE TABLE usuarios (
     direccion VARCHAR(100),                
     tipo_documento VARCHAR(20),             
     numero_documento VARCHAR(20),           
-    fecha_nacimiento DATE,                  
+    fecha_nacimiento DATE,            
     role VARCHAR(20) DEFAULT 'usuario',
     active TINYINT(1) DEFAULT 1 COMMENT '1=activo, 0=inactivo',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -70,8 +70,8 @@ CREATE TABLE citas (
     id_servicio INT NOT NULL,
     id_veterinario INT,
     fecha DATETIME NOT NULL,
-    ubicacion VARCHAR(255),
-    estado ENUM('pendiente', 'aceptada', 'rechazada') DEFAULT 'pendiente',
+    servicios VARCHAR(255),
+    estado ENUM('pendiente', 'aceptada', 'rechazada', 'completa', 'cancelada') DEFAULT 'pendiente',
     FOREIGN KEY (id_cliente) REFERENCES clientes(id_cliente),
     FOREIGN KEY (id_servicio) REFERENCES servicios(id_servicio),
     FOREIGN KEY (id_veterinario) REFERENCES usuarios(id)
@@ -146,14 +146,14 @@ INSERT INTO usuarios (email, password, nombre, apellido, telefono, direccion, ti
 ('user13@example.com', '$2a$10$xJwL5v5Jz5U5Z5U5Z5U5Ze', 'Eduardo', 'Paredes', '3208901234', 'Carrera Fiel 18', 'CC', '88990011', '1989-04-05', 'usuario'),
 ('user14@example.com', '$2a$10$xJwL5v5Jz5U5Z5U5Z5U5Ze', 'Verónica', 'Salazar', '3009012345', 'Calle Protectora 19', 'CC', '99001122', '1991-08-12', 'usuario'),
 ('user15@example.com', '$2a$10$xJwL5v5Jz5U5Z5U5Z5U5Ze', 'Raúl', 'Fuentes', '3150123456', 'Avenida Cariño 20', 'CC', '00112233', '1994-02-19', 'usuario');
-INSERT INTO citas (id_cliente, id_servicio, id_veterinario, fecha, ubicacion, estado) VALUES
+INSERT INTO citas (id_cliente, id_servicio, id_veterinario, fecha, servicios, estado) VALUES
 (1, 1, 2, '2030-06-15 09:00:00', 'Consultorio 1', 'aceptada'),
 (2, 2, 3, '2030-07-15 10:30:00', 'Consultorio 2', 'aceptada'),
 (3, 3, 2, '2030-07-16 11:00:00', 'Sala de Estética', 'aceptada'),
 (4, 1, 3, '2030-07-16 14:00:00', 'Consultorio 1', 'pendiente'),
 (5, 2, 2, '2030-02-17 09:30:00', 'Consultorio 2', 'aceptada'),
 (6, 4, 3, '2030-02-17 11:00:00', 'Quirófano', 'aceptada'),
-(7, 5, 2, '2030-06-18 10:00:00', 'Sala de Rayos X', 'pendiente'),
+(7, 5, 2, '2030-03-18 10:00:00', 'Sala de Rayos X', 'pendiente'),
 (8, 6, 3, '2030-01-18 15:00:00', 'Laboratorio', 'aceptada'),
 (9, 1, 2, '2030-03-19 08:30:00', 'Consultorio 1', 'aceptada'),
 (10, 3, 3, '2030-05-19 13:00:00', 'Sala de Estética', 'pendiente'),
@@ -162,7 +162,7 @@ INSERT INTO citas (id_cliente, id_servicio, id_veterinario, fecha, ubicacion, es
 (13, 1, 2, '2030-09-21 09:00:00', 'Consultorio 1', 'pendiente'),
 (14, 4, 3, '2030-12-21 14:00:00', 'Quirófano', 'aceptada'),
 (15, 6, 2, '2023-10-22 10:30:00', 'Laboratorio', 'aceptada'),
-(16, 3, 3, '2030-11-22 12:00:00', 'Sala de Estética', 'pendiente'),
+(16, 3, 3, '2030-11-22 12:00:00', 'Sala de Estética', 'completa'),
 (17, 2, 2, '2030-12-23 09:00:00', 'Consultorio 2', 'aceptada'),
 (18, 1, 3, '2030-04-23 11:00:00', 'Consultorio 1', 'rechazada'),
 (19, 5, 2, '2030-07-24 10:00:00', 'Sala de Rayos X', 'aceptada'),
@@ -215,7 +215,7 @@ SELECT * FROM mascotas;
 SELECT email, nombre, apellido, role FROM usuarios;
 
 -- Agrega esto a tu script SQL para tener citas de hoy
-INSERT INTO citas (id_cliente, id_servicio, id_veterinario, fecha, ubicacion, estado) VALUES
+INSERT INTO citas (id_cliente, id_servicio, id_veterinario, fecha, servicios, estado) VALUES
 (1, 1, 2, CURDATE() + INTERVAL 1 HOUR, 'Consultorio 1', 'aceptada'),
 (2, 2, 2, CURDATE() + INTERVAL 2 HOUR, 'Consultorio 2', 'aceptada'),
 (3, 3, 2, CURDATE() + INTERVAL 3 HOUR, 'Sala de Estética', 'pendiente');

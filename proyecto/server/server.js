@@ -19,11 +19,7 @@ app.use(express.json()); // Habilita el parsing de JSON en el cuerpo de las peti
 const pool = mysql.createPool({
     host: process.env.DB_HOST || "127.0.0.1",
     user: process.env.DB_USER || "root",
-<<<<<<< HEAD
-    password: process.env.DB_PASSWORD || "12345678",
-=======
-    password: process.env.DB_PASSWORD || "", // Revertido al valor por defecto proporcionado previamente
->>>>>>> 1786033df74716e08ce50eb8871ccbe4c812c22f
+    password: process.env.DB_PASSWORD || "",
     database: process.env.DB_NAME || "veterinaria",
     waitForConnections: true,
     connectionLimit: 10, // Número máximo de conexiones en el pool
@@ -75,43 +71,63 @@ const isVetOrAdmin = (req, res, next) => {
 };
 
 // Middleware para verificar si es el propietario del recurso o un administrador
-// Este middleware necesita ser ajustado si no hay id_mascota en citas para /citas
 const isOwnerOrAdmin = async (req, res, next) => {
-    const resourceId = parseInt(req.params.id || req.params.userId || req.params.id_cliente || req.params.id_mascota);
     const userIdFromToken = req.user.id;
     const userRole = req.user.role;
 
+    // Admin siempre tiene acceso
     if (userRole === 'admin') {
-        next(); // Admin siempre tiene acceso
-        return;
+        return next();
     }
 
-    let isOwner = false;
+    let resourceUserId = null; // ID del usuario asociado al recurso
+
     try {
         if (req.baseUrl.includes('/mascotas')) {
-            const [rows] = await pool.query("SELECT id_propietario FROM mascotas WHERE id_mascota = ?", [resourceId]);
-            if (rows.length > 0 && rows[0].id_propietario === userIdFromToken) {
-                isOwner = true;
+            const idMascota = parseInt(req.params.id || req.body.id_mascota);
+            if (isNaN(idMascota)) {
+                return res.status(400).json({ success: false, message: "ID de mascota no válido." });
             }
+            const [rows] = await pool.query("SELECT id_propietario FROM mascotas WHERE id_mascota = ?", [idMascota]);
+            if (rows.length > 0) resourceUserId = rows[0].id_propietario;
         } else if (req.baseUrl.includes('/historial_medico')) {
+            const idHistorial = parseInt(req.params.id || req.body.id_historial);
+            if (isNaN(idHistorial)) {
+                return res.status(400).json({ success: false, message: "ID de historial médico no válido." });
+            }
             const [rows] = await pool.query(
                 "SELECT m.id_propietario FROM historial_medico h JOIN mascotas m ON h.id_mascota = m.id_mascota WHERE h.id_historial = ?",
-                [resourceId]
+                [idHistorial]
             );
-            if (rows.length > 0 && rows[0].id_propietario === userIdFromToken) {
-                isOwner = true;
-            }
+            if (rows.length > 0) resourceUserId = rows[0].id_propietario;
         } else if (req.baseUrl.includes('/citas')) {
-            const [rows] = await pool.query("SELECT id_cliente FROM citas WHERE id_cita = ?", [resourceId]);
-            if (rows.length > 0 && rows[0].id_cliente === userIdFromToken) {
-                isOwner = true;
+            const idCita = parseInt(req.params.id || req.body.id_cita);
+            if (isNaN(idCita)) {
+                return res.status(400).json({ success: false, message: "ID de cita no válido." });
             }
-        } else if (req.baseUrl.includes('/usuarios') && resourceId === userIdFromToken) {
-            isOwner = true;
-        } else if (req.baseUrl.includes('/clientes') && resourceId === userIdFromToken) {
-            // Nota: La tabla 'clientes' no se usa para autenticación, esto podría ser redundante
-            // si 'usuarios' maneja todos los clientes.
-            isOwner = true;
+            const [rows] = await pool.query("SELECT id_cliente FROM citas WHERE id_cita = ?", [idCita]);
+            if (rows.length > 0) resourceUserId = rows[0].id_cliente;
+        } else if (req.baseUrl.includes('/usuarios')) {
+            const userId = parseInt(req.params.id || req.body.id);
+            if (isNaN(userId)) {
+                return res.status(400).json({ success: false, message: "ID de usuario no válido." });
+            }
+            resourceUserId = userId; // Para /usuarios/:id, el propio usuario es el recurso
+        }
+        
+        // Si no se pudo determinar el propietario del recurso o no hay recurso, denegar acceso.
+        if (resourceUserId === null) {
+            // Permitir que si es un POST a /mascotas o /historial_medico, el admin/vet pueda crear
+            if (req.method === 'POST' && (req.baseUrl.includes('/mascotas') || req.baseUrl.includes('/historial_medico')) && userRole !== 'usuario') {
+                 // Si es POST para crear, el middleware isVetOrAdmin ya manejará permisos
+                return next();
+            }
+            return res.status(403).json({ success: false, message: "Acceso denegado. Recurso no encontrado o no eres el propietario." });
+        }
+
+        // Si el usuario del token es el propietario del recurso, permitir acceso
+        if (resourceUserId === userIdFromToken) {
+            return next();
         }
 
     } catch (error) {
@@ -119,12 +135,9 @@ const isOwnerOrAdmin = async (req, res, next) => {
         return res.status(500).json({ success: false, message: "Error al verificar permisos." });
     }
 
-    if (isOwner) {
-        next();
-    } else {
-        return res.status(403).json({ success: false, message: "Acceso denegado. No eres el propietario de este recurso." });
-    }
+    return res.status(403).json({ success: false, message: "Acceso denegado. No eres el propietario de este recurso." });
 };
+
 
 // Ruta de prueba
 app.get("/", (req, res) => {
@@ -971,9 +984,14 @@ app.get("/admin/usuarios", authenticateToken, isAdmin, async (req, res) => {
 });
 
 // Obtener detalles de un usuario por ID (para AdminUserDetail.js y otros)
-app.get("/usuarios/:id", authenticateToken, isAdmin, async (req, res) => {
+app.get("/usuarios/:id", authenticateToken, async (req, res) => { 
     const { id } = req.params;
     try {
+        // Permite a un usuario ver su propio perfil o a un admin ver cualquier perfil
+        if (req.user.id !== parseInt(id) && req.user.role !== 'admin') {
+            return res.status(403).json({ success: false, message: "Acceso denegado. No tienes permisos para ver este perfil." });
+        }
+
         const [user] = await pool.query(
             `SELECT id, nombre, apellido, email, telefono, direccion, tipo_documento, numero_documento,
                     fecha_nacimiento, role, active, created_at
@@ -992,9 +1010,14 @@ app.get("/usuarios/:id", authenticateToken, isAdmin, async (req, res) => {
 });
 
 // Actualizar usuario (general, para clientes, veterinarios, admins)
-app.put("/usuarios/:id", authenticateToken, isAdmin, async (req, res) => {
+app.put("/usuarios/:id", authenticateToken, async (req, res) => { 
     const { id } = req.params;
     const { nombre, apellido, email, telefono, direccion, tipo_documento, numero_documento, fecha_nacimiento, active, password } = req.body;
+
+    // Asegurarse de que el usuario solo pueda actualizar su propio perfil o que sea un admin
+    if (req.user.id !== parseInt(id) && req.user.role !== 'admin') {
+        return res.status(403).json({ success: false, message: "Acceso denegado. No tienes permisos para actualizar este perfil." });
+    }
 
     try {
         const fields = [];
@@ -1020,6 +1043,7 @@ app.put("/usuarios/:id", authenticateToken, isAdmin, async (req, res) => {
         if (numero_documento !== undefined) { fields.push('numero_documento = ?'); values.push(numero_documento); }
         if (fecha_nacimiento !== undefined) { fields.push('fecha_nacimiento = ?'); values.push(fecha_nacimiento); }
         
+        // Solo un admin puede cambiar el estado 'active'
         if (active !== undefined && req.user.role === 'admin') {
             fields.push('active = ?'); values.push(active ? 1 : 0);
         }
@@ -1398,7 +1422,7 @@ app.delete("/historial_medico/:id", authenticateToken, isAdmin, async (req, res)
 // Obtener todas las citas
 app.get("/citas", authenticateToken, async (req, res) => {
     try {
-        let query = `SELECT c.id_cita, DATE_FORMAT(c.fecha, '%Y-%m-%d %H:%i') as fecha, c.estado, c.ubicacion,
+        let query = `SELECT c.id_cita, DATE_FORMAT(c.fecha, '%Y-%m-%d %H:%i') as fecha, c.estado, c.servicios,
                             s.nombre as servicio_nombre, s.precio,
                             CONCAT(u_cli.nombre, ' ', u_cli.apellido) as cliente_nombre, u_cli.telefono as cliente_telefono,
                             CONCAT(u_vet.nombre, ' ', u_vet.apellido) as veterinario_nombre,
@@ -1407,7 +1431,7 @@ app.get("/citas", authenticateToken, async (req, res) => {
                      JOIN servicios s ON c.id_servicio = s.id_servicio
                      JOIN usuarios u_cli ON c.id_cliente = u_cli.id
                      LEFT JOIN usuarios u_vet ON c.id_veterinario = u_vet.id
-                     `; // ELIMINADO JOIN A MASCOTAS
+                     `; 
         const queryParams = [];
 
         // Filtro por rol: Administrador ve todas, Veterinario solo las suyas, Usuario solo las suyas.
@@ -1434,7 +1458,7 @@ app.get("/citas/:id", authenticateToken, isOwnerOrAdmin, async (req, res) => {
     const { id } = req.params;
     try {
         const [cita] = await pool.query(
-            `SELECT c.id_cita, DATE_FORMAT(c.fecha, '%Y-%m-%d %H:%i') as fecha, c.estado, c.ubicacion,
+            `SELECT c.id_cita, DATE_FORMAT(c.fecha, '%Y-%m-%d %H:%i') as fecha, c.estado, c.servicios,
                     s.nombre as servicio_nombre, s.precio, s.id_servicio,
                     u_cli.id as id_cliente, CONCAT(u_cli.nombre, ' ', u_cli.apellido) as cliente_nombre, u_cli.telefono as cliente_telefono,
                     u_vet.id as id_veterinario, CONCAT(u_vet.nombre, ' ', u_vet.apellido) as veterinario_nombre
@@ -1444,7 +1468,7 @@ app.get("/citas/:id", authenticateToken, isOwnerOrAdmin, async (req, res) => {
              LEFT JOIN usuarios u_vet ON c.id_veterinario = u_vet.id
              WHERE c.id_cita = ?`,
             [id]
-        ); // ELIMINADO JOIN A MASCOTAS Y REFERENCIAS A MASCOTAS
+        ); 
         if (cita.length === 0) {
             return res.status(404).json({ success: false, message: "Cita no encontrada." });
         }
@@ -1457,7 +1481,7 @@ app.get("/citas/:id", authenticateToken, isOwnerOrAdmin, async (req, res) => {
 
 // Registrar nueva cita (solo para usuarios o admins/vets que registran para un cliente)
 app.post("/citas", authenticateToken, async (req, res) => {
-    const { fecha, estado, ubicacion, id_servicio, id_cliente, id_veterinario } = req.body; // ELIMINADO id_mascota
+    const { fecha, estado, servicios, id_servicio, id_cliente, id_veterinario } = req.body; 
 
     // Validación básica de campos requeridos
     if (!fecha || !id_servicio || !id_cliente) {
@@ -1489,12 +1513,11 @@ app.post("/citas", authenticateToken, async (req, res) => {
                 return res.status(400).json({ success: false, message: "ID de veterinario no válido o no es un veterinario." });
             }
         }
-        // ELIMINADO VERIFICACIÓN DE MASCOTA
-
+        
         const [result] = await pool.query(
-            `INSERT INTO citas (fecha, estado, ubicacion, id_servicio, id_cliente, id_veterinario)
-             VALUES (?, ?, ?, ?, ?, ?)`, // ELIMINADO id_mascota
-            [fecha, estado || 'pendiente', ubicacion, id_servicio, id_cliente, id_veterinario || null]
+            `INSERT INTO citas (fecha, estado, servicios, id_servicio, id_cliente, id_veterinario)
+             VALUES (?, ?, ?, ?, ?, ?)`, 
+            [fecha, estado || 'pendiente', servicios || null, id_servicio, id_cliente, id_veterinario || null]
         );
 
         const [newCita] = await pool.query("SELECT * FROM citas WHERE id_cita = ?", [result.insertId]);
@@ -1506,34 +1529,66 @@ app.post("/citas", authenticateToken, async (req, res) => {
     }
 });
 
-// Actualizar cita (admin/vet)
-app.put("/citas/:id", authenticateToken, isVetOrAdmin, async (req, res) => {
+// Actualizar cita (admin/vet/owner for cancel)
+app.put("/citas/:id", authenticateToken, async (req, res) => {
     const { id } = req.params;
-    const { fecha, estado, ubicacion, id_servicio, id_cliente, id_veterinario } = req.body; // ELIMINADO id_mascota
+    let { fecha, estado, servicios, id_servicio, id_cliente, id_veterinario } = req.body; // Cambiado 'ubicacion' a 'servicios'
 
     try {
-        // Verificar que la cita exista
-        const [existing] = await pool.query("SELECT id_cita FROM citas WHERE id_cita = ?", [id]);
-        if (existing.length === 0) {
+        // --- Lógica de autorización personalizada para esta ruta específica ---
+        const userIdFromToken = req.user.id;
+        const userRole = req.user.role;
+
+        const [citaResult] = await pool.query("SELECT id_cliente, id_veterinario FROM citas WHERE id_cita = ?", [id]);
+        if (citaResult.length === 0) {
             return res.status(404).json({ success: false, message: "Cita no encontrada." });
         }
+        const existingCita = citaResult[0];
+
+        let isAuthorized = false;
+
+        // Administrador siempre puede modificar
+        if (userRole === 'admin') {
+            isAuthorized = true;
+        } else {
+            // Usuario (cliente): solo puede cancelar sus propias citas
+            if (userRole === 'usuario' && estado === 'cancelada' && userIdFromToken === existingCita.id_cliente) {
+                isAuthorized = true;
+            }
+            // Veterinario: puede completar o cancelar citas que le estén asignadas
+            // Y también puede actualizar otros detalles de las citas que le estén asignadas
+            else if (userRole === 'veterinario' && userIdFromToken === existingCita.id_veterinario) {
+                isAuthorized = true;
+            }
+            // Si ninguna de las condiciones anteriores se cumple, denegar acceso.
+            else {
+                return res.status(403).json({ success: false, message: "Acceso denegado. No tienes permisos para realizar esta acción o solo puedes cancelar/completar tu cita/cita asignada." });
+            }
+        }
+        
+        if (!isAuthorized) {
+            return res.status(403).json({ success: false, message: "Acceso denegado. No tienes permisos para realizar esta acción." });
+        }
+        // --- Fin de la lógica de autorización personalizada ---
 
         const fields = [];
         const values = [];
+
         if (fecha !== undefined) { fields.push('fecha = ?'); values.push(fecha); }
-        if (estado !== undefined) { fields.push('estado = ?'); values.push(estado); }
-        if (ubicacion !== undefined) { fields.push('ubicacion = ?'); values.push(ubicacion); }
         
+        if (estado !== undefined) {
+            fields.push('estado = ?'); values.push(estado);
+        }
+
+        if (servicios !== undefined) { fields.push('servicios = ?'); values.push(servicios); } // Usar 'servicios'
+
         if (id_servicio !== undefined) {
             const [service] = await pool.query("SELECT id_servicio FROM servicios WHERE id_servicio = ?", [id_servicio]);
             if (service.length === 0) return res.status(400).json({ success: false, message: "ID de servicio no válido." });
             fields.push('id_servicio = ?'); values.push(id_servicio);
         }
         
-        // EL id_cliente no se debería actualizar en una cita existente desde este formulario
-        // para mantener la integridad, a menos que sea un "traslado de cita" con lógica específica.
-        // Lo dejaremos deshabilitado en el frontend, pero si el backend lo permite, aquí se procesaría.
-        if (id_cliente !== undefined) { // No deberíamos permitir esto si el cliente es fijo en edición
+        if (id_cliente !== undefined && userRole === 'admin') { 
             const [cliente] = await pool.query("SELECT id FROM usuarios WHERE id = ? AND role = 'usuario'", [id_cliente]);
             if (cliente.length === 0) return res.status(400).json({ success: false, message: "ID de cliente no válido o no es un usuario." });
             fields.push('id_cliente = ?'); values.push(id_cliente);
@@ -1546,8 +1601,6 @@ app.put("/citas/:id", authenticateToken, isVetOrAdmin, async (req, res) => {
         } else if (req.body.hasOwnProperty('id_veterinario') && id_veterinario === null) {
             fields.push('id_veterinario = ?'); values.push(null);
         }
-
-        // ELIMINADO LÓGICA DE id_mascota
 
         if (fields.length === 0) {
             return res.status(400).json({ success: false, message: "No hay datos para actualizar." });
@@ -1592,11 +1645,9 @@ app.delete("/citas/:id", authenticateToken, isAdmin, async (req, res) => {
 // =============================================
 
 // ### **VISUALIZACIÓN DE CITAS** (Endpoint para Admin)
-// Este endpoint se ha modificado para no unirse a la tabla 'mascotas'
 app.get("/admin/citas", authenticateToken, isAdmin, async (req, res) => {
     try {
-        const [appointments] = await pool.query(
-            `SELECT c.id_cita, DATE_FORMAT(c.fecha, '%Y-%m-%d %H:%i') as fecha, c.estado, c.ubicacion,
+        let query = `SELECT c.id_cita, DATE_FORMAT(c.fecha, '%Y-%m-%d %H:%i') as fecha, c.estado, c.servicios,
             s.nombre as servicio, s.precio,
             CONCAT(cl.nombre, ' ', cl.apellido) as cliente, cl.telefono as cliente_telefono,
             CONCAT(v.nombre, ' ', v.apellido) as veterinario,
@@ -1604,9 +1655,19 @@ app.get("/admin/citas", authenticateToken, isAdmin, async (req, res) => {
             FROM citas c
             JOIN servicios s ON c.id_servicio = s.id_servicio
             JOIN usuarios cl ON c.id_cliente = cl.id
-            LEFT JOIN usuarios v ON c.id_veterinario = v.id
-            ORDER BY c.fecha DESC`
-        ); // ELIMINADO LEFT JOIN mascotas m ON c.id_mascota = m.id_mascota
+            LEFT JOIN usuarios v ON c.id_veterinario = v.id`;
+
+        const queryParams = [];
+        const { status } = req.query; // Obtener el parámetro de estado de la consulta
+
+        if (status && status !== 'all') { 
+            query += ` WHERE c.estado = ?`;
+            queryParams.push(status);
+        }
+
+        query += ` ORDER BY c.fecha DESC`;
+
+        const [appointments] = await pool.query(query, queryParams);
         res.json({ success: true, data: appointments });
     } catch (error) {
         console.error("Error al obtener citas de admin:", error);
@@ -1640,3 +1701,4 @@ app.get("/admin/historiales", authenticateToken, isAdmin, async (req, res) => {
 app.listen(PORT, () => {
     console.log(`Servidor corriendo en el puerto ${PORT}`);
 });
+

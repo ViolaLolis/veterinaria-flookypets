@@ -362,22 +362,6 @@ function AdminProfile({ user, setUser }) {
             </div>
           )}
         </div>
-
-        <div className="password-section">
-          <div className="section-header">
-            <h3>
-              <FaLock className="section-icon" />
-              Seguridad
-            </h3>
-            <button 
-              onClick={handlePasswordChangeRedirect}
-              className="toggle-btn"
-              disabled={isSubmitting}
-            >
-              Cambiar Contraseña
-            </button>
-          </div>
-        </div>
       </div>
     </div>
   );

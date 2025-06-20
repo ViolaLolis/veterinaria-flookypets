@@ -1,212 +1,285 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { FaUser, FaPaw, FaNotesMedical, FaSpinner, FaArrowLeft, FaInfoCircle, FaCalendarAlt, FaUserMd } from 'react-icons/fa';
+import { FaTimes, FaSpinner, FaInfoCircle, FaUser, FaPaw, FaCalendarAlt, FaWeight, FaRulerCombined, FaPalette, FaMicrochip, FaVenusMars, FaBirthdayCake, FaPhone, FaMapMarkerAlt, FaIdCard, FaEnvelope } from 'react-icons/fa'; // Agregué FaEnvelope para el email
+import { motion } from 'framer-motion';
 import { authFetch } from './api'; // Asegúrate de que la ruta sea correcta a tu api.js
-import './Styles/AdminStyles.css'; // O un archivo CSS específico para detalles
+import './Styles/AdminStyles.css'; // Estilos generales de administración
+/**
+ * Componente AdminUserDetail
+ * Muestra los detalles completos de un usuario y sus mascotas asociadas en un modal.
+ * @param {object} props - Propiedades del componente.
+ * @param {number} props.userId - ID del usuario a mostrar.
+ * @param {object} props.user - Objeto del usuario logueado (para authFetch).
+ * @param {function} props.onClose - Función para cerrar el modal.
+ */
+function AdminUserDetail({ userId, user, onClose }) {
+    // Estados para almacenar la información del usuario, sus mascotas, carga y errores
+    const [userDetails, setUserDetails] = useState(null);
+    const [userPets, setUserPets] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState('');
 
-function AdminUserDetail({ user }) { // Recibe 'user' como prop para authFetch
-  const { userId } = useParams(); // Obtener el ID del usuario de la URL
-  const navigate = useNavigate();
-  const [userData, setUserData] = useState(null);
-  const [pets, setPets] = useState([]);
-  const [medicalRecords, setMedicalRecords] = useState({}); // Para almacenar historiales por ID de mascota
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
+    /**
+     * Función para formatear la fecha de YYYY-MM-DD a DD/MM/YYYY.
+     * Si la fecha incluye información de tiempo, también la formatea.
+     * @param {string} dateString - La fecha en formato 'YYYY-MM-DD' o 'YYYY-MM-DD HH:MM:SS'.
+     * @returns {string} La fecha en formato 'DD/MM/YYYY' o 'N/A' si es inválida.
+     */
+    const formatDate = (dateString) => {
+        if (!dateString) return 'N/A';
+        try {
+            // Intenta parsear como fecha ISO para manejar diferentes formatos de backend
+            const date = new Date(dateString);
 
-  const fetchUserData = useCallback(async () => {
-    setIsLoading(true);
-    setError('');
-    try {
-      // Obtener datos del usuario
-      const userResponse = await authFetch(`/usuarios/${userId}`);
-      if (userResponse.success && userResponse.data) {
-        setUserData(userResponse.data);
+            // Verifica si la fecha es válida. Si Date() recibe una cadena inválida, retorna "Invalid Date"
+            if (isNaN(date.getTime())) {
+                // Si falla, intenta un parseo manual para el formato YYYY-MM-DD
+                const parts = dateString.split(' ')[0].split('-'); // Toma solo la parte de la fecha
+                if (parts.length === 3) {
+                    const [year, month, day] = parts;
+                    return `${day}/${month}/${year}`;
+                }
+                return 'Formato de fecha inválido'; // No se pudo formatear
+            }
 
-        // Obtener mascotas asociadas al usuario por id_propietario
-        // Endpoint: /mascotas?id_propietario={userId}
-        const petsResponse = await authFetch(`/mascotas?id_propietario=${userId}`); 
-        if (petsResponse.success && Array.isArray(petsResponse.data)) {
-          setPets(petsResponse.data);
-
-          // Obtener todos los historiales médicos y luego filtrarlos por mascota en el frontend
-          const allMedicalRecordsResponse = await authFetch('/historial_medico');
-          if (allMedicalRecordsResponse.success && Array.isArray(allMedicalRecordsResponse.data)) {
-            const recordsMap = {};
-            petsResponse.data.forEach(pet => {
-              recordsMap[pet.id_mascota] = allMedicalRecordsResponse.data.filter(
-                record => record.id_mascota === pet.id_mascota
-              );
-            });
-            setMedicalRecords(recordsMap);
-          } else {
-            console.warn("No se pudieron cargar todos los historiales médicos o formato incorrecto:", allMedicalRecordsResponse.message);
-            setMedicalRecords({});
-          }
-
-        } else {
-          console.warn(`No se encontraron mascotas o formato incorrecto para el usuario ${userId}:`, petsResponse.message);
-          setPets([]);
-          setMedicalRecords({}); // Asegurarse de que no haya historiales si no hay mascotas
+            const day = String(date.getUTCDate()).padStart(2, '0');
+            const month = String(date.getUTCMonth() + 1).padStart(2, '0'); // Meses son 0-index
+            const year = date.getUTCFullYear();
+            return `${day}/${month}/${year}`;
+        } catch (e) {
+            console.error("Error formatting date:", e);
+            return 'Error de formato';
         }
-      } else {
-        setError(userResponse.message || 'Error al cargar los datos del usuario.');
-      }
-    } catch (err) {
-      setError(`Error de conexión: ${err.message}`);
-      console.error('Error fetching user details:', err);
-    } finally {
-      setIsLoading(false);
+    };
+
+
+    /**
+     * useCallback para la carga de datos del usuario y sus mascotas.
+     * Se ejecuta cuando userId o el token del usuario cambian.
+     */
+    const fetchUserData = useCallback(async () => {
+        if (!userId || !user?.token) {
+            setError('No se pudo cargar la información del usuario. ID o token no proporcionados.');
+            setIsLoading(false);
+            return;
+        }
+
+        setIsLoading(true);
+        setError('');
+        try {
+            // 1. Obtener detalles del usuario
+            const userResponse = await authFetch(`/usuarios/${userId}`);
+            if (userResponse.success && userResponse.data) {
+                setUserDetails(userResponse.data);
+            } else {
+                setError(userResponse.message || 'Error al cargar detalles del usuario.');
+                setIsLoading(false);
+                return; // Detener si no se puede cargar el usuario
+            }
+
+            // 2. Obtener mascotas del usuario
+            // Asegúrate de que tu backend soporta el filtro por id_propietario
+            const petsResponse = await authFetch(`/mascotas?id_propietario=${userId}`);
+            if (petsResponse.success && Array.isArray(petsResponse.data)) {
+                setUserPets(petsResponse.data);
+            } else {
+                console.warn('No se pudieron cargar las mascotas del usuario o no hay mascotas.');
+                setUserPets([]); // Asegurarse de que sea un array vacío si falla
+            }
+
+        } catch (err) {
+            console.error('Error fetching user and pet details:', err);
+            setError(`Error al cargar datos: ${err.message}`);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [userId, user, authFetch]);
+
+    // Efecto para llamar a la función de carga de datos al montar o cambiar dependencias
+    useEffect(() => {
+        fetchUserData();
+    }, [fetchUserData]);
+
+    // Renderizado del componente
+    if (isLoading) {
+        return (
+            <motion.div
+                className="modal-overlay" // Usa overlay para que el spinner esté centrado en la pantalla
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+            >
+                <motion.div
+                    className="modal-content modal-detail-content"
+                    initial={{ y: "-100vh", opacity: 0 }}
+                    animate={{ y: "0", opacity: 1 }}
+                    exit={{ y: "100vh", opacity: 0 }}
+                    transition={{ type: "spring", stiffness: 120, damping: 20 }}
+                >
+                    <div className="loading-container">
+                        <FaSpinner className="spinner-icon" />
+                        <p>Cargando detalles del usuario...</p>
+                    </div>
+                </motion.div>
+            </motion.div>
+        );
     }
-  }, [userId, authFetch]);
 
-  useEffect(() => {
-    if (user && user.token && userId) {
-      fetchUserData();
-    } else if (!userId) {
-      setError('ID de usuario no proporcionado en la URL.');
-      setIsLoading(false);
-    } else {
-      setError('No autorizado. Por favor, inicie sesión.');
-      setIsLoading(false);
+    if (error) {
+        return (
+            <motion.div
+                className="modal-overlay"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+            >
+                <motion.div
+                    className="modal-content modal-detail-content"
+                    initial={{ y: "-100vh", opacity: 0 }}
+                    animate={{ y: "0", opacity: 1 }}
+                    exit={{ y: "100vh", opacity: 0 }}
+                    transition={{ type: "spring", stiffness: 120, damping: 20 }}
+                >
+                    <button className="close-modal-btn" onClick={onClose}>
+                        <FaTimes />
+                    </button>
+                    <div className="error-message">
+                        <FaInfoCircle className="icon" />
+                        <p>{error}</p>
+                    </div>
+                    <div className="modal-footer">
+                        <button onClick={onClose} className="cancel-btn">
+                            <FaTimes /> Cerrar
+                        </button>
+                    </div>
+                </motion.div>
+            </motion.div>
+        );
     }
-  }, [user, userId, fetchUserData]);
 
-  if (isLoading) {
+    if (!userDetails) {
+        return (
+            <motion.div
+                className="modal-overlay"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+            >
+                <motion.div
+                    className="modal-content modal-detail-content"
+                    initial={{ y: "-100vh", opacity: 0 }}
+                    animate={{ y: "0", opacity: 1 }}
+                    exit={{ y: "100vh", opacity: 0 }}
+                    transition={{ type: "spring", stiffness: 120, damping: 20 }}
+                >
+                    <button className="close-modal-btn" onClick={onClose}>
+                        <FaTimes />
+                    </button>
+                    <div className="no-results">
+                        <FaInfoCircle className="info-icon" />
+                        <p>No se encontraron detalles para este usuario.</p>
+                    </div>
+                    <div className="modal-footer">
+                        <button onClick={onClose} className="cancel-btn">
+                            <FaTimes /> Cerrar
+                        </button>
+                    </div>
+                </motion.div>
+            </motion.div>
+        );
+    }
+
+    // Renderizado de los detalles del usuario
     return (
-      <div className="loading-container">
-        <FaSpinner className="spinner-icon" />
-        <p>Cargando detalles del usuario...</p>
-      </div>
-    );
-  }
+        <motion.div
+            className="modal-content modal-detail-content"
+            initial={{ y: "-100vh", opacity: 0 }}
+            animate={{ y: "0", opacity: 1 }}
+            exit={{ y: "100vh", opacity: 0 }}
+            transition={{ type: "spring", stiffness: 120, damping: 20 }}
+        >
+            <button className="close-modal-btn" onClick={onClose}>
+                <FaTimes />
+            </button>
+            <div className="user-detail-header">
+                <h3><FaUser /> Detalles del Propietario: {userDetails.nombre} {userDetails.apellido}</h3>
+            </div>
 
-  if (error) {
-    return (
-      <div className="error-message">
-        <FaInfoCircle className="icon" /> {error}
-        <button onClick={() => navigate(-1)} className="back-btn">
-          <FaArrowLeft /> Volver
-        </button>
-      </div>
-    );
-  }
-
-  if (!userData) {
-    return (
-      <div className="no-results">
-        <FaInfoCircle className="icon" /> No se encontraron datos para este usuario.
-        <button onClick={() => navigate(-1)} className="back-btn">
-          <FaArrowLeft /> Volver
-        </button>
-      </div>
-    );
-  }
-
-  return (
-    <div className="user-detail-container">
-      <button onClick={() => navigate(-1)} className="back-btn">
-        <FaArrowLeft /> Volver a Usuarios
-      </button>
-
-      {/* Sección de Datos del Usuario */}
-      <div className="user-profile-card">
-        <h3><FaUser className="header-icon" /> Detalles del Usuario</h3>
-        <div className="profile-info-grid">
-          <div className="info-item">
-            <strong>ID:</strong> <span>{userData.id}</span>
-          </div>
-          <div className="info-item">
-            <strong>Nombre:</strong> <span>{userData.nombre} {userData.apellido}</span>
-          </div>
-          <div className="info-item">
-            <strong>Email:</strong> <span>{userData.email}</span>
-          </div>
-          <div className="info-item">
-            <strong>Teléfono:</strong> <span>{userData.telefono}</span>
-          </div>
-          <div className="info-item">
-            <strong>Dirección:</strong> <span>{userData.direccion || 'N/A'}</span>
-          </div>
-          <div className="info-item">
-            <strong>Documento:</strong> <span>{userData.tipo_documento} - {userData.numero_documento}</span>
-          </div>
-          <div className="info-item">
-            <strong>Fecha Nacimiento:</strong> <span>{userData.fecha_nacimiento ? new Date(userData.fecha_nacimiento).toLocaleDateString() : 'N/A'}</span>
-          </div>
-          <div className="info-item">
-            <strong>Rol:</strong> <span>{userData.role}</span>
-          </div>
-          <div className="info-item">
-            <strong>Estado:</strong>
-            <span className={`status-badge ${userData.active ? 'active' : 'inactive'}`}>
-              {userData.active ? 'Activo' : 'Inactivo'}
-            </span>
-          </div>
-          <div className="info-item">
-            <strong>Miembro desde:</strong> <span>{userData.created_at ? new Date(userData.created_at).toLocaleDateString() : 'N/A'}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Sección de Mascotas del Usuario */}
-      <div className="pets-section">
-        <h3><FaPaw className="header-icon" /> Mascotas de {userData.nombre}</h3>
-        {pets.length > 0 ? (
-          <div className="pets-grid">
-            {pets.map(pet => (
-              <div key={pet.id_mascota} className="pet-card">
-                <div className="card-header">
-                  <h4>{pet.nombre}</h4>
-                  <span className="badge">{pet.especie} - {pet.raza}</span>
+            <div className="user-detail-info">
+                <div className="info-item">
+                    <strong>ID:</strong> <span>{userDetails.id}</span>
                 </div>
-                <div className="card-body">
-                  <p><strong>Edad:</strong> {pet.edad || 'N/A'} años</p>
-                  <p><strong>Peso:</strong> {pet.peso || 'N/A'} kg</p>
-                  <p><strong>Sexo:</strong> {pet.sexo || 'N/A'}</p>
-                  <p><strong>Color:</strong> {pet.color || 'N/A'}</p>
-                  <p><strong>Microchip:</strong> {pet.microchip || 'N/A'}</p>
-                  <p><strong>Fecha Registro:</strong> {pet.fecha_registro ? new Date(pet.fecha_registro).toLocaleDateString() : 'N/A'}</p>
+                <div className="info-item">
+                    <strong>Email:</strong> <FaEnvelope className="icon" /> <span>{userDetails.email}</span>
                 </div>
+                <div className="info-item">
+                    <strong>Teléfono:</strong> <FaPhone className="icon" /> <span>{userDetails.telefono}</span>
+                </div>
+                <div className="info-item">
+                    <strong>Rol:</strong> <FaUser className="icon" /> <span className="capitalize">{userDetails.role}</span>
+                </div>
+                <div className="info-item">
+                    <strong>Estado:</strong>
+                    <span className={`status-badge ${userDetails.active ? 'active' : 'inactive'}`}>
+                        {userDetails.active ? 'Activo' : 'Inactivo'}
+                    </span>
+                </div>
+                <div className="info-item">
+                    <strong>Dirección:</strong> <FaMapMarkerAlt className="icon" /> <span>{userDetails.direccion || 'N/A'}</span>
+                </div>
+                <div className="info-item">
+                    <strong>Tipo Documento:</strong> <FaIdCard className="icon" /> <span>{userDetails.tipo_documento || 'N/A'}</span>
+                </div>
+                <div className="info-item">
+                    <strong>Número Documento:</strong> <FaIdCard className="icon" /> <span>{userDetails.numero_documento || 'N/A'}</span>
+                </div>
+                <div className="info-item">
+                    <strong>Fecha Nacimiento:</strong> <FaBirthdayCake className="icon" /> <span>{formatDate(userDetails.fecha_nacimiento)}</span>
+                </div>
+                <div className="info-item">
+                    <strong>Registrado:</strong> <FaCalendarAlt className="icon" /> <span>{formatDate(userDetails.created_at)}</span>
+                </div>
+            </div>
 
-                {/* Historial Médico de la Mascota */}
-                <div className="medical-history-section">
-                  <h5><FaNotesMedical className="icon" /> Historial Médico</h5>
-                  {medicalRecords[pet.id_mascota] && medicalRecords[pet.id_mascota].length > 0 ? (
-                    <table className="medical-records-table">
-                      <thead>
-                        <tr>
-                          <th>Fecha</th>
-                          <th>Veterinario</th>
-                          <th>Diagnóstico</th>
-                          <th>Tratamiento</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {medicalRecords[pet.id_mascota].map(record => (
-                          <tr key={record.id_historial}>
-                            <td><FaCalendarAlt className="icon-small" /> {record.fecha_consulta ? new Date(record.fecha_consulta).toLocaleDateString() : 'N/A'}</td>
-                            <td><FaUserMd className="icon-small" /> {record.veterinario_nombre || 'N/A'}</td>
-                            <td>{record.diagnostico}</td>
-                            <td>{record.tratamiento}</td>
-                          </tr>
+            {/* Sección de Mascotas */}
+            <div className="user-detail-pets">
+                <h4><FaPaw /> Mascotas de {userDetails.nombre}</h4>
+                {userPets.length > 0 ? (
+                    <div className="pets-grid">
+                        {userPets.map(pet => (
+                            <div key={pet.id_mascota} className="pet-card">
+                                <div className="card-header">
+                                    <h3>{pet.nombre}</h3>
+                                    <span className="vet-id">ID: {pet.id_mascota}</span>
+                                </div>
+                                <div className="card-body">
+                                    <div className="info-item"><FaPaw className="icon" /> <strong>Especie:</strong> <span>{pet.especie}</span></div>
+                                    <div className="info-item"><FaVenusMars className="icon" /> <strong>Sexo:</strong> <span>{pet.sexo || 'Desconocido'}</span></div>
+                                    <div className="info-item"><i className="fas fa-dog"></i> <strong>Raza:</strong> <span>{pet.raza || 'N/A'}</span></div>
+                                    <div className="info-item"><FaBirthdayCake className="icon" /> <strong>Edad:</strong> <span>{pet.edad ? `${pet.edad} años` : 'N/A'}</span></div>
+                                    <div className="info-item"><FaWeight className="icon" /> <strong>Peso:</strong> <span>{pet.peso ? `${pet.peso} kg` : 'N/A'}</span></div>
+                                    <div className="info-item"><FaCalendarAlt className="icon" /> <strong>Fecha Nac:</strong> <span>{formatDate(pet.fecha_nacimiento)}</span></div>
+                                    <div className="info-item"><FaPalette className="icon" /> <strong>Color:</strong> <span>{pet.color || 'N/A'}</span></div>
+                                    <div className="info-item"><FaMicrochip className="icon" /> <strong>Microchip:</strong> <span>{pet.microchip || 'N/A'}</span></div>
+                                    <div className="info-item"><FaCalendarAlt className="icon" /> <strong>Registrado:</strong> <span>{formatDate(pet.fecha_registro)}</span></div>
+                                </div>
+                            </div>
                         ))}
-                      </tbody>
-                    </table>
-                  ) : (
-                    <p className="no-records">No hay historiales médicos para esta mascota.</p>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="no-results">
-            <FaInfoCircle className="info-icon" /> Este usuario no tiene mascotas registradas.
-          </div>
-        )}
-      </div>
-    </div>
-  );
+                    </div>
+                ) : (
+                    <div className="no-results small">
+                        <FaInfoCircle className="info-icon" />
+                        <p>Este propietario no tiene mascotas registradas.</p>
+                    </div>
+                )}
+            </div>
+
+            <div className="modal-footer">
+                <button onClick={onClose} className="cancel-btn">
+                    <FaTimes /> Cerrar
+                </button>
+            </div>
+        </motion.div>
+    );
 }
 
 export default AdminUserDetail;
