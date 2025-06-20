@@ -47,23 +47,25 @@ import EditarPerfilVeterinario from "./Pages/InicioVeterinario/EditarPerfilVeter
 import MainVeterinario from "./Pages/InicioVeterinario/MainVeterinario";
 import NavegacionVeterinario from "./Pages/InicioVeterinario/NavegacionVeterinario";
 import ConfiguracionVeterinario from "./Pages/InicioVeterinario/ConfiguracionVeterinario";
+// Importa el componente para crear citas de veterinario si lo tienes
+import CrearCitaVeterinario from "./Pages/InicioVeterinario/CrearCitaVeterinario"; // ASUMIMOS ESTE COMPONENTE
 
 // Componentes de Administrador
 import AdminDashboard from "./Pages/InicioAdministrador/AdminDashboard";
-import AdminServices from "./Pages/InicioAdministrador/AdminServices"; // Ya importado desde components
-import AdminVets from "./Pages/InicioAdministrador/AdminVets";         // Ya importado desde components
-import AdminAdmins from "./Pages/InicioAdministrador/AdminAdmins";     // Ya importado desde components
-import AdminProfile from "./Pages/InicioAdministrador/AdminProfile";   // Ya importado desde components
-import AdminStats from "./Pages/InicioAdministrador/AdminStats";       // Ya importado desde components
-import AdminUsers from "./Pages/InicioAdministrador/AdminUsers"; // Ruta corregida si está en Components
-import AdminUserDetail from "./Pages/InicioAdministrador/AdminUserDetail"; // Nuevo componente
+import AdminServices from "./Pages/InicioAdministrador/AdminServices";
+import AdminVets from "./Pages/InicioAdministrador/AdminVets";
+import AdminAdmins from "./Pages/InicioAdministrador/AdminAdmins";
+import AdminProfile from "./Pages/InicioAdministrador/AdminProfile";
+import AdminStats from "./Pages/InicioAdministrador/AdminStats";
+import AdminUsers from "./Pages/InicioAdministrador/AdminUsers";
+import AdminUserDetail from "./Pages/InicioAdministrador/AdminUserDetail";
 import AdminAppointments from "./Pages/InicioAdministrador/AdminAppointments";
 import AdminMedicalRecords from "./Pages/InicioAdministrador/AdminMedicalRecords";
 import AdminSettings from "./Pages/InicioAdministrador/AdminSettings";
-import ServicesManagement from "./Pages/InicioAdministrador/ServicesManagement"; // Asegúrate de que la ruta sea correcta
-import VetsManagement from "./Pages/InicioAdministrador/VetsManagement"; // Asegúrate de que la ruta sea correcta
-import AdminsManagement from "./Pages/InicioAdministrador/AdminsManagement"; // Asegúrate de que la ruta sea correcta
-import UserProfile from "./Pages/InicioAdministrador/UserProfile"; // Asegúrate de que la ruta sea correcta
+import ServicesManagement from "./Pages/InicioAdministrador/ServicesManagement";
+import VetsManagement from "./Pages/InicioAdministrador/VetsManagement";
+import AdminsManagement from "./Pages/InicioAdministrador/AdminsManagement";
+import UserProfile from "./Pages/InicioAdministrador/UserProfile";
 
 
 function App() {
@@ -84,13 +86,13 @@ function App() {
         {/* Rutas de administrador */}
         <Route element={<Protegida user={user} allowedRoles={['admin']} />}>
           <Route path="/admin" element={<AdminDashboard user={user} setUser={setUser} />}>
-            <Route index element={<AdminStats user={user} />} /> {/* Pasar user a AdminStats */}
-            <Route path="dashboard" element={<AdminStats user={user} />} /> {/* Pasar user a AdminStats */}
-            <Route path="services" element={<ServicesManagement user={user} />} /> {/* Pasar user */}
-            <Route path="veterinarians" element={<VetsManagement user={user} />} /> {/* Pasar user */}
-            <Route path="administrators" element={<AdminsManagement user={user} />} /> {/* Pasar user */}
-            <Route path="users" element={<AdminUsers user={user} />} /> {/* Nueva ruta para Usuarios, pasar user */}
-            <Route path="users/:userId" element={<AdminUserDetail user={user} />} /> {/* Nueva ruta para detalle de usuario */}
+            <Route index element={<AdminStats user={user} />} />
+            <Route path="dashboard" element={<AdminStats user={user} />} />
+            <Route path="services" element={<ServicesManagement user={user} />} />
+            <Route path="veterinarians" element={<VetsManagement user={user} />} />
+            <Route path="administrators" element={<AdminsManagement user={user} />} />
+            <Route path="users" element={<AdminUsers user={user} />} />
+            <Route path="users/:userId" element={<AdminUserDetail user={user} />} />
             <Route path="appointments" element={<AdminAppointments user={user} />} />
             <Route path="medical-records" element={<AdminMedicalRecords user={user} />} />
             <Route path="settings" element={<AdminSettings user={user} />} />
@@ -112,6 +114,7 @@ function App() {
             <Route path="mascotas/registrar" element={<RegistrarMascotaVeterinario />} />
             <Route path="mascotas/editar/:id" element={<EditarMascotaVeterinario />} />
             <Route path="citas" element={<ListaCitasVeterinario />} />
+            <Route path="citas/agendar" element={<CrearCitaVeterinario />} /> {/* NUEVA RUTA PARA AGENDAR CITAS DE VETERINARIO */}
             <Route path="citas/:id" element={<DetalleCitaVeterinario />} />
             <Route path="historiales" element={<ListaHistorialesVeterinario />} />
             <Route path="historiales/:id" element={<DetalleHistorialVeterinario />} />

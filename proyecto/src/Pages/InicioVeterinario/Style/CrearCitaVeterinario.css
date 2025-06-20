@@ -1,0 +1,434 @@
+/* Colores y Variables (opcional, para mantener consistencia) */
+:root {
+  --primary-color: #007bff; /* Azul vibrante */
+  --secondary-color: #6c757d; /* Gris para botones secundarios */
+  --success-color: #28a745; /* Verde para éxito */
+  --danger-color: #dc3545; /* Rojo para errores */
+  --warning-color: #ffc107; /* Amarillo para advertencias */
+  --info-color: #17a2b8; /* Azul claro para información */
+  --light-bg: #f8f9fa; /* Fondo claro */
+  --dark-text: #343a40; /* Texto oscuro */
+  --border-color: #ced4da; /* Color de borde de inputs */
+  --box-shadow-light: rgba(0, 0, 0, 0.1); /* Sombra suave */
+}
+
+body {
+  background-color: #f0f2f5; /* Un fondo gris claro para la página */
+  margin: 0;
+  padding: 0;
+}
+
+/* Contenedor principal de la página */
+.crear-cita-container {
+  max-width: 800px;
+  margin: 40px auto; /* Centrar y dar espacio arriba/abajo */
+  padding: 30px;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); /* Sombra más pronunciada */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: var(--dark-text);
+  display: flex; /* Añadir display flex al contenedor principal */
+  flex-direction: column; /* Apilar sus hijos verticalmente */
+  gap: 30px; /* Espacio entre el header, el form y los mensajes */
+}
+
+/* Encabezado */
+.header {
+  background-color: #00bcd4; /* Color de fondo del encabezado */
+  color: white;
+  padding: 25px 30px;
+  border-radius: 10px;
+  /* margin-bottom: 30px; /* Ya no es necesario con 'gap' en el contenedor principal */
+  text-align: center;
+  position: relative; /* Mantener por si hay algún pseudo-elemento o efecto */
+  overflow: hidden;
+  display: flex; /* Usar flexbox */
+  flex-direction: column; /* Apilar elementos verticalmente */
+  align-items: center; /* Centrar horizontalmente */
+  justify-content: center; /* Centrar verticalmente si hay espacio extra */
+  gap: 8px; /* Espacio entre los elementos del header */
+  box-shadow: 0 4px 10px rgba(0, 188, 212, 0.2); /* Sombra para el header */
+}
+
+.header h2 {
+  margin: 0;
+  font-size: 1.8em;
+  font-weight: 600;
+}
+
+.header-icon {
+  font-size: 2.2em;
+  margin-bottom: 10px;
+}
+
+.help-text {
+  font-size: 0.95em;
+  margin: 0;
+  line-height: 1.4;
+  opacity: 0.9;
+}
+
+/* Mensajes de carga */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  font-size: 1.2em;
+  color: var(--primary-color);
+  text-align: center;
+  margin-top: 50px;
+}
+
+.loading-container .spinner {
+  font-size: 3em;
+  margin-bottom: 15px;
+}
+
+/* Contenedor de error inicial (si no se pueden cargar los datos) */
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  font-size: 1.2em;
+  color: var(--danger-color);
+  text-align: center;
+  margin-top: 50px;
+  padding: 20px;
+  border: 1px solid var(--danger-color);
+  border-radius: 8px;
+  background-color: #ffebe9;
+}
+
+.error-container .error-icon {
+  font-size: 3em;
+  margin-bottom: 15px;
+}
+
+/* Estilos del formulario */
+.cita-form {
+  display: flex;
+  flex-direction: column;
+  gap: 25px; /* Espacio entre secciones del formulario */
+  /* Removido margin-bottom aquí ya que el 'gap' del padre lo maneja */
+}
+
+.form-section {
+  background-color: var(--light-bg);
+  padding: 25px;
+  border-radius: 10px;
+  border: 1px solid #e0e0e0;
+}
+
+.section-title {
+  color: var(--primary-color);
+  font-size: 1.4em;
+  margin-top: 0;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.input-group {
+  margin-bottom: 20px;
+}
+
+.label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: var(--dark-text);
+  font-size: 0.95em;
+}
+
+.input-with-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-field,
+.select-field,
+.time-picker-input {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 1em;
+  color: var(--dark-text);
+  box-sizing: border-box;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+.input-field:focus,
+.select-field:focus,
+.time-picker-input:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  outline: none;
+}
+
+.input-icon {
+  position: absolute;
+  right: 15px;
+  color: var(--secondary-color);
+  pointer-events: none;
+}
+
+.select-container {
+  position: relative;
+  width: 100%;
+}
+
+.select-container .select-field {
+  padding-right: 40px;
+}
+
+.select-arrow {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--secondary-color);
+  pointer-events: none;
+}
+
+/* Estilos específicos del DatePicker (Hora) */
+.time-picker-container {
+  position: relative;
+  width: 100%;
+}
+
+.time-picker-input {
+  padding-right: 40px;
+}
+
+.time-icon {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--secondary-color);
+  pointer-events: none;
+}
+
+/* Mensajes de información */
+.info-text {
+  font-size: 0.9em;
+  color: var(--secondary-color);
+  margin-top: -10px;
+  margin-bottom: 20px;
+  padding-left: 5px;
+}
+
+.inline-link {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.inline-link:hover {
+  text-decoration: underline;
+}
+
+/* Botones de acción */
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 30px; /* Aún dejamos un margen superior explícito aquí */
+  padding-top: 20px;
+  border-top: 1px solid #e9ecef;
+}
+
+.primary-button,
+.secondary-button {
+  padding: 12px 25px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.05em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.primary-button {
+  background-color: var(--primary-color);
+  color: white;
+  box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
+}
+
+.primary-button:hover:not(:disabled) {
+  background-color: #0056b3;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0, 123, 255, 0.3);
+}
+
+.primary-button:disabled {
+  background-color: #a0cbed;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.secondary-button {
+  background-color: var(--secondary-color);
+  color: white;
+  box-shadow: 0 4px 10px rgba(108, 117, 125, 0.2);
+}
+
+.secondary-button:hover:not(:disabled) {
+  background-color: #5a6268;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(108, 117, 125, 0.3);
+}
+
+/* Mensajes de alerta (éxito, error) */
+.message {
+  padding: 15px 20px;
+  border-radius: 8px;
+  /* margin-top: 25px; /* Comentado porque el 'gap' del contenedor padre lo maneja */
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.95em;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: relative;
+  /* Asegurarse de que esté en un nuevo contexto de apilamiento si hay problemas de z-index */
+  z-index: 10; 
+}
+
+.success-message {
+  background-color: #e6ffed;
+  color: var(--success-color);
+  border: 1px solid var(--success-color);
+}
+
+.error-message {
+  background-color: #ffe6e6;
+  color: var(--danger-color);
+  border: 1px solid var(--danger-color);
+}
+
+.message .close-message-button {
+  background: none;
+  border: none;
+  color: inherit;
+  font-size: 1.2em;
+  cursor: pointer;
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 5px;
+  line-height: 1;
+  transition: color 0.2s ease;
+}
+
+.message .close-message-button:hover {
+  color: #333;
+}
+
+/* Estilos para el DatePicker (pop-up del calendario y horas) */
+.react-datepicker-wrapper {
+  width: 100%;
+}
+
+.react-datepicker {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.react-datepicker__header {
+  background-color: var(--primary-color);
+  color: white;
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
+  padding-top: 10px;
+}
+
+.react-datepicker__current-month,
+.react-datepicker__day-name {
+  color: white;
+}
+
+.react-datepicker__day--selected,
+.react-datepicker__day--keyboard-selected {
+  background-color: var(--primary-color);
+  color: white;
+  border-radius: 50%;
+}
+
+.react-datepicker__day--selected:hover,
+.react-datepicker__day--keyboard-selected:hover {
+  background-color: #0056b3;
+}
+
+.react-datepicker__day:hover {
+  background-color: #e0e0e0;
+  border-radius: 50%;
+}
+
+/* Estilo para el contenedor de tiempo en DatePicker */
+.react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box {
+  width: 100%;
+}
+
+.react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list li.react-datepicker__time-list-item {
+  padding: 8px 10px;
+}
+
+.react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list li.react-datepicker__time-list-item--selected {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list li.react-datepicker__time-list-item:hover {
+  background-color: #e0e0e0;
+  color: var(--dark-text);
+}
+
+/* Media Queries para responsividad (opcional pero recomendado) */
+@media (max-width: 768px) {
+  .crear-cita-container {
+      margin: 20px auto;
+      padding: 20px;
+  }
+
+  .header {
+      padding: 20px;
+  }
+
+  .header h2 {
+      font-size: 1.5em;
+  }
+
+  .form-section {
+      padding: 15px;
+  }
+
+  .action-buttons {
+      flex-direction: column;
+      gap: 10px;
+  }
+
+  .primary-button,
+  .secondary-button {
+      width: 100%;
+  }
+}
