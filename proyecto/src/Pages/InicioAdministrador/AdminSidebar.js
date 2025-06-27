@@ -8,11 +8,9 @@ import {
     FaUserCog, 
     FaUsers, 
     FaCalendarAlt, 
-    FaNotesMedical, 
-    FaCog,
+    FaNotesMedical,
     FaChevronDown, // Icono para indicar desplegable
     FaChevronUp,   // Icono para indicar replegado
-    FaPaw          // Icono para Mascotas
 } from 'react-icons/fa'; // Importa los iconos de Font Awesome
 
 function AdminSidebar({ activeTab, setActiveTab }) {

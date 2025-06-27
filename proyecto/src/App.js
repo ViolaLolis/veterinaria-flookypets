@@ -22,7 +22,6 @@ import EditarPerfil from "./Pages/InicioUsuario/EditarPerfil.js";
 import DetalleServicio from "./Pages/InicioUsuario/DetalleServicio.js";
 import ChatSoporte from "./Pages/InicioUsuario/ChatSoporte.js";
 import { Protegida } from "./Seguridad/Protegidos.js";
-import CrearCita from "./Pages/InicioUsuario/CrearCita.js";
 import EditarCita from "./Pages/InicioUsuario/EditarCita.js";
 import DetalleHistorial from "./Pages/InicioUsuario/DetalleHistorial.js";
 import AgregarHistorial from "./Pages/InicioUsuario/AgregarHistorial.js";

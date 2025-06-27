@@ -1,587 +1,475 @@
-/* src/Styles/AdminProfile.css - Diseño Premium y Moderno para el Perfil del Administrador */
+/* src/Styles/AdminProfile.css - Diseño Profesional y Moderno */
 
-/* Definición de variables CSS para la paleta de colores y efectos */
-:root {
-  /* Paleta de Colores Inspirada en la Imagen */
-  --primary-color: #00acc1; /* Azul cian vibrante (principal) */
-  --primary-light: #4dd0e1; /* Azul cian más claro */
-  --primary-dark: #007c91;  /* Azul cian más oscuro para sombras profundas */
-  --primary-glow: rgba(0, 172, 193, 0.3); /* Efecto de brillo para enfoque */
-
-  --secondary-background: #ecf0f1; /* Gris muy claro para fondos generales */
-  --surface-white: #ffffff;      /* Blanco puro para tarjetas y modales */
-
-  --text-dark: #2c3e50; /* Gris oscuro para texto principal */
-  --text-medium: #546e7a; /* Gris medio para texto secundario/labels */
-  --text-light: #90a4ae; /* Gris claro para placehoders/bordes suaves */
-
-  --success-color: #2ecc71; /* Verde brillante para éxito */
-  --danger-color: #e74c3c;  /* Rojo intenso para errores/eliminar */
-  --warning-color: #f39c12; /* Naranja para advertencias */
-
-  /* Sombras y Elevación */
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
-  --shadow-md: 0 5px 15px rgba(0, 0, 0, 0.12);
-  --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.15);
-
-  /* Transiciones y animaciones */
-  --transition-fast: all 0.2s ease-out;
-  --transition-medium: all 0.3s ease-in-out;
-  --transition-slow: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-}
-
-/* Contenedor principal de la página de perfil del administrador */
+/* Contenedor principal del perfil */
 .admin-profile-container {
-    padding: 2.5rem; /* Relleno generoso */
-    max-width: 900px; /* Ancho máximo para el contenido */
-    margin: 3rem auto; /* Centrado horizontalmente con margen vertical */
-    min-height: calc(100vh - 6rem); /* Ocupa al menos la altura de la ventana visible */
-    display: flex;
-    flex-direction: column;
-    align-items: center; /* Centra el contenido horizontalmente */
-    background-color: var(--secondary-background); /* Fondo principal suave */
-    border-radius: 16px; /* Bordes notablemente redondeados */
-    box-shadow: var(--shadow-lg); /* Sombra envolvente para un efecto de elevación */
-    transition: var(--transition-medium);
+    background-color: #ffffff;
+    border-radius: 14px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    padding: 2rem;
+    margin: 1.5rem auto;
+    max-width: 900px;
+    border: 1px solid rgba(0, 172, 193, 0.1);
+    animation: fadeIn 0.5s ease-out;
 }
 
-.admin-profile-container:hover {
-    transform: translateY(-5px); /* Pequeña elevación al pasar el ratón */
-    box-shadow: 0 12px 35px rgba(0, 172, 193, 0.2); /* Sombra más pronunciada con un toque de color primario */
-}
-
-/* Encabezado principal de la página de perfil */
+/* Encabezado de la página */
 .admin-content-header {
-    margin-bottom: 2.5rem;
-    text-align: center;
-    width: 100%;
-    padding-bottom: 1.5rem;
-    border-bottom: 2px solid var(--primary-light); /* Línea divisoria elegante */
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
-    flex-wrap: wrap; /* Permite que el contenido se ajuste en pantallas pequeñas */
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e0e0e0;
+    flex-wrap: wrap;
+    gap: 1rem;
 }
 
 .admin-content-header h2 {
-    color: var(--text-dark);
-    font-size: 2.4rem; /* Tamaño de fuente más grande y legible */
-    font-weight: 700;
     display: flex;
     align-items: center;
-    gap: 1rem;
+    font-size: 1.8rem;
+    color: #007c91;
+    font-weight: 700;
     margin: 0;
-    line-height: 1.2;
 }
 
-.admin-content-header .header-icon {
-    font-size: 2.2rem; /* Icono grande y llamativo */
-    color: var(--primary-color);
-    transition: var(--transition-medium);
-    filter: drop-shadow(0 0 8px rgba(0, 172, 193, 0.4)); /* Efecto de brillo sutil */
+.header-icon {
+    font-size: 2.2rem;
+    margin-right: 0.8rem;
+    color: #00acc1;
 }
 
-.admin-content-header:hover .header-icon {
-    transform: rotate(5deg) scale(1.1); /* Rotación y escala sutil al pasar el ratón */
-    filter: drop-shadow(0 0 12px rgba(0, 172, 193, 0.6));
-}
-
-/* Tarjeta de información del perfil */
+/* Tarjeta de Perfil */
 .profile-card {
-    background: var(--surface-white);
-    border-radius: 16px; /* Coherente con el contenedor principal */
-    box-shadow: var(--shadow-md); /* Sombra más suave para el contenido interno */
-    overflow: hidden;
-    width: 100%;
-    max-width: 750px; /* Ancho máximo para la tarjeta */
-    border: 1px solid var(--primary-light); /* Borde sutil del color primario */
     display: flex;
     flex-direction: column;
-}
-
-/* Secciones dentro de la tarjeta de perfil (información personal, seguridad) */
-.profile-section, .password-section {
-    padding: 2.2rem 2.8rem; /* Mayor relleno para espacio y aire */
-    position: relative;
+    gap: 2rem;
 }
 
 .profile-section {
-    border-bottom: 1px solid var(--secondary-background); /* Separador discreto */
+    background-color: #fcfcfc; /* Fondo suave para la sección */
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    border: 1px solid #eceff1;
 }
 
-.password-section {
-    padding-top: 1.8rem; /* Ajuste el relleno superior */
-}
-
-/* Encabezados de las subsecciones */
 .section-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1.8rem;
+    margin-bottom: 1.5rem;
     padding-bottom: 0.8rem;
-    border-bottom: 1px solid var(--text-light); /* Línea divisoria elegante */
+    border-bottom: 1px solid #e0e0e0;
 }
 
 .section-header h3 {
-    color: var(--text-dark);
-    font-size: 1.8rem;
-    font-weight: 600;
     display: flex;
     align-items: center;
-    gap: 0.8rem;
+    font-size: 1.4rem;
+    color: #007c91;
+    font-weight: 600;
     margin: 0;
 }
 
-.section-header .section-icon {
+.section-header .icon {
     font-size: 1.6rem;
-    color: var(--primary-color);
+    margin-right: 0.6rem;
+    color: #00acc1;
 }
 
-/* Visualización de la información del perfil (modo lectura) */
-.profile-info {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); /* Columnas más grandes y adaptables */
-    gap: 1.8rem; /* Mayor espacio entre los elementos */
-}
-
-.info-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 1.5rem;
-    padding: 1.2rem 0; /* Relleno vertical para cada ítem */
-    border-bottom: 1px dashed var(--text-light); /* Separador punteado y ligero */
-    transition: var(--transition-fast);
-}
-
-.info-item:last-child {
-    border-bottom: none;
-    padding-bottom: 0;
-}
-
-.info-item:hover {
-    transform: translateX(8px); /* Desplazamiento sutil al pasar el ratón */
-    background-color: rgba(0, 172, 193, 0.03); /* Fondo muy claro al pasar el ratón */
-    border-radius: 8px; /* Pequeño redondeo en hover */
-}
-
-.info-icon {
-    color: var(--primary-color);
-    font-size: 1.8rem; /* Iconos de información más grandes */
-    min-width: 36px; /* Asegura un ancho fijo para alineación vertical */
-    text-align: center;
-    flex-shrink: 0; /* Evita que el icono se encoja */
-}
-
-.info-label {
-    display: block;
-    font-size: 1rem;
-    color: var(--text-medium);
-    margin-bottom: 0.4rem;
+/* Botones de Editar/Cancelar/Cambiar Contraseña */
+.edit-btn, .cancel-btn, .toggle-btn {
+    background-color: #00acc1;
+    color: #ffffff;
+    padding: 0.6rem 1.2rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
     font-weight: 600;
-    text-transform: uppercase; /* Etiquetas en mayúsculas */
-    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 6px rgba(0, 172, 193, 0.2);
 }
 
-.info-value {
-    font-weight: 500;
-    color: var(--text-dark);
-    font-size: 1.15rem; /* Texto de valor ligeramente más grande */
-    word-break: break-word;
+.edit-btn:hover, .toggle-btn:hover {
+    background-color: #007c91;
+    box-shadow: 0 4px 10px rgba(0, 172, 193, 0.3);
+    transform: translateY(-1px);
 }
 
-/* Formulario de edición */
+.cancel-btn {
+    background-color: #9e9e9e;
+    box-shadow: 0 2px 6px rgba(158, 158, 158, 0.2);
+}
+
+.cancel-btn:hover {
+    background-color: #757575;
+    box-shadow: 0 4px 10px rgba(158, 158, 158, 0.3);
+    transform: translateY(-1px);
+}
+
+.edit-btn:disabled, .cancel-btn:disabled, .toggle-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+/* Formulario de Edición */
 .edit-form {
-    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
 }
 
 .form-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1.8rem;
-    margin-bottom: 2.5rem;
+    gap: 1.5rem;
 }
 
 .form-group {
-    margin-bottom: 0;
+    display: flex;
+    flex-direction: column;
 }
 
 .form-group label {
-    display: block;
-    margin-bottom: 0.7rem;
-    color: var(--text-dark);
+    font-size: 0.9rem;
+    color: #555;
+    margin-bottom: 0.5rem;
     font-weight: 600;
-    font-size: 1rem;
 }
 
-.form-group input, .disabled-input {
-    width: 100%;
-    padding: 1rem 1.2rem; /* Mayor relleno en los inputs */
-    border: 2px solid var(--text-light); /* Borde más pronunciado */
-    border-radius: 10px; /* Bordes más redondeados en inputs */
-    transition: var(--transition-medium);
-    font-family: 'Inter', sans-serif;
-    font-size: 1rem;
-    background-color: var(--surface-white);
-    color: var(--text-dark);
+.form-group input,
+.form-group select,
+.form-group textarea {
+    padding: 0.8rem 1rem;
+    border: 1px solid #b0bec5;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    color: #2c3e50;
+    background-color: #f4f6f9;
+    transition: all 0.3s ease;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    border-color: #00acc1;
+    box-shadow: 0 0 0 3px rgba(0, 172, 193, 0.3);
+    outline: none;
+    background-color: #ffffff;
+}
+
+.form-group input:disabled,
+.form-group textarea:disabled,
+.form-group select:disabled {
+    background-color: #eceff1 !important;
+    color: #7f8c8d !important;
+    cursor: not-allowed;
+    box-shadow: none !important;
 }
 
 .disabled-input {
-    background-color: var(--secondary-background);
-    color: var(--text-medium);
+    padding: 0.8rem 1rem;
+    border: 1px solid #b0bec5;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    color: #7f8c8d;
+    background-color: #eceff1;
     cursor: not-allowed;
-    border-style: dashed; /* Borde punteado para campos deshabilitados */
-    opacity: 0.8;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-.form-group input:focus {
-    border-color: var(--primary-color);
-    outline: none;
-    box-shadow: 0 0 0 4px var(--primary-glow); /* Efecto de brillo suave y envolvente */
-}
-
-/* Mensajes de error en línea */
 .error-message-inline {
-    color: var(--danger-color);
-    font-size: 0.9rem;
-    margin-top: 0.6rem;
-    display: block;
-    font-weight: 500;
+    color: #e74c3c;
+    font-size: 0.8rem;
+    margin-top: 0.4rem;
+    animation: fadeIn 0.3s ease-out;
 }
 
-/* Botones de acción */
-.edit-btn, .toggle-btn, .cancel-btn, .save-btn {
-    padding: 0.8rem 1.6rem;
-    border: none;
-    border-radius: 50px; /* Botones más redondeados (pill-shaped) */
-    cursor: pointer;
-    transition: var(--transition-medium);
+.form-actions {
     display: flex;
-    align-items: center;
-    gap: 0.8rem;
-    font-weight: 600;
-    font-size: 1rem;
-    text-decoration: none;
-    justify-content: center;
-    box-shadow: var(--shadow-sm); /* Sombra pequeña para todos los botones */
-}
-
-.edit-btn {
-    background-color: var(--primary-color);
-    color: white;
-}
-
-.edit-btn:hover {
-    background-color: var(--primary-dark);
-    transform: translateY(-3px); /* Elevación más notable */
-    box-shadow: var(--shadow-md); /* Sombra más grande al pasar el ratón */
-}
-
-.toggle-btn { /* Para el botón "Cambiar Contraseña" */
-    background-color: var(--text-medium);
-    color: white;
-}
-
-.toggle-btn:hover {
-    background-color: var(--text-dark);
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-md);
-}
-
-.cancel-btn {
-    background-color: var(--text-light);
-    color: var(--text-dark);
-    border: 1px solid var(--text-medium);
-}
-
-.cancel-btn:hover {
-    background-color: var(--text-medium);
-    color: var(--surface-white);
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-md);
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e0e0e0;
 }
 
 .save-btn {
-    background-color: var(--success-color);
-    color: white;
-    margin-top: 1.5rem;
+    background-color: #00acc1;
+    color: #ffffff;
+    padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 172, 193, 0.2);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .save-btn:hover {
-    background-color: #27ae60;
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-md);
+    background-color: #007c91;
+    box-shadow: 0 6px 12px rgba(0, 172, 193, 0.3);
+    transform: translateY(-2px);
 }
 
-.save-btn:disabled, .edit-btn:disabled, .toggle-btn:disabled, .cancel-btn:disabled {
+.save-btn:disabled {
     opacity: 0.6;
     cursor: not-allowed;
-    transform: none;
     box-shadow: none;
+    transform: none;
 }
 
-/* Contenedor de botones para el formulario de edición */
-.form-actions {
-    display: flex;
-    justify-content: flex-end; /* Alinea los botones a la derecha */
+/* Información de Perfil (Modo Vista) */
+.profile-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 1rem;
-    margin-top: 1.5rem;
 }
 
-/* Estilo de notificaciones flotantes */
-.notification {
-    position: fixed;
-    bottom: 2rem;
-    right: 2rem;
-    padding: 1.2rem 2rem;
-    border-radius: 12px; /* Bordes redondeados */
-    box-shadow: var(--shadow-lg); /* Sombra prominente */
-    z-index: 1000;
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    font-size: 0.95rem;
+    color: #2c3e50;
+    background-color: #fcfcfc;
+    padding: 0.8rem;
+    border-radius: 8px;
+    border: 1px solid #eceff1;
+    transition: all 0.2s ease-in-out; /* Suave transición al pasar el mouse */
+}
+
+.info-item:hover {
+    background-color: #e0f7fa; /* Fondo azul muy claro al pasar el mouse */
+    border-color: #b2ebf2; /* Borde más azul */
+    box-shadow: 0 2px 10px rgba(0, 172, 193, 0.05);
+}
+
+.info-item .info-icon {
+    font-size: 1.2rem;
+    color: #00acc1;
+    flex-shrink: 0; /* Evita que el icono se encoja */
+}
+
+.info-item .info-label {
+    font-weight: 600;
+    color: #555;
+    min-width: 80px; /* Ancho mínimo para las etiquetas */
+}
+
+.info-item .info-value {
+    flex-grow: 1;
+    word-break: break-word; /* Permite que el texto largo se rompa */
+}
+
+/* Mensajes de Carga y Error */
+.admin-profile-container.loading-state,
+.admin-profile-container.error-state,
+.admin-profile-container.no-data-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+    text-align: center;
+}
+
+.loading-spinner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    color: #007c91;
+    font-size: 1.1rem;
+}
+
+.loading-spinner .spinner-icon {
+    font-size: 3rem;
+    color: #00acc1;
+    animation: spin 1.2s linear infinite;
+}
+
+.error-message, .info-message {
+    background-color: #ffebee;
+    color: #c62828;
+    padding: 1.5rem;
+    border-radius: 10px;
+    text-align: center;
+    margin: 2rem auto;
+    max-width: 700px;
+    box-shadow: 0 4px 12px rgba(244, 67, 54, 0.1);
     display: flex;
     align-items: center;
     gap: 1rem;
+    font-weight: 500;
+    border: 1px solid #ef9a9a;
+}
+
+.info-message {
+    background-color: #e3f2fd;
+    color: #1565c0;
+    border: 1px solid #90caf9;
+    box-shadow: 0 4px 12px rgba(33, 150, 243, 0.1);
+}
+
+.error-message .info-icon, .info-message .info-icon {
+    font-size: 1.8rem;
+    color: #d32f2f;
+}
+.info-message .info-icon {
+    color: #1976D2;
+}
+
+/* Notificaciones */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 1rem 1.5rem;
+    border-radius: 10px;
+    font-size: 0.95rem;
     font-weight: 600;
-    font-size: 1.1rem;
-    animation: fadeInSlideUp 0.4s ease-out; /* Nueva animación de entrada */
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 1001;
+    animation: slideInRight 0.4s ease-out;
 }
 
 .notification.success {
-    background-color: var(--success-color);
-    color: white;
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #a5d6a7;
 }
 
 .notification.error {
-    background-color: var(--danger-color);
-    color: white;
+    background-color: #ffebee;
+    color: #c62828;
+    border: 1px solid #ef9a9a;
 }
 
 .notification-icon {
-    font-size: 1.5rem;
+    font-size: 1.2rem;
 }
 
 .close-notification {
     background: none;
     border: none;
-    color: white;
-    font-size: 1.3rem;
+    color: inherit;
+    font-size: 1rem;
     cursor: pointer;
-    margin-left: 0.8rem;
-    opacity: 0.9;
-    transition: opacity 0.2s ease;
+    margin-left: 0.5rem;
+    transition: transform 0.2s ease;
 }
 
 .close-notification:hover {
-    opacity: 1;
+    transform: rotate(90deg);
 }
 
-/* Animación de entrada para notificaciones */
-@keyframes fadeInSlideUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+/* Animaciones */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
-/* Estilos para los estados de carga y error */
-.loading-state, .error-state, .no-data-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 60vh;
-    text-align: center;
-    background-color: var(--surface-white);
-    border-radius: 16px;
-    box-shadow: var(--shadow-md);
-    padding: 3rem;
-    margin: 3rem auto;
-    max-width: 600px;
-    width: 100%;
-}
-
-.loading-spinner .spinner-icon {
-    font-size: 3.5rem;
-    color: var(--primary-color);
-    animation: spin 1.2s linear infinite;
-    margin-bottom: 1.5rem;
-}
-
-.loading-spinner p, .error-message p, .info-message p {
-    font-size: 1.3rem;
-    color: var(--text-dark);
-    font-weight: 500;
-}
-
-.error-message .info-icon, .no-data-state .info-icon {
-    font-size: 2.5rem;
-    color: var(--danger-color);
-    margin-bottom: 1.5rem;
-}
-
-/* Animación de spinner */
 @keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
-/* Ajustes responsivos */
-@media (max-width: 992px) {
-    .admin-profile-container {
-        padding: 2rem;
-        margin: 2rem auto;
-    }
-    .profile-section, .password-section {
-        padding: 1.8rem 2rem;
-    }
-    .profile-info {
-        grid-template-columns: 1fr; /* Una columna en tablets */
-    }
-    .form-grid {
-        grid-template-columns: 1fr; /* Una columna en tablets */
-    }
-    .notification {
-        bottom: 1.5rem;
-        right: 1.5rem;
-        padding: 1rem 1.5rem;
-        font-size: 1rem;
-    }
-    .notification-icon {
-        font-size: 1.3rem;
-    }
-    .close-notification {
-        font-size: 1.1rem;
-    }
+@keyframes slideInRight {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
 }
 
-@media (max-width: 768px) {
+/* Responsive */
+@media (max-width: 1024px) {
     .admin-profile-container {
         padding: 1.5rem;
         margin: 1rem auto;
-        border-radius: 12px;
-    }
-    .admin-content-header h2 {
-        font-size: 2rem;
-        gap: 0.8rem;
-    }
-    .admin-content-header .header-icon {
-        font-size: 1.8rem;
-    }
-    .profile-section, .password-section {
-        padding: 1.5rem;
-    }
-    .section-header {
-        flex-direction: column; /* Apila título y botón en columna */
-        align-items: flex-start;
-        gap: 0.8rem;
-    }
-    .section-header h3 {
-        font-size: 1.5rem;
-    }
-    .info-icon {
-        font-size: 1.5rem;
-        min-width: 30px;
-    }
-    .info-label {
-        font-size: 0.9rem;
-    }
-    .info-value {
-        font-size: 1.05rem;
-    }
-    .form-group input, .disabled-input {
-        padding: 0.8rem 1rem;
-    }
-    .edit-btn, .toggle-btn, .cancel-btn, .save-btn {
-        width: 100%; /* Botones a ancho completo en pantallas pequeñas */
-        font-size: 0.95rem;
-        padding: 0.7rem 1.2rem;
-    }
-    .form-actions {
-        flex-direction: column;
-        gap: 0.8rem;
-    }
-    .notification {
-        width: calc(100% - 3rem); /* Ocupa casi todo el ancho */
-        right: 1.5rem;
-        bottom: 1rem;
-        padding: 0.8rem 1rem;
-        font-size: 0.9rem;
-        border-radius: 8px;
-    }
-    .notification-icon {
-        font-size: 1.1rem;
-    }
-    .close-notification {
-        font-size: 1rem;
-    }
-    .loading-state, .error-state, .no-data-state {
-        padding: 1.5rem;
-        margin: 1.5rem auto;
-        max-width: 95%;
-    }
-    .loading-spinner .spinner-icon {
-        font-size: 3rem;
-    }
-    .loading-spinner p, .error-message p, .info-message p {
-        font-size: 1.1rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .admin-profile-container {
-        padding: 1rem;
-        margin: 0.8rem auto;
     }
     .admin-content-header h2 {
         font-size: 1.6rem;
-        gap: 0.5rem;
     }
-    .admin-content-header .header-icon {
-        font-size: 1.4rem;
-    }
-    .profile-section, .password-section {
-        padding: 1rem;
+    .header-icon {
+        font-size: 2rem;
     }
     .section-header h3 {
-        font-size: 1.3rem;
+        font-size: 1.2rem;
     }
-    .info-item {
-        flex-direction: column; /* Apila icono y texto en columna */
-        align-items: flex-start;
-        gap: 0.5rem;
-        padding: 0.8rem 0;
+    .section-header .icon {
+        font-size: 1.4rem;
     }
-    .info-icon {
-        font-size: 1.3rem;
-        min-width: unset; /* Permite que el ancho se ajuste */
-    }
-    .info-label {
+    .edit-btn, .cancel-btn, .toggle-btn {
+        padding: 0.5rem 1rem;
         font-size: 0.8rem;
     }
-    .info-value {
-        font-size: 0.95rem;
+    .form-grid {
+        grid-template-columns: 1fr;
     }
-    .form-group input, .disabled-input {
+    .form-group input, .form-group textarea, .form-group select, .disabled-input {
         padding: 0.7rem 0.8rem;
         font-size: 0.9rem;
     }
-    .edit-btn, .toggle-btn, .cancel-btn, .save-btn {
+    .save-btn {
+        padding: 0.7rem 1.2rem;
+        font-size: 0.9rem;
+    }
+    .profile-info {
+        grid-template-columns: 1fr;
+    }
+    .info-item {
+        font-size: 0.9rem;
+    }
+    .info-item .info-label {
+        min-width: 70px;
+    }
+    .notification {
+        width: calc(100% - 40px);
+        left: 20px;
+        right: 20px;
+        padding: 0.8rem 1rem;
         font-size: 0.85rem;
-        padding: 0.6rem 1rem;
     }
-    .loading-state, .error-state, .no-data-state {
-        padding: 1rem;
-        margin: 1rem auto;
-        max-width: 100%;
-        box-shadow: none; /* Eliminar sombra en pantallas muy pequeñas */
+}
+
+@media (max-width: 767px) {
+    .admin-content-header {
+        flex-direction: column;
+        align-items: flex-start;
     }
-    .loading-spinner .spinner-icon {
-        font-size: 2.5rem;
+    .admin-content-header h2 {
+        width: 100%;
+        text-align: center;
+        justify-content: center;
     }
-    .loading-spinner p, .error-message p, .info-message p {
-        font-size: 1rem;
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .section-header h3 {
+        width: 100%;
+        text-align: center;
+        justify-content: center;
+    }
+    .edit-btn, .cancel-btn, .toggle-btn, .save-btn {
+        width: 100%;
+        justify-content: center;
     }
 }

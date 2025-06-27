@@ -1,247 +1,308 @@
-/* AdminSidebar.css - Versión Mejorada y Profesional */
+/* src/Styles/AdminSidebar.css - Diseño Profesional y Moderno */
 
-:root {
-    --sidebar-main: #00acc1;       /* Color principal */
-    --sidebar-dark: #00838f;       /* Tono más oscuro */
-    --sidebar-light: #b2ebf2;      /* Tono más claro */
-    
-    --sidebar-text: rgba(255, 255, 255, 0.95);
-    --sidebar-icon: rgba(255, 255, 255, 0.95);
-    
-    --sidebar-hover-bg: rgba(255, 255, 255, 0.15);
-    --sidebar-active-bg: rgba(255, 255, 255, 0.9);
-    --sidebar-active-text: #00796b;
-    
-    --submenu-bg: #2c3e50;
-    --submenu-hover: #34495e;
-    
-    --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
-  
-  /* Estructura Principal */
+/* Estructura Principal del Sidebar */
+.admin-sidebar {
+  position: fixed;
+  left: 0;
+  top: 60px; /* Ajusta según la altura de tu navbar */
+  bottom: 0;
+  width: 250px; /* Ancho del sidebar */
+  background-color: #ffffff;
+  color: #2c3e50; /* Color de texto oscuro */
+  z-index: 900;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05); /* Sombra suave */
+  transition: all 0.3s ease; /* Transición para colapsar/expandir */
+  overflow-y: auto; /* Permite scroll si el contenido es largo */
+  border-right: 1px solid #eceff1; /* Borde derecho sutil */
+  padding-top: 1.5rem;
+}
+
+.admin-sidebar nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Ítems del Menú Principal */
+.admin-sidebar nav ul li {
+  margin-bottom: 0.5rem;
+}
+
+.admin-sidebar nav ul li span {
+  white-space: nowrap; /* Evita que el texto se rompa */
+}
+
+/* Estilo para todos los enlaces del sidebar */
+.admin-sidebar nav ul li:not(.sidebar-dropdown-parent) {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.9rem 1.5rem;
+  text-decoration: none;
+  color: #555; /* Color de texto normal */
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 0 25px 25px 0; /* Bordes redondeados a la derecha */
+  transition: all 0.3s ease;
+  position: relative; /* Para efectos de hover */
+  overflow: hidden; /* Para que el fondo de hover no se desborde */
+  cursor: pointer; /* Indica que es clickeable */
+}
+
+.admin-sidebar nav ul li:not(.sidebar-dropdown-parent) .sidebar-icon {
+  font-size: 1.2rem;
+  color: #7f8c8d; /* Color de icono normal */
+  transition: color 0.3s ease;
+}
+
+/* Efecto de Hover para los enlaces del Sidebar */
+.admin-sidebar nav ul li:not(.sidebar-dropdown-parent):hover {
+  background-color: #e0f7fa; /* Fondo azul claro al pasar el ratón */
+  color: #007c91; /* Texto azul oscuro */
+  transform: translateX(5px); /* Pequeño desplazamiento */
+}
+
+.admin-sidebar nav ul li:not(.sidebar-dropdown-parent):hover .sidebar-icon {
+  color: #00acc1; /* Icono azul vibrante */
+}
+
+/* Estado Activo del Ítem del Sidebar */
+.admin-sidebar nav ul li.active:not(.sidebar-dropdown-parent) {
+  background-color: #00acc1; /* Azul principal para el activo */
+  color: #ffffff; /* Texto blanco */
+  font-weight: 700;
+  box-shadow: 0 4px 10px rgba(0, 172, 193, 0.2);
+  border-left: 5px solid #005f6b; /* Borde más oscuro para el activo */
+}
+
+.admin-sidebar nav ul li.active:not(.sidebar-dropdown-parent) .sidebar-icon {
+  color: #ffffff;
+}
+
+/* Menú Desplegable (Usuarios) - Contenedor padre */
+.sidebar-dropdown-parent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  user-select: none; /* Evita selección de texto */
+  padding: 0.9rem 1.5rem;
+  text-decoration: none;
+  color: #555;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 0 25px 25px 0;
+  transition: all 0.3s ease;
+  margin-bottom: 0.5rem;
+}
+
+.sidebar-dropdown-parent:hover {
+  background-color: #e0f7fa;
+  color: #007c91;
+  transform: translateX(5px);
+}
+
+/* Estado activo del padre desplegable */
+.sidebar-dropdown-parent.active {
+  background-color: #00acc1;
+  color: #ffffff;
+  font-weight: 700;
+  box-shadow: 0 4px 10px rgba(0, 172, 193, 0.2);
+  border-left: 5px solid #005f6b;
+}
+
+.sidebar-dropdown-parent .sidebar-icon {
+  font-size: 1.2rem;
+  color: #7f8c8d;
+  transition: color 0.3s ease;
+}
+
+.sidebar-dropdown-parent:hover .sidebar-icon,
+.sidebar-dropdown-parent.active .sidebar-icon {
+  color: #ffffff;
+}
+
+.dropdown-arrow {
+  margin-left: auto; /* Empuja la flecha a la derecha */
+  font-size: 0.8rem;
+  transition: transform 0.3s ease;
+}
+
+.sidebar-dropdown-parent.open .dropdown-arrow {
+  transform: rotate(180deg);
+}
+
+/* Submenú (Contenido desplegable) */
+.sidebar-submenu {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out, padding 0.3s ease-out; /* También transicionar padding */
+  background-color: #f4f6f9; /* Fondo más claro para el submenú */
+  border-radius: 0 0 10px 10px; /* Bordes redondeados inferiores */
+  margin-top: -0.5rem; /* Ajuste para que se vea continuo */
+  margin-left: 1.5rem; /* Indentación */
+  padding-bottom: 0; /* Por defecto sin padding */
+}
+
+.sidebar-submenu.open {
+  max-height: 300px; /* Suficiente para mostrar los elementos */
+  padding-bottom: 0.5rem; /* Añadir padding cuando está abierto */
+}
+
+.sidebar-submenu ul {
+  padding: 0;
+  list-style: none;
+}
+
+.sidebar-submenu li {
+  margin-bottom: 0.2rem;
+}
+
+.sidebar-submenu .sidebar-icon.submenu-icon {
+  font-size: 1rem;
+  color: #555;
+}
+
+.sidebar-submenu li { /* Aplicar estilo a los li directamente para que sean clickeables */
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.7rem 1.5rem 0.7rem 2.5rem; /* Más padding a la izquierda para indentación */
+  font-size: 0.9rem;
+  border-radius: 0 25px 25px 0;
+  color: #555;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.sidebar-submenu li:hover {
+  background-color: #e0f7fa;
+  color: #007c91;
+  transform: translateX(5px);
+}
+
+.sidebar-submenu li.active {
+  background-color: #b2ebf2; /* Azul muy claro para activo en submenú */
+  color: #007c91;
+  border-left: 3px solid #00acc1; /* Borde más sutil */
+  box-shadow: inset 3px 0 8px rgba(0, 172, 193, 0.1);
+  font-weight: 600;
+}
+
+.sidebar-submenu li.active .sidebar-icon {
+  color: #00acc1;
+}
+
+
+/* Scrollbar Personalizada (Webkit) */
+.admin-sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.admin-sidebar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.admin-sidebar::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 3px;
+}
+
+.admin-sidebar::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
   .admin-sidebar {
-    position: fixed;
-    left: 0;
-    top: 70px;
-    bottom: 0;
-    width: 260px;
-    background: linear-gradient(135deg, var(--sidebar-main), var(--sidebar-dark));
-    color: var(--sidebar-text);
-    z-index: 900;
-    transition: var(--transition);
-    box-shadow: var(--shadow);
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
+      width: 65px; /* Sidebar colapsado */
+      padding-top: 0.5rem;
   }
-  
+
   .admin-sidebar nav {
-    padding: 1rem 0;
-    flex-grow: 1;
-  }
-  
-  /* Lista y Elementos */
-  .admin-sidebar ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-  
-  .admin-sidebar li {
-    position: relative;
-    margin: 0.25rem 1rem;
-    border-radius: 6px;
-    overflow: hidden;
-    transition: var(--transition);
-  }
-  
-  /* Enlaces y Contenido */
-  .admin-sidebar li > div {
-    display: flex;
-    align-items: center;
-    padding: 0.75rem 1.25rem;
-    color: var(--sidebar-text);
-    text-decoration: none;
-    font-size: 0.95rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: var(--transition);
-  }
-  
-  /* Iconos */
-  .sidebar-icon {
-    font-size: 1.1rem;
-    margin-right: 1rem;
-    min-width: 1.5rem;
-    text-align: center;
-    color: var(--sidebar-icon);
-    transition: var(--transition);
-  }
-  
-  /* Efectos Hover */
-  .admin-sidebar li:hover {
-    background-color: var(--sidebar-hover-bg);
-  }
-  
-  .admin-sidebar li:hover .sidebar-icon {
-    transform: scale(1.1);
-  }
-  
-  /* Elemento Activo */
-  .admin-sidebar li.active {
-    background-color: var(--sidebar-active-bg);
-    color: var(--sidebar-active-text);
-    font-weight: 600;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  }
-  
-  .admin-sidebar li.active .sidebar-icon {
-    color: var(--sidebar-active-text);
-  }
-  
-  /* Menú Desplegable */
-  .sidebar-dropdown-parent {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    user-select: none;
-  }
-  
-  .dropdown-arrow {
-    font-size: 0.8rem;
-    transition: var(--transition);
-    margin-left: auto;
-  }
-  
-  .sidebar-dropdown-parent.open .dropdown-arrow {
-    transform: rotate(180deg);
-  }
-  
-  /* Submenú */
-  .sidebar-submenu {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.3s ease-out;
-    background-color: var(--submenu-bg);
-    margin: 0 1rem;
-    border-radius: 0 0 6px 6px;
-  }
-  
-  .sidebar-submenu.open {
-    max-height: 500px;
-  }
-  
-  .sidebar-submenu li {
-    margin: 0;
-    border-radius: 0;
-  }
-  
-  .sidebar-submenu li > div {
-    padding: 0.6rem 1.25rem 0.6rem 3rem;
-    font-size: 0.9rem;
-  }
-  
-  .submenu-icon {
-    font-size: 0.9rem;
-    margin-right: 0.75rem;
-  }
-  
-  .sidebar-submenu li:hover {
-    background-color: var(--submenu-hover);
-  }
-  
-  /* Scrollbar Personalizada */
-  .admin-sidebar::-webkit-scrollbar {
-    width: 6px;
-  }
-  
-  .admin-sidebar::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
-  }
-  
-  .admin-sidebar::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 3px;
-  }
-  
-  .admin-sidebar::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.3);
-  }
-  
-  /* Responsive */
-  @media (max-width: 992px) {
-    .admin-sidebar {
-      width: 72px;
-      transform: translateX(-100%);
-    }
-    
-    .admin-sidebar.active {
-      transform: translateX(0);
-    }
-  
-    .admin-sidebar li > div {
+      display: flex;
       flex-direction: column;
-      padding: 1rem 0.5rem;
+      align-items: center;
+  }
+
+  .admin-sidebar nav ul li:not(.sidebar-dropdown-parent) {
+      flex-direction: column; /* Apilar icono y texto */
+      padding: 0.8rem 0.5rem;
       text-align: center;
-    }
-  
-    .sidebar-icon {
+      gap: 0.2rem;
+      border-radius: 10px; /* Ajustar bordes para el colapsado */
+  }
+
+  .admin-sidebar nav ul li:not(.sidebar-dropdown-parent) .sidebar-icon {
       margin-right: 0;
-      margin-bottom: 0.25rem;
-      font-size: 1.3rem;
-    }
-  
-    .admin-sidebar li span {
-      font-size: 0.7rem;
+      font-size: 1.4rem;
+  }
+
+  .admin-sidebar nav ul li:not(.sidebar-dropdown-parent) span {
+      font-size: 0.75rem;
       line-height: 1.2;
-    }
-  
-    .admin-sidebar li.active {
-      border-left: none;
-      border-bottom: 3px solid var(--sidebar-light);
-    }
-  
-    /* Submenú en móvil */
-    .sidebar-submenu {
-      position: absolute;
-      left: 72px;
-      top: 0;
-      width: 200px;
-      z-index: 950;
-      box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.2);
-      border-radius: 0 6px 6px 0;
-    }
-  
-    .sidebar-submenu li > div {
-      flex-direction: row;
-      padding: 0.75rem 1rem;
+      white-space: normal; /* Permitir que el texto se envuelva si es muy largo */
+  }
+
+  .admin-sidebar nav ul li.active:not(.sidebar-dropdown-parent) {
+      border-left: none; /* Eliminar borde izquierdo */
+      border: 1px solid #005f6b; /* Borde completo para el activo */
+  }
+
+  .sidebar-dropdown-parent {
+      flex-direction: column;
+      padding: 0.8rem 0.5rem;
+      text-align: center;
+      gap: 0.2rem;
+      border-radius: 10px;
+  }
+
+  .sidebar-dropdown-parent .sidebar-icon {
+      margin-right: 0;
+      font-size: 1.4rem;
+  }
+
+  .sidebar-dropdown-parent span {
+      font-size: 0.75rem;
+      line-height: 1.2;
+  }
+
+  .dropdown-arrow {
+      position: absolute; /* Posicionar la flecha para que no afecte el layout */
+      bottom: 5px;
+      right: 5px;
+      font-size: 0.7rem;
+  }
+
+  /* Submenú en modo colapsado */
+  .sidebar-submenu {
+      position: absolute; /* Superponer el submenú */
+      left: 65px; /* A la derecha del sidebar colapsado */
+      top: auto; /* Se ajustará dinámicamente */
+      width: 180px; /* Ancho del submenú */
+      box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.1);
+      border-radius: 0 10px 10px 0;
+      z-index: 950; /* Por encima del contenido principal */
+      margin-left: 0;
+      padding-bottom: 0;
+  }
+
+  .sidebar-submenu li {
+      padding: 0.7rem 1rem;
+      font-size: 0.85rem;
       text-align: left;
-    }
-  
-    .sidebar-submenu .submenu-icon {
-      margin-right: 0.75rem;
+      flex-direction: row; /* Volver a fila en el submenú */
+      border-radius: 0; /* Sin bordes redondeados en el submenú */
+  }
+
+  .sidebar-submenu li .sidebar-icon {
+      margin-right: 0.5rem;
       font-size: 1rem;
-    }
   }
-  
-  /* Animaciones */
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateX(-10px); }
-    to { opacity: 1; transform: translateX(0); }
-  }
-  
-  .admin-sidebar li {
-    animation: fadeIn 0.3s forwards;
-  }
-  
-  .admin-sidebar li:nth-child(1) { animation-delay: 0.05s; }
-  .admin-sidebar li:nth-child(2) { animation-delay: 0.1s; }
-  .admin-sidebar li:nth-child(3) { animation-delay: 0.15s; }
-  .admin-sidebar li:nth-child(4) { animation-delay: 0.2s; }
-  .admin-sidebar li:nth-child(5) { animation-delay: 0.25s; }
-  .admin-sidebar li:nth-child(6) { animation-delay: 0.3s; }
-  .admin-sidebar li:nth-child(7) { animation-delay: 0.35s; }
-  .admin-sidebar li:nth-child(8) { animation-delay: 0.4s; }
-  .admin-sidebar li:nth-child(9) { animation-delay: 0.45s; }
-  .admin-sidebar li:nth-child(10) { animation-delay: 0.5s; }
+}

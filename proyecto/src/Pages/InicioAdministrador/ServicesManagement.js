@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { FaSearch, FaPlus, FaEdit, FaTrash, FaTimes, FaSave, FaSpinner, FaInfoCircle, FaConciergeBell, FaDollarSign, FaClock } from 'react-icons/fa';
+import { FaSearch, FaPlus, FaEdit, FaTrash, FaTimes, FaSave, FaSpinner, FaInfoCircle, FaConciergeBell } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 import { authFetch } from './api'; // Importa la función authFetch centralizada
-import './Styles/AdminStyles.css'; // Asegúrate de que este archivo CSS existe y contiene los estilos necesarios
+import './Styles/ServicesManagement.css'; // Asegúrate de que este archivo CSS existe y contiene los estilos necesarios
 
 function ServicesManagement({ user }) {
     const [services, setServices] = useState([]);

@@ -1,1375 +1,569 @@
-/* src/Styles/AdminStyles.css - Diseño Premium, Moderno y Detallado */
+/* src/Styles/AdminStyles.css - Diseño Premium, Moderno y Detallado para el Panel de Administración */
 
 /* ===================================================================== */
-/* 0. Variables CSS Personalizadas (Custom CSS Properties)               */
-/* Define la paleta de colores, sombras, radios de borde y transiciones */
+/* 0. Paleta de Colores y Variables (Solo para referencia, no se usa :root) */
+/* Se definen directamente en las reglas CSS para evitar conflictos globales */
 /* ===================================================================== */
-:root {
-  /* Paleta de Colores Principal: Inspirada en un tono cian vibrante */
-  --primary-color: #00acc1; /* Azul cian vibrante (principal) */
-  --primary-light: #4dd0e1; /* Azul cian más claro para acentos y hover */
-  --primary-dark: #007c91;  /* Azul cian más oscuro para sombras profundas y texto principal */
-  --primary-glow: rgba(0, 172, 193, 0.3); /* Efecto de brillo para enfoque */
-  --primary-border: rgba(0, 172, 193, 0.5); /* Borde para elementos primarios */
+/* Colores Principales */
+/* --primary-color: #00acc1;  Azul cian vibrante (principal) */
+/* --primary-light: #4dd0e1;  Azul cian más claro para acentos y hover */
+/* --primary-dark: #007c91;   Azul cian más oscuro para sombras profundas y texto principal */
+/* --primary-glow: rgba(0, 172, 193, 0.3); Efecto de brillo para enfoque */
+/* --primary-border: rgba(0, 172, 193, 0.5); Borde para elementos primarios */
 
-  /* Colores de Fondo y Superficie */
-  --secondary-background: #ecf0f1; /* Gris muy claro para fondos generales (suave) */
-  --surface-white: #ffffff;      /* Blanco puro para tarjetas, modales y superficies */
-  --surface-light-grey: #f4f6f9; /* Gris muy claro para fondos sutiles de componentes */
+/* Colores de Fondo y Superficie */
+/* --secondary-background: #ecf0f1; Gris muy claro para fondos generales (suave) */
+/* --surface-white: #ffffff;       Blanco puro para tarjetas, modales y superficies */
+/* --surface-light-grey: #f4f6f9;  Gris muy claro para fondos sutiles de componentes */
 
-  /* Colores de Texto */
-  --text-dark: #2c3e50;    /* Gris oscuro profundo para texto principal */
-  --text-medium: #546e7a;  /* Gris medio para texto secundario, etiquetas y placehoders */
-  --text-light: #90a4ae;   /* Gris claro para placehoders, bordes suaves y texto menos prominente */
-  --text-link: #3498db;    /* Azul para enlaces */
+/* Colores de Texto */
+/* --text-dark: #2c3e50;     Gris oscuro profundo para texto principal */
+/* --text-medium: #555;     Gris medio para texto secundario */
+/* --text-light: #7f8c8d;    Gris claro para placeholders y texto menos prominente */
+/* --text-white: #ffffff;    Blanco para texto sobre fondos oscuros */
 
-  /* Colores de Estado (Feedback para el usuario) */
-  --success-color: #2ecc71;   /* Verde brillante para éxito y confirmación */
-  --success-light: rgba(46, 204, 113, 0.15); /* Verde claro para fondos de éxito */
-  --danger-color: #e74c3c;    /* Rojo intenso para errores, eliminar y acciones críticas */
-  --danger-light: rgba(231, 76, 60, 0.15);   /* Rojo claro para fondos de error */
-  --warning-color: #f39c12;   /* Naranja para advertencias y estados pendientes */
-  --warning-light: rgba(243, 156, 18, 0.15);  /* Naranja claro para fondos de advertencia */
-  --info-color: #3498db;      /* Azul claro para información y estados de progreso */
-  --info-light: rgba(52, 152, 219, 0.15);    /* Azul claro para fondos de información */
-  --neutral-color: #7f8c8d;   /* Gris para estados neutrales o deshabilitados */
-  --neutral-light: rgba(127, 140, 141, 0.15); /* Gris claro para fondos neutrales */
+/* Colores de Estado */
+/* --success-color: #4CAF50;  Verde para éxito */
+/* --error-color: #F44336;   Rojo para errores */
+/* --warning-color: #FFC107; Amarillo para advertencias */
+/* --info-color: #2196F3;    Azul para información */
 
-  /* Sombras y Elevación (para dar profundidad y jerarquía) */
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08); /* Sombra pequeña */
-  --shadow-md: 0 6px 20px rgba(0, 0, 0, 0.1); /* Sombra mediana */
-  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.15); /* Sombra grande */
-  --inner-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.06); /* Sombra interna para inputs */
+/* Sombras */
+/* --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.08); */
+/* --shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.1); */
+/* --shadow-deep: 0 8px 20px rgba(0, 0, 0, 0.15); */
 
-  /* Bordes y Radios de Borde (para estética y usabilidad) */
-  --border-radius-pill: 50px;    /* Bordes muy redondeados (píldora) */
-  --border-radius-lg: 16px;      /* Bordes grandes */
-  --border-radius-md: 10px;      /* Bordes medianos (más comunes) */
-  --border-radius-sm: 6px;       /* Bordes pequeños */
+/* Bordes y Radios */
+/* --border-radius-sm: 6px; */
+/* --border-radius-md: 10px; */
+/* --border-radius-lg: 14px; */
 
-  /* Transiciones (para animaciones suaves) */
-  --transition-ease: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); /* Transición con "rebote" */
-  --transition-fast: all 0.2s ease-out; /* Transición rápida */
-}
+/* Transiciones */
+/* --transition-ease: all 0.3s ease; */
+/* --transition-fast: all 0.2s ease-out; */
+
 
 /* ===================================================================== */
-/* 1. Estilos Generales y Reseteo (Base Styles and Reset)                */
-/* Define reglas básicas para el HTML y el Body para asegurar consistencia */
+/* 1. Estilos Generales del Contenedor de Administración                 */
+/* Aplica a los contenedores principales de cada sección de gestión.     */
 /* ===================================================================== */
-*, *::before, *::after {
-  box-sizing: border-box; /* Asegura que padding y border no aumenten el tamaño final */
-  margin: 0;             /* Elimina márgenes por defecto */
-  padding: 0;            /* Elimina paddings por defecto */
+.admin-content-container {
+  background-color: #ffffff; /* Blanco puro para el fondo del contenido */
+  border-radius: 14px; /* Bordes redondeados grandes */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Sombra suave */
+  padding: 2rem; /* Espaciado interno generoso */
+  margin-bottom: 2rem; /* Margen inferior para separar secciones */
+  transition: all 0.3s ease; /* Transición suave para cambios */
+  overflow-x: auto; /* Permite desplazamiento horizontal en caso de tablas grandes */
 }
 
-html {
-  font-size: 16px; /* Base para unidades rem */
-  scroll-behavior: smooth; /* Desplazamiento suave para anclas */
-}
-
-body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
-  line-height: 1.6; /* Altura de línea legible */
-  color: var(--text-dark); /* Color de texto principal */
-  background-color: var(--secondary-background); /* Color de fondo general */
-  -webkit-font-smoothing: antialiased; /* Suavizado de fuentes para WebKit */
-  -moz-osx-font-smoothing: grayscale; /* Suavizado de fuentes para Firefox */
-  min-height: 100vh; /* Asegura que el body ocupe al menos la altura de la ventana */
-  display: flex; /* Permite una distribución flexible del contenido principal */
-  flex-direction: column; /* Contenido apilado verticalmente */
-}
-
-a {
-  text-decoration: none; /* Elimina el subrayado de los enlaces */
-  color: var(--text-link); /* Color de enlace por defecto */
-  transition: color 0.2s ease; /* Transición suave al cambiar color */
-}
-
-a:hover {
-  color: var(--primary-color); /* Color de enlace al pasar el ratón */
-}
-
-button {
-  border: none;
-  background: none;
-  cursor: pointer;
-  font-family: inherit;
-  transition: var(--transition-ease);
-  user-select: none; /* Evita que el texto del botón sea seleccionado */
-}
-
-button:focus-visible {
-  outline: 2px solid var(--primary-color); /* Outline para accesibilidad */
-  outline-offset: 2px;
-}
-
-/* ===================================================================== */
-/* 2. Estructura de Layout (Layout Structure)                            */
-/* Estilos para la barra de navegación, sidebar y contenedor principal */
-/* ===================================================================== */
-
-/* --- 2.1. Barra de Navegación Superior (Admin Navbar) --- */
-.admin-navbar {
-  position: fixed; /* Fija la barra de navegación en la parte superior */
-  top: 0;
-  left: 0;
-  right: 0;
-  background-color: var(--primary-color); /* Fondo primario */
-  color: var(--surface-white); /* Texto blanco */
-  padding: 0.9rem 2.5rem; /* Padding generoso */
-  box-shadow: var(--shadow-md); /* Sombra para elevarlo */
-  z-index: 1000; /* Asegura que esté por encima de otros elementos */
-  transition: var(--transition-ease); /* Transición suave para scroll/hover */
-}
-
-/* Efecto de scroll para la barra de navegación */
-.admin-navbar.scrolled {
-  padding: 0.7rem 2.5rem; /* Padding reducido al hacer scroll */
-  background-color: var(--primary-dark); /* Color más oscuro al hacer scroll */
-  box-shadow: var(--shadow-lg); /* Sombra más pronunciada */
-}
-
-.navbar-container {
-  display: flex;
-  justify-content: space-between; /* Espacia los elementos */
-  align-items: center; /* Centra verticalmente */
-  max-width: 1400px; /* Ancho máximo para el contenido de la barra */
-  margin: 0 auto; /* Centra la barra horizontalmente */
-  width: 100%;
-}
-
-.navbar-brand {
-  display: flex;
-  align-items: center;
-  text-decoration: none;
-  color: var(--surface-white);
-  font-weight: 700;
-  font-size: 1.3rem;
-  letter-spacing: 0.5px;
-  transition: var(--transition-ease);
-}
-
-.navbar-brand:hover {
-  opacity: 0.9;
-  transform: translateX(3px); /* Pequeño desplazamiento al pasar el ratón */
-}
-
-.navbar-logo {
-  height: 45px;
-  margin-right: 15px;
-  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3)); /* Sutil brillo en el logo */
-  transition: var(--transition-ease);
-}
-
-.navbar-logo:hover {
-  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.5));
-}
-
-/* --- 2.2. Perfil de Usuario en Navbar (User Profile) --- */
-.user-profile {
-  display: flex;
-  align-items: center;
-  position: relative; /* Para el menú desplegable */
-  cursor: pointer;
-  padding: 0.6rem 1.2rem;
-  border-radius: var(--border-radius-pill);
-  transition: var(--transition-ease);
-  background-color: rgba(255, 255, 255, 0.05); /* Fondo sutil */
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.user-profile:hover {
-  background-color: rgba(255, 255, 255, 0.15);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-  transform: translateY(-1px);
-}
-
-.user-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background-color: var(--primary-light);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 12px;
-  border: 2px solid var(--surface-white);
-  flex-shrink: 0;
-  overflow: hidden; /* Asegura que la imagen de perfil se recorte */
-}
-
-.user-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover; /* Asegura que la imagen cubra el espacio sin distorsión */
-}
-
-.user-icon {
-  color: var(--primary-color); /* Color del icono si no hay avatar */
-  font-size: 1.3rem;
-}
-
-.user-info {
+/* Estilo para el contenedor principal del dashboard (si aplica) */
+.admin-dashboard {
   display: flex;
   flex-direction: column;
-  margin-right: 10px;
-  color: var(--surface-white);
+  min-height: 100vh; /* Ocupa al menos el alto de la ventana */
+  background-color: #ecf0f1; /* Fondo gris claro */
+  font-family: 'Inter', sans-serif; /* Fuente Inter */
+  color: #2c3e50; /* Color de texto oscuro */
 }
 
-.user-name {
-  font-weight: 600;
-  font-size: 0.95rem;
-  white-space: nowrap; /* Evita que el nombre se rompa en varias líneas */
-  overflow: hidden;
-  text-overflow: ellipsis; /* Agrega puntos suspensivos si el texto es muy largo */
-  max-width: 150px; /* Ancho máximo para el nombre */
-}
-
-.user-role {
-  font-size: 0.85rem;
-  opacity: 0.9;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 150px;
-}
-
-.dropdown-menu {
-  position: absolute;
-  top: calc(100% + 10px); /* Espacio debajo del perfil */
-  right: 0;
-  background-color: var(--surface-white);
-  border-radius: var(--border-radius-md);
-  box-shadow: var(--shadow-lg);
-  min-width: 200px;
-  overflow: hidden;
-  z-index: 1001;
-  animation: fadeInScale 0.3s ease-out forwards;
-  transform-origin: top right;
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  padding: 0.5rem 0; /* Padding interno para los items */
-}
-
-/* Animación para el menú desplegable */
-@keyframes fadeInScale {
-  from { opacity: 0; transform: scale(0.9) translateY(-10px); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
-}
-
-.dropdown-item {
-  display: flex;
-  align-items: center;
-  padding: 0.9rem 1.5rem;
-  text-decoration: none;
-  color: var(--text-dark);
-  font-size: 0.95rem;
-  transition: var(--transition-ease);
-  width: 100%;
-  text-align: left;
-  border: none;
-  background: none;
-  cursor: pointer;
-  gap: 0.8rem;
-}
-
-.dropdown-item:hover {
-  background-color: var(--primary-light);
-  color: var(--primary-dark);
-  padding-left: 1.8rem; /* Efecto de desplazamiento */
-}
-
-.dropdown-item i {
-  font-size: 1.1rem;
-  color: var(--text-medium);
-  transition: color 0.3s ease, transform 0.3s ease;
-}
-
-.dropdown-item:hover i {
-  color: var(--primary-dark);
-  transform: translateX(3px);
-}
-
-.logout-item {
-  color: var(--danger-color);
-  border-top: 1px solid var(--secondary-background); /* Separador visual */
-  margin-top: 0.5rem;
-  padding-top: 0.8rem;
-}
-
-.logout-item:hover {
-  background-color: rgba(231, 76, 60, 0.1);
-  color: var(--danger-color);
-}
-
-/* --- 2.3. Sidebar de Navegación Lateral (Admin Sidebar) --- */
-.admin-sidebar {
-  position: fixed;
-  top: 75px; /* Ajusta según la altura de tu navbar */
-  left: 0;
-  bottom: 0;
-  width: 280px; /* Ancho del sidebar */
-  background-color: var(--surface-white);
-  box-shadow: 2px 0 15px rgba(0, 0, 0, 0.08); /* Sombra suave lateral */
-  z-index: 900;
-  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-  border-right: 1px solid rgba(0, 0, 0, 0.03);
-  padding-top: 1.5rem;
-  display: flex;
-  flex-direction: column;
-}
-
-.admin-sidebar nav {
-  flex-grow: 1; /* Ocupa el espacio restante */
-}
-
-.admin-sidebar nav ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.admin-sidebar nav ul li {
-  padding: 1rem 2rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  transition: var(--transition-ease);
-  color: var(--text-medium);
-  font-weight: 500;
-  position: relative;
-  overflow: hidden;
-  margin-bottom: 0.2rem;
-  border-left: 5px solid transparent; /* Borde para el estado activo/hover */
-}
-
-.admin-sidebar nav ul li::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background-color: var(--primary-light);
-  opacity: 0.1; /* Sutil opacidad para el efecto */
-  transition: left 0.3s ease, opacity 0.3s ease;
-  z-index: 0;
-}
-
-.admin-sidebar nav ul li:hover::before {
-  left: 0;
-  opacity: 0.2;
-}
-
-.admin-sidebar nav ul li i {
-  margin-right: 15px;
-  color: var(--primary-color);
-  font-size: 1.2rem;
-  transition: var(--transition-ease);
-  z-index: 1;
-}
-
-.admin-sidebar nav ul li span {
-  font-size: 1rem;
-  z-index: 1;
-  white-space: nowrap; /* Evita que el texto se rompa */
-}
-
-.admin-sidebar nav ul li:hover {
-  color: var(--primary-dark);
-}
-
-.admin-sidebar nav ul li.active {
-  background-color: var(--primary-light);
-  border-left: 5px solid var(--primary-color);
-  color: var(--primary-dark);
-  font-weight: 600;
-  box-shadow: inset 5px 0 15px rgba(0, 172, 193, 0.1);
-}
-
-.admin-sidebar nav ul li.active::before {
-  left: -100%; /* Asegura que el efecto de hover no esté activo al estar ya activo */
-  opacity: 0;
-}
-.admin-sidebar nav ul li.active:hover::before {
-  left: 0;
-  opacity: 0.15; /* Sutil efecto al hacer hover sobre el elemento activo */
-  background-color: var(--primary-dark);
-}
-
-/* --- 2.4. Contenedor Principal de Contenido (Admin Container) --- */
+/* Contenedor del contenido principal */
 .admin-container {
-  margin-left: 280px; /* Ajusta según el ancho del sidebar */
-  margin-top: 75px; /* Ajusta según la altura de la navbar */
-  padding: 2.5rem;
-  min-height: calc(100vh - 75px);
-  transition: margin-left 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-  background-color: var(--secondary-background);
+  display: flex;
+  flex: 1; /* Permite que el contenedor crezca */
+  margin-top: 60px; /* Espacio para la barra de navegación superior */
 }
 
+/* Contenido principal (donde se renderizan las pestañas) */
 .admin-content {
-  background-color: var(--surface-white);
-  border-radius: var(--border-radius-lg);
-  padding: 2.5rem;
-  box-shadow: var(--shadow-md);
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  flex-grow: 1; /* Ocupa el espacio restante */
+  padding: 1.5rem; /* Espaciado interno */
+  overflow-y: auto; /* Permite desplazamiento vertical */
 }
 
 /* ===================================================================== */
-/* 3. Estilos Comunes de Encabezado de Contenido (Content Header Styles) */
-/* Encabezados de secciones, barras de búsqueda y botones de acción */
+/* 2. Encabezados de Sección (Header)                                    */
+/* Estilos para los títulos y acciones principales de cada sección.      */
 /* ===================================================================== */
-
 .admin-content-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2.5rem;
-  flex-wrap: wrap;
-  gap: 1.5rem;
-  padding-bottom: 1.5rem;
-  border-bottom: 2px solid rgba(0, 172, 193, 0.1);
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e0e0e0; /* Línea divisoria sutil */
+  flex-wrap: wrap; /* Permite que los elementos se envuelvan en pantallas pequeñas */
+  gap: 1rem; /* Espacio entre elementos */
 }
 
 .admin-content-header h2 {
-  color: var(--primary-dark);
-  font-size: 2.2rem;
-  font-weight: 700;
-  margin: 0;
   display: flex;
   align-items: center;
-  flex-shrink: 0; /* Evita que el título se encoja */
+  font-size: 1.8rem;
+  color: #007c91; /* Azul oscuro para los títulos */
+  font-weight: 700; /* Negrita */
+  margin: 0;
 }
 
 .header-icon {
-  color: var(--primary-color);
-  margin-right: 1rem;
-  font-size: 2.5rem; /* Icono grande en el encabezado */
+  font-size: 2.2rem;
+  margin-right: 0.8rem;
+  color: #00acc1; /* Azul vibrante */
+  animation: fadeIn 0.5s ease-out; /* Animación de aparición */
+}
+
+.badge {
+  background-color: #e0f7fa; /* Fondo azul muy claro */
+  color: #007c91; /* Texto azul oscuro */
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px; /* Pastilla */
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-left: 1rem;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05); /* Sombra interna sutil */
 }
 
 .header-actions {
   display: flex;
   gap: 1rem;
-  flex-wrap: wrap;
   align-items: center;
-  flex-grow: 1; /* Permite que las acciones ocupen espacio */
-  justify-content: flex-end; /* Alinea a la derecha por defecto */
+  flex-wrap: wrap; /* Permite que los botones se envuelvan */
 }
 
-/* --- 3.1. Caja de Búsqueda (Search Box) --- */
+/* ===================================================================== */
+/* 3. Barra de Búsqueda y Filtros                                        */
+/* Estilos para los inputs de búsqueda y botones de filtro.              */
+/* ===================================================================== */
 .search-box {
   position: relative;
-  flex-grow: 1;
-  min-width: 280px;
-  max-width: 450px;
-  background-color: var(--surface-white);
-  border-radius: var(--border-radius-pill);
-  box-shadow: var(--inner-shadow);
-  transition: var(--transition-ease);
-}
-
-.search-box:focus-within {
-  box-shadow: 0 0 0 3px var(--primary-glow);
-  border-color: var(--primary-color);
+  display: flex;
+  align-items: center;
+  flex-grow: 1; /* Permite que la caja de búsqueda crezca */
+  max-width: 350px; /* Ancho máximo para la búsqueda */
 }
 
 .search-box input {
-  border: 1px solid var(--text-light);
-  outline: none;
-  padding: 0.9rem 1.5rem 0.9rem 3rem; /* Espacio para el icono */
   width: 100%;
-  background: transparent;
-  font-size: 1rem;
-  border-radius: var(--border-radius-pill);
-  color: var(--text-dark);
-  transition: var(--transition-fast);
+  padding: 0.8rem 1rem 0.8rem 2.8rem; /* Espacio para icono y texto */
+  border: 1px solid #b0bec5; /* Borde gris suave */
+  border-radius: 10px; /* Bordes redondeados */
+  font-size: 0.95rem;
+  color: #2c3e50;
+  background-color: #f4f6f9; /* Fondo gris muy claro */
+  transition: all 0.3s ease;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.search-box input::placeholder {
+  color: #7f8c8d; /* Color de placeholder */
 }
 
 .search-box input:focus {
-  border-color: var(--primary-color);
+  border-color: #00acc1; /* Borde azul al enfocar */
+  box-shadow: 0 0 0 3px rgba(0, 172, 193, 0.3); /* Sombra de enfoque azul */
+  outline: none; /* Elimina el contorno predeterminado */
+  background-color: #ffffff; /* Fondo blanco al enfocar */
 }
 
 .search-icon {
   position: absolute;
   left: 1rem;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--primary-color);
-  font-size: 1.15rem;
+  color: #7f8c8d; /* Color del icono de búsqueda */
+  font-size: 1rem;
 }
 
 .clear-search {
   position: absolute;
   right: 0.8rem;
-  top: 50%;
-  transform: translateY(-50%);
   background: none;
   border: none;
-  color: var(--text-medium);
+  color: #7f8c8d;
   cursor: pointer;
-  padding: 0.3rem;
-  border-radius: 50%;
-  transition: var(--transition-ease);
-  font-size: 1.1rem;
+  font-size: 0.9rem;
+  transition: color 0.2s ease;
 }
 
 .clear-search:hover {
-  color: var(--danger-color);
-  background-color: rgba(231, 76, 60, 0.1);
-  transform: translateY(-50%) scale(1.1);
-}
-.clear-search:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-  transform: translateY(-50%);
+  color: #e74c3c; /* Rojo al pasar el ratón */
 }
 
-/* --- 3.2. Botones de Acción (Add Button) --- */
-.add-btn {
-  background-color: var(--primary-color);
-  color: var(--surface-white);
+.filter-buttons {
+  display: flex;
+  gap: 0.5rem;
+  background-color: #f4f6f9; /* Fondo para los botones de filtro */
+  border-radius: 10px;
+  padding: 0.3rem;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.filter-btn {
+  padding: 0.6rem 1rem;
   border: none;
-  padding: 0.9rem 2rem;
-  border-radius: var(--border-radius-pill);
+  border-radius: 8px;
+  background-color: transparent;
+  color: #555;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+}
+
+.filter-btn:hover {
+  background-color: #e0e0e0; /* Gris claro al pasar el ratón */
+  color: #2c3e50;
+}
+
+.filter-btn.active {
+  background-color: #00acc1; /* Azul vibrante para el activo */
+  color: #ffffff; /* Texto blanco */
+  box-shadow: 0 2px 6px rgba(0, 172, 193, 0.3);
+}
+
+/* ===================================================================== */
+/* 4. Botones de Acción (Add, Edit, Delete, Save, Cancel, Toggle Status) */
+/* Estilos para los botones principales de acción.                       */
+/* ===================================================================== */
+.add-btn,
+.btn-primary,
+.save-btn {
+  background-color: #00acc1; /* Azul vibrante */
+  color: #ffffff;
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 600;
   display: flex;
   align-items: center;
-  gap: 0.8rem;
+  gap: 0.6rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0, 172, 193, 0.2);
+  text-transform: uppercase; /* Texto en mayúsculas */
+  letter-spacing: 0.5px;
+}
+
+.add-btn:hover,
+.btn-primary:hover,
+.save-btn:hover {
+  background-color: #007c91; /* Azul más oscuro al pasar el ratón */
+  box-shadow: 0 6px 12px rgba(0, 172, 193, 0.3);
+  transform: translateY(-2px); /* Pequeño levantamiento */
+}
+
+.add-btn:active,
+.btn-primary:active,
+.save-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 172, 193, 0.2);
+}
+
+.edit-btn,
+.btn-edit {
+  background-color: #2196F3; /* Azul para editar */
+  color: #ffffff;
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 8px;
   cursor: pointer;
-  transition: var(--transition-ease);
+  font-size: 0.85rem;
   font-weight: 600;
-  box-shadow: 0 5px 15px rgba(0, 172, 193, 0.3);
-  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(33, 150, 243, 0.2);
+}
+
+.edit-btn:hover,
+.btn-edit:hover {
+  background-color: #1976D2; /* Azul más oscuro al pasar el ratón */
+  box-shadow: 0 4px 10px rgba(33, 150, 243, 0.3);
+  transform: translateY(-1px);
+}
+
+.delete-btn,
+.btn-delete {
+  background-color: #F44336; /* Rojo para eliminar */
+  color: #ffffff;
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(244, 67, 54, 0.2);
+}
+
+.delete-btn:hover,
+.btn-delete:hover {
+  background-color: #D32F2F; /* Rojo más oscuro al pasar el ratón */
+  box-shadow: 0 4px 10px rgba(244, 67, 54, 0.3);
+  transform: translateY(-1px);
+}
+
+.cancel-btn {
+  background-color: #9e9e9e; /* Gris para cancelar */
+  color: #ffffff;
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 8px rgba(158, 158, 158, 0.2);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
-.add-btn:hover {
-  background-color: var(--primary-dark);
-  transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(0, 172, 193, 0.4);
-}
-.add-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  background: linear-gradient(45deg, #a0dce5 0%, #ccebf0 100%); /* Degradado deshabilitado */
-  box-shadow: none;
-  transform: none;
-}
-
-/* --- 3.3. Botones de Filtro (Filter Buttons) --- */
-.filter-buttons {
-  display: flex;
-  gap: 0.7rem;
-  flex-wrap: wrap;
-  justify-content: flex-end; /* Alinea a la derecha */
-}
-
-.filter-btn {
-  padding: 0.8rem 1.5rem;
-  border: 1px solid var(--text-light);
-  background-color: var(--surface-white);
-  border-radius: var(--border-radius-pill);
-  cursor: pointer;
-  transition: var(--transition-ease);
-  color: var(--text-medium);
-  font-weight: 500;
-  font-size: 0.9rem;
-  box-shadow: var(--shadow-sm);
-  text-transform: capitalize; /* Capitaliza el texto del botón de filtro */
-}
-
-.filter-btn:hover {
-  background-color: var(--primary-light);
-  color: var(--primary-dark);
-  border-color: var(--primary-color);
+.cancel-btn:hover {
+  background-color: #757575; /* Gris más oscuro al pasar el ratón */
+  box-shadow: 0 6px 12px rgba(158, 158, 158, 0.3);
   transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(0, 172, 193, 0.15);
 }
 
-.filter-btn.active {
-  background-color: var(--primary-color);
-  color: var(--surface-white);
-  border-color: var(--primary-color);
-  box-shadow: 0 4px 10px rgba(0, 172, 193, 0.25);
+.cancel-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(158, 158, 158, 0.2);
+}
+
+.status-toggle-btn,
+.btn-status {
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.85rem;
   font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
-.filter-btn:disabled {
+.status-toggle-btn.active,
+.btn-status.active { /* Para activar */
+  background-color: #4CAF50; /* Verde */
+  color: #ffffff;
+}
+
+.status-toggle-btn.active:hover,
+.btn-status.active:hover {
+  background-color: #388E3C; /* Verde más oscuro */
+  box-shadow: 0 4px 10px rgba(76, 175, 80, 0.3);
+  transform: translateY(-1px);
+}
+
+.status-toggle-btn.inactive,
+.btn-status.inactive { /* Para desactivar */
+  background-color: #FFC107; /* Amarillo/Naranja */
+  color: #2c3e50; /* Texto oscuro para contraste */
+}
+
+.status-toggle-btn.inactive:hover,
+.btn-status.inactive:hover {
+  background-color: #FFA000; /* Naranja más oscuro */
+  box-shadow: 0 4px 10px rgba(255, 193, 7, 0.3);
+  transform: translateY(-1px);
+}
+
+.btn-details {
+  background-color: #607D8B; /* Azul grisáceo para detalles */
+  color: #ffffff;
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(96, 125, 139, 0.2);
+}
+
+.btn-details:hover {
+  background-color: #455A64; /* Azul grisáceo más oscuro */
+  box-shadow: 0 4px 10px rgba(96, 125, 139, 0.3);
+  transform: translateY(-1px);
+}
+
+/* Estilos para botones deshabilitados */
+.add-btn:disabled,
+.edit-btn:disabled,
+.delete-btn:disabled,
+.save-btn:disabled,
+.cancel-btn:disabled,
+.status-toggle-btn:disabled,
+.filter-btn:disabled,
+.btn-details:disabled,
+.btn-edit:disabled,
+.btn-status:disabled,
+.btn-delete:disabled {
   opacity: 0.6;
   cursor: not-allowed;
-  background-color: var(--secondary-background);
-  color: var(--text-light);
   box-shadow: none;
   transform: none;
 }
+
 
 /* ===================================================================== */
-/* 4. Estilos de Tablas (Table Styles)                                  */
-/* Diseño para mostrar listados de datos en formato tabular         */
+/* 5. Tablas de Datos                                                    */
+/* Estilos para la visualización de datos en formato de tabla.           */
 /* ===================================================================== */
 .admin-table-container {
-  overflow-x: auto; /* Permite scroll horizontal en tablas grandes */
-  background-color: var(--surface-white);
-  border-radius: var(--border-radius-md);
-  box-shadow: var(--shadow-md);
-  border: 1px solid rgba(44, 62, 80, 0.05);
+  overflow-x: auto; /* Permite desplazamiento horizontal en tablas */
   margin-top: 1.5rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); /* Sombra suave para el contenedor de la tabla */
+  background-color: #ffffff; /* Fondo blanco */
 }
 
 .admin-table {
   width: 100%;
-  border-collapse: separate; /* Permite border-radius en th/td */
+  border-collapse: separate; /* Permite border-radius en las celdas */
   border-spacing: 0;
-  min-width: 900px; /* Ancho mínimo para la tabla */
+  min-width: 800px; /* Ancho mínimo para evitar el colapso en pantallas pequeñas */
+}
+
+.admin-table thead {
+  background-color: #e0f7fa; /* Fondo azul muy claro para el encabezado */
 }
 
 .admin-table th {
-  background: linear-gradient(to right, rgba(0, 172, 193, 0.1), rgba(0, 172, 193, 0.05)); /* Degradado sutil */
-  color: var(--primary-dark);
-  padding: 1.2rem 1.5rem;
+  padding: 1rem 1.2rem;
   text-align: left;
+  font-size: 0.9rem;
+  color: #007c91; /* Azul oscuro para el texto del encabezado */
   font-weight: 700;
-  font-size: 0.95rem;
   text-transform: uppercase;
-  letter-spacing: 0.8px;
-  border-bottom: 1px solid var(--primary-light);
-  white-space: nowrap; /* Evita que los encabezados se rompan */
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid #00acc1; /* Borde inferior azul vibrante */
 }
 
-/* Redondeo de bordes para la cabecera de la tabla */
-.admin-table th:first-child { border-top-left-radius: var(--border-radius-md); }
-.admin-table th:last-child { border-top-right-radius: var(--border-radius-md); }
+/* Bordes redondeados para las esquinas de la cabecera */
+.admin-table th:first-child {
+  border-top-left-radius: 10px;
+}
+.admin-table th:last-child {
+  border-top-right-radius: 10px;
+}
 
 .admin-table td {
-  padding: 1rem 1.5rem;
-  border-bottom: 1px solid var(--secondary-background); /* Bordes más suaves */
-  color: var(--text-dark);
+  padding: 0.9rem 1.2rem;
+  border-bottom: 1px solid #eceff1; /* Línea divisoria suave entre filas */
+  color: #2c3e50; /* Color de texto para celdas */
   font-size: 0.9rem;
-  vertical-align: middle;
-  white-space: nowrap; /* Evita que el contenido de la celda se rompa */
 }
 
-/* Eliminar borde inferior de la última fila */
 .admin-table tbody tr:last-child td {
-  border-bottom: none;
+  border-bottom: none; /* Elimina el borde inferior de la última fila */
 }
 
 .admin-table tbody tr:hover {
-  background-color: rgba(52, 152, 219, 0.03); /* Efecto hover sutil en las filas */
+  background-color: #f8fcfd; /* Fondo muy claro al pasar el ratón */
+  transition: background-color 0.2s ease;
 }
 
-.icon {
-  margin-right: 0.6rem;
-  color: var(--primary-color);
-  font-size: 1.1rem;
-  vertical-align: middle;
+/* Estilo para la fila del usuario actual (en AdminsManagement) */
+.current-user-row {
+  background-color: #e3f2fd; /* Azul claro para resaltar */
+  font-weight: 600;
+  border-left: 5px solid #2196F3; /* Borde izquierdo azul */
 }
 
-/* --- 4.1. Celdas de Acciones en Tablas (Action Cells) --- */
+.current-user-row:hover {
+  background-color: #bbdefb; /* Azul un poco más oscuro al pasar el ratón */
+}
+
 .actions-cell {
   display: flex;
-  gap: 0.7rem;
-  flex-wrap: wrap; /* Permite que los botones se envuelvan */
-  align-items: center;
-  justify-content: flex-start;
-  min-width: 180px; /* Ancho mínimo para evitar que se aplasten */
+  gap: 0.5rem; /* Espacio entre botones de acción */
+  flex-wrap: wrap; /* Permite que los botones se envuelvan en celdas estrechas */
+  justify-content: center; /* Centra los botones horizontalmente */
+  align-items: center; /* Centra los botones verticalmente */
 }
 
-.actions-cell button {
-  padding: 0.5rem 0.8rem;
-  border-radius: var(--border-radius-sm);
-  font-size: 0.85rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: var(--transition-ease);
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-  border: none;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  white-space: nowrap; /* Evita que el texto del botón se rompa */
-}
-
-/* Estilos específicos para los botones de acción en tabla */
-.btn-details {
-  background-color: var(--info-color);
-  color: var(--surface-white);
-}
-.btn-details:hover {
-  background-color: var(--info-light);
-  color: var(--info-color);
-  box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
-}
-
-.btn-edit {
-  background-color: var(--primary-color);
-  color: var(--surface-white);
-}
-.btn-edit:hover {
-  background-color: var(--primary-dark);
-  box-shadow: 0 4px 8px rgba(0, 172, 193, 0.3);
-}
-
-.btn-status.active { /* Para botón de Desactivar (cuando el usuario/item está activo) */
-  background-color: var(--danger-color);
-  color: var(--surface-white);
-}
-.btn-status.active:hover {
-  background-color: var(--danger-light);
-  color: var(--danger-color);
-  box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
-}
-
-.btn-status.inactive { /* Para botón de Activar (cuando el usuario/item está inactivo) */
-  background-color: var(--success-color);
-  color: var(--surface-white);
-}
-.btn-status.inactive:hover {
-  background-color: var(--success-light);
-  color: var(--success-color);
-  box-shadow: 0 4px 8px rgba(39, 174, 96, 0.3);
-}
-
-.btn-delete {
-  background-color: var(--danger-color);
-  color: var(--surface-white);
-}
-.btn-delete:hover {
-  background-color: var(--danger-light);
-  color: var(--danger-color);
-  box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
-}
-
-/* Estado deshabilitado para todos los botones de acción */
-.actions-cell button:disabled {
-  background-color: var(--neutral-light);
-  color: var(--neutral-color);
-  cursor: not-allowed;
-  opacity: 0.7;
-  transform: none;
-  box-shadow: none;
-}
-
-/* --- 4.2. Badges de Estado (Status Badges) --- */
 .status-badge {
-  display: inline-block;
-  padding: 0.45rem 1rem;
-  border-radius: var(--border-radius-pill);
-  font-size: 0.85rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 15px;
+  font-size: 0.8rem;
   font-weight: 600;
-  text-transform: capitalize;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  white-space: nowrap; /* Evita que el badge se rompa */
+  text-transform: uppercase;
+  display: inline-block; /* Para que ocupe solo el ancho necesario */
+  min-width: 70px; /* Ancho mínimo para consistencia */
+  text-align: center;
 }
 
-/* Colores para diferentes estados */
-.status-badge.active, .status-badge.completa { 
-  background-color: var(--success-light); 
-  color: var(--success-color); 
+.status-badge.active {
+  background-color: #e8f5e9; /* Verde muy claro */
+  color: #2e7d32; /* Verde oscuro */
 }
-.status-badge.inactive, .status-badge.rechazada, .status-badge.cancelada { 
-  background-color: var(--danger-light); 
-  color: var(--danger-color); 
-}
-.status-badge.pendiente { 
-  background-color: var(--warning-light); 
-  color: var(--warning-color); 
-}
-.status-badge.aceptada { 
-  background-color: var(--info-light); 
-  color: var(--info-color); 
+
+.status-badge.inactive {
+  background-color: #ffebee; /* Rojo muy claro */
+  color: #c62828; /* Rojo oscuro */
 }
 
 /* ===================================================================== */
-/* 5. Modales (Modals)                                                   */
-/* Estilos para ventanas emergentes de formularios o detalles       */
+/* 6. Mensajes de No Resultados, Carga y Error                           */
+/* Estilos para cuando no hay datos, se están cargando o hay errores.    */
 /* ===================================================================== */
-
-/* --- 5.1. Overlay del Modal (Modal Overlay) --- */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.7); /* Fondo más oscuro y translúcido */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000; /* Asegura que cubra todo */
-  backdrop-filter: blur(8px); /* Desenfoque del fondo */
-  animation: fadeIn 0.3s ease forwards;
-}
-
-/* --- 5.2. Contenido del Modal (Modal Content) --- */
-.modal-content {
-  background-color: var(--surface-white);
-  border-radius: var(--border-radius-lg);
-  width: 90%;
-  max-width: 750px; /* Ancho un poco más grande para formularios detallados */
-  max-height: 90vh; /* Altura máxima para permitir scroll interno */
-  overflow-y: auto; /* Scroll si el contenido excede la altura */
-  box-shadow: var(--shadow-lg);
-  animation: slideUpFadeIn 0.5s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
-  position: relative;
-  border: 3px solid var(--primary-color); /* Borde distintivo */
-  padding: 2.5rem; /* Padding generoso dentro del modal */
-}
-
-/* Animación de entrada para modales */
-@keyframes slideUpFadeIn {
-  from { opacity: 0; transform: translateY(30px) scale(0.95); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-/* --- 5.3. Encabezado del Modal (Modal Header) --- */
-.modal-header {
-  padding: 0 0 1.5rem 0; /* Padding inferior para separar del contenido */
-  border-bottom: 1px solid var(--secondary-background);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem; /* Espacio antes del formulario */
-}
-
-.modal-header h3 {
-  margin: 0;
-  color: var(--primary-dark);
-  font-size: 1.8rem;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
-}
-
-.form-icon {
-  color: var(--primary-color);
-  font-size: 2.2rem;
-}
-
-/* --- 5.4. Botón de Cierre del Modal (Close Modal Button) --- */
-.close-modal-btn {
-  background: none;
-  border: none;
-  color: var(--text-light);
-  font-size: 1.8rem;
-  cursor: pointer;
-  transition: var(--transition-ease);
-  position: absolute; /* Posicionado absolutamente en la esquina del modal */
-  top: 1.2rem;
-  right: 1.2rem;
-  z-index: 1010; /* Asegura que esté por encima de todo el contenido */
-  padding: 0.5rem;
-  border-radius: 50%;
-}
-
-.close-modal-btn:hover {
-  color: var(--danger-color);
-  background-color: rgba(231, 76, 60, 0.1);
-  transform: rotate(90deg);
-}
-.close-modal-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
-  background: none;
-}
-
-/* --- 5.5. Formulario dentro del Modal (Modal Form) --- */
-.modal-form {
-  padding: 0; /* Ya se maneja con el padding del modal-content */
-}
-
-.form-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.8rem;
-  margin-bottom: 2rem; /* Espacio antes de las acciones del formulario */
-}
-
-.form-group {
-  margin-bottom: 0; /* El gap de la grid lo maneja */
+.no-results {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #555;
+  font-size: 1.1rem;
   display: flex;
   flex-direction: column;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 0.6rem;
-  font-weight: 600;
-  color: var(--text-medium);
-  font-size: 0.95rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.form-group input, 
-.form-group select, 
-.form-group textarea {
-  width: 100%;
-  padding: 1.1rem 1.4rem;
-  border: 1px solid var(--text-light);
-  border-radius: var(--border-radius-md);
-  transition: var(--transition-ease);
-  font-family: inherit;
-  font-size: 1rem;
-  color: var(--text-dark);
-  background-color: var(--surface-white);
-  box-shadow: var(--inner-shadow);
-}
-
-.form-group input:focus, 
-.form-group select:focus, 
-.form-group textarea:focus {
-  border-color: var(--primary-color);
-  outline: none;
-  box-shadow: 0 0 0 4px var(--primary-glow);
-}
-
-.form-group input:disabled, 
-.form-group select:disabled, 
-.form-group textarea:disabled {
-  background-color: var(--secondary-background);
-  opacity: 0.7;
-  cursor: not-allowed;
-  box-shadow: none;
-  color: var(--text-light); /* Texto más claro para deshabilitados */
-}
-
-/* Estilo para inputs de texto deshabilitados, para que no parezcan input de verdad */
-.disabled-input-text {
-  background-color: var(--secondary-background);
-  opacity: 0.9;
-  cursor: default;
-  color: var(--text-medium);
-  border: 1px solid var(--secondary-background); /* Borde sutil para disabled */
-  box-shadow: none;
-}
-
-/* --- 5.6. Mensajes de Error en Línea (Inline Error Messages) --- */
-.error-message-inline {
-  color: var(--danger-color);
-  font-size: 0.85rem;
-  margin-top: 0.4rem;
-  display: block; /* Ocupa su propia línea */
-  animation: fadeInError 0.3s ease-out;
-  font-weight: 500;
-  letter-spacing: 0.2px;
-}
-
-@keyframes fadeInError {
-  from { opacity: 0; transform: translateY(-5px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* --- 5.7. Acciones del Formulario (Form Actions) --- */
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 1.2rem;
-  margin-top: 2rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--secondary-background);
-}
-
-.save-btn, .cancel-btn {
-  padding: 1rem 2.2rem;
-  border-radius: var(--border-radius-pill);
-  font-weight: 600;
-  cursor: pointer;
-  transition: var(--transition-ease);
-  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.8rem;
-  font-size: 1.05rem;
-  border: none;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  box-shadow: var(--shadow-sm);
-}
-
-.save-btn {
-  background: linear-gradient(45deg, var(--primary-dark) 0%, var(--primary-color) 100%);
-  color: var(--surface-white);
-  box-shadow: 0 5px 15px rgba(0, 172, 193, 0.3);
-}
-
-.save-btn:hover {
-  background-color: var(--primary-dark);
-  transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(0, 172, 193, 0.4);
-}
-.save-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  background: linear-gradient(45deg, #a0dce5 0%, #ccebf0 100%);
-  box-shadow: none;
-  transform: none;
-}
-
-.cancel-btn {
-  background-color: var(--secondary-background);
-  color: var(--text-medium);
-  border: 1px solid var(--text-light);
-}
-
-.cancel-btn:hover {
-  background-color: var(--text-light);
-  color: var(--surface-white);
-  transform: translateY(-3px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-.cancel-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-}
-
-/* --- 5.8. Checkboxes y Radio Buttons (personalizados) --- */
-.checkbox-group, .radio-group {
-  display: flex;
-  align-items: center;
-  margin-bottom: 1rem;
-  gap: 0.8rem;
-  flex-wrap: wrap;
-}
-
-.checkbox-group input[type="checkbox"],
-.radio-group input[type="radio"] {
-  width: 20px;
-  height: 20px;
-  appearance: none;
-  border: 2px solid var(--text-light);
-  border-radius: 4px; /* Cuadrado para checkbox */
-  cursor: pointer;
-  position: relative;
-  transition: var(--transition-ease);
-  flex-shrink: 0;
-  background-color: var(--surface-white);
-}
-
-.radio-group input[type="radio"] {
-  border-radius: 50%; /* Redondo para radio */
-}
-
-.checkbox-group input[type="checkbox"]:checked {
-  background-color: var(--primary-color);
-  border-color: var(--primary-color);
-}
-
-.radio-group input[type="radio"]:checked {
-  background-color: var(--primary-color);
-  border-color: var(--primary-color);
-}
-
-.checkbox-group input[type="checkbox"]:checked::after {
-  content: '\2713'; /* Símbolo de checkmark (✓) */
-  font-size: 14px;
-  color: var(--surface-white);
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  line-height: 1; /* Asegura que el checkmark se centre correctamente */
-}
-
-.radio-group input[type="radio"]:checked::after {
-  content: '';
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background-color: var(--surface-white);
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-
-.checkbox-group label,
-.radio-group label {
-  margin-bottom: 0;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: var(--text-dark);
-  font-size: 1rem;
-  cursor: pointer;
-  user-select: none; /* Evita selección de texto al hacer clic en label */
-}
-
-/* --- 5.9. Contenido del Modal de Detalles (Modal Details Content) --- */
-.modal-detail-content {
-  /* No padding aquí, el padding se maneja en .modal-content */
-  width: 95%;
-  max-width: 900px; /* Aumentar ancho máximo para acomodar más contenido horizontal */
-}
-
-.user-detail-header h3 {
-  color: var(--primary-dark);
-  margin-top: 0;
-  margin-bottom: 1.5rem;
-  font-size: 2rem;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
-  border-bottom: 2px solid rgba(0, 172, 193, 0.15);
-  padding-bottom: 1rem;
-}
-
-.user-detail-header .form-icon {
-  font-size: 2.5rem;
-}
-
-.user-detail-info {
-  display: grid;
-  /* Fuerza 2 columnas en pantallas grandes, auto-ajuste y colapsa en 1 en móviles */
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
-  gap: 1.5rem 2.5rem; /* Gap vertical y horizontal */
-  margin-bottom: 2rem;
-  padding-bottom: 1.5rem;
-  border-bottom: 1px solid var(--secondary-background);
-}
-
-.user-detail-info .info-item {
-  margin-bottom: 0; /* Resetea el margin-bottom para el grid */
-  display: flex;
-  flex-direction: column; /* Apila label y value */
-  align-items: flex-start;
-  padding: 0.8rem; /* Padding dentro de cada item de info */
-  background-color: var(--surface-light-grey); /* Fondo sutil para cada item */
-  border-radius: var(--border-radius-sm);
-  border: 1px solid rgba(0,0,0,0.02);
-  box-shadow: inset 0 1px 3px rgba(0,0,0,0.03); /* Sombra interna sutil */
-}
-
-.user-detail-info .info-item strong {
-  font-size: 0.9rem;
-  color: var(--text-medium);
-  margin-bottom: 0.3rem;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-  display: flex; /* Para alinear el texto con el icono si lo tiene */
-  align-items: center;
-  gap: 0.5rem;
-}
-.user-detail-info .info-item strong .icon { /* Iconos dentro de strong */
-  font-size: 1.1rem;
-  color: var(--primary-color);
-  margin-right: 0; /* Elimina el margen default del .icon */
-}
-
-
-.user-detail-info .info-item span {
-  font-size: 1rem;
-  color: var(--text-dark);
-  font-weight: 500;
-}
-/* Estilo para el estado activo/inactivo dentro de los detalles */
-.user-detail-info .info-item .status-badge {
-    margin-top: 0.2rem; /* Pequeño ajuste si es necesario */
-}
-
-
-.user-detail-pets {
-  margin-top: 2rem;
-}
-
-.user-detail-pets h4 {
-  color: var(--primary-dark);
-  margin-bottom: 1.5rem;
-  font-size: 1.6rem;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
-  border-bottom: 1px solid var(--secondary-background);
-  padding-bottom: 0.8rem;
-}
-
-.user-detail-pets h4 .icon {
-  font-size: 1.8rem;
-}
-
-.pets-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* Múltiples columnas para mascotas */
   gap: 1.5rem;
+  background-color: #fcfcfc;
+  border-radius: 10px;
+  border: 1px dashed #cfd8dc; /* Borde punteado */
+  margin-top: 1.5rem;
+}
+
+.no-results .info-icon {
+  font-size: 3rem;
+  color: #b0bec5; /* Gris suave */
+  animation: bounceIn 0.8s ease-out; /* Animación de rebote */
+}
+
+.no-results .add-btn {
   margin-top: 1rem;
 }
 
-.pet-card {
-  background-color: var(--surface-light-grey);
-  border-radius: var(--border-radius-md);
-  box-shadow: var(--shadow-sm);
-  overflow: hidden;
-  border: 1px solid rgba(0,0,0,0.03);
-  transition: var(--transition-fast);
-}
-
-.pet-card:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-md);
-  border-color: var(--primary-light);
-}
-
-.pet-card .card-header {
-  background-color: var(--primary-light);
-  color: var(--primary-dark);
-  padding: 0.8rem 1rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.pet-card .card-header h3 {
-  font-size: 1.1rem;
-  margin: 0;
-  color: var(--primary-dark);
-}
-
-.pet-card .card-header .vet-id { /* Reutilizando vet-id para el ID de mascota */
-  background-color: rgba(255,255,255,0.3);
-  color: var(--primary-dark);
-  padding: 0.2rem 0.6rem;
-  font-size: 0.75rem;
-}
-
-.pet-card .card-body {
-  padding: 1rem;
-  background-color: var(--surface-white);
-}
-
-.pet-card .info-item {
-  margin-bottom: 0.6rem;
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  font-size: 0.9rem;
-  color: var(--text-dark);
-}
-.pet-card .info-item:last-child {
-  margin-bottom: 0;
-}
-
-.pet-card .info-item strong {
-  color: var(--text-medium);
-  font-weight: 600;
-  min-width: 80px; /* Alineación de labels */
-}
-
-.pet-card .info-item i {
-  color: var(--info-color); /* Un color diferente para los iconos de mascota */
-  font-size: 0.9rem;
-}
-
-.modal-footer {
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--secondary-background);
-  text-align: right;
-  margin-top: 2rem;
-}
-
-/* ===================================================================== */
-/* 6. Notificaciones y Mensajes Globales (Notifications & Global Messages) */
-/* Pop-ups de notificación, mensajes de carga y error */
-/* ===================================================================== */
-
-/* --- 6.1. Notificaciones Flotantes (Toast Notifications) --- */
-.notification {
-  position: fixed;
-  bottom: 2.5rem;
-  right: 2.5rem;
-  padding: 1.3rem 2rem;
-  border-radius: var(--border-radius-lg);
-  box-shadow: var(--shadow-lg);
-  z-index: 1100; /* Por encima de modales */
-  animation: slideInFromRight 0.5s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  font-size: 1rem;
-  font-weight: 600;
-  max-width: 450px;
-  border-left: 6px solid; /* Borde de color pronunciado */
-  color: var(--surface-white);
-}
-
-/* Animación de entrada para notificaciones */
-@keyframes slideInFromRight {
-  from { transform: translateX(100%); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
-}
-
-.notification.success {
-  background-color: var(--success-color);
-  border-color: #28a745;
-}
-
-.notification.error {
-  background-color: var(--danger-color);
-  border-color: #dc3545;
-}
-
-.notification.warning {
-  background-color: var(--warning-color);
-  border-color: #ffc107;
-}
-
-.notification.info {
-  background-color: var(--info-color);
-  border-color: #17a2b8;
-}
-
-.notification .notification-icon {
-  font-size: 1.6rem;
-  color: var(--surface-white);
-  flex-shrink: 0; /* Evita que el icono se achique */
-}
-
-.notification .close-notification {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 1.3rem;
-  color: rgba(255, 255, 255, 0.85);
-  margin-left: auto; /* Mueve el botón de cierre a la derecha */
-  transition: var(--transition-ease);
-}
-
-.notification .close-notification:hover {
-  color: var(--surface-white);
-  transform: rotate(90deg);
-}
-
-/* --- 6.2. Mensaje de Carga Global (Loading Indicator) --- */
 .loading-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 300px;
+  height: 300px; /* Altura fija para el contenedor de carga */
   gap: 1.5rem;
-  color: var(--primary-dark);
-  font-size: 1.2rem;
-  font-weight: 500;
+  color: #007c91;
+  font-size: 1.1rem;
+  background-color: #f4f6f9;
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  margin: 2rem auto; /* Centrar */
+  max-width: 600px;
 }
 
-.loading-spinner {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 60px;
-  height: 60px;
-  border: 5px solid rgba(0, 172, 193, 0.15);
-  border-top-color: var(--primary-color);
-  border-radius: 50%;
-  animation: spin 1.2s cubic-bezier(0.5, 0.2, 0.5, 0.8) infinite; /* Animación de spinner con easing */
-}
-.loading-container .spinner-icon {
+.spinner-icon {
   font-size: 3rem;
-  color: var(--primary-color);
-  animation: none; /* Evita doble animación si ya el contenedor rota */
+  color: #00acc1;
+  animation: spin 1.5s linear infinite; /* Animación de giro */
 }
 
 @keyframes spin {
@@ -1377,961 +571,927 @@ button:focus-visible {
   100% { transform: rotate(360deg); }
 }
 
-/* --- 6.3. Mensaje de Error Global (Error Message) --- */
+@keyframes bounceIn {
+  0%, 20%, 40%, 60%, 80%, 100% {
+      transition-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+  }
+  0% {
+      opacity: 0;
+      transform: scale3d(0.3, 0.3, 0.3);
+  }
+  20% {
+      transform: scale3d(1.1, 1.1, 1.1);
+  }
+  40% {
+      transform: scale3d(0.9, 0.9, 0.9);
+  }
+  60% {
+      opacity: 1;
+      transform: scale3d(1.03, 1.03, 1.03);
+  }
+  80% {
+      transform: scale3d(0.97, 0.97, 0.97);
+  }
+  100% {
+      opacity: 1;
+      transform: scale3d(1, 1, 1);
+  }
+}
+
 .error-message {
-  padding: 1.8rem;
-  background-color: var(--danger-light);
-  color: var(--danger-color);
-  border-radius: var(--border-radius-md);
-  text-align: center;
-  margin: 2.5rem auto;
-  max-width: 700px;
-  font-weight: 600;
-  border-left: 6px solid var(--danger-color);
-  box-shadow: var(--shadow-md);
-  animation: fadeIn 0.4s ease-out forwards;
-  font-size: 1rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.8rem;
-}
-.error-message .info-icon {
-  font-size: 2rem;
-  margin-bottom: 0.5rem;
-}
-.error-message p {
-  margin: 0;
-  line-height: 1.5;
-}
-
-/* ===================================================================== */
-/* 7. Estilos para Tarjetas (Cards)                                      */
-/* Usados para estadísticas, administradores, veterinarios y servicios */
-/* ===================================================================== */
-
-/* --- 7.1. Grid de Estadísticas (Stats Grid) --- */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1.8rem;
-  margin-bottom: 2.5rem;
-}
-
-/* --- 7.2. Tarjeta de Estadísticas (Stat Card) --- */
-.stat-card {
-  background-color: var(--surface-white);
-  border-radius: var(--border-radius-lg);
-  padding: 1.8rem;
-  box-shadow: var(--shadow-md);
-  display: flex;
-  align-items: center;
-  gap: 1.2rem;
-  transition: var(--transition-ease);
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  position: relative; /* Para efectos sutiles */
-  overflow: hidden; /* Para el ::before */
-}
-
-.stat-card::before { /* Efecto de fondo sutil al pasar el ratón */
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: var(--primary-color);
-  opacity: 0;
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.3s ease-out, opacity 0.3s ease-out;
-  z-index: 0;
-}
-
-.stat-card:hover::before {
-  transform: scaleX(1);
-  opacity: 0.05;
-}
-
-.stat-card:hover {
-  transform: translateY(-5px);
-  box-shadow: var(--shadow-lg);
-}
-
-.stat-icon {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.8rem;
-  color: var(--surface-white);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-  flex-shrink: 0;
-  position: relative;
-  z-index: 1; /* Asegura que el icono esté encima del ::before */
-}
-
-/* Colores de degradado para los iconos de estadísticas */
-.stat-icon.users { background: linear-gradient(45deg, #5c6bc0, #3f51b5); }
-.stat-icon.vets { background: linear-gradient(45deg, #26a69a, #00897b); }
-.stat-icon.admins { background: linear-gradient(45deg, #7e57c2, #673ab7); }
-.stat-icon.services { background: linear-gradient(45deg, #ffa726, #fb8c00); }
-.stat-icon.appointments { background: linear-gradient(45deg, #66bb6a, #43a047); }
-.stat-icon.growth { background: linear-gradient(45deg, #ef5350, #d32f2f); }
-.stat-icon.pets { background: linear-gradient(45deg, #FF7043, #F4511E); } /* Nuevo color para mascotas */
-.stat-icon.history { background: linear-gradient(45deg, #78909C, #546E7A); } /* Nuevo color para historiales */
-
-
-.stat-info {
-  position: relative;
-  z-index: 1; /* Asegura que el texto esté encima del ::before */
-}
-
-.stat-info h3 {
-  font-size: 1rem;
-  color: var(--text-medium);
-  margin-bottom: 0.4rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.stat-info p {
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--primary-dark);
-  margin: 0;
-}
-
-.stat-description {
-  font-size: 0.85rem;
-  color: var(--text-light);
-  margin-top: 0.4rem;
-}
-
-/* --- 7.3. Grids de Tarjetas (Card Grids) --- */
-.admins-grid, .services-grid, .vets-grid, .clients-grid, .pets-grid, .medical-history-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 1.8rem;
-  margin-top: 2rem;
-}
-
-/* --- 7.4. Tarjetas Individuales (Individual Cards) --- */
-.admin-card, .service-card, .vet-card, .client-card, .pet-card, .medical-history-card {
-  background-color: var(--surface-white);
-  border-radius: var(--border-radius-lg);
-  overflow: hidden;
-  box-shadow: var(--shadow-md);
-  transition: var(--transition-ease);
-  border: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-.admin-card:hover, .service-card:hover, .vet-card:hover, .client-card:hover, .pet-card:hover, .medical-history-card:hover {
-  transform: translateY(-5px);
-  box-shadow: var(--shadow-lg);
-}
-
-.card-header {
-  padding: 1.2rem 1.5rem;
-  background: linear-gradient(to right, rgba(0, 172, 193, 0.1), rgba(0, 172, 193, 0.05));
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.card-header h3 {
-  color: var(--primary-dark);
-  font-size: 1.3rem;
-  font-weight: 600;
-  margin: 0;
-  flex-grow: 1; /* Permite que el título crezca */
-}
-
-.role-badge, .category-badge, .vet-id, .price-badge {
-  padding: 0.4rem 0.9rem;
-  border-radius: var(--border-radius-pill);
-  font-size: 0.8rem;
-  font-weight: 600;
-  background-color: var(--primary-light);
-  color: var(--primary-dark);
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-  white-space: nowrap;
-}
-
-.role-badge.super-admin {
-  background-color: rgba(255, 215, 0, 0.15);
-  color: #ffb300;
-}
-
-.card-body {
+  background-color: #ffebee; /* Fondo rojo muy claro */
+  color: #c62828; /* Texto rojo oscuro */
   padding: 1.5rem;
-}
-
-.info-item {
-  margin-bottom: 1rem;
-  display: flex;
-  align-items: flex-start; /* Alinea al inicio si el contenido es largo */
-  gap: 0.8rem;
-}
-
-.info-item i {
-  color: var(--primary-color);
-  font-size: 1rem;
-  flex-shrink: 0;
-  margin-top: 0.2rem; /* Alineación visual con el texto */
-}
-
-.info-label {
-  font-weight: 600;
-  color: var(--text-medium);
-  min-width: 100px; /* Ancho mínimo para labels */
-  flex-shrink: 0;
-  font-size: 0.9rem;
-}
-
-.info-value {
-  color: var(--text-dark);
-  font-size: 0.95rem;
-  flex-grow: 1;
-  word-break: break-word; /* Permite romper palabras largas */
-}
-
-.specialty-badge {
-  padding: 0.4rem 0.9rem;
-  border-radius: var(--border-radius-pill);
-  font-size: 0.8rem;
-  font-weight: 600;
-  background-color: rgba(2, 136, 209, 0.15);
-  color: #0288d1;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-}
-
-.card-footer {
-  padding: 1.2rem 1.5rem;
-  border-top: 1px solid rgba(0, 0, 0, 0.05);
-  display: flex;
-  gap: 0.8rem;
-  justify-content: flex-end;
-  flex-wrap: wrap; /* Permite que los botones se envuelvan en el footer */
-}
-
-.card-footer .edit-btn, .card-footer .delete-btn {
-  flex: none;
-  padding: 0.7rem 1.2rem;
-  width: auto;
-  height: auto;
-  border-radius: var(--border-radius-sm);
-  font-size: 0.9rem;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.card-footer .edit-btn {
-  background-color: var(--primary-light);
-  color: var(--primary-dark);
-}
-
-.card-footer .edit-btn:hover {
-  background-color: var(--primary-color);
-  color: var(--surface-white);
-  box-shadow: 0 4px 10px rgba(0, 172, 193, 0.2);
-}
-
-.card-footer .delete-btn {
-  background-color: var(--danger-light);
-  color: var(--danger-color);
-}
-
-.card-footer .delete-btn:hover:not(:disabled) {
-  background-color: var(--danger-color);
-  color: var(--surface-white);
-  box-shadow: 0 4px 10px rgba(231, 76, 60, 0.2);
-}
-
-/* ===================================================================== */
-/* 8. Componentes Adicionales de UI (Additional UI Components)           */
-/* Estilos para pestañas, paginación, alertas y tooltips             */
-/* ===================================================================== */
-
-/* --- 8.1. Pestañas (Tabs) --- */
-.tabs-container {
-  display: flex;
-  border-bottom: 2px solid var(--secondary-dark);
-  margin-bottom: 2rem;
-  gap: 0.5rem;
-  overflow-x: auto; /* Permite scroll si hay muchas pestañas */
-  -webkit-overflow-scrolling: touch; /* Desplazamiento suave en móviles */
-}
-
-.tab-button {
-  padding: 1rem 1.5rem;
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--text-medium);
-  border: none;
-  background-color: transparent;
-  cursor: pointer;
-  border-bottom: 3px solid transparent;
-  transition: var(--transition-ease);
-  white-space: nowrap; /* Evita que el texto de la pestaña se rompa */
-}
-
-.tab-button:hover {
-  color: var(--primary-color);
-}
-
-.tab-button.active {
-  color: var(--primary-color);
-  border-bottom-color: var(--primary-color);
-  font-weight: 700;
-}
-
-.tab-content {
-  padding: 1.5rem 0;
-}
-
-/* --- 8.2. Paginación (Pagination) --- */
-.pagination-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 0.5rem;
-  margin-top: 2.5rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--secondary-background);
-}
-
-.pagination-button {
-  padding: 0.8rem 1.2rem;
-  border: 1px solid var(--text-light);
-  border-radius: var(--border-radius-sm);
-  background-color: var(--surface-white);
-  color: var(--text-dark);
-  font-weight: 500;
-  cursor: pointer;
-  transition: var(--transition-ease);
-  min-width: 40px;
+  border-radius: 10px;
   text-align: center;
-}
-
-.pagination-button:hover:not(:disabled):not(.active) {
-  background-color: var(--primary-light);
-  color: var(--primary-dark);
-  border-color: var(--primary-color);
-  transform: translateY(-2px);
-}
-
-.pagination-button.active {
-  background-color: var(--primary-color);
-  color: var(--surface-white);
-  border-color: var(--primary-color);
-  font-weight: 700;
-  box-shadow: var(--shadow-sm);
-}
-
-.pagination-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  background-color: var(--secondary-background);
-  color: var(--text-light);
-}
-
-/* --- 8.3. Alertas en Página (In-Page Alerts) --- */
-.alert-message {
-  padding: 1.2rem 1.5rem;
-  border-radius: var(--border-radius-md);
-  margin-bottom: 1.5rem;
+  margin: 2rem auto;
+  max-width: 700px;
+  box-shadow: 0 4px 12px rgba(244, 67, 54, 0.1);
   display: flex;
   align-items: center;
   gap: 1rem;
   font-weight: 500;
-  border-left: 5px solid;
-  box-shadow: var(--shadow-sm);
+  border: 1px solid #ef9a9a; /* Borde rojo suave */
 }
 
-.alert-message.success {
-  background-color: var(--success-light);
-  color: var(--success-color);
-  border-color: var(--success-color);
+.error-message .icon {
+  font-size: 1.8rem;
+  color: #d32f2f; /* Rojo más oscuro para el icono */
 }
 
-.alert-message.danger {
-  background-color: var(--danger-light);
-  color: var(--danger-color);
-  border-color: var(--danger-color);
+/* ===================================================================== */
+/* 7. Modales (Formularios y Detalles)                                   */
+/* Estilos para las ventanas emergentes de formularios y detalles.       */
+/* ===================================================================== */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6); /* Fondo semi-transparente oscuro */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* Asegura que esté por encima de todo */
+  backdrop-filter: blur(5px); /* Efecto de desenfoque */
 }
 
-.alert-message.warning {
-  background-color: var(--warning-light);
-  color: var(--warning-color);
-  border-color: var(--warning-color);
-}
-
-.alert-message.info {
-  background-color: var(--info-light);
-  color: var(--info-color);
-  border-color: var(--info-color);
-}
-
-.alert-message .icon {
-  font-size: 1.5rem;
-  flex-shrink: 0;
-  margin-right: 0; /* Ya tenemos gap */
-}
-
-/* --- 8.4. Tooltips (Consejos de Herramienta) --- */
-.tooltip-container {
+.modal-content {
+  background-color: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25); /* Sombra más pronunciada */
+  padding: 2.5rem;
+  width: 90%;
+  max-width: 700px; /* Ancho máximo para modales de formulario */
   position: relative;
-  display: inline-block;
-  cursor: help;
+  animation: slideInUp 0.5s ease-out; /* Animación de entrada */
+  transform-origin: center bottom; /* Punto de origen para la animación */
 }
 
-.tooltip-text {
-  visibility: hidden;
-  background-color: var(--primary-dark);
-  color: var(--surface-white);
+.modal-detail-content {
+  max-width: 900px; /* Ancho un poco mayor para modales de detalle */
+  padding: 2rem 3rem;
+}
+
+@keyframes slideInUp {
+  from {
+      transform: translateY(100%);
+      opacity: 0;
+  }
+  to {
+      transform: translateY(0);
+      opacity: 1;
+  }
+}
+
+.close-modal-btn {
+  position: absolute;
+  top: 1.2rem;
+  right: 1.2rem;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #7f8c8d;
+  cursor: pointer;
+  transition: color 0.2s ease, transform 0.2s ease;
+  z-index: 10; /* Asegura que el botón de cierre esté clickable */
+}
+
+.close-modal-btn:hover {
+  color: #e74c3c; /* Rojo al pasar el ratón */
+  transform: rotate(90deg); /* Animación de giro */
+}
+
+.modal-header {
   text-align: center;
-  border-radius: var(--border-radius-sm);
-  padding: 0.6rem 0.9rem;
-  position: absolute;
-  z-index: 100;
-  bottom: 125%; /* Posiciona encima del elemento */
-  left: 50%;
-  transform: translateX(-50%);
-  opacity: 0;
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.modal-header h3 {
+  font-size: 1.8rem;
+  color: #007c91;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  margin: 0;
+}
+
+.modal-form .form-icon {
+  font-size: 2rem;
+  color: #00acc1;
+}
+
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Columnas responsivas */
+  gap: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-size: 0.9rem;
+  color: #555;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  padding: 0.8rem 1rem;
+  border: 1px solid #b0bec5;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  color: #2c3e50;
+  background-color: #f4f6f9;
+  transition: all 0.3s ease;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  border-color: #00acc1;
+  box-shadow: 0 0 0 3px rgba(0, 172, 193, 0.3);
+  outline: none;
+  background-color: #ffffff;
+}
+
+.form-group textarea {
+  resize: vertical; /* Solo permite redimensionar verticalmente */
+  min-height: 80px;
+}
+
+.disabled-input-text {
+  background-color: #eceff1 !important; /* Fondo gris para campos deshabilitados */
+  color: #7f8c8d !important;
+  cursor: not-allowed;
+  box-shadow: none !important;
+}
+
+.error-message-inline {
+  color: #e74c3c; /* Rojo para mensajes de error en línea */
   font-size: 0.8rem;
-  white-space: nowrap;
-  box-shadow: var(--shadow-sm);
+  margin-top: 0.4rem;
+  animation: fadeIn 0.3s ease-out;
 }
 
-.tooltip-text::after {
-  content: "";
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  margin-left: -5px;
-  border-width: 5px;
-  border-style: solid;
-  border-color: var(--primary-dark) transparent transparent transparent;
-}
-
-.tooltip-container:hover .tooltip-text {
-  visibility: visible;
-  opacity: 1;
-  transform: translateX(-50%) translateY(-5px); /* Pequeño desplazamiento hacia arriba */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e0e0e0;
 }
 
 /* ===================================================================== */
-/* 9. Tipografía (Typography)                                            */
-/* Estilos para encabezados, párrafos y elementos de texto           */
+/* 8. Notificaciones Flotantes                                           */
+/* Estilos para mensajes de éxito, error o información temporales.       */
 /* ===================================================================== */
+.notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 1rem 1.5rem;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1001; /* Por encima del modal */
+  animation: slideInRight 0.4s ease-out;
+}
 
-h1, h2, h3, h4, h5, h6 {
-  color: var(--primary-dark);
-  margin-bottom: 0.8rem;
+.notification.success {
+  background-color: #e8f5e9; /* Verde muy claro */
+  color: #2e7d32; /* Verde oscuro */
+  border: 1px solid #a5d6a7;
+}
+
+.notification.error {
+  background-color: #ffebee; /* Rojo muy claro */
+  color: #c62828; /* Rojo oscuro */
+  border: 1px solid #ef9a9a;
+}
+
+.notification-icon {
+  font-size: 1.2rem;
+}
+
+.close-notification {
+  background: none;
+  border: none;
+  color: inherit; /* Hereda el color del texto de la notificación */
+  font-size: 1rem;
+  cursor: pointer;
+  margin-left: 0.5rem;
+  transition: transform 0.2s ease;
+}
+
+.close-notification:hover {
+  transform: rotate(90deg);
+}
+
+@keyframes slideInRight {
+  from {
+      transform: translateX(100%);
+      opacity: 0;
+  }
+  to {
+      transform: translateX(0);
+      opacity: 1;
+  }
+}
+
+/* ===================================================================== */
+/* 9. Detalles de Usuario/Mascota (AdminUserDetail)                      */
+/* Estilos para la visualización de información detallada.               */
+/* ===================================================================== */
+.user-detail-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.user-detail-header h3 {
+  font-size: 1.6rem;
+  color: #007c91;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  margin: 0;
+}
+
+.user-detail-header .icon {
+  font-size: 1.8rem;
+  color: #00acc1;
+}
+
+.user-detail-info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.95rem;
+  color: #2c3e50;
+  background-color: #fcfcfc;
+  padding: 0.8rem;
+  border-radius: 8px;
+  border: 1px solid #eceff1;
+}
+
+.info-item strong {
+  color: #007c91;
+  font-weight: 700;
+  min-width: 100px; /* Ancho mínimo para las etiquetas */
+}
+
+.info-item .icon {
+  color: #00acc1;
+  font-size: 1.1rem;
+}
+
+.capitalize {
+  text-transform: capitalize;
+}
+
+.user-detail-pets h4 {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 1.5rem;
+  color: #007c91;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.user-detail-pets h4 .icon {
+  font-size: 1.7rem;
+  color: #00acc1;
+}
+
+.pets-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.pet-card {
+  background-color: #f4f6f9; /* Fondo gris claro para la tarjeta de mascota */
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  padding: 1.5rem;
+  border: 1px solid #cfd8dc;
+  transition: all 0.3s ease;
+}
+
+.pet-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+.pet-card .card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid #b0bec5;
+}
+
+.pet-card .card-header h3 {
+  font-size: 1.4rem;
+  color: #007c91;
+  margin: 0;
+}
+
+.pet-card .vet-id {
+  background-color: #b2ebf2;
+  color: #007c91;
+  padding: 0.3rem 0.7rem;
+  border-radius: 15px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.pet-card .card-body .info-item {
+  background-color: transparent;
+  border: none;
+  padding: 0.4rem 0;
+  gap: 0.8rem;
+}
+
+.pet-card .card-body .info-item strong {
+  color: #555;
+  min-width: 80px;
+}
+
+.pet-card .card-body .info-item .icon {
+  color: #00acc1;
+  font-size: 1rem;
+}
+
+.no-results.small {
+  padding: 1.5rem;
+  font-size: 0.95rem;
+  margin-top: 1rem;
+  border: 1px dashed #cfd8dc;
+}
+
+.no-results.small .info-icon {
+  font-size: 2rem;
+}
+
+/* ===================================================================== */
+/* 10. Navegación de Administración (AdminNavbar)                        */
+/* ===================================================================== */
+.admin-navbar {
+  background-color: #00acc1; /* Azul principal */
+  color: #ffffff;
+  padding: 0.8rem 1.5rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  position: fixed;
+  width: 100%;
+  top: 0;
+  left: 0;
+  z-index: 999;
+  transition: all 0.3s ease;
+}
+
+.admin-navbar.scrolled {
+  background-color: #007c91; /* Azul más oscuro al hacer scroll */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.navbar-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1400px; /* Ancho máximo del contenido de la barra */
+  margin: 0 auto;
+}
+
+.navbar-left {
+  display: flex;
+  align-items: center;
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: #ffffff;
+  font-size: 1.5rem;
+  font-weight: 700;
+  gap: 0.8rem;
+}
+
+.navbar-logo {
+  height: 40px; /* Tamaño del logo */
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3); /* Borde blanco sutil */
+  transition: transform 0.3s ease;
+}
+
+.navbar-logo:hover {
+  transform: rotate(10deg);
+}
+
+.brand-text {
+  display: none; /* Ocultar en móvil por defecto */
+}
+
+/* Mostrar texto de marca en pantallas más grandes */
+@media (min-width: 768px) {
+  .brand-text {
+      display: inline;
+  }
+}
+
+.navbar-right {
+  position: relative;
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  border-radius: 25px;
+  background-color: rgba(255, 255, 255, 0.1);
+  transition: background-color 0.3s ease;
+}
+
+.user-profile:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.user-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background-color: #4dd0e1; /* Azul claro */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  color: #007c91;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.9rem;
   line-height: 1.2;
 }
 
-h1 { font-size: 2.8rem; font-weight: 800; }
-h2 { font-size: 2.2rem; font-weight: 700; }
-h3 { font-size: 1.8rem; font-weight: 600; }
-h4 { font-size: 1.4rem; font-weight: 600; }
-h5 { font-size: 1.1rem; font-weight: 500; }
-h6 { font-size: 0.9rem; font-weight: 500; text-transform: uppercase; color: var(--text-medium); }
+.user-name {
+  font-weight: 600;
+  color: #ffffff;
+}
 
-p {
-  margin-bottom: 1rem;
+.user-role {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.menu-arrow {
+  margin-left: 0.5rem;
+  font-size: 0.8rem;
+  transition: transform 0.3s ease;
+}
+
+.user-profile[aria-expanded="true"] .menu-arrow {
+  transform: rotate(180deg);
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 10px); /* Debajo del perfil de usuario */
+  right: 0;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  min-width: 180px;
+  overflow: hidden;
+  z-index: 100;
+  animation: fadeInScale 0.3s ease-out;
+}
+
+@keyframes fadeInScale {
+  from {
+      opacity: 0;
+      transform: scale(0.95) translateY(-10px);
+  }
+  to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+  }
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  width: 100%;
+  padding: 0.8rem 1.2rem;
+  background: none;
+  border: none;
+  text-align: left;
+  font-size: 0.95rem;
+  color: #2c3e50;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dropdown-item:hover {
+  background-color: #e0f7fa; /* Azul claro al pasar el ratón */
+  color: #007c91;
+}
+
+.dropdown-item.logout-item {
+  border-top: 1px solid #eceff1;
+  color: #e74c3c; /* Rojo para cerrar sesión */
+}
+
+.dropdown-item.logout-item:hover {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+/* ===================================================================== */
+/* 11. Barra Lateral de Navegación (AdminSidebar)                        */
+/* ===================================================================== */
+.admin-sidebar {
+  width: 250px; /* Ancho fijo del sidebar */
+  background-color: #ffffff;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+  padding-top: 1.5rem;
+  flex-shrink: 0; /* Evita que se encoja */
+  transition: width 0.3s ease;
+  border-right: 1px solid #eceff1;
+}
+
+.admin-sidebar-nav {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.admin-sidebar-nav-item {
+  margin-bottom: 0.5rem;
+}
+
+.admin-sidebar-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.9rem 1.5rem;
+  text-decoration: none;
+  color: #555;
   font-size: 1rem;
-  line-height: 1.6;
-  color: var(--text-dark);
+  font-weight: 500;
+  border-radius: 0 25px 25px 0; /* Bordes redondeados a la derecha */
+  transition: all 0.3s ease;
 }
 
-small {
-  font-size: 0.85rem;
-  color: var(--text-light);
+.admin-sidebar-nav-link .icon {
+  font-size: 1.2rem;
+  color: #7f8c8d;
+  transition: color 0.3s ease;
+}
+
+.admin-sidebar-nav-link:hover {
+  background-color: #e0f7fa; /* Fondo azul claro al pasar el ratón */
+  color: #007c91;
+  transform: translateX(5px); /* Pequeño desplazamiento */
+}
+
+.admin-sidebar-nav-link:hover .icon {
+  color: #00acc1;
+}
+
+.admin-sidebar-nav-link.active {
+  background-color: #00acc1; /* Azul principal para el activo */
+  color: #ffffff;
+  font-weight: 700;
+  box-shadow: 0 4px 10px rgba(0, 172, 193, 0.2);
+  border-left: 5px solid #005f6b; /* Borde más oscuro para el activo */
+}
+
+.admin-sidebar-nav-link.active .icon {
+  color: #ffffff;
 }
 
 /* ===================================================================== */
-/* 10. Utilidades (Utilities)                                            */
-/* Clases reusables para espaciado, texto, visibilidad, etc.        */
+/* 12. Media Queries para Responsividad                                  */
+/* Ajustes para diferentes tamaños de pantalla.                          */
 /* ===================================================================== */
 
-/* --- 10.1. Espaciado (Spacing) --- */
-.mb-1 { margin-bottom: 0.5rem; }
-.mb-2 { margin-bottom: 1rem; }
-.mb-3 { margin-bottom: 1.5rem; }
-.mb-4 { margin-bottom: 2rem; }
-.mb-5 { margin-bottom: 2.5rem; }
-
-.mt-1 { margin-top: 0.5rem; }
-.mt-2 { margin-top: 1rem; }
-.mt-3 { margin-top: 1.5rem; }
-.mt-4 { margin-top: 2rem; }
-.mt-5 { margin-top: 2.5rem; }
-
-.py-1 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
-.py-2 { padding-top: 1rem; padding-bottom: 1rem; }
-.py-3 { padding-top: 1.5rem; padding-bottom: 1.5rem; }
-.py-4 { padding-top: 2rem; padding-bottom: 2rem; }
-.py-5 { padding-top: 2.5rem; padding-bottom: 2.5rem; }
-
-.px-1 { padding-left: 0.5rem; padding-right: 0.5rem; }
-.px-2 { padding-left: 1rem; padding-right: 1rem; }
-.px-3 { padding-left: 1.5rem; padding-right: 1.5rem; }
-.px-4 { padding-left: 2rem; padding-right: 2rem; }
-.px-5 { padding-left: 2.5rem; padding-right: 2.5rem; }
-
-/* --- 10.2. Alineación de Texto (Text Alignment) --- */
-.text-left { text-align: left; }
-.text-center { text-align: center; }
-.text-right { text-align: right; }
-
-/* --- 10.3. Visibilidad (Visibility) --- */
-.d-none { display: none !important; }
-.d-block { display: block !important; }
-.d-flex { display: flex !important; }
-
-/* --- 10.4. Border Radius (Radius Utilities) --- */
-.rounded-sm { border-radius: var(--border-radius-sm); }
-.rounded-md { border-radius: var(--border-radius-md); }
-.rounded-lg { border-radius: var(--border-radius-lg); }
-.rounded-pill { border-radius: var(--border-radius-pill); }
-.rounded-full { border-radius: 50%; }
-
-/* --- 10.5. Sombras (Shadow Utilities) --- */
-.shadow-sm { box-shadow: var(--shadow-sm); }
-.shadow-md { box-shadow: var(--shadow-md); }
-.shadow-lg { box-shadow: var(--shadow-lg); }
-
-/* --- 10.6. Capitalización de Texto (Text Capitalization) --- */
-.capitalize { text-transform: capitalize; }
-
-
-/* ===================================================================== */
-/* 11. Responsive Design (Diseño Responsivo)                             */
-/* Ajustes para diferentes tamaños de pantalla                       */
-/* ===================================================================== */
-
-/* --- 11.1. Para pantallas de Laptop y Tablets grandes (max-width: 1200px) --- */
-@media (max-width: 1200px) {
-  .admin-content-container {
-    padding: 2rem;
-    margin: 1.5rem auto;
-    max-width: 95%; /* Ocupa más espacio horizontal */
-  }
-  .admin-navbar, .admin-navbar.scrolled {
-    padding: 0.8rem 1.5rem;
-  }
-  .navbar-brand {
-    font-size: 1.2rem;
-  }
-  .navbar-logo {
-    height: 35px;
-  }
-  .user-profile {
-    padding: 0.5rem 1rem;
-  }
-  .user-avatar {
-    width: 32px;
-    height: 32px;
-  }
-  .user-name, .user-role {
-    font-size: 0.85rem;
-  }
-  .admin-sidebar {
-    width: 250px; /* Sidebar ligeramente más estrecho */
-  }
+/* Móviles (menos de 768px) */
+@media (max-width: 767px) {
   .admin-container {
-    margin-left: 250px; /* Ajusta según el nuevo ancho del sidebar */
-    padding: 2rem;
+      flex-direction: column; /* Apilar sidebar y contenido */
+      margin-top: 55px; /* Ajustar margen superior para navbar */
   }
+
+  .admin-sidebar {
+      width: 100%; /* Sidebar ocupa todo el ancho */
+      padding-top: 0.5rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      border-right: none;
+      border-bottom: 1px solid #eceff1;
+  }
+
+  .admin-sidebar-nav {
+      display: flex; /* Mostrar ítems en fila */
+      overflow-x: auto; /* Permite scroll horizontal si hay muchos ítems */
+      padding: 0.5rem 1rem;
+      justify-content: flex-start; /* Alinear al inicio */
+  }
+
+  .admin-sidebar-nav-item {
+      flex-shrink: 0; /* Evita que los ítems se encojan */
+      margin-right: 1rem; /* Espacio entre ítems */
+      margin-bottom: 0;
+  }
+
+  .admin-sidebar-nav-link {
+      padding: 0.6rem 1rem;
+      border-radius: 20px; /* Más redondeado para pastillas */
+      font-size: 0.85rem;
+      gap: 0.5rem;
+      white-space: nowrap; /* Evita que el texto se rompa */
+  }
+
+  .admin-sidebar-nav-link .icon {
+      font-size: 1rem;
+  }
+
+  .admin-sidebar-nav-link.active {
+      border-left: none; /* Eliminar borde izquierdo en móvil */
+      border: 1px solid #005f6b; /* Borde completo para el activo */
+  }
+
   .admin-content {
-    padding: 2rem;
+      padding: 1rem; /* Menor padding en móvil */
   }
+
   .admin-content-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
-  }
-  .header-actions {
-    width: 100%;
-    flex-direction: column;
-    align-items: stretch; /* Estira los elementos para ocupar el 100% */
-    gap: 1rem;
-  }
-  .search-box {
-    max-width: 100%; /* El search ocupa todo el ancho disponible */
-    min-width: unset;
-  }
-  .add-btn {
-    width: 100%; /* El botón Añadir ocupa todo el ancho */
-  }
-  .modal-content {
-    max-width: 600px; /* Modales ligeramente más estrechos */
-    padding: 2rem;
-  }
-  .modal-header h3 {
-    font-size: 1.6rem;
-  }
-  .form-grid {
-    grid-template-columns: 1fr; /* Una columna en tablets y móviles */
-    gap: 1.2rem;
-  }
-  .admin-table {
-    min-width: 768px; /* Mantiene un mínimo para el scroll horizontal */
-  }
-  .admin-table th, .admin-table td {
-    padding: 0.9rem 1.2rem;
-    font-size: 0.9rem;
-  }
-  .stats-grid {
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 1.5rem;
-  }
-  .stat-card {
-    padding: 1.5rem;
-  }
-  .stat-icon {
-    width: 50px;
-    height: 50px;
-    font-size: 1.5rem;
-  }
-  .stat-info p {
-    font-size: 1.8rem;
-  }
-  .admins-grid, .services-grid, .vets-grid, .clients-grid, .pets-grid, .medical-history-grid {
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1.5rem;
-  }
-  .card-header h3 {
-    font-size: 1.2rem;
-  }
-  .card-body {
-    padding: 1.2rem;
-  }
-  .info-item {
-    gap: 0.6rem;
-  }
-  .info-label {
-    min-width: 80px;
-    font-size: 0.85rem;
-  }
-  .info-value {
-    font-size: 0.9rem;
+      flex-direction: column; /* Apilar elementos del header */
+      align-items: flex-start; /* Alinear a la izquierda */
   }
 
-  /* DETALLES DE USUARIO RESPONSIVE */
-  .modal-detail-content {
-    max-width: 700px;
-  }
-  .user-detail-info {
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 1rem;
-  }
-  .pets-grid {
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  }
-}
-
-/* --- 11.2. Para pantallas de Tablets pequeñas y Móviles (max-width: 768px) --- */
-@media (max-width: 768px) {
-  body {
-    flex-direction: column; /* Asegura que el contenido se apile */
-  }
-  .admin-content-container {
-    padding: 1.5rem;
-    margin: 1rem auto;
-    border-radius: var(--border-radius-md);
-  }
-  .admin-navbar {
-    padding: 0.7rem 1rem;
-  }
-  .navbar-brand .brand-text {
-    display: none; /* Oculta el texto del logo para ahorrar espacio */
-  }
-  .navbar-logo {
-    height: 30px;
-    margin-right: 10px;
-  }
-  .user-info {
-    display: none; /* Oculta el nombre y rol del usuario en la navbar */
-  }
-  .user-profile {
-    padding: 0.4rem 0.8rem;
-  }
-  .user-avatar {
-    width: 28px;
-    height: 28px;
-  }
-  /* Sidebar colapsado en móviles */
-  .admin-sidebar {
-    width: 65px; /* Ancho muy reducido para solo mostrar iconos */
-    overflow: hidden; /* Oculta el texto que se desborda */
-    padding-top: 1rem;
-    top: 60px; /* Ajusta según la nueva altura de la navbar */
-  }
-  .admin-sidebar nav ul li {
-    padding: 0.8rem 0; /* Centra los iconos verticalmente */
-    justify-content: center;
-    border-left: none; /* Elimina el borde izquierdo */
-    margin-bottom: 0.1rem;
-  }
-  .admin-sidebar nav ul li i {
-    margin-right: 0; /* Elimina el margen derecho del icono */
-  }
-  .admin-sidebar nav ul li span {
-    display: none; /* Oculta el texto del menú */
-  }
-  .admin-sidebar nav ul li.active {
-    border-left: none; /* Quita el borde de activo */
-    background-color: var(--primary-light); /* Mantiene el fondo de color */
-  }
-  .admin-sidebar nav ul li.active::before {
-    left: 0; /* Permite el efecto de hover */
-    opacity: 0.15;
-  }
-  /* Contenedor principal con margen reducido */
-  .admin-container {
-    margin-left: 65px; /* Ajusta según el ancho del sidebar colapsado */
-    padding: 1.5rem;
-    margin-top: 60px; /* Ajusta según la nueva altura de la navbar */
-  }
-  .admin-content {
-    padding: 1.5rem;
-  }
   .admin-content-header h2 {
-    font-size: 1.8rem;
-    width: 100%; /* Título ocupa todo el ancho */
-    text-align: center;
-    justify-content: center; /* Centra el icono y texto */
+      font-size: 1.4rem;
   }
+
   .header-icon {
-    font-size: 2rem;
-    margin-right: 0.5rem;
+      font-size: 1.8rem;
   }
+
   .header-actions {
-    flex-direction: column;
-    gap: 0.8rem;
-    align-items: stretch;
+      width: 100%;
+      flex-direction: column; /* Apilar acciones */
+      gap: 0.8rem;
   }
+
   .search-box {
-    min-width: 100%;
+      max-width: 100%; /* Ocupa todo el ancho disponible */
   }
-  .add-btn {
-    width: 100%;
-  }
+
   .filter-buttons {
-    justify-content: center; /* Centra los botones de filtro */
-    gap: 0.5rem;
-    width: 100%; /* Ocupa todo el ancho disponible */
-  }
-  .filter-btn {
-    padding: 0.7rem 1.2rem;
-    font-size: 0.8rem;
-    flex-grow: 1; /* Permite que los botones crezcan y ocupen el espacio */
-    text-align: center;
-  }
-  .admin-table {
-    min-width: 100%; /* Permite que la tabla se ajuste al 100% en el contenedor */
-  }
-  .admin-table th, .admin-table td {
-    padding: 0.8rem 0.6rem;
-    font-size: 0.8rem;
-    white-space: normal; /* Permite que el texto se rompa en celdas pequeñas */
-    word-break: break-word;
-  }
-  .actions-cell {
-    flex-direction: column; /* Botones de acción apilados */
-    gap: 0.4rem;
-    align-items: stretch;
-    min-width: unset;
-  }
-  .actions-cell button {
-    width: 100%;
-    padding: 0.6rem 0.8rem;
-    font-size: 0.8rem;
-    justify-content: center; /* Centra el icono y texto del botón */
-  }
-  .modal-content {
-    max-width: 95%;
-    margin: 0.5rem;
-    padding: 1.5rem;
-  }
-  .modal-header h3 {
-    font-size: 1.4rem;
-  }
-  .form-group label {
-    font-size: 0.9rem;
-  }
-  .form-group input, .form-group select, .form-group textarea {
-    padding: 0.9rem 1rem;
-    font-size: 0.9rem;
-  }
-  .form-actions {
-    flex-direction: column;
-    gap: 0.8rem;
-  }
-  .save-btn, .cancel-btn {
-    width: 100%;
-    padding: 0.9rem 1.5rem;
-    font-size: 0.95rem;
-  }
-  .notification {
-    width: calc(100% - 2rem); /* Ocupa el 100% menos los márgenes */
-    right: 1rem;
-    bottom: 1rem;
-    padding: 1rem 1.2rem;
-    font-size: 0.9rem;
-    flex-wrap: wrap; /* Permite que el contenido se envuelva */
-  }
-  .notification .close-notification {
-    position: static; /* No flotar en móviles */
-    margin-left: 0.5rem;
-  }
-  .stats-grid, .admins-grid, .services-grid, .vets-grid, .clients-grid, .pets-grid, .medical-history-grid {
-    grid-template-columns: 1fr; /* Una columna para todas las grids */
-    gap: 1.2rem;
-  }
-  .stat-card {
-    flex-direction: column; /* Apila contenido en tarjetas de estadísticas */
-    text-align: center;
-    padding: 1rem;
-  }
-  .stat-icon {
-    margin-bottom: 0.8rem;
-  }
-  .card-footer {
-    flex-direction: column;
-    gap: 0.6rem;
-  }
-  .card-footer .edit-btn, .card-footer .delete-btn {
-    width: 100%;
-  }
-  .pagination-container {
-    flex-wrap: wrap;
-    gap: 0.3rem;
-  }
-  .pagination-button {
-    padding: 0.6rem 0.8rem;
-    font-size: 0.8rem;
+      width: 100%;
+      justify-content: center; /* Centrar botones de filtro */
   }
 
-  /* DETALLES DE USUARIO RESPONSIVE */
-  .modal-detail-content {
-    max-width: 95%;
-  }
-  .user-detail-info {
-    grid-template-columns: 1fr; /* Una columna en móviles */
-  }
-  .pets-grid {
-    grid-template-columns: 1fr; /* Una columna para mascotas en móviles */
-  }
-}
-
-/* --- 11.3. Para Móviles muy pequeños (max-width: 480px) --- */
-@media (max-width: 480px) {
-  .admin-content-container {
-    padding: 0.8rem;
-    margin: 0.5rem auto;
-  }
-  .admin-navbar {
-    padding: 0.5rem 0.8rem;
-  }
-  .navbar-logo {
-    height: 25px;
-  }
-  .user-profile {
-    padding: 0.3rem 0.6rem;
-  }
-  .user-avatar {
-    width: 24px;
-    height: 24px;
-  }
-  .admin-sidebar {
-    width: 55px; /* Sidebar aún más estrecho */
-    top: 50px; /* Ajusta según la navbar */
-  }
-  .admin-container {
-    margin-left: 55px;
-    padding: 0.8rem;
-    margin-top: 50px;
-  }
-  .admin-content {
-    padding: 1rem;
-  }
-  .admin-content-header h2 {
-    font-size: 1.5rem;
-  }
-  .header-icon {
-    font-size: 1.8rem;
-  }
-  .search-box input {
-    padding: 0.6rem 1rem 0.6rem 2.2rem;
-    font-size: 0.85rem;
-  }
-  .search-icon {
-    left: 0.6rem;
-    font-size: 0.9rem;
-  }
-  .clear-search {
-    right: 0.4rem;
-    font-size: 0.9rem;
-  }
   .add-btn {
-    padding: 0.7rem 1.2rem;
-    font-size: 0.85rem;
-    gap: 0.5rem;
+      width: 100%; /* Botón de añadir ocupa todo el ancho */
+      justify-content: center;
+      padding: 0.7rem 1rem;
+      font-size: 0.9rem;
   }
-  .admin-table th, .admin-table td {
-    padding: 0.6rem 0.4rem;
-    font-size: 0.75rem;
+
+  .admin-table {
+      min-width: 600px; /* Asegura un mínimo para el scroll */
   }
-  .status-badge {
-    padding: 0.3rem 0.6rem;
-    font-size: 0.7rem;
+
+  .admin-table th,
+  .admin-table td {
+      padding: 0.7rem 0.8rem;
+      font-size: 0.8rem;
   }
+
+  .actions-cell {
+      flex-direction: column; /* Apilar botones de acción en celdas */
+      gap: 0.3rem;
+      align-items: flex-start;
+  }
+
+  .edit-btn, .delete-btn, .status-toggle-btn, .btn-details, .btn-edit, .btn-status, .btn-delete {
+      width: 100%;
+      justify-content: center;
+      padding: 0.5rem 0.8rem;
+      font-size: 0.8rem;
+  }
+
   .modal-content {
-    padding: 1rem;
+      padding: 1.5rem;
+      width: 95%;
   }
+
   .modal-header h3 {
-    font-size: 1.2rem;
+      font-size: 1.5rem;
   }
-  .form-group label {
-    font-size: 0.8rem;
+
+  .modal-form .form-icon {
+      font-size: 1.8rem;
   }
-  .form-group input, .form-group select, .form-group textarea {
-    padding: 0.8rem 0.8rem;
-    font-size: 0.85rem;
+
+  .form-grid {
+      grid-template-columns: 1fr; /* Una columna en móvil */
   }
-  .save-btn, .cancel-btn {
-    padding: 0.8rem 1.2rem;
-    font-size: 0.9rem;
+
+  .form-actions {
+      flex-direction: column; /* Apilar botones del formulario */
+      gap: 0.8rem;
   }
+
+  .cancel-btn, .save-btn {
+      width: 100%;
+      justify-content: center;
+      padding: 0.7rem 1rem;
+      font-size: 0.9rem;
+  }
+
   .notification {
-    width: calc(100% - 1rem);
-    right: 0.5rem;
-    bottom: 0.5rem;
-    padding: 0.7rem 0.8rem;
-    font-size: 0.8rem;
-    gap: 0.5rem;
+      width: calc(100% - 40px); /* Ancho completo menos padding */
+      left: 20px;
+      right: 20px;
+      padding: 0.8rem 1rem;
+      font-size: 0.85rem;
+      top: 15px; /* Ajustar posición superior */
   }
-  .notification .notification-icon {
-    font-size: 1.2rem;
+
+  .user-detail-info,
+  .pets-grid {
+      grid-template-columns: 1fr; /* Una columna en móvil */
   }
-  h1 { font-size: 2.2rem; }
-  h2 { font-size: 1.8rem; }
-  h3 { font-size: 1.5rem; }
-  h4 { font-size: 1.2rem; }
-  p { font-size: 0.9rem; }
+
+  .user-detail-header h3 {
+      font-size: 1.4rem;
+  }
+
+  .user-detail-pets h4 {
+      font-size: 1.3rem;
+  }
 }
 
+/* Tablets (768px a 1024px) */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .admin-sidebar {
+      width: 200px; /* Ancho más pequeño para sidebar */
+  }
+
+  .admin-sidebar-nav-link {
+      padding: 0.8rem 1rem;
+      font-size: 0.95rem;
+  }
+
+  .admin-content {
+      padding: 1.2rem;
+  }
+
+  .admin-content-header h2 {
+      font-size: 1.6rem;
+  }
+
+  .header-actions {
+      gap: 0.8rem;
+  }
+
+  .search-box {
+      max-width: 300px;
+  }
+
+  .add-btn {
+      padding: 0.7rem 1.2rem;
+      font-size: 0.9rem;
+  }
+
+  .admin-table th,
+  .admin-table td {
+      padding: 0.8rem 1rem;
+      font-size: 0.85rem;
+  }
+
+  .edit-btn, .delete-btn, .status-toggle-btn, .btn-details, .btn-edit, .btn-status, .btn-delete {
+      padding: 0.5rem 1rem;
+      font-size: 0.8rem;
+  }
+
+  .modal-content {
+      max-width: 600px;
+      padding: 2rem;
+  }
+
+  .form-grid {
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
+}
+
+/* Animaciones adicionales */
+/* Fade in para elementos que aparecen */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Animación para iconos de carga */
+.spinner-icon {
+  animation: spin 1.5s linear infinite;
+}
+
+/* Animación de entrada para modales (ya manejada por Framer Motion, pero CSS fallback) */
+.modal-content {
+  animation: fadeInScale 0.3s ease-out; /* Fallback si Framer Motion no carga */
+}
+
+/* Animación para el badge del header */
+.badge {
+  animation: popIn 0.4s ease-out;
+}
+
+@keyframes popIn {
+  0% { transform: scale(0.5); opacity: 0; }
+  80% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+/* Animación para las filas de la tabla al cargar (opcional, si se maneja en JS) */
+.admin-table tbody tr {
+  opacity: 0;
+  animation: fadeInRow 0.5s forwards;
+}
+
+@keyframes fadeInRow {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Ejemplo de cómo aplicar fadeInRow con un delay en React:
+ filteredVets.map((vet, index) => (
+   <tr key={vet.id} style={{ animationDelay: `${index * 0.05}s` }}>
+     ...
+   </tr>
+ ))
+*/

@@ -19,8 +19,11 @@ app.use(express.json()); // Habilita el parsing de JSON en el cuerpo de las peti
 const pool = mysql.createPool({
     host: process.env.DB_HOST || "127.0.0.1",
     user: process.env.DB_USER || "root",
+<<<<<<< HEAD
     password: process.env.DB_PASSWORD || "12345678",
     password: process.env.DB_PASSWORD || "", // Revertido al valor por defecto proporcionado previamente
+=======
+>>>>>>> def80686f5435e7dcd1c784edbd37bd85c3a6b3d
     password: process.env.DB_PASSWORD || "",
     database: process.env.DB_NAME || "veterinaria",
     waitForConnections: true,
@@ -86,12 +89,19 @@ const isOwnerOrAdmin = async (req, res, next) => {
 
     try {
         if (req.baseUrl.includes('/mascotas')) {
-            const idMascota = parseInt(req.params.id || req.body.id_mascota);
-            if (isNaN(idMascota)) {
-                return res.status(400).json({ success: false, message: "ID de mascota no válido." });
+            // Cuando la solicitud es GET /mascotas?id_propietario=X, el propietario es X
+            if (req.query.id_propietario) {
+                resourceUserId = parseInt(req.query.id_propietario);
+            } else if (req.params.id) { // Para /mascotas/:id
+                const idMascota = parseInt(req.params.id);
+                if (isNaN(idMascota)) {
+                    return res.status(400).json({ success: false, message: "ID de mascota no válido." });
+                }
+                const [rows] = await pool.query("SELECT id_propietario FROM mascotas WHERE id_mascota = ?", [idMascota]);
+                if (rows.length > 0) resourceUserId = rows[0].id_propietario;
+            } else if (req.method === 'POST' && req.body.id_propietario) { // Para POST /mascotas
+                 resourceUserId = parseInt(req.body.id_propietario);
             }
-            const [rows] = await pool.query("SELECT id_propietario FROM mascotas WHERE id_mascota = ?", [idMascota]);
-            if (rows.length > 0) resourceUserId = rows[0].id_propietario;
         } else if (req.baseUrl.includes('/historial_medico')) {
             const idHistorial = parseInt(req.params.id || req.body.id_historial);
             if (isNaN(idHistorial)) {
@@ -118,11 +128,10 @@ const isOwnerOrAdmin = async (req, res, next) => {
         }
         
         // Si no se pudo determinar el propietario del recurso o no hay recurso, denegar acceso.
+        // O permitir si es POST de mascota y no es usuario
         if (resourceUserId === null) {
-            // Permitir que si es un POST a /mascotas o /historial_medico, el admin/vet pueda crear
-            if (req.method === 'POST' && (req.baseUrl.includes('/mascotas') || req.baseUrl.includes('/historial_medico')) && userRole !== 'usuario') {
-                 // Si es POST para crear, el middleware isVetOrAdmin ya manejará permisos
-                return next();
+            if (req.method === 'POST' && req.baseUrl.includes('/mascotas') && userRole !== 'usuario') {
+                 return next(); // Permitir a admin/vet crear mascotas para cualquier propietario
             }
             return res.status(403).json({ success: false, message: "Acceso denegado. Recurso no encontrado o no eres el propietario." });
         }
@@ -996,7 +1005,7 @@ app.get("/usuarios/:id", authenticateToken, async (req, res) => {
 
         const [user] = await pool.query(
             `SELECT id, nombre, apellido, email, telefono, direccion, tipo_documento, numero_documento,
-                    fecha_nacimiento, role, active, created_at
+                    fecha_nacimiento, role, active, created_at, experiencia, universidad, horario
              FROM usuarios
              WHERE id = ?`,
             [id]
@@ -1014,7 +1023,7 @@ app.get("/usuarios/:id", authenticateToken, async (req, res) => {
 // Actualizar usuario (general, para clientes, veterinarios, admins)
 app.put("/usuarios/:id", authenticateToken, async (req, res) => { 
     const { id } = req.params;
-    const { nombre, apellido, email, telefono, direccion, tipo_documento, numero_documento, fecha_nacimiento, active, password } = req.body;
+    const { nombre, apellido, email, telefono, direccion, tipo_documento, numero_documento, fecha_nacimiento, active, password, experiencia, universidad, horario } = req.body;
 
     // Asegurarse de que el usuario solo pueda actualizar su propio perfil o que sea un admin
     if (req.user.id !== parseInt(id) && req.user.role !== 'admin') {
@@ -1055,6 +1064,11 @@ app.put("/usuarios/:id", authenticateToken, async (req, res) => {
             fields.push('password = ?'); values.push(hashedPassword);
         }
 
+        // Nuevos campos para 'admin' y 'veterinario'
+        if (experiencia !== undefined) { fields.push('experiencia = ?'); values.push(experiencia); }
+        if (universidad !== undefined) { fields.push('universidad = ?'); values.push(universidad); }
+        if (horario !== undefined) { fields.push('horario = ?'); values.push(horario); }
+
         if (fields.length === 0) {
             return res.status(400).json({ success: false, message: "No hay datos para actualizar." });
         }
@@ -1070,7 +1084,7 @@ app.put("/usuarios/:id", authenticateToken, async (req, res) => {
 
         const [updatedUser] = await pool.query(
             `SELECT id, nombre, apellido, email, telefono, direccion, tipo_documento, numero_documento,
-                    fecha_nacimiento, role, active, created_at
+                    fecha_nacimiento, role, active, created_at, experiencia, universidad, horario
              FROM usuarios WHERE id = ?`,
             [id]
         );
@@ -1123,7 +1137,7 @@ app.delete("/usuarios/:id", authenticateToken, isAdmin, async (req, res) => {
 
 // Obtener todas las mascotas
 // Modificado para aceptar un query parameter id_propietario
-app.get("/mascotas", authenticateToken, isVetOrAdmin, async (req, res) => {
+app.get("/mascotas", authenticateToken, isOwnerOrAdmin, async (req, res) => { // CAMBIADO de isVetOrAdmin a isOwnerOrAdmin
     try {
         const { id_propietario } = req.query; // Leer id_propietario desde los query parameters
         let query = `SELECT m.*, CONCAT(u.nombre, ' ', u.apellido) as propietario_nombre
@@ -1168,7 +1182,7 @@ app.get("/mascotas/:id", authenticateToken, isOwnerOrAdmin, async (req, res) => 
 });
 
 // Registrar nueva mascota
-app.post("/mascotas", authenticateToken, isVetOrAdmin, async (req, res) => {
+app.post("/mascotas", authenticateToken, isVetOrAdmin, async (req, res) => { // isVetOrAdmin se mantiene para la creación
     const { nombre, especie, raza, edad, peso, sexo, color, microchip, id_propietario } = req.body;
 
     if (!nombre || !especie || !id_propietario) {
@@ -1703,4 +1717,3 @@ app.get("/admin/historiales", authenticateToken, isAdmin, async (req, res) => {
 app.listen(PORT, () => {
     console.log(`Servidor corriendo en el puerto ${PORT}`);
 });
-
