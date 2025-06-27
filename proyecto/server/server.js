@@ -19,12 +19,9 @@ app.use(express.json()); // Habilita el parsing de JSON en el cuerpo de las peti
 const pool = mysql.createPool({
     host: process.env.DB_HOST || "127.0.0.1",
     user: process.env.DB_USER || "root",
-<<<<<<< HEAD
     password: process.env.DB_PASSWORD || "12345678",
     password: process.env.DB_PASSWORD || "", // Revertido al valor por defecto proporcionado previamente
-=======
     password: process.env.DB_PASSWORD || "",
->>>>>>> 3353d257ed8541abab87e8147a5a7c52248629c9
     database: process.env.DB_NAME || "veterinaria",
     waitForConnections: true,
     connectionLimit: 10, // Número máximo de conexiones en el pool

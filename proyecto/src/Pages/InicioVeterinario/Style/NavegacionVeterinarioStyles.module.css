@@ -1,437 +1,399 @@
-/* veteVeterinarioInicioStyles.module.css */
-
-.veteInicioContainer {
-    padding: 30px;
-    background-color: #f8fcfc; /* Very light background for the content area */
-    border-radius: 15px;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
-    font-family: 'Poppins', sans-serif;
-    color: #333;
-    animation: fadeIn 0.8s ease-out;
+/* Base Styles */
+.vetDash_mainContainer {
+  padding: 30px;
+  background-color: #f5f9fa; /* Light blue-gray background */
+  min-height: 100vh;
+  font-family: 'Poppins', sans-serif;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+.vetDash_greetingText {
+  font-size: 2.4rem;
+  color: #2c3e50; /* Dark blue-gray */
+  margin-bottom: 10px;
+  font-weight: 600;
 }
 
-.veteGreeting {
-    margin-bottom: 30px;
-    color: #00acc1;
-    font-size: 2.2em;
-    font-weight: 700;
+.vetDash_subHeaderMessage {
+  font-size: 1.1rem;
+  color: #7f8c8d; /* Gray-blue */
+  margin-bottom: 40px;
+  line-height: 1.6;
 }
 
-/* New: Dashboard Cards Grid */
-.veteDashboardGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Larger cards */
-    gap: 25px;
-    margin-bottom: 40px;
+/* Section Wrapper */
+.vetDash_sectionWrapper {
+  margin-bottom: 40px;
+  background-color: white;
+  border-radius: 16px;
+  padding: 25px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+  border-top: 4px solid #00acc1; /* Teal accent */
 }
 
-/* New: General Dashboard Card Style */
-.veteDashboardCard {
-    background-color: #ffffff;
-    padding: 25px;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    border-left: 5px solid #00acc1; /* Accent border */
+.vetDash_sectionWrapper h2 {
+  font-size: 1.5rem;
+  color: #2c3e50;
+  margin-bottom: 25px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
-.veteDashboardCard:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0, 172, 193, 0.2);
+.vetDash_sectionIcon {
+  color: #00acc1;
+  font-size: 1.3rem;
 }
 
-.veteCardHeader {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    margin-bottom: 15px;
+/* Quick Actions Grid */
+.vetDash_quickActionsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
 }
 
-.veteCardHeader .veteIcon {
-    font-size: 2.2em;
-    color: #00acc1;
+.vetDash_quickActionCard {
+  background: white;
+  border-radius: 12px;
+  padding: 25px 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid #e0f7fa; /* Light teal border */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
 }
 
-.veteCardHeader h3 {
-    margin: 0;
-    font-size: 1.2em;
-    color: #555;
-    font-weight: 600;
+.vetDash_quickActionCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background-color: var(--action-color);
 }
 
-.veteCardContent {
-    font-size: 2.5em; /* Main number size */
-    font-weight: 700;
-    color: #00acc1;
-    text-align: right;
-    margin-top: auto; /* Pushes content to bottom if card has variable height */
+.vetDash_quickActionIcon {
+  font-size: 1.8rem;
+  margin-bottom: 15px;
+  color: var(--action-color);
 }
 
-/* Specific card adjustments */
-.veteCardContent.smallText {
-    font-size: 1.1em; /* For ratings/comments */
-    font-weight: 600;
-    color: #666; /* More subtle color */
+.vetDash_quickActionText {
+  font-size: 1.1rem;
+  color: #2c3e50;
+  font-weight: 500;
+  margin: 0;
 }
 
-.veteCardContent.smallText strong {
-    font-size: 1.6em; /* Make the actual number larger */
-    color: #00acc1;
+/* Stats Grid */
+.vetDash_statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
 }
 
-/* Quick Actions Section */
-.veteQuickActionsSection {
-    margin-bottom: 40px;
+.vetDash_statCard {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e0f7fa;
+  transition: all 0.3s ease;
 }
 
-.veteQuickActionsGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 20px;
+.vetDash_statCardHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
 }
 
-.veteActionButtonCard {
-    background-color: #e0f7fa; /* Light background for action buttons */
-    color: #00acc1;
-    border: 2px solid #00acc1;
-    padding: 20px;
-    border-radius: 12px;
-    cursor: pointer;
-    font-size: 1.05em;
-    font-weight: 600;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: 10px;
-    transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
-    text-decoration: none; /* For NavLink functionality */
+.vetDash_statCardHeader h3 {
+  font-size: 1.1rem;
+  color: #2c3e50;
+  margin: 0;
+  font-weight: 600;
 }
 
-.veteActionButtonCard:hover {
-    background-color: #00acc1;
-    color: white;
-    transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0, 172, 193, 0.4);
+.vetDash_statIcon {
+  font-size: 1.3rem;
 }
 
-.veteActionButtonCard .veteIcon {
-    font-size: 2.5em;
-    margin-bottom: 5px;
-    color: #00acc1; /* Default icon color */
-    transition: color 0.3s ease;
+.vetDash_statHighlight {
+  font-size: 2.2rem;
+  color: #00acc1;
+  font-weight: 700;
+  margin: 10px 0;
+  line-height: 1;
 }
 
-.veteActionButtonCard:hover .veteIcon {
-    color: white; /* Icon color on hover */
+.vetDash_statSmallText {
+  font-size: 1.8rem;
 }
 
+.vetDash_statFooter {
+  font-size: 0.9rem;
+  color: #7f8c8d;
+  font-style: italic;
+}
 
 /* Appointments Section */
-.veteAppointmentsSection {
-    margin-bottom: 40px;
+.vetDash_appointmentsSection {
+  background: white;
+  border-radius: 16px;
+  padding: 25px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+  border-top: 4px solid #00acc1;
 }
 
-.veteSectionHeader {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 25px;
-    padding-bottom: 15px;
-    border-bottom: 2px solid #e0f7fa;
+.vetDash_sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
 }
 
-.veteSectionHeader h2 {
-    font-size: 1.8em;
-    color: #00acc1;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 10px;
+.vetDash_viewAllButton {
+  background-color: #00acc1;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
 }
 
-.veteViewAllButton {
-    background-color: #e0f7fa;
-    color: #00acc1;
-    border: 1px solid #00acc1;
-    padding: 10px 20px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 0.95em;
-    font-weight: 500;
-    transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease;
+.vetDash_buttonArrow {
+  font-size: 0.8rem;
 }
 
-.veteViewAllButton:hover {
-    background-color: #00acc1;
-    color: white;
-    transform: translateY(-2px);
+/* Appointments List */
+.vetDash_appointmentsList {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
 }
 
-.veteAppointmentsList {
-    display: grid;
-    gap: 20px;
+.vetDash_appointmentItem {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  border: 1px solid #e0f7fa;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
 }
 
-.veteAppointmentItem {
-    background-color: #ffffff;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+.vetDash_appointmentItem::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 4px;
+  background-color: var(--appointment-color, #00acc1);
 }
 
-.veteAppointmentItem:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(0, 172, 193, 0.1);
+.vetDash_appointmentTimeAvatar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 80px;
 }
 
-.veteAppointmentTime {
-    font-size: 1.2em;
-    font-weight: 600;
-    color: #00acc1;
-    flex-shrink: 0;
-    padding-right: 20px;
-    border-right: 2px solid #e0f7fa; /* Separator */
+.vetDash_mascotaAvatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e0f7fa;
 }
 
-.veteAppointmentDetails {
-    flex-grow: 1;
+.vetDash_timeDisplay {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-top: 8px;
 }
 
-.veteAppointmentDetails h4 {
-    margin: 0 0 5px 0;
-    font-size: 1.1em;
-    color: #333;
-    font-weight: 600;
+.vetDash_appointmentDetails {
+  flex-grow: 1;
 }
 
-.veteAppointmentDetails p {
-    margin: 0;
-    font-size: 0.9em;
-    color: #666;
+.vetDash_mascotaName {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #2c3e50;
 }
 
-.veteAppointmentActions {
-    flex-shrink: 0;
-    display: flex;
-    gap: 10px;
+.vetDash_serviceType {
+  font-size: 1rem;
+  color: #7f8c8d;
 }
 
-.veteActionButton {
-    background-color: #00acc1;
-    color: white;
-    border: none;
-    padding: 8px 15px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 0.9em;
-    font-weight: 500;
-    transition: background-color 0.3s ease, transform 0.2s ease;
+.vetDash_propietarioName {
+  font-size: 0.95rem;
+  color: #7f8c8d;
+  margin-top: 5px;
 }
 
-.veteActionButton.veteComplete {
-    background-color: #4CAF50; /* Green for complete */
+.vetDash_appointmentActions {
+  display: flex;
+  gap: 10px;
 }
 
-.veteActionButton.veteComplete:hover {
-    background-color: #388E3C;
-    transform: translateY(-1px);
+.vetDash_actionButton {
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
 }
 
-.veteActionButton.veteView {
-    background-color: #00acc1; /* Teal for view */
+.vetDash_completeButton {
+  background-color: #e8f5e9; /* Light green */
+  color: #4CAF50; /* Green */
+  border: 1px solid #c8e6c9;
 }
 
-.veteActionButton.veteView:hover {
-    background-color: #008fa7;
-    transform: translateY(-1px);
+.vetDash_viewDetailsButton {
+  background-color: #e3f2fd; /* Light blue */
+  color: #2196F3; /* Blue */
+  border: 1px solid #bbdefb;
 }
 
-.veteActionButton:hover {
-    transform: translateY(-1px);
+/* No Appointments Message */
+.vetDash_noAppointmentsMessage {
+  text-align: center;
+  padding: 40px 20px;
+  background-color: #f8f9fa;
+  border-radius: 12px;
+  border: 1px dashed #b2ebf2;
 }
 
-.veteNoAppointments {
-    text-align: center;
-    padding: 30px;
-    color: #999;
-    font-size: 1.1em;
-    background-color: #e0f7fa;
-    border-radius: 12px;
+.vetDash_noAppointmentsIcon {
+  font-size: 3rem;
+  color: #00acc1;
+  margin-bottom: 20px;
 }
 
-.veteNoAppointments .veteIcon {
-    font-size: 3em;
-    margin-bottom: 15px;
-    color: #00acc1;
+.vetDash_noAppointmentsMessage p {
+  font-size: 1.1rem;
+  color: #7f8c8d;
+  margin-bottom: 25px;
 }
 
-/* Responsive adjustments */
+.vetDash_scheduleNewButton {
+  background-color: #00acc1;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 25px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+/* Animation Enhancements */
+.vetDash_appointmentCompleted {
+  opacity: 0.6;
+  background-color: #f5f5f5;
+}
+
+/* Responsive Adjustments */
 @media (max-width: 1024px) {
-    .veteDashboardGrid {
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    }
+  .vetDash_mainContainer {
+    padding: 20px;
+  }
+  
+  .vetDash_quickActionsGrid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  }
+  
+  .vetDash_statsGrid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  }
+  
+  .vetDash_appointmentItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+  
+  .vetDash_appointmentTimeAvatar {
+    flex-direction: row;
+    align-items: center;
+    gap: 15px;
+    width: 100%;
+  }
+  
+  .vetDash_appointmentActions {
+    width: 100%;
+    justify-content: flex-end;
+  }
 }
 
 @media (max-width: 768px) {
-    .veteInicioContainer {
-        padding: 20px;
-        margin: 20px 0;
-    }
-
-    .veteGreeting {
-        font-size: 1.8em;
-    }
-
-    .veteDashboardGrid {
-        grid-template-columns: 1fr; /* Single column on smaller screens */
-        gap: 20px;
-    }
-
-    .veteDashboardCard {
-        padding: 20px;
-    }
-
-    .veteCardHeader .veteIcon {
-        font-size: 1.8em;
-    }
-
-    .veteCardHeader h3 {
-        font-size: 1.1em;
-    }
-
-    .veteCardContent {
-        font-size: 2em;
-    }
-
-    .veteCardContent.smallText strong {
-        font-size: 1.4em;
-    }
-
-    .veteQuickActionsGrid {
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: 15px;
-    }
-
-    .veteActionButtonCard {
-        padding: 15px;
-        font-size: 0.95em;
-    }
-
-    .veteActionButtonCard .veteIcon {
-        font-size: 2em;
-    }
-
-    .veteSectionHeader {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-    }
-
-    .veteSectionHeader h2 {
-        font-size: 1.5em;
-    }
-
-    .veteViewAllButton {
-        width: 100%;
-        text-align: center;
-    }
-
-    .veteAppointmentsList {
-        grid-template-columns: 1fr;
-    }
-
-    .veteAppointmentItem {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-        padding: 15px;
-    }
-
-    .veteAppointmentTime {
-        width: 100%;
-        padding-right: 0;
-        border-right: none;
-        margin-bottom: 10px;
-        border-bottom: 1px solid #e0f7fa; /* New separator */
-        padding-bottom: 10px;
-    }
-
-    .veteAppointmentActions {
-        width: 100%;
-        justify-content: flex-end;
-    }
-
-    .veteActionButton {
-        padding: 6px 12px;
-        font-size: 0.85em;
-    }
+  .vetDash_greetingText {
+    font-size: 2rem;
+  }
+  
+  .vetDash_sectionWrapper {
+    padding: 20px;
+  }
+  
+  .vetDash_quickActionsGrid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+  
+  .vetDash_statsGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .vetDash_sectionHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+  
+  .vetDash_viewAllButton {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 @media (max-width: 480px) {
-    .veteInicioContainer {
-        padding: 15px;
-    }
-
-    .veteGreeting {
-        font-size: 1.5em;
-    }
-
-    .veteCardHeader h3 {
-        font-size: 1em;
-    }
-
-    .veteCardContent {
-        font-size: 1.8em;
-    }
-
-    .veteCardContent.smallText strong {
-        font-size: 1.2em;
-    }
-
-    .veteQuickActionsGrid {
-        grid-template-columns: 1fr; /* Single column on smallest screens */
-    }
-
-    .veteActionButtonCard {
-        padding: 12px;
-        font-size: 0.9em;
-    }
-
-    .veteActionButtonCard .veteIcon {
-        font-size: 1.8em;
-    }
-
-    .veteSectionHeader h2 {
-        font-size: 1.3em;
-    }
-
-    .veteViewAllButton {
-        padding: 8px 15px;
-        font-size: 0.85em;
-    }
-
-    .veteAppointmentTime {
-        font-size: 1em;
-    }
-
-    .veteAppointmentDetails h4 {
-        font-size: 1em;
-    }
-
-    .veteAppointmentDetails p {
-        font-size: 0.85em;
-    }
+  .vetDash_mainContainer {
+    padding: 15px;
+  }
+  
+  .vetDash_greetingText {
+    font-size: 1.8rem;
+  }
+  
+  .vetDash_quickActionsGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .vetDash_actionButton {
+    padding: 8px 12px;
+    font-size: 0.85rem;
+  }
 }
