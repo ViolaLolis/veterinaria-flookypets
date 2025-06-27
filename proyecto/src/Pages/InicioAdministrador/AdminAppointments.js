@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 // Importa los íconos necesarios
 import { 
-    FaCalendarAlt, FaSearch, FaUser, FaPaw, FaNotesMedical, 
-    FaSpinner, FaPlus, FaEdit, FaTrash, FaTimes, FaInfoCircle, 
-    FaCheck, FaBan, FaEye, FaRegCheckCircle, FaRegTimesCircle, 
-    FaClock, FaCalendarCheck, FaTimesCircle // Agregado FaTimesCircle para cancelar
+    FaCalendarAlt, FaSearch, FaUser, FaNotesMedical, 
+    FaSpinner, FaPlus, FaEdit, FaTrash, FaTimes, FaInfoCircle 
+    , FaEye, FaRegCheckCircle, FaRegTimesCircle, FaCalendarCheck, FaTimesCircle // Agregado FaTimesCircle para cancelar
 } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 import { authFetch } from './api'; // Asegúrate de que la ruta sea correcta

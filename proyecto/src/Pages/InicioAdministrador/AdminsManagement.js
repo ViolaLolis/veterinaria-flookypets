@@ -3,7 +3,7 @@ import { FaUserShield, FaEdit, FaTrash, FaPlus, FaSearch, FaSave, FaTimes, FaSpi
 import { motion, AnimatePresence } from 'framer-motion';
 import './Styles/AdminStyles.css'; // Importa AdminStyles.css que contiene los estilos generales, incluyendo los del modal
 
-const AdminsManagement = () => {
+const AdminsManagement = ({ user }) => { // Recibe 'user' como prop
     // --- Estados para gestionar los datos de los administradores y la UI ---
     const [admins, setAdmins] = useState([]); // Lista completa de administradores
     const [filteredAdmins, setFilteredAdmins] = useState([]); // Lista de administradores filtrados por búsqueda y estado
@@ -25,9 +25,6 @@ const AdminsManagement = () => {
     const [validationErrors, setValidationErrors] = useState({}); // Errores de validación por campo
     const [isSubmitting, setIsSubmitting] = useState(false); // Indica si el formulario se está enviando
     const [notification, setNotification] = useState(null); // Para mostrar mensajes de éxito/error temporales
-
-    // Obtener el usuario logueado desde localStorage. Necesario para prevenir que un admin se elimine a sí mismo.
-    const user = JSON.parse(localStorage.getItem('user')) || {};
 
     // Función auxiliar para obtener el token de autenticación del localStorage
     const getAuthToken = () => {
@@ -164,24 +161,23 @@ const AdminsManagement = () => {
         const trimmedValue = value.trim();
 
         // --- Patrones y listas de palabras clave para validaciones generales y de seguridad ---
-        const commonSpecialChars = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`€£¥§°¶™®©₽₹¢\p{Emoji}]/u;
+        const commonSpecialChars = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?~`€£¥§°¶™®©₽₹¢\p{Emoji}]/u;
         const sqlInjectionKeywords = /(union\s+select|select\s+from|drop\s+table|insert\s+into|delete\s+from|alter\s+table|--|;|xp_cmdshell|exec\s+\(|sleep\(|benchmark\()/i;
         const xssKeywords = /(<script|javascript:|onmouseover|onerror|onload|onclick|alert\(|prompt\(|confirm\(|<iframe|<img|<svg|<body|<div|<style)/i;
         const commonBadWords = ['sexo', 'puta', 'mierda', 'nazi', 'fuck', 'shit', 'asshole', 'bitch', 'joder']; // Ejemplos, ampliar según necesidad
         const repetitivePattern = /(.)\1{4,}/; // Más de 4 caracteres idénticos consecutivos
-        const sequentialPattern = /(?:01234|12345|23456|34567|45678|56789|7890|9876|8765|7654|6543|5432|4321|3210)/; // Secuencias numéricas
+        const sequentialPattern = /(?:01234|12345|23456|34567|4321|3210)/; // Secuencias numéricas
         const keyboardSequencesRegex = new RegExp( // Reconstrucción de la regex para evitar errores
             [
                 "qwer", "wert", "erty", "rtyu", "tyui", "yuio", "uiop",
                 "asdf", "sdfg", "dfgh", "fghj", "ghjk", "hjkl",
                 "zxcv", "xcvb", "cvbn", "vbnm",
-                "1qaz", "2wsx", "3edc", "4rfv", "5tgb", "6yhn", "7ujm", "8ik\\,", "9ol\\.", "0p\\;", // Vertical and diagonal numerical/alpha
+                "1qaz", "2wsx", "3edc", "4rfv", "5tgb", "6yhn", "7ujm", "8ik", "9ol", "0p", // Vertical and diagonal numerical/alpha
                 "qaz", "wsx", "edc", "rfv", "tgb", "yhn", "ujm", // Vertical alphabetical
-                // Caracteres especiales que necesitan ser escapados en una regex construida con un string
-                "\\,\\.i", // comma, dot, i
-                "\\/po", // slash, p, o
-                "\\/\\?", // slash, question mark
-                "\\.;" // dot, semicolon
+                ",.i", // comma, dot, i
+                "/po", // slash, p, o
+                "/?", // slash, question mark
+                ".;" // dot, semicolon
             ].join("|"),
             "i"
         );
@@ -319,6 +315,7 @@ const AdminsManagement = () => {
                     const disposableDomains = [
                         'mailinator.com', 'tempmail.com', 'grr.la', 'yopmail.com', '10minutemail.com', 'guerrillamail.com',
                         'sharklasers.com', 'getnada.com', 'trashmail.com', 'disposablemail.com', 'mohmal.com', 'dropmail.me',
+                        'anonemail.net', 'bccto.me', 'chacuo.net', 'filzmail.com', 'fudgerub.com', 'maildrop.com',
                         'anonemail.net', 'bccto.me', 'chacuo.net', 'filzmail.com', 'fudgerub.com', 'maildrop.cc'
                     ];
                     if (disposableDomains.some(d => domain.includes(d))) {
@@ -473,51 +470,46 @@ const AdminsManagement = () => {
 
             case 'password':
                 // Validación: Campo obligatorio
-                if (!trimmedValue) {
-                    message = 'Este campo es obligatorio.';
+                if (!trimmedValue && isNewAdmin) { // Contraseña es obligatoria solo al crear un nuevo admin
+                    message = 'La contraseña es obligatoria.';
                 }
-                // Validación: Longitud mínima
+                // Si no es un nuevo admin y la contraseña está vacía, no se valida (no se va a cambiar)
+                else if (!trimmedValue && !isNewAdmin) {
+                    message = ''; // No hay error si la contraseña está vacía en modo edición
+                }
                 else if (trimmedValue.length < 8) {
                     message = 'Mínimo 8 caracteres.';
                 }
-                // Validación: Al menos una minúscula
                 else if (!/(?=.*[a-z])/.test(trimmedValue)) {
                     message = 'Debe contener al menos una minúscula.';
                 }
-                // Validación: Al menos una mayúscula
                 else if (!/(?=.*[A-Z])/.test(trimmedValue)) {
                     message = 'Debe contener al menos una mayúscula.';
                 }
-                // Validación: Al menos un número
                 else if (!/(?=.*\d)/.test(trimmedValue)) {
                     message = 'Debe contener al menos un número.';
                 }
-                // Validación: Al menos un carácter especial (@$!%*?&)
                 else if (!/(?=.*[@$!%*?&])/.test(trimmedValue)) {
                     message = 'Debe contener al menos un carácter especial (@$!%*?&).';
                 }
-                // Validación: Longitud máxima
                 else if (trimmedValue.length > 30) {
                     message = 'Máximo 30 caracteres.';
                 }
                 break;
 
             case 'confirmPassword':
-                // Validación: Requerido si se está estableciendo o cambiando la contraseña principal
-                if ((currentFormData.password && currentFormData.password.length > 0) || isNewAdmin) {
+                // Validación: Requerido si se está creando un nuevo admin o si se ha introducido una contraseña en el campo 'password'
+                if (isNewAdmin || (currentFormData.password && currentFormData.password.length > 0)) {
                     if (!trimmedValue) {
                         message = 'Por favor, confirma tu contraseña. Este campo es obligatorio.';
                     }
-                    // Validación: Debe coincidir exactamente con la contraseña principal
                     else if (trimmedValue !== currentFormData.password) {
                         message = 'Las contraseñas no coinciden. Asegúrate de que sean exactamente iguales.';
                     }
-                    // Validación: Longitud mínima (como la principal)
-                    else if (trimmedValue.length < 8) { // Ajustado a la nueva longitud mínima de la contraseña
-                        message = 'La confirmación debe tener al menos 8 caracteres, igual que la contraseña principal.';
+                    else if (trimmedValue.length < 8) {
+                        message = 'La confirmación debe tener al menos 8 caracteres.';
                     }
-                    // Validación: Longitud máxima (como la principal)
-                    else if (trimmedValue.length > 30) { // Ajustado a la nueva longitud máxima de la contraseña
+                    else if (trimmedValue.length > 30) {
                         message = 'La confirmación no debe exceder los 30 caracteres.';
                     }
                 }
@@ -753,7 +745,7 @@ const AdminsManagement = () => {
 
             } else {
                 // Lógica para CREAR un nuevo administrador
-                payload.role = 'administrador'; // Asegura que el rol sea 'administrador'
+                payload.role = 'admin'; // Asegura que el rol sea 'admin'
                 payload.active = 1; // Un nuevo administrador se registra como activo por defecto
 
                 responseData = await authFetch('/administrators', { // Asegúrate de que este endpoint sea correcto para crear administradores
@@ -767,7 +759,7 @@ const AdminsManagement = () => {
                         id: responseData.data.id,
                         ...responseData.data, // Usa los datos completos devueltos por el backend
                         name: `${responseData.data.nombre} ${responseData.data.apellido || ''}`.trim(),
-                        role: responseData.data.role || 'administrador', // Asegura el rol
+                        role: responseData.data.role || 'admin', // Asegura el rol
                         active: responseData.data.active !== undefined ? responseData.data.active : 1, // Si active no viene, asume 1
                         created_at: responseData.data.created_at || new Date().toISOString().split('T')[0] // Formato YYYY-MM-DD
                     };
@@ -787,8 +779,7 @@ const AdminsManagement = () => {
         } finally {
             setIsSubmitting(false); // Desactiva el estado de envío (oculta el spinner)
         }
-    }, [authFetch, currentAdmin, formData, showNotification, setAdmins, handleCancelForm, fetchAdmins, validateField, setError]); // Dependencias para useCallback
-
+    }, [authFetch, currentAdmin, formData, showNotification, setAdmins, handleCancelForm, fetchAdmins, validateField, setError]);
 
     // Renderizado condicional: Muestra spinner mientras carga por primera vez
     if (isLoading && admins.length === 0 && !error) {
