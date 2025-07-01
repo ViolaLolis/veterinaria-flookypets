@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams, Link } from 'react-router-dom'; // Importar Link
+import { useParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import styles from './Styles/HistorialMedico.module.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faStethoscope, faFileMedicalAlt, faPrint, faDownload, faSearch, faChevronDown, faChevronUp, faCalendarAlt, faSpinner, faInfoCircle } from '@fortawesome/free-solid-svg-icons';
-import { authFetch } from './api'; // Asegúrate de que la ruta sea correcta
+import { authFetch } from './api';
 
-const HistorialMedico = ({ user }) => { // Recibe el usuario para comprobación de rol
+const HistorialMedico = ({ user }) => {
   const { mascotaId } = useParams();
   const [historial, setHistorial] = useState([]);
   const [expandedRow, setExpandedRow] = useState(null);
@@ -18,7 +18,6 @@ const HistorialMedico = ({ user }) => { // Recibe el usuario para comprobación 
     setIsLoading(true);
     setError('');
     try {
-      // Ajusta la URL para filtrar por id_mascota
       const response = await authFetch(`/historial_medico?id_mascota=${mascotaId}`);
       if (response.success) {
         setHistorial(response.data);
@@ -44,7 +43,7 @@ const HistorialMedico = ({ user }) => { // Recibe el usuario para comprobación 
   const filteredHistorial = historial.filter(item =>
     item.diagnostico.toLowerCase().includes(searchTerm.toLowerCase()) ||
     item.tratamiento.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.observaciones.toLowerCase().includes(searchTerm.toLowerCase()) || // Usar 'observaciones' en lugar de 'notas'
+    item.observaciones.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (item.veterinario_nombre && item.veterinario_nombre.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
@@ -115,7 +114,7 @@ const HistorialMedico = ({ user }) => { // Recibe el usuario para comprobación 
         <div className={styles.historialContainer}>
           {filteredHistorial.map(item => (
             <motion.div
-              key={item.id_historial} // Usar id_historial de la DB
+              key={item.id_historial}
               className={styles.historialCard}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -176,7 +175,7 @@ const HistorialMedico = ({ user }) => { // Recibe el usuario para comprobación 
                       </div>
                     )}
                     <div className={styles.cardActions}>
-                      <Link to={`/usuario/mascota/${mascotaId}/historial/${item.id_historial}`} className={styles.smallActionButton}>
+                      <Link to={`/usuario/historial/${mascotaId}/${item.id_historial}`} className={styles.smallActionButton}> {/* CORREGIDO */}
                         Ver Detalles
                       </Link>
                     </div>

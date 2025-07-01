@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import styles from './Styles/AgendarCita.module.css';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link, useOutletContext } from 'react-router-dom'; // Importa useOutletContext
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faArrowLeft,
@@ -13,11 +13,13 @@ import {
   faCalendarAlt,
   faClock,
   faCheckCircle,
-  faSpinner
+  faSpinner,
+  faTimesCircle // Asegúrate de importar faTimesCircle para errores
 } from '@fortawesome/free-solid-svg-icons';
-import { authFetch } from './api'; // Importa authFetch
+import { authFetch } from './api';
 
-const AgendarCita = ({ user }) => { // Recibe el objeto 'user' como prop
+const AgendarCita = () => {
+  const { user, showNotification } = useOutletContext(); // Obtiene user y showNotification del contexto del Outlet
   const [date, setDate] = useState(new Date());
   const [selectedTime, setSelectedTime] = useState('');
   const [citaAgendada, setCitaAgendada] = useState(false);
@@ -28,31 +30,28 @@ const AgendarCita = ({ user }) => { // Recibe el objeto 'user' como prop
   const [selectedVeterinario, setSelectedVeterinario] = useState('');
   const [servicio, setServicio] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Horarios disponibles (pueden ser dinámicos desde la DB en un futuro)
   const horariosDisponibles = [
     '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'
   ];
 
   const fetchInitialData = useCallback(async () => {
     setLoading(true);
-    setError(null);
+    setErrorSeleccion(null); // Usamos errorSeleccion para errores de carga también
     try {
-      const servicioId = location.state?.servicioId;
-      const userId = user?.id; // Obtener el ID del usuario logueado
+      const servicioId = location.state?.servicioId; // Obtener el ID del servicio del estado de la ubicación
+      const userId = user?.id;
 
       if (!userId) {
-        setError('No se pudo obtener la información del usuario. Por favor, inicia sesión nuevamente.');
+        setErrorSeleccion('No se pudo obtener la información del usuario. Por favor, inicia sesión nuevamente.');
         setLoading(false);
         return;
       }
 
-      // Fetch del servicio seleccionado
       let fetchedService = null;
       if (servicioId) {
         const serviceRes = await authFetch(`/servicios/${servicioId}`);
@@ -60,32 +59,31 @@ const AgendarCita = ({ user }) => { // Recibe el objeto 'user' como prop
           fetchedService = serviceRes.data;
           setServicio(fetchedService);
         } else {
-          setError(serviceRes.message || 'Error al cargar el servicio seleccionado.');
+          setErrorSeleccion(serviceRes.message || 'Error al cargar el servicio seleccionado.');
           setLoading(false);
           return;
         }
       } else {
-        setError('No se ha seleccionado un servicio para agendar.');
-        setLoading(false);
-        return;
+        // Si no hay servicioId, se asume que el usuario llegó a esta página sin seleccionar un servicio
+        // Podrías redirigirlo o mostrar un mensaje para que seleccione uno.
+        // Por ahora, lo dejaré para que pueda seleccionar un servicio manualmente si lo deseas.
+        // O podrías hacer que la página de agendar cita sea siempre iniciada desde un servicio.
       }
 
-      // Fetch de las mascotas del usuario
       const petsRes = await authFetch(`/mascotas?id_propietario=${userId}`);
       if (petsRes.success) {
         setMascotas(petsRes.data);
       } else {
-        setError(petsRes.message || 'Error al cargar tus mascotas.');
+        setErrorSeleccion(petsRes.message || 'Error al cargar tus mascotas.');
         setLoading(false);
         return;
       }
 
-      // Fetch de los veterinarios (solo activos)
-      const vetsRes = await authFetch('/usuarios/veterinarios'); // Este endpoint debería ser accesible para usuarios normales para ver veterinarios disponibles
+      const vetsRes = await authFetch('/usuarios/veterinarios');
       if (vetsRes.success) {
-        setVeterinarios(vetsRes.data.filter(vet => vet.active)); // Solo veterinarios activos
+        setVeterinarios(vetsRes.data.filter(vet => vet.active));
       } else {
-        setError(vetsRes.message || 'Error al cargar los veterinarios.');
+        setErrorSeleccion(vetsRes.message || 'Error al cargar los veterinarios.');
         setLoading(false);
         return;
       }
@@ -93,10 +91,10 @@ const AgendarCita = ({ user }) => { // Recibe el objeto 'user' como prop
       setLoading(false);
     } catch (err) {
       console.error("Error fetching initial data for AgendarCita:", err);
-      setError('Error de conexión al servidor al cargar los datos iniciales.');
+      setErrorSeleccion('Error de conexión al servidor al cargar los datos iniciales.');
       setLoading(false);
     }
-  }, [location.state, user]); // Dependencia del user object para obtener su ID
+  }, [location.state, user, authFetch]);
 
   useEffect(() => {
     fetchInitialData();
@@ -116,7 +114,7 @@ const AgendarCita = ({ user }) => { // Recibe el objeto 'user' como prop
 
   const handleSubmit = async () => {
     if (!selectedMascota || !selectedTime || !servicio || !user?.id) {
-      setErrorSeleccion('Por favor, selecciona una mascota, una fecha y una hora.');
+      setErrorSeleccion('Por favor, selecciona una mascota, un servicio, una fecha y una hora.');
       return;
     }
 
@@ -127,15 +125,15 @@ const AgendarCita = ({ user }) => { // Recibe el objeto 'user' como prop
       const [hours, minutes] = selectedTime.split(':');
       fechaHora.setHours(parseInt(hours, 10));
       fechaHora.setMinutes(parseInt(minutes, 10));
-      fechaHora.setSeconds(0); // Asegurarse de que los segundos sean 0
+      fechaHora.setSeconds(0);
 
       const nuevaCita = {
-        id_cliente: user.id, // ID del usuario logueado
+        id_cliente: user.id,
         id_servicio: servicio.id_servicio,
-        id_veterinario: selectedVeterinario || null, // Puede ser null si no selecciona
-        fecha: fechaHora.toISOString().slice(0, 19).replace('T', ' '), // Formato 'YYYY-MM-DD HH:MM:SS'
-        servicios: servicio.nombre, // Puedes usar el nombre del servicio como descripción adicional
-        estado: 'pendiente' // Por defecto, las citas agendadas por el usuario son 'pendiente'
+        id_veterinario: selectedVeterinario || null,
+        fecha: fechaHora.toISOString().slice(0, 19).replace('T', ' '),
+        servicios: servicio.nombre,
+        estado: 'pendiente'
       };
 
       const response = await authFetch('/citas', {
@@ -145,14 +143,17 @@ const AgendarCita = ({ user }) => { // Recibe el objeto 'user' como prop
 
       if (response.success) {
         setCitaAgendada(true);
+        showNotification('¡Cita agendada con éxito!', 'success');
         setTimeout(() => {
-          navigate('/usuario/citas'); // Redirigir a la lista de citas del usuario
+          navigate('/usuario/citas');
         }, 3000);
       } else {
-        setErrorSeleccion(response.message || 'Error al agendar la cita. Por favor, intenta nuevamente.');
+        showNotification(response.message || 'Error al agendar la cita. Por favor, intenta nuevamente.', 'error');
+        setErrorSeleccion(response.message || 'Error al agendar la cita.');
       }
     } catch (err) {
       console.error("Error submitting appointment:", err);
+      showNotification('Error de conexión al servidor al agendar la cita.', 'error');
       setErrorSeleccion('Error de conexión al servidor al agendar la cita.');
     } finally {
       setIsSubmitting(false);
@@ -170,9 +171,10 @@ const AgendarCita = ({ user }) => { // Recibe el objeto 'user' como prop
     </div>
   );
 
-  if (error) return (
+  if (errorSeleccion && !citaAgendada) return (
     <div className={styles.errorContainer}>
-      <p>{error}</p>
+      <FontAwesomeIcon icon={faTimesCircle} className={styles.errorIcon} />
+      <p>{errorSeleccion}</p>
       <button onClick={handleVolver} className={styles.backButton}>
         <FontAwesomeIcon icon={faArrowLeft} /> Volver
       </button>
@@ -331,7 +333,7 @@ const AgendarCita = ({ user }) => { // Recibe el objeto 'user' como prop
       </div>
 
       <AnimatePresence>
-        {errorSeleccion && (
+        {errorSeleccion && !citaAgendada && ( // Mostrar error solo si no se ha agendado la cita
           <motion.div
             className={styles.errorMessage}
             initial={{ opacity: 0, y: 20 }}
@@ -365,7 +367,7 @@ const AgendarCita = ({ user }) => { // Recibe el objeto 'user' como prop
       >
         <motion.button
           onClick={handleSubmit}
-          disabled={!selectedMascota || !selectedTime || citaAgendada || isSubmitting}
+          disabled={!selectedMascota || !selectedTime || !servicio || citaAgendada || isSubmitting}
           className={styles.submitButton}
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.97 }}

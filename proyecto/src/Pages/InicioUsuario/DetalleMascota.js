@@ -1,21 +1,24 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useOutletContext } from 'react-router-dom'; // Importa useOutletContext
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaPaw, FaWeight, FaCalendarAlt, FaArrowLeft, FaSpinner, FaInfoCircle, FaEdit, FaTrash } from 'react-icons/fa';
-import { faDog, faCat } from '@fortawesome/free-solid-svg-icons'; // Corrected import for faDog and faCat
-import { authFetch } from './api'; // Importa authFetch
-import './Styles/DetalleMascota.css'; // Importa el CSS
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'; // Import FontAwesomeIcon
+import {
+  FaPaw, FaWeight, FaCalendarAlt, FaArrowLeft, FaSpinner, FaInfoCircle, FaEdit, FaTrash
+} from 'react-icons/fa';
+import { faDog, faCat } from '@fortawesome/free-solid-svg-icons';
+import { authFetch } from './api';
+import './Styles/DetalleMascota.css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-const DetalleMascota = ({ user }) => { // Recibe el objeto 'user' para validación de permisos
+const DetalleMascota = () => { // Ya no recibe user directamente, lo obtiene del contexto
+  const { user, showNotification } = useOutletContext(); // Obtiene user y showNotification del contexto del Outlet
   const { id } = useParams();
   const navigate = useNavigate();
   const [mascota, setMascota] = useState(null);
   const [historial, setHistorial] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [showConfirmDelete, setShowConfirmDelete] = useState(false); // Estado para el modal de confirmación
-  const [isDeleting, setIsDeleting] = useState(false); // Estado para el spinner de eliminación
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const fetchMascotaDetails = useCallback(async () => {
     setIsLoading(true);
@@ -24,7 +27,6 @@ const DetalleMascota = ({ user }) => { // Recibe el objeto 'user' para validaci�
       const mascotaRes = await authFetch(`/mascotas/${id}`);
       if (mascotaRes.success) {
         setMascota(mascotaRes.data);
-        // Ahora, obtener el historial médico de esta mascota
         const historialRes = await authFetch(`/historial_medico?id_mascota=${id}`);
         if (historialRes.success) {
           setHistorial(historialRes.data);
@@ -40,7 +42,7 @@ const DetalleMascota = ({ user }) => { // Recibe el objeto 'user' para validaci�
     } finally {
       setIsLoading(false);
     }
-  }, [id]);
+  }, [id, authFetch]);
 
   useEffect(() => {
     fetchMascotaDetails();
@@ -54,17 +56,19 @@ const DetalleMascota = ({ user }) => { // Recibe el objeto 'user' para validaci�
         method: 'DELETE',
       });
       if (response.success) {
-        alert('Mascota eliminada correctamente.'); // Reemplazar con una notificación más elegante
-        navigate('/usuario/mascotas'); // Redirigir a la lista de mascotas
+        showNotification('Mascota eliminada correctamente.', 'success'); // Usar showNotification
+        navigate('/usuario/mascotas');
       } else {
+        showNotification(response.message || 'Error al eliminar la mascota.', 'error'); // Usar showNotification
         setError(response.message || 'Error al eliminar la mascota.');
       }
     } catch (err) {
       console.error("Error deleting mascota:", err);
+      showNotification('Error de conexión al servidor al intentar eliminar la mascota.', 'error'); // Usar showNotification
       setError('Error de conexión al servidor al intentar eliminar la mascota.');
     } finally {
       setIsDeleting(false);
-      setShowConfirmDelete(false); // Cerrar el modal de confirmación
+      setShowConfirmDelete(false);
     }
   };
 
@@ -101,7 +105,6 @@ const DetalleMascota = ({ user }) => { // Recibe el objeto 'user' para validaci�
     );
   }
 
-  // Determinar si el usuario logueado es el propietario de la mascota o un admin
   const isOwnerOrAdmin = user && (user.id === mascota.id_propietario || user.role === 'admin');
 
   return (
@@ -168,22 +171,22 @@ const DetalleMascota = ({ user }) => { // Recibe el objeto 'user' para validaci�
             {historial.map(item => (
               <li key={item.id_historial} className="historial-item">
                 <span className="historial-date">{item.fecha_consulta}</span> - <span className="historial-diagnosis">{item.diagnostico}</span>
-                <Link to={`/usuario/mascota/${id}/historial/${item.id_historial}`} className="historial-detail-link">Ver detalle</Link>
+                <Link to={`/usuario/historial/${id}/${item.id_historial}`} className="historial-detail-link">Ver detalle</Link>
               </li>
             ))}
           </ul>
         ) : (
           <p className="no-historial">No hay historial médico registrado para esta mascota.</p>
         )}
-        {isOwnerOrAdmin && ( // Solo el propietario o admin puede agregar historial
-          <Link to={`/usuario/mascota/${id}/historial/agregar`} className="detalle-mascota-button">Agregar entrada al historial</Link>
+        {isOwnerOrAdmin && (
+          <Link to={`/usuario/historial/${id}/agregar`} className="detalle-mascota-button">Agregar entrada al historial</Link>
         )}
       </motion.div>
 
       <div className="detalle-mascota-actions">
-        {isOwnerOrAdmin && ( // Solo el propietario o admin puede editar/eliminar
+        {isOwnerOrAdmin && (
           <>
-            <Link to={`/usuario/mascota/editar/${id}`} className="detalle-mascota-button editar">
+            <Link to={`/usuario/mascotas/editar/${id}`} className="detalle-mascota-button editar">
               <FaEdit /> Editar Mascota
             </Link>
             <motion.button
@@ -202,7 +205,6 @@ const DetalleMascota = ({ user }) => { // Recibe el objeto 'user' para validaci�
         </button>
       </div>
 
-      {/* Modal de Confirmación de Eliminación */}
       <AnimatePresence>
         {showConfirmDelete && (
           <motion.div

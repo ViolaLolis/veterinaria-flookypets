@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useOutletContext } from 'react-router-dom'; // Importa useOutletContext
 import { motion, AnimatePresence } from 'framer-motion';
 import styles from './Styles/ConfiguracionPerfil.module.css';
 import {
@@ -8,42 +8,31 @@ import {
   faBell, faShieldAlt, faChevronDown, faChevronUp, faSpinner, faTimesCircle
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { authFetch } from './api'; // Importa authFetch
+import { authFetch } from './api';
 
-const ConfiguracionPerfil = ({ user, setUser }) => { // Recibe user y setUser como props
+const ConfiguracionPerfil = () => { // Ya no recibe user y setUser directamente como props, los obtiene del contexto
+  const { user, setUser, showNotification } = useOutletContext(); // Obtiene user, setUser y showNotification del contexto del Outlet
   const [formData, setFormData] = useState({
     nombre: '',
-    apellido: '', // Asumiendo que también tienes apellido
+    apellido: '',
     email: '',
     telefono: '',
     direccion: '',
-    tipo_documento: '', // Nuevo campo
-    numero_documento: '', // Nuevo campo
-    fecha_nacimiento: '', // Nuevo campo
-    // No incluir password aquí directamente para edición de perfil general
+    tipo_documento: '',
+    numero_documento: '',
+    fecha_nacimiento: '',
   });
   const [imagenPerfil, setImagenPerfil] = useState(null);
-  const [notification, setNotification] = useState(null);
+  // const [notification, setNotification] = useState(null); // Ya se obtiene del contexto
   const [activeSection, setActiveSection] = useState('informacion');
   const [showSubMenu, setShowSubMenu] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false); // Estado para el modal de confirmación de eliminación
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const navigate = useNavigate();
 
-  /**
-   * Muestra una notificación temporal en la UI.
-   * @param {string} message - El mensaje a mostrar.
-   * @param {string} type - El tipo de notificación ('success' o 'error').
-   */
-  const showNotification = useCallback((message, type = 'success') => {
-    setNotification({ message, type });
-    const timer = setTimeout(() => {
-      setNotification(null);
-    }, 3000); // La notificación desaparece después de 3 segundos
-    return () => clearTimeout(timer);
-  }, []);
+  // showNotification ya viene del contexto, no es necesario redefinirla aquí
 
   const fetchUserData = useCallback(async () => {
     setIsLoading(true);
@@ -65,7 +54,6 @@ const ConfiguracionPerfil = ({ user, setUser }) => { // Recibe user y setUser co
           numero_documento: response.data.numero_documento || '',
           fecha_nacimiento: response.data.fecha_nacimiento ? response.data.fecha_nacimiento.split('T')[0] : '',
         });
-        // Si tienes una URL de imagen de perfil en la DB, cárgala aquí
         // setImagenPerfil(response.data.imagen_perfil_url || null);
       } else {
         showNotification(response.message || 'Error al cargar los datos del perfil.', 'error');
@@ -76,7 +64,7 @@ const ConfiguracionPerfil = ({ user, setUser }) => { // Recibe user y setUser co
     } finally {
       setIsLoading(false);
     }
-  }, [user, showNotification]);
+  }, [user, authFetch, showNotification]);
 
   useEffect(() => {
     fetchUserData();
@@ -90,8 +78,6 @@ const ConfiguracionPerfil = ({ user, setUser }) => { // Recibe user y setUser co
   const handleImagenPerfilChange = (e) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      // Aquí podrías subir la imagen al servidor y guardar la URL
-      // Por ahora, solo se muestra la previsualización
       setImagenPerfil(URL.createObjectURL(file));
       showNotification('Imagen seleccionada. Para guardar, haz clic en "Guardar Cambios". (La carga real de la imagen requiere backend)', 'info');
     }
@@ -100,7 +86,7 @@ const ConfiguracionPerfil = ({ user, setUser }) => { // Recibe user y setUser co
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setNotification(null);
+    // setNotification(null); // Ya se maneja con showNotification
 
     try {
       const updatedData = {
@@ -112,7 +98,6 @@ const ConfiguracionPerfil = ({ user, setUser }) => { // Recibe user y setUser co
         tipo_documento: formData.tipo_documento,
         numero_documento: formData.numero_documento,
         fecha_nacimiento: formData.fecha_nacimiento,
-        // No enviar imagenPerfil en el JSON directamente
       };
 
       const response = await authFetch(`/usuarios/${user.id}`, {
@@ -122,7 +107,6 @@ const ConfiguracionPerfil = ({ user, setUser }) => { // Recibe user y setUser co
 
       if (response.success) {
         showNotification('¡Perfil actualizado con éxito!', 'success');
-        // Actualizar el estado del usuario en el contexto/global si es necesario
         setUser(prevUser => ({ ...prevUser, ...updatedData }));
       } else {
         showNotification(response.message || 'Error al actualizar el perfil.', 'error');
@@ -136,9 +120,9 @@ const ConfiguracionPerfil = ({ user, setUser }) => { // Recibe user y setUser co
   };
 
   const handleDeleteAccount = async () => {
-    setIsSubmitting(true); // Usar isSubmitting para el spinner de eliminación
-    setShowDeleteConfirm(false); // Cerrar el modal
-    setNotification(null);
+    setIsSubmitting(true);
+    setShowDeleteConfirm(false);
+    // setNotification(null); // Ya se maneja con showNotification
 
     try {
       const response = await authFetch(`/usuarios/${user.id}`, {
@@ -147,12 +131,11 @@ const ConfiguracionPerfil = ({ user, setUser }) => { // Recibe user y setUser co
 
       if (response.success) {
         showNotification('Cuenta eliminada con éxito. Redirigiendo...', 'success');
-        // Limpiar token y redirigir a la página de inicio de sesión
         localStorage.removeItem('token');
-        localStorage.removeItem('user'); // Asegúrate de limpiar también el objeto user
-        setUser(null); // Limpiar el estado global del usuario
+        localStorage.removeItem('user');
+        setUser(null);
         setTimeout(() => {
-          navigate('/login'); // Redirigir a la página de login
+          navigate('/login');
         }, 2000);
       } else {
         showNotification(response.message || 'Error al eliminar la cuenta.', 'error');
@@ -179,7 +162,6 @@ const ConfiguracionPerfil = ({ user, setUser }) => { // Recibe user y setUser co
 
   return (
     <div className={styles.container}>
-      {/* Header con efecto de gradiente */}
       <div className={styles.header}>
         <div className={styles.headerContent}>
           <FontAwesomeIcon icon={faCog} className={styles.icon} spin />
@@ -191,7 +173,7 @@ const ConfiguracionPerfil = ({ user, setUser }) => { // Recibe user y setUser co
       </div>
 
       <AnimatePresence>
-        {notification && (
+        {/* {notification && ( // Notificación ahora se muestra desde el layout principal (InicioUsuario)
           <motion.div
             className={`${styles.notification} ${styles[notification.type]}`}
             initial={{ opacity: 0, y: -50 }}
@@ -201,11 +183,10 @@ const ConfiguracionPerfil = ({ user, setUser }) => { // Recibe user y setUser co
             <FontAwesomeIcon icon={notification.type === 'success' ? faCheckCircle : faTimesCircle} />
             {notification.message}
           </motion.div>
-        )}
+        )} */}
       </AnimatePresence>
 
       <div className={styles.mainLayout}>
-        {/* Panel lateral con menú interactivo */}
         <div className={styles.sidePanel}>
           <div
             className={styles.profileCard}
@@ -235,23 +216,21 @@ const ConfiguracionPerfil = ({ user, setUser }) => { // Recibe user y setUser co
               className={styles.chevronIcon}
             />
           </div>
-          {/* Contenido adicional del panel lateral */}
           <div className={styles.sidePanelContent}>
             <h4>Estadísticas</h4>
             <div className={styles.statsContainer}>
               <div className={styles.statItem}>
-                <span className={styles.statValue}>N/A</span> {/* Estos datos deberían venir de la DB */}
+                <span className={styles.statValue}>N/A</span>
                 <span className={styles.statLabel}>Actividades</span>
               </div>
               <div className={styles.statItem}>
-                <span className={styles.statValue}>N/A</span> {/* Estos datos deberían venir de la DB */}
+                <span className={styles.statValue}>N/A</span>
                 <span className={styles.statLabel}>Perfil completo</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Contenido principal */}
         <div className={styles.mainContent}>
           {activeSection === 'informacion' && (
             <form className={styles.form} onSubmit={handleSubmit}>
@@ -417,7 +396,7 @@ const ConfiguracionPerfil = ({ user, setUser }) => { // Recibe user y setUser co
 
               <div className={styles.securityCard}>
                 <div className={styles.securityActions}>
-                  <Link to="/usuario/perfil/cambiar-contrasena" className={styles.securityBtn}>
+                  <Link to="/usuario/perfil/editar" className={styles.securityBtn}> {/* CORREGIDO */}
                     <FontAwesomeIcon icon={faLock} /> Cambiar Contraseña
                   </Link>
                   <motion.button
@@ -521,7 +500,6 @@ const ConfiguracionPerfil = ({ user, setUser }) => { // Recibe user y setUser co
         </div>
       </div>
 
-      {/* Modal de Confirmación de Eliminación */}
       <AnimatePresence>
         {showDeleteConfirm && (
           <motion.div

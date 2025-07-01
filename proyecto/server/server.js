@@ -512,7 +512,7 @@ app.post('/upload-image', authenticateToken, async (req, res) => {
 
         const file = req.files.image; // 'image' es el nombre del campo en el formulario
         const result = await cloudinary.uploader.upload(file.tempFilePath, {
-            folder: 'flookypets_profiles', // Carpeta en Cloudinary
+            folder: 'flookypets_profiles', // Carpeta en Cloudinary (puede ser usada para usuarios y mascotas)
             // Puedes añadir más opciones aquí como transformación, etc.
         });
 
@@ -1343,7 +1343,7 @@ app.get("/mascotas/:id", authenticateToken, isOwnerOrAdmin, async (req, res) => 
 
 // Registrar nueva mascota
 app.post("/mascotas", authenticateToken, isVetOrAdmin, async (req, res) => { // isVetOrAdmin se mantiene para la creación
-    const { nombre, especie, raza, edad, peso, sexo, color, microchip, id_propietario } = req.body;
+    const { nombre, especie, raza, edad, peso, sexo, color, microchip, id_propietario, imagen_url } = req.body; // Añadir imagen_url
 
     if (!nombre || !especie || !id_propietario) {
         return res.status(400).json({ success: false, message: "Nombre, especie y ID de propietario son requeridos." });
@@ -1357,9 +1357,9 @@ app.post("/mascotas", authenticateToken, isVetOrAdmin, async (req, res) => { // 
         }
 
         const [result] = await pool.query(
-            `INSERT INTO mascotas (nombre, especie, raza, edad, peso, sexo, color, microchip, id_propietario)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [nombre, especie, raza, edad, peso, sexo, color, microchip, id_propietario]
+            `INSERT INTO mascotas (nombre, especie, raza, edad, peso, sexo, color, microchip, id_propietario, imagen_url)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [nombre, especie, raza, edad, peso, sexo, color, microchip, id_propietario, imagen_url || null] // Guardar imagen_url
         );
 
         const [newMascota] = await pool.query("SELECT * FROM mascotas WHERE id_mascota = ?", [result.insertId]);
@@ -1374,7 +1374,7 @@ app.post("/mascotas", authenticateToken, isVetOrAdmin, async (req, res) => { // 
 // Actualizar mascota
 app.put("/mascotas/:id", authenticateToken, isOwnerOrAdmin, async (req, res) => {
     const { id } = req.params;
-    const { nombre, especie, raza, edad, peso, sexo, color, microchip, id_propietario } = req.body;
+    const { nombre, especie, raza, edad, peso, sexo, color, microchip, id_propietario, imagen_url } = req.body; // Añadir imagen_url
 
     try {
         if (id_propietario !== undefined) {
@@ -1395,6 +1395,7 @@ app.put("/mascotas/:id", authenticateToken, isOwnerOrAdmin, async (req, res) => 
         if (color !== undefined) { fields.push('color = ?'); values.push(color); }
         if (microchip !== undefined) { fields.push('microchip = ?'); values.push(microchip); }
         if (id_propietario !== undefined) { fields.push('id_propietario = ?'); values.push(id_propietario); }
+        if (imagen_url !== undefined) { fields.push('imagen_url = ?'); values.push(imagen_url); } // Guardar imagen_url
 
         if (fields.length === 0) {
             return res.status(400).json({ success: false, message: "No hay datos para actualizar." });

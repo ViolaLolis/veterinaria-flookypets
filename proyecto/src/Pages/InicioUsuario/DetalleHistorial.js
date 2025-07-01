@@ -1,10 +1,9 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
-import './Styles/DetalleHistorial.css'; // Importa el CSS
+import './Styles/DetalleHistorial.css';
 
 const DetalleHistorial = () => {
   const { mascotaId, historialId } = useParams();
-  // Aquí iría la lógica para obtener los detalles de la entrada del historial
   const historial = {
     id: historialId,
     mascotaId: mascotaId,
@@ -26,10 +25,11 @@ const DetalleHistorial = () => {
         {historial.notas && <p><strong>Notas:</strong> {historial.notas}</p>}
       </div>
       <div className="detalle-historial-actions">
-        <Link to={`/usuario/mascota/${mascotaId}/historial/editar/${historialId}`} className="detalle-historial-button editar">Editar Entrada</Link>
+        {/* NOTA: La ruta /usuario/historial/:mascotaId/editar/:historialId debe estar definida en App.js */}
+        <Link to={`/usuario/historial/${mascotaId}/editar/${historialId}`} className="detalle-historial-button editar">Editar Entrada</Link> {/* CORREGIDO */}
         {/* Implementar lógica de eliminación */}
         <button className="detalle-historial-button eliminar">Eliminar Entrada</button>
-        <Link to={`/usuario/mascota/${mascotaId}/historial`} className="detalle-historial-back">Volver al Historial</Link>
+        <Link to={`/usuario/historial/${mascotaId}`} className="detalle-historial-back">Volver al Historial</Link> {/* CORREGIDO */}
       </div>
     </div>
   );
