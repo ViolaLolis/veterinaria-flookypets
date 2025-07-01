@@ -2,13 +2,7 @@ DROP DATABASE IF EXISTS veterinaria;
 CREATE DATABASE veterinaria;
 USE veterinaria;
 
-CREATE TABLE clientes (
-    id_cliente INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL,
-    direccion VARCHAR(255) NOT NULL,
-    telefono VARCHAR(20) NOT NULL
-);
-
+-- Tabla de usuarios (clientes, veterinarios, administradores)
 CREATE TABLE usuarios (
     id INT AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(100) NOT NULL UNIQUE,
@@ -20,19 +14,20 @@ CREATE TABLE usuarios (
     tipo_documento VARCHAR(20),
     numero_documento VARCHAR(20),
     fecha_nacimiento DATE,
-    role VARCHAR(20) DEFAULT 'usuario',
+    role VARCHAR(20) DEFAULT 'usuario', -- 'usuario', 'veterinario', 'admin'
     active TINYINT(1) DEFAULT 1 COMMENT '1=activo, 0=inactivo',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     reset_token VARCHAR(50),
     reset_token_expires DATETIME,
-    experiencia VARCHAR(100), -- Nuevo campo
-    universidad VARCHAR(150), -- Nuevo campo
-    horario VARCHAR(255) -- Nuevo campo
+    experiencia VARCHAR(100), -- Campo para veterinarios
+    universidad VARCHAR(150), -- Campo para veterinarios
+    horario VARCHAR(255) -- Campo para veterinarios
 );
 
+-- Tabla de mascotas (id_propietario ahora referencia usuarios.id)
 CREATE TABLE mascotas (
     id_mascota INT AUTO_INCREMENT PRIMARY KEY,
-    id_propietario INT NOT NULL,
+    id_propietario INT NOT NULL, -- Referencia a usuarios.id
     nombre VARCHAR(100) NOT NULL,
     especie VARCHAR(50) NOT NULL,
     raza VARCHAR(100),
@@ -43,24 +38,26 @@ CREATE TABLE mascotas (
     sexo ENUM('Macho', 'Hembra', 'Desconocido'),
     microchip VARCHAR(50),
     fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (id_propietario) REFERENCES clientes(id_cliente)
+    FOREIGN KEY (id_propietario) REFERENCES usuarios(id) ON DELETE CASCADE
 );
 
+-- Tabla de historial médico
 CREATE TABLE historial_medico (
     id_historial INT AUTO_INCREMENT PRIMARY KEY,
     id_mascota INT NOT NULL,
     fecha_consulta DATETIME DEFAULT CURRENT_TIMESTAMP,
-    veterinario INT,
+    veterinario INT, -- Referencia a usuarios.id (veterinario o admin)
     diagnostico TEXT,
     tratamiento TEXT,
     observaciones TEXT,
     peso_actual DECIMAL(5,2),
     temperatura DECIMAL(4,2),
     proxima_cita DATE,
-    FOREIGN KEY (id_mascota) REFERENCES mascotas(id_mascota),
-    FOREIGN KEY (veterinario) REFERENCES usuarios(id)
+    FOREIGN KEY (id_mascota) REFERENCES mascotas(id_mascota) ON DELETE CASCADE,
+    FOREIGN KEY (veterinario) REFERENCES usuarios(id) ON DELETE SET NULL
 );
 
+-- Tabla de servicios
 CREATE TABLE servicios (
     id_servicio INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
@@ -68,26 +65,41 @@ CREATE TABLE servicios (
     precio VARCHAR(50) NOT NULL
 );
 
+-- Tabla de citas (id_cliente ahora referencia usuarios.id)
 CREATE TABLE citas (
     id_cita INT AUTO_INCREMENT PRIMARY KEY,
-    id_cliente INT NOT NULL,
+    id_cliente INT NOT NULL, -- Referencia a usuarios.id
     id_servicio INT NOT NULL,
-    id_veterinario INT,
+    id_veterinario INT, -- Referencia a usuarios.id (veterinario o admin)
     fecha DATETIME NOT NULL,
-    servicios VARCHAR(255),
+    servicios VARCHAR(255), -- Este campo parece ser un duplicado de id_servicio, considerar su uso.
     estado ENUM('pendiente', 'aceptada', 'rechazada', 'completa', 'cancelada') DEFAULT 'pendiente',
-    FOREIGN KEY (id_cliente) REFERENCES clientes(id_cliente),
+    FOREIGN KEY (id_cliente) REFERENCES usuarios(id) ON DELETE CASCADE,
     FOREIGN KEY (id_servicio) REFERENCES servicios(id_servicio),
-    FOREIGN KEY (id_veterinario) REFERENCES usuarios(id)
+    FOREIGN KEY (id_veterinario) REFERENCES usuarios(id) ON DELETE SET NULL
 );
 
+-- Tabla para el historial de contraseñas (se mantiene)
 CREATE TABLE password_history (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES usuarios(id)
+    FOREIGN KEY (user_id) REFERENCES usuarios(id) ON DELETE CASCADE
 );
+
+-- NUEVA TABLA: notificaciones
+CREATE TABLE notificaciones (
+    id_notificacion INT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario INT NOT NULL, -- El usuario que recibe la notificación
+    tipo VARCHAR(50) NOT NULL, -- 'cita_creada_vet', 'cita_aceptada_user', 'cita_rechazada_user', 'permiso_mascota_solicitud'
+    mensaje TEXT NOT NULL,
+    leida BOOLEAN DEFAULT FALSE,
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    referencia_id INT, -- ID de la cita, mascota, etc.
+    FOREIGN KEY (id_usuario) REFERENCES usuarios(id) ON DELETE CASCADE
+);
+
 
 -- Inserción de datos iniciales en servicios
 INSERT INTO servicios (nombre, descripcion, precio) VALUES
@@ -99,7 +111,7 @@ INSERT INTO servicios (nombre, descripcion, precio) VALUES
 ('Laboratorio Clínico', 'Análisis de sangre, orina y otros fluidos corporales.', '25.000');
 
 -- Inserción de datos iniciales y extendidos en usuarios
--- Contraseña '$2a$10$xJwL5v5Jz5U5Z5U5Z5U5Ze' es un placeholder seguro
+-- Contraseña '$2a$10$xJwL5v5Jz5U5Z5U5Z5U5Ze' es un placeholder seguro para 'password'
 INSERT INTO usuarios (email, password, nombre, apellido, telefono, direccion, tipo_documento, numero_documento, fecha_nacimiento, role, experiencia, universidad, horario) VALUES
 ('admin@example.com', '$2a$10$xJwL5v5Jz5U5Z5U5Z5U5Ze', 'Admin', 'Principal', '3001234567', 'Calle Admin 123', 'CC', '123456789', '1980-01-01', 'admin', '10 AÑOS', 'UNIVERSIDAD NACIONAL DE COLOMBIA', 'LUNES A VIERNES: 8:00 AM - 5:00 PM'),
 ('vet@example.com', '$2a$10$xJwL5v5Jz5U5Z5U5Z5U5Ze', 'Carlos', 'Veterinario', '3102345678', 'Carrera Vet 456', 'CC', '987654321', '1985-05-15', 'veterinario', '5 AÑOS', 'UNIVERSIDAD DE LOS ANDES', 'LUNES A SÁBADO: 9:00 AM - 6:00 PM'),
@@ -115,144 +127,102 @@ INSERT INTO usuarios (email, password, nombre, apellido, telefono, direccion, ti
 
 -- Más usuarios de rol 'usuario'
 INSERT INTO usuarios (email, password, nombre, apellido, telefono, direccion, tipo_documento, numero_documento, fecha_nacimiento, role) VALUES
-('user1@example.com', '$2a$10$xJwL5v5Jz5U5Z5U5Z5U5Ze', 'Alejandro', 'Rojas', '3206789012', 'Carrera Usuario 6', 'CC', '66778899', '1987-02-14', 'usuario'),
-('user2@example.com', '$2a$10$xJwL5v5Jz5U5Z5U5Z5U5Ze', 'Gabriela', 'Sánchez', '3007890123', 'Calle Cliente 7', 'CC', '77889900', '1995-08-03', 'usuario'),
-('user3@example.com', '$2a$10$xJwL5v5Jz5U5Z5U5Z5U5Ze', 'Felipe', 'Gutiérrez', '3158901234', 'Avenida Propietario 8', 'CC', '88990011', '1989-12-19', 'usuario'),
-('user4@example.com', '$2a$10$xJwL5v5Jz5U5Z5U5Z5U5Ze', 'Daniela', 'Castillo', '3209012345', 'Carrera Dueño 9', 'CC', '99001122', '1991-04-27', 'usuario'),
-('user5@example.com', '$2a$10$xJwL5v5Jz5U5Z5U5Z5U5Ze', 'Javier', 'Ortiz', '3000123456', 'Calle Mascotero 10', 'CC', '00112233', '1994-06-08', 'usuario'),
-('user6@example.com', '$2a$10$xJwL5v5Jz5U5Z5U5Z5U5Ze', 'Lucía', 'Mendoza', '3151234567', 'Avenida Animalista 11', 'CC', '11223344', '1986-10-15', 'usuario'),
-('user7@example.com', '$2a$10$xJwL5v5Jz5U5Z5U5Z5U5Ze', 'Ricardo', 'Vega', '3202345678', 'Carrera Pet 12', 'CC', '22334455', '1993-01-22', 'usuario'),
-('user8@example.com', '$2a$10$xJwL5v5Jz5U5Z5U5Z5U5Ze', 'Patricia', 'Castro', '3003456789', 'Calle Amante 13', 'CC', '33445566', '1988-07-30', 'usuario'),
-('user9@example.com', '$2a$10$xJwL5v5Jz5U5Z5U5Z5U5Ze', 'Hugo', 'Ríos', '3154567890', 'Avenida Cuidados 14', 'CC', '44556677', '1990-03-17', 'usuario'),
-('user10@example.com', '$2a$10$xJwL5v5Jz5U5Z5U5Z5U5Ze', 'Camila', 'Navarro', '3205678901', 'Carrera Feliz 15', 'CC', '55667788', '1992-09-24', 'usuario');
+('user1@example.com', '$2a$10$xJwL5v5Jz5U5Z5U5Z5U5Ze', 'Alejandro', 'Rojas', '3206789012', 'Carrera Usuario 6', 'CC', '66778899', '1987-02-14', 'usuario'), -- ID 9
+('user2@example.com', '$2a$10$xJwL5v5Jz5U5Z5U5Z5U5Ze', 'Gabriela', 'Sánchez', '3007890123', 'Calle Cliente 7', 'CC', '77889900', '1995-08-03', 'usuario'), -- ID 10
+('user3@example.com', '$2a$10$xJwL5v5Jz5U5Z5U5Z5U5Ze', 'Felipe', 'Gutiérrez', '3158901234', 'Avenida Propietario 8', 'CC', '88990011', '1989-12-19', 'usuario'), -- ID 11
+('user4@example.com', '$2a$10$xJwL5v5Jz5U5Z5U5Z5U5Ze', 'Daniela', 'Castillo', '3209012345', 'Carrera Dueño 9', 'CC', '99001122', '1991-04-27', 'usuario'), -- ID 12
+('user5@example.com', '$2a$10$xJwL5v5Jz5U5Z5U5Z5U5Ze', 'Javier', 'Ortiz', '3000123456', 'Calle Mascotero 10', 'CC', '00112233', '1994-06-08', 'usuario'), -- ID 13
+('user6@example.com', '$2a$10$xJwL5v5Jz5U5Z5U5Z5U5Ze', 'Lucía', 'Mendoza', '3151234567', 'Avenida Animalista 11', 'CC', '11223344', '1986-10-15', 'usuario'), -- ID 14
+('user7@example.com', '$2a$10$xJwL5v5Jz5U5Z5U5Z5U5Ze', 'Ricardo', 'Vega', '3202345678', 'Carrera Pet 12', 'CC', '22334455', '1993-01-22', 'usuario'), -- ID 15
+('user8@example.com', '$2a$10$xJwL5v5Jz5U5Z5U5Z5U5Ze', 'Patricia', 'Castro', '3003456789', 'Calle Amante 13', 'CC', '33445566', '1988-07-30', 'usuario'), -- ID 16
+('user9@example.com', '$2a$10$xJwL5v5Jz5U5Z5U5Z5U5Ze', 'Hugo', 'Ríos', '3154567890', 'Avenida Cuidados 14', 'CC', '44556677', '1990-03-17', 'usuario'), -- ID 17
+('user10@example.com', '$2a$10$xJwL5v5Jz5U5Z5U5Z5U5Ze', 'Camila', 'Navarro', '3205678901', 'Carrera Feliz 15', 'CC', '55667788', '1992-09-24', 'usuario'); -- ID 18
 
--- Inserción de datos en clientes
-INSERT INTO clientes (nombre, direccion, telefono) VALUES
-('Juan Pérez', 'Calle Ficticia 123', '1234567890'),
-('María Gómez', 'Avenida Ejemplo 456', '0987654321'),
-('Carlos López', 'Plaza Principal 789', '1122334455'),
-('Ana Martínez', 'Calle 123 #45-67', '3101112233'),
-('Luis Rodríguez', 'Avenida Principal 890', '3152223344'),
-('Sofía García', 'Carrera 56 #78-90', '3203334455'),
-('Pedro Sánchez', 'Diagonal 12 #34-56', '3174445566'),
-('María López', 'Calle 78 #90-12', '3005556677'),
-('Carlos Ramírez', 'Avenida Central 345', '3116667788'),
-('Laura Fernández', 'Carrera 78 #12-34', '3187778899'),
-('Jorge González', 'Calle 90 #12-34', '3158889900'),
-('Diana Torres', 'Avenida Norte 567', '3129990011'),
-('Andrés Herrera', 'Carrera 34 #56-78', '3000001122'),
-('Patricia Díaz', 'Calle 56 #78-90', '3141112233'),
-('Ricardo Vargas', 'Avenida Sur 123', '3192223344'),
-('Carmen Castro', 'Carrera 90 #12-34', '3173334455'),
-('Fernando Rojas', 'Diagonal 56 #78-90', '3124445566'),
-('Gloria Méndez', 'Calle 34 #56-78', '3185556677'),
-('Oscar Quintero', 'Avenida Oriental 789', '3156667788'),
-('Silvia Peña', 'Carrera 12 #34-56', '3007778899'),
-('Mauricio Guzmán', 'Calle 67 #89-01', '3148889900'),
-('Adriana Ruiz', 'Avenida Occidental 234', '3199990011'),
-('Héctor Silva', 'Carrera 45 #67-89', '3170001122');
 
--- Inserción de datos en mascotas
+-- Inserción de datos en mascotas (id_propietario ahora es el id de usuario)
+-- Asegúrate de que id_propietario sea un ID de un usuario con role 'usuario'
 INSERT INTO mascotas (id_propietario, nombre, especie, raza, edad, peso, fecha_nacimiento, color, sexo, microchip) VALUES
-(1, 'Max', 'Perro', 'Labrador Retriever', 3, 28.5, '2020-05-10', 'Dorado', 'Macho', '123456789012345'),
-(1, 'Luna', 'Gato', 'Siamés', 2, 4.2, '2021-03-15', 'Blanco y café', 'Hembra', '234567890123456'),
-(2, 'Rocky', 'Perro', 'Bulldog Francés', 4, 12.3, '2019-01-20', 'Atigrado', 'Macho', '345678901234567'),
-(3, 'Milo', 'Gato', 'Mestizo', 1, 3.8, '2022-07-05', 'Negro', 'Macho', NULL),
-(4, 'Bella', 'Perro', 'Golden Retriever', 5, 30.0, '2018-11-12', 'Dorado', 'Hembra', '456789012345678'),
-(5, 'Simba', 'Gato', 'Persa', 2, 5.1, '2021-02-28', 'Gris', 'Macho', '567890123456789'),
-(6, 'Coco', 'Perro', 'Chihuahua', 7, 2.5, '2016-09-17', 'Café', 'Hembra', '678901234567890'),
-(7, 'Leo', 'Perro', 'Pastor Alemán', 2, 35.0, '2021-04-22', 'Negro y café', 'Macho', '789012345678901'),
-(8, 'Lola', 'Gato', 'Bengalí', 1, 4.5, '2022-08-30', 'Atigrado', 'Hembra', NULL),
-(9, 'Toby', 'Perro', 'Beagle', 6, 15.0, '2017-12-05', 'Tricolor', 'Macho', '890123456789012'),
-(10, 'Mia', 'Gato', 'Ragdoll', 3, 5.8, '2020-06-18', 'Blanco y gris', 'Hembra', '901234567890123'),
-(11, 'Bruno', 'Perro', 'Boxer', 4, 32.0, '2019-03-25', 'Atigrado', 'Macho', '012345678901234'),
-(12, 'Lily', 'Gato', 'Esfinge', 2, 3.9, '2021-10-10', 'Rosa', 'Hembra', NULL),
-(13, 'Zeus', 'Perro', 'Husky Siberiano', 3, 25.0, '2020-01-15', 'Blanco y negro', 'Macho', '123450987654321'),
-(14, 'Nala', 'Gato', 'Maine Coon', 1, 6.2, '2022-05-20', 'Atigrado', 'Hembra', '234561098765432'),
-(15, 'Thor', 'Perro', 'Doberman', 5, 38.0, '2018-08-08', 'Negro y café', 'Macho', '345672109876543'),
-(16, 'Cleo', 'Gato', 'Mestizo', 2, 4.0, '2021-07-12', 'Atigrado', 'Hembra', NULL),
-(17, 'Rex', 'Perro', 'Rottweiler', 4, 42.0, '2019-04-03', 'Negro y café', 'Macho', '456783210987654'),
-(18, 'Molly', 'Gato', 'Británico de Pelo Corto', 3, 5.5, '2020-09-25', 'Gris', 'Hembra', '567894321098765'),
-(19, 'Duke', 'Perro', 'Gran Danés', 2, 50.0, '2021-11-30', 'Negro', 'Macho', '678905432109876');
-
--- Nuevas mascotas para los usuarios de rol 'usuario' existentes (user1 a user5)
-INSERT INTO mascotas (id_propietario, nombre, especie, raza, edad, peso, fecha_nacimiento, color, sexo, microchip) VALUES
-((SELECT id_cliente FROM clientes WHERE nombre = 'Alejandro Rojas'), 'Firulais', 'Perro', 'Criollo', 2, 10.5, '2022-01-01', 'Marrón', 'Macho', NULL),
-((SELECT id_cliente FROM clientes WHERE nombre = 'Alejandro Rojas'), 'Whiskers', 'Gato', 'Europeo Común', 1, 3.0, '2023-03-10', 'Blanco y negro', 'Hembra', NULL),
-((SELECT id_cliente FROM clientes WHERE nombre = 'Gabriela Sánchez'), 'Burbuja', 'Perro', 'Poodle', 4, 6.0, '2020-07-20', 'Blanco', 'Hembra', '987654321098765'),
-((SELECT id_cliente FROM clientes WHERE nombre = 'Gabriela Sánchez'), 'Garfield', 'Gato', 'Común Europeo', 3, 5.5, '2021-04-05', 'Naranja', 'Macho', NULL),
-((SELECT id_cliente FROM clientes WHERE nombre = 'Felipe Gutiérrez'), 'Manchas', 'Perro', 'Dálmata', 1, 18.0, '2023-02-15', 'Blanco y negro', 'Macho', '876543210987654'),
-((SELECT id_cliente FROM clientes WHERE nombre = 'Felipe Gutiérrez'), 'Shadow', 'Gato', 'Bombay', 2, 4.0, '2022-09-01', 'Negro', 'Macho', NULL),
-((SELECT id_cliente FROM clientes WHERE nombre = 'Daniela Castillo'), 'Princesa', 'Perro', 'Shih Tzu', 5, 5.0, '2019-11-11', 'Blanco y café', 'Hembra', '765432109876543'),
-((SELECT id_cliente FROM clientes WHERE nombre = 'Daniela Castillo'), 'Kitty', 'Gato', 'Angora', 4, 3.5, '2020-08-22', 'Crema', 'Hembra', NULL),
-((SELECT id_cliente FROM clientes WHERE nombre = 'Javier Ortiz'), 'Capitán', 'Perro', 'Pastor Collie', 3, 25.0, '2021-06-01', 'Tricolor', 'Macho', '654321098765432'),
-((SELECT id_cliente FROM clientes WHERE nombre = 'Javier Ortiz'), 'Duquesa', 'Gato', 'Siberiano', 1, 4.8, '2023-05-01', 'Gris atigrado', 'Hembra', NULL);
+(3, 'Max', 'Perro', 'Labrador Retriever', 3, 28.5, '2020-05-10', 'Dorado', 'Macho', '123456789012345'), -- Juan Pérez (ID 3)
+(3, 'Luna', 'Gato', 'Siamés', 2, 4.2, '2021-03-15', 'Blanco y café', 'Hembra', '234567890123456'), -- Juan Pérez (ID 3)
+(9, 'Rocky', 'Perro', 'Bulldog Francés', 4, 12.3, '2019-01-20', 'Atigrado', 'Macho', '345678901234567'), -- Alejandro Rojas (ID 9)
+(10, 'Milo', 'Gato', 'Mestizo', 1, 3.8, '2022-07-05', 'Negro', 'Macho', NULL), -- Gabriela Sánchez (ID 10)
+(11, 'Bella', 'Perro', 'Golden Retriever', 5, 30.0, '2018-11-12', 'Dorado', 'Hembra', '456789012345678'), -- Felipe Gutiérrez (ID 11)
+(12, 'Simba', 'Gato', 'Persa', 2, 5.1, '2021-02-28', 'Gris', 'Macho', '567890123456789'), -- Daniela Castillo (ID 12)
+(13, 'Coco', 'Perro', 'Chihuahua', 7, 2.5, '2016-09-17', 'Café', 'Hembra', '678901234567890'), -- Javier Ortiz (ID 13)
+(14, 'Leo', 'Perro', 'Pastor Alemán', 2, 35.0, '2021-04-22', 'Negro y café', 'Macho', '789012345678901'), -- Lucía Mendoza (ID 14)
+(15, 'Lola', 'Gato', 'Bengalí', 1, 4.5, '2022-08-30', 'Atigrado', 'Hembra', NULL), -- Ricardo Vega (ID 15)
+(16, 'Toby', 'Perro', 'Beagle', 6, 15.0, '2017-12-05', 'Tricolor', 'Macho', '890123456789012'), -- Patricia Castro (ID 16)
+(17, 'Mia', 'Gato', 'Ragdoll', 3, 5.8, '2020-06-18', 'Blanco y gris', 'Hembra', '901234567890123'), -- Hugo Ríos (ID 17)
+(18, 'Bruno', 'Perro', 'Boxer', 4, 32.0, '2019-03-25', 'Atigrado', 'Macho', '012345678901234'), -- Camila Navarro (ID 18)
+(3, 'Lily', 'Gato', 'Esfinge', 2, 3.9, '2021-10-10', 'Rosa', 'Hembra', NULL), -- Juan Pérez (ID 3)
+(9, 'Zeus', 'Perro', 'Husky Siberiano', 3, 25.0, '2020-01-15', 'Blanco y negro', 'Macho', '123450987654321'), -- Alejandro Rojas (ID 9)
+(10, 'Nala', 'Gato', 'Maine Coon', 1, 6.2, '2022-05-20', 'Atigrado', 'Hembra', '234561098765432'), -- Gabriela Sánchez (ID 10)
+(11, 'Thor', 'Perro', 'Doberman', 5, 38.0, '2018-08-08', 'Negro y café', 'Macho', '345672109876543'), -- Felipe Gutiérrez (ID 11)
+(12, 'Cleo', 'Gato', 'Mestizo', 2, 4.0, '2021-07-12', 'Atigrado', 'Hembra', NULL), -- Daniela Castillo (ID 12)
+(13, 'Rex', 'Perro', 'Rottweiler', 4, 42.0, '2019-04-03', 'Negro y café', 'Macho', '456783210987654'), -- Javier Ortiz (ID 13)
+(14, 'Molly', 'Gato', 'Británico de Pelo Corto', 3, 5.5, '2020-09-25', 'Gris', 'Hembra', '567894321098765'), -- Lucía Mendoza (ID 14)
+(15, 'Duke', 'Perro', 'Gran Danés', 2, 50.0, '2021-11-30', 'Negro', 'Macho', '678905432109876'); -- Ricardo Vega (ID 15)
 
 -- Inserción de datos en historial_medico
+-- Asegúrate de que id_mascota exista y veterinario sea un ID de un usuario con role 'veterinario' o 'admin'
 INSERT INTO historial_medico (id_mascota, veterinario, diagnostico, tratamiento, observaciones, peso_actual, temperatura, proxima_cita) VALUES
-(1, (SELECT id FROM usuarios WHERE email = 'vet@example.com'), 'Control anual de salud', 'Vacuna antirrábica', 'Mascota en buen estado de salud', 28.5, 38.5, '2024-05-10'),
-(2, (SELECT id FROM usuarios WHERE email = 'vet1@example.com'), 'Desparasitación', 'Tabletas antiparasitarias', 'Sin problemas detectados', 4.2, 38.7, '2023-09-15'),
-(3, (SELECT id FROM usuarios WHERE email = 'vet@example.com'), 'Problemas de piel', 'Shampoo medicado y antibióticos', 'Posible alergia alimentaria', 12.0, 39.0, '2023-07-20'),
-(4, (SELECT id FROM usuarios WHERE email = 'vet1@example.com'), 'Castración', 'Postoperatorio controlado', 'Recuperación normal', 3.8, 38.5, '2023-08-05'),
-(5, (SELECT id FROM usuarios WHERE email = 'vet2@example.com'), 'Control de peso', 'Dieta especial y ejercicio', 'Sobrepeso moderado', 30.5, 38.6, '2023-08-12'),
-(6, (SELECT id FROM usuarios WHERE email = 'vet3@example.com'), 'Infección ocular', 'Gotas oftálmicas', 'Mejoría en 48 horas', 5.1, 38.9, '2023-07-28'),
-(7, (SELECT id FROM usuarios WHERE email = 'vet2@example.com'), 'Control geriátrico', 'Suplementos articulares', 'Artritis incipiente', 2.4, 38.4, '2023-09-17'),
-(8, (SELECT id FROM usuarios WHERE email = 'vet3@example.com'), 'Vacunación anual', 'Vacuna múltiple', 'Reacción normal', 35.2, 38.8, '2024-04-22'),
-(9, (SELECT id FROM usuarios WHERE email = 'vet@example.com'), 'Control de crecimiento', 'Alimentación balanceada', 'Desarrollo adecuado', 4.7, 38.6, '2023-10-30'),
-(10, (SELECT id FROM usuarios WHERE email = 'vet1@example.com'), 'Problemas digestivos', 'Dieta blanda y probióticos', 'Posible intolerancia', 15.0, 39.1, '2023-08-05'),
-(11, (SELECT id FROM usuarios WHERE email = 'vet2@example.com'), 'Control de esterilización', 'Postoperatorio', 'Recuperación sin complicaciones', 5.7, 38.5, '2023-09-18'),
-(12, (SELECT id FROM usuarios WHERE email = 'vet3@example.com'), 'Dermatitis', 'Antihistamínicos y crema', 'Alergia ambiental', 3.8, 38.7, '2023-08-10'),
-(13, (SELECT id FROM usuarios WHERE email = 'vet@example.com'), 'Control de vacunas', 'Vacuna antirrábica y múltiple', 'Buen estado general', 25.3, 38.5, '2024-01-15'),
-(14, (SELECT id FROM usuarios WHERE email = 'vet1@example.com'), 'Control de peso', 'Aumento de ración', 'Bajo peso para la raza', 6.5, 38.9, '2023-08-20'),
-(15, (SELECT id FROM usuarios WHERE email = 'vet2@example.com'), 'Problemas articulares', 'Suplementos y antiinflamatorios', 'Displasia de cadera', 38.0, 38.7, '2023-09-08'),
-(16, (SELECT id FROM usuarios WHERE email = 'vet3@example.com'), 'Control de salud', 'Desparasitación', 'Sin problemas detectados', 4.1, 38.5, '2023-10-12'),
-(17, (SELECT id FROM usuarios WHERE email = 'vet@example.com'), 'Herida en pata', 'Curación y antibióticos', 'Herida superficial', 42.0, 39.2, '2023-07-03'),
-(18, (SELECT id FROM usuarios WHERE email = 'vet1@example.com'), 'Control dental', 'Limpieza dental', 'Sarro moderado', 5.4, 38.6, '2024-03-25'),
-(19, (SELECT id FROM usuarios WHERE email = 'vet2@example.com'), 'Control de crecimiento', 'Alimentación para cachorro grande', 'Desarrollo adecuado', 52.0, 38.8, '2023-11-30');
-
--- Historial médico para las nuevas mascotas
-INSERT INTO historial_medico (id_mascota, veterinario, diagnostico, tratamiento, observaciones, peso_actual, temperatura, proxima_cita) VALUES
-((SELECT id_mascota FROM mascotas WHERE nombre = 'Firulais' AND id_propietario = (SELECT id_cliente FROM clientes WHERE nombre = 'Alejandro Rojas')), (SELECT id FROM usuarios WHERE email = 'vet1@example.com'), 'Revisión general', 'Vacuna Parvovirus', 'Cachorro saludable', 10.0, 38.0, '2024-07-01'),
-((SELECT id_mascota FROM mascotas WHERE nombre = 'Whiskers' AND id_propietario = (SELECT id_cliente FROM clientes WHERE nombre = 'Alejandro Rojas')), (SELECT id FROM usuarios WHERE email = 'vet2@example.com'), 'Control de crecimiento', 'Dieta especial', 'Buen apetito', 2.8, 38.2, '2024-08-15'),
-((SELECT id_mascota FROM mascotas WHERE nombre = 'Burbuja' AND id_propietario = (SELECT id_cliente FROM clientes WHERE nombre = 'Gabriela Sánchez')), (SELECT id FROM usuarios WHERE email = 'vet3@example.com'), 'Chequeo dental', 'Limpieza', 'Encías sanas', 5.9, 38.5, '2024-09-01');
+(1, 2, 'Control anual de salud', 'Vacuna antirrábica', 'Mascota en buen estado de salud', 28.5, 38.5, '2024-05-10'), -- Mascota 1 (Max), Vet 2 (Carlos)
+(2, 4, 'Desparasitación', 'Tabletas antiparasitarias', 'Sin problemas detectados', 4.2, 38.7, '2023-09-15'), -- Mascota 2 (Luna), Vet 4 (Laura)
+(3, 5, 'Problemas de piel', 'Shampoo medicado y antibióticos', 'Posible alergia alimentaria', 12.0, 39.0, '2023-07-20'), -- Mascota 3 (Rocky), Vet 5 (Mario)
+(4, 6, 'Castración', 'Postoperatorio controlado', 'Recuperación normal', 3.8, 38.5, '2023-08-05'), -- Mascota 4 (Milo), Vet 6 (Sandra)
+(5, 2, 'Control de peso', 'Dieta especial y ejercicio', 'Sobrepeso moderado', 30.5, 38.6, '2023-08-12'), -- Mascota 5 (Bella), Vet 2 (Carlos)
+(6, 4, 'Infección ocular', 'Gotas oftálmicas', 'Mejoría en 48 horas', 5.1, 38.9, '2023-07-28'), -- Mascota 6 (Simba), Vet 4 (Laura)
+(7, 5, 'Control geriátrico', 'Suplementos articulares', 'Artritis incipiente', 2.4, 38.4, '2023-09-17'), -- Mascota 7 (Coco), Vet 5 (Mario)
+(8, 4, 'Vacunación anual', 'Vacuna múltiple', 'Reacción normal', 35.2, 38.8, '2024-04-22'), -- Mascota 8 (Leo), Vet 4 (Laura)
+(9, 6, 'Control de crecimiento', 'Alimentación balanceada', 'Desarrollo adecuado', 4.7, 38.6, '2023-10-30'), -- Mascota 9 (Lola), Vet 6 (Sandra)
+(10, 2, 'Problemas digestivos', 'Dieta blanda y probióticos', 'Posible intolerancia', 15.0, 39.1, '2023-08-05'), -- Mascota 10 (Toby), Vet 2 (Carlos)
+(11, 2, 'Control de esterilización', 'Postoperatorio', 'Recuperación sin complicaciones', 5.7, 38.5, '2023-09-18'), -- Mascota 11 (Mia), Vet 2 (Carlos)
+(12, 4, 'Dermatitis', 'Antihistamínicos y crema', 'Alergia ambiental', 3.8, 38.7, '2023-08-10'), -- Mascota 12 (Bruno), Vet 4 (Laura)
+(13, 5, 'Control de vacunas', 'Vacuna antirrábica y múltiple', 'Buen estado general', 25.3, 38.5, '2024-01-15'), -- Mascota 13 (Lily), Vet 5 (Mario)
+(14, 2, 'Control de peso', 'Aumento de ración', 'Bajo peso para la raza', 6.5, 38.9, '2023-08-20'), -- Mascota 14 (Zeus), Vet 2 (Carlos)
+(15, 6, 'Problemas articulares', 'Suplementos y antiinflamatorios', 'Displasia de cadera', 38.0, 38.7, '2023-09-08'), -- Mascota 15 (Nala), Vet 6 (Sandra)
+(16, 4, 'Control de salud', 'Desparasitación', 'Sin problemas detectados', 4.1, 38.5, '2023-10-12'), -- Mascota 16 (Thor), Vet 4 (Laura)
+(17, 5, 'Herida en pata', 'Curación y antibióticos', 'Herida superficial', 42.0, 39.2, '2023-07-03'), -- Mascota 17 (Cleo), Vet 5 (Mario)
+(18, 2, 'Control dental', 'Limpieza dental', 'Sarro moderado', 5.4, 38.6, '2024-03-25'), -- Mascota 18 (Rex), Vet 2 (Carlos)
+(19, 6, 'Control de crecimiento', 'Alimentación para cachorro grande', 'Desarrollo adecuado', 52.0, 38.8, '2023-11-30'), -- Mascota 19 (Molly), Vet 6 (Sandra)
+(20, 4, 'Revisión general', 'Chequeo completo', 'Mascota sana', 50.0, 38.7, '2024-06-30'); -- Mascota 20 (Duke), Vet 4 (Laura)
 
 
 -- Inserción de datos en citas
+-- Asegúrate de que id_cliente sea un ID de un usuario con role 'usuario'
+-- Asegúrate de que id_servicio exista y id_veterinario sea un ID de un usuario con role 'veterinario' o 'admin'
 INSERT INTO citas (id_cliente, id_servicio, id_veterinario, fecha, servicios, estado) VALUES
-(1, 1, (SELECT id FROM usuarios WHERE email = 'vet@example.com'), '2030-06-15 09:00:00', 'Consultorio 1', 'aceptada'),
-(2, 2, (SELECT id FROM usuarios WHERE email = 'vet1@example.com'), '2030-07-15 10:30:00', 'Consultorio 2', 'aceptada'),
-(3, 3, (SELECT id FROM usuarios WHERE email = 'vet@example.com'), '2030-07-16 11:00:00', 'Sala de Estética', 'aceptada'),
-(4, 1, (SELECT id FROM usuarios WHERE email = 'vet1@example.com'), '2030-07-16 14:00:00', 'Consultorio 1', 'pendiente'),
-(5, 2, (SELECT id FROM usuarios WHERE email = 'vet2@example.com'), '2030-02-17 09:30:00', 'Consultorio 2', 'aceptada'),
-(6, 4, (SELECT id FROM usuarios WHERE email = 'vet3@example.com'), '2030-02-17 11:00:00', 'Quirófano', 'aceptada'),
-(7, 5, (SELECT id FROM usuarios WHERE email = 'vet2@example.com'), '2030-03-18 10:00:00', 'Sala de Rayos X', 'pendiente'),
-(8, 6, (SELECT id FROM usuarios WHERE email = 'vet3@example.com'), '2030-01-18 15:00:00', 'Laboratorio', 'aceptada'),
-(9, 1, (SELECT id FROM usuarios WHERE email = 'vet@example.com'), '2030-03-19 08:30:00', 'Consultorio 1', 'aceptada'),
-(10, 3, (SELECT id FROM usuarios WHERE email = 'vet1@example.com'), '2030-05-19 13:00:00', 'Sala de Estética', 'pendiente'),
-(11, 2, (SELECT id FROM usuarios WHERE email = 'vet2@example.com'), '2030-04-20 10:00:00', 'Consultorio 2', 'aceptada'),
-(12, 5, (SELECT id FROM usuarios WHERE email = 'vet3@example.com'), '2030-08-20 11:30:00', 'Sala de Rayos X', 'aceptada'),
-(13, 1, (SELECT id FROM usuarios WHERE email = 'vet@example.com'), '2030-09-21 09:00:00', 'Consultorio 1', 'pendiente'),
-(14, 4, (SELECT id FROM usuarios WHERE email = 'vet1@example.com'), '2030-12-21 14:00:00', 'Quirófano', 'aceptada'),
-(15, 6, (SELECT id FROM usuarios WHERE email = 'vet2@example.com'), '2023-10-22 10:30:00', 'Laboratorio', 'aceptada'),
-(16, 3, (SELECT id FROM usuarios WHERE email = 'vet3@example.com'), '2030-11-22 12:00:00', 'Sala de Estética', 'completa'),
-(17, 2, (SELECT id FROM usuarios WHERE email = 'vet2@example.com'), '2030-12-23 09:00:00', 'Consultorio 2', 'aceptada'),
-(18, 1, (SELECT id FROM usuarios WHERE email = 'vet@example.com'), '2030-04-23 11:00:00', 'Consultorio 1', 'rechazada'),
-(19, 5, (SELECT id FROM usuarios WHERE email = 'vet1@example.com'), '2030-07-24 10:00:00', 'Sala de Rayos X', 'aceptada'),
-(20, 6, (SELECT id FROM usuarios WHERE email = 'vet2@example.com'), '2030-06-24 15:30:00', 'Laboratorio', 'pendiente');
+(3, 1, 2, '2030-06-15 09:00:00', 'Consultorio 1', 'aceptada'), -- Juan Pérez (ID 3), Vet 2 (Carlos)
+(9, 2, 4, '2030-07-15 10:30:00', 'Consultorio 2', 'aceptada'), -- Alejandro Rojas (ID 9), Vet 4 (Laura)
+(10, 3, 2, '2030-07-16 11:00:00', 'Sala de Estética', 'aceptada'), -- Gabriela Sánchez (ID 10), Vet 2 (Carlos)
+(11, 1, 4, '2030-07-16 14:00:00', 'Consultorio 1', 'pendiente'), -- Felipe Gutiérrez (ID 11), Vet 4 (Laura)
+(12, 2, 5, '2030-02-17 09:30:00', 'Consultorio 2', 'aceptada'), -- Daniela Castillo (ID 12), Vet 5 (Mario)
+(13, 4, 6, '2030-02-17 11:00:00', 'Quirófano', 'aceptada'), -- Javier Ortiz (ID 13), Vet 6 (Sandra)
+(14, 5, 5, '2030-03-18 10:00:00', 'Sala de Rayos X', 'pendiente'), -- Lucía Mendoza (ID 14), Vet 5 (Mario)
+(15, 6, 6, '2030-01-18 15:00:00', 'Laboratorio', 'aceptada'), -- Ricardo Vega (ID 15), Vet 6 (Sandra)
+(16, 1, 2, '2030-03-19 08:30:00', 'Consultorio 1', 'aceptada'), -- Patricia Castro (ID 16), Vet 2 (Carlos)
+(17, 3, 4, '2030-05-19 13:00:00', 'Sala de Estética', 'pendiente'), -- Hugo Ríos (ID 17), Vet 4 (Laura)
+(18, 2, 5, '2030-04-20 10:00:00', 'Consultorio 2', 'aceptada'), -- Camila Navarro (ID 18), Vet 5 (Mario)
+(3, 5, 6, '2030-08-20 11:30:00', 'Sala de Rayos X', 'aceptada'), -- Juan Pérez (ID 3), Vet 6 (Sandra)
+(9, 1, 2, '2030-09-21 09:00:00', 'Consultorio 1', 'pendiente'), -- Alejandro Rojas (ID 9), Vet 2 (Carlos)
+(10, 4, 4, '2030-12-21 14:00:00', 'Quirófano', 'aceptada'), -- Gabriela Sánchez (ID 10), Vet 4 (Laura)
+(11, 6, 5, '2023-10-22 10:30:00', 'Laboratorio', 'aceptada'), -- Felipe Gutiérrez (ID 11), Vet 5 (Mario)
+(12, 3, 6, '2030-11-22 12:00:00', 'Sala de Estética', 'completa'), -- Daniela Castillo (ID 12), Vet 6 (Sandra)
+(13, 2, 5, '2030-12-23 09:00:00', 'Consultorio 2', 'aceptada'), -- Javier Ortiz (ID 13), Vet 5 (Mario)
+(14, 1, 2, '2030-04-23 11:00:00', 'Consultorio 1', 'rechazada'), -- Lucía Mendoza (ID 14), Vet 2 (Carlos)
+(15, 5, 4, '2030-07-24 10:00:00', 'Sala de Rayos X', 'aceptada'), -- Ricardo Vega (ID 15), Vet 4 (Laura)
+(16, 6, 5, '2030-06-24 15:30:00', 'Laboratorio', 'pendiente'); -- Patricia Castro (ID 16), Vet 5 (Mario)
 
 -- Agrega citas para hoy usando CURDATE()
 INSERT INTO citas (id_cliente, id_servicio, id_veterinario, fecha, servicios, estado) VALUES
-(1, 1, (SELECT id FROM usuarios WHERE email = 'vet@example.com'), CURDATE() + INTERVAL 1 HOUR, 'Consultorio 1', 'aceptada'),
-(2, 2, (SELECT id FROM usuarios WHERE email = 'vet1@example.com'), CURDATE() + INTERVAL 2 HOUR, 'Consultorio 2', 'aceptada'),
-(3, 3, (SELECT id FROM usuarios WHERE email = 'vet2@example.com'), CURDATE() + INTERVAL 3 HOUR, 'Sala de Estética', 'pendiente');
-
-INSERT INTO mascotas (id_propietario, nombre, especie, raza, edad, peso, fecha_nacimiento, color, sexo, microchip) VALUES
-(1, 'Luna', 'Gato', 'Egipcio', 3, 5,3, '2021-05-12', 'Amarillo', 'Hembra', '12345678907890'),
+(3, 1, 2, CURDATE() + INTERVAL 1 HOUR, 'Consultorio 1', 'aceptada'),
+(9, 2, 4, CURDATE() + INTERVAL 2 HOUR, 'Consultorio 2', 'aceptada'),
+(10, 3, 5, CURDATE() + INTERVAL 3 HOUR, 'Sala de Estética', 'pendiente');
 
 -- Consultas de verificación
 SELECT * FROM usuarios;
 SELECT * FROM servicios;
-SELECT * FROM clientes;
 SELECT * FROM mascotas;
 SELECT * FROM historial_medico;
 SELECT * FROM citas;
+SELECT * FROM notificaciones;

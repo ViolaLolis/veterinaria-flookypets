@@ -1,39 +1,41 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useParams, Link } from 'react-router-dom'; // Importar Link
+import { motion, AnimatePresence } from 'framer-motion';
 import styles from './Styles/HistorialMedico.module.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faStethoscope, faFileMedicalAlt, faPrint, faDownload, faSearch, faChevronDown, faChevronUp, faCalendarAlt } from '@fortawesome/free-solid-svg-icons';
+import { faStethoscope, faFileMedicalAlt, faPrint, faDownload, faSearch, faChevronDown, faChevronUp, faCalendarAlt, faSpinner, faInfoCircle } from '@fortawesome/free-solid-svg-icons';
+import { authFetch } from './api'; // Asegúrate de que la ruta sea correcta
 
-const HistorialMedico = () => {
+const HistorialMedico = ({ user }) => { // Recibe el usuario para comprobación de rol
+  const { mascotaId } = useParams();
+  const [historial, setHistorial] = useState([]);
   const [expandedRow, setExpandedRow] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-  
-  const historial = [
-    { 
-      id: 1, 
-      fecha: '2024-03-10', 
-      diagnostico: 'Chequeo general', 
-      tratamiento: 'Sin tratamiento', 
-      notas: 'Mascota con buen estado de salud general. Peso: 4.2kg. Temperatura normal. Pelaje en buen estado.', 
-      veterinario: 'Dr. Rodríguez' 
-    },
-    { 
-      id: 2, 
-      fecha: '2024-05-01', 
-      diagnostico: 'Vacunación triple felina', 
-      tratamiento: 'Vacuna aplicada (lote #XYZ123)', 
-      notas: 'Se administró la vacuna sin complicaciones. La mascota mostró buen comportamiento durante el procedimiento.', 
-      veterinario: 'Dra. Martínez' 
-    },
-    { 
-      id: 3, 
-      fecha: '2024-07-15', 
-      diagnostico: 'Infección de oído leve', 
-      tratamiento: 'Gotas óticas (dosis: 5 gotas en cada oído, 2 veces al día por 7 días).', 
-      notas: 'Se recomienda seguimiento en una semana. Dueño instruido en la aplicación del medicamento. Posible alergia a monitorear.', 
-      veterinario: 'Dr. López' 
-    },
-  ];
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  const fetchHistorial = useCallback(async () => {
+    setIsLoading(true);
+    setError('');
+    try {
+      // Ajusta la URL para filtrar por id_mascota
+      const response = await authFetch(`/historial_medico?id_mascota=${mascotaId}`);
+      if (response.success) {
+        setHistorial(response.data);
+      } else {
+        setError(response.message || 'Error al cargar el historial médico.');
+      }
+    } catch (err) {
+      console.error("Error fetching historial:", err);
+      setError('Error de conexión al servidor.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [mascotaId]);
+
+  useEffect(() => {
+    fetchHistorial();
+  }, [fetchHistorial]);
 
   const toggleRow = (id) => {
     setExpandedRow(expandedRow === id ? null : id);
@@ -42,11 +44,30 @@ const HistorialMedico = () => {
   const filteredHistorial = historial.filter(item =>
     item.diagnostico.toLowerCase().includes(searchTerm.toLowerCase()) ||
     item.tratamiento.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.notas.toLowerCase().includes(searchTerm.toLowerCase())
+    item.observaciones.toLowerCase().includes(searchTerm.toLowerCase()) || // Usar 'observaciones' en lugar de 'notas'
+    (item.veterinario_nombre && item.veterinario_nombre.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
+  if (isLoading) {
+    return (
+      <div className={styles.loadingContainer}>
+        <FontAwesomeIcon icon={faSpinner} spin className={styles.spinnerIcon} />
+        <p>Cargando historial médico...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className={styles.errorMessage}>
+        <FontAwesomeIcon icon={faInfoCircle} className={styles.infoIcon} />
+        <p>{error}</p>
+      </div>
+    );
+  }
+
   return (
-    <motion.div 
+    <motion.div
       className={styles.container}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -58,7 +79,7 @@ const HistorialMedico = () => {
           <h2>Historial Clínico</h2>
           <p>Registro completo de atenciones médicas</p>
         </div>
-        
+
         <div className={styles.controls}>
           <div className={styles.searchContainer}>
             <FontAwesomeIcon icon={faSearch} className={styles.searchIcon} />
@@ -70,16 +91,16 @@ const HistorialMedico = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          
+
           <div className={styles.actionButtons}>
-            <motion.button 
+            <motion.button
               className={styles.actionButton}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
               <FontAwesomeIcon icon={faPrint} /> Imprimir
             </motion.button>
-            <motion.button 
+            <motion.button
               className={styles.actionButton}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -93,61 +114,80 @@ const HistorialMedico = () => {
       {filteredHistorial.length > 0 ? (
         <div className={styles.historialContainer}>
           {filteredHistorial.map(item => (
-            <motion.div 
-              key={item.id}
+            <motion.div
+              key={item.id_historial} // Usar id_historial de la DB
               className={styles.historialCard}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <div 
+              <div
                 className={styles.cardHeader}
-                onClick={() => toggleRow(item.id)}
+                onClick={() => toggleRow(item.id_historial)}
               >
                 <div className={styles.cardDate}>
                   <FontAwesomeIcon icon={faCalendarAlt} />
-                  <span>{item.fecha}</span>
+                  <span>{item.fecha_consulta}</span>
                 </div>
                 <h3 className={styles.cardDiagnosis}>{item.diagnostico}</h3>
                 <div className={styles.cardVet}>
-                  <span>Atendió: {item.veterinario}</span>
+                  <span>Atendió: {item.veterinario_nombre || 'N/A'}</span>
                 </div>
                 <div className={styles.cardToggle}>
-                  <FontAwesomeIcon icon={expandedRow === item.id ? faChevronUp : faChevronDown} />
+                  <FontAwesomeIcon icon={expandedRow === item.id_historial ? faChevronUp : faChevronDown} />
                 </div>
               </div>
-              
-              {expandedRow === item.id && (
-                <motion.div 
-                  className={styles.cardContent}
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <div className={styles.detailRow}>
-                    <h4>Tratamiento:</h4>
-                    <p>{item.tratamiento}</p>
-                  </div>
-                  <div className={styles.detailRow}>
-                    <h4>Observaciones:</h4>
-                    <p>{item.notas}</p>
-                  </div>
-                  <div className={styles.cardActions}>
-                    <button className={styles.smallActionButton}>
-                      Ver receta
-                    </button>
-                    <button className={styles.smallActionButton}>
-                      Ver imágenes
-                    </button>
-                  </div>
-                </motion.div>
-              )}
+
+              <AnimatePresence>
+                {expandedRow === item.id_historial && (
+                  <motion.div
+                    className={styles.cardContent}
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <div className={styles.detailRow}>
+                      <h4>Tratamiento:</h4>
+                      <p>{item.tratamiento}</p>
+                    </div>
+                    {item.observaciones && (
+                      <div className={styles.detailRow}>
+                        <h4>Observaciones:</h4>
+                        <p>{item.observaciones}</p>
+                      </div>
+                    )}
+                    {item.peso_actual && (
+                      <div className={styles.detailRow}>
+                        <h4>Peso Actual:</h4>
+                        <p>{item.peso_actual} kg</p>
+                      </div>
+                    )}
+                    {item.temperatura && (
+                      <div className={styles.detailRow}>
+                        <h4>Temperatura:</h4>
+                        <p>{item.temperatura} °C</p>
+                      </div>
+                    )}
+                    {item.proxima_cita && (
+                      <div className={styles.detailRow}>
+                        <h4>Próxima Cita:</h4>
+                        <p>{item.proxima_cita}</p>
+                      </div>
+                    )}
+                    <div className={styles.cardActions}>
+                      <Link to={`/usuario/mascota/${mascotaId}/historial/${item.id_historial}`} className={styles.smallActionButton}>
+                        Ver Detalles
+                      </Link>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </motion.div>
           ))}
         </div>
       ) : (
-        <motion.div 
+        <motion.div
           className={styles.noHistorial}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

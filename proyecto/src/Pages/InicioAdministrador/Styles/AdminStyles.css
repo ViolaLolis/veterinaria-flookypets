@@ -1,174 +1,177 @@
 /* src/Styles/AdminStyles.css - Diseño Premium, Moderno y Detallado para el Panel de Administración */
 
 /* ===================================================================== */
-/* 0. Paleta de Colores y Variables (Solo para referencia, no se usa :root) */
-/* Se definen directamente en las reglas CSS para evitar conflictos globales */
+/* 0. Variables CSS Personalizadas (Custom CSS Properties)               */
+/* Define la paleta de colores, sombras, radios de borde y transiciones */
 /* ===================================================================== */
-/* Colores Principales */
-/* --primary-color: #00acc1;  Azul cian vibrante (principal) */
-/* --primary-light: #4dd0e1;  Azul cian más claro para acentos y hover */
-/* --primary-dark: #007c91;   Azul cian más oscuro para sombras profundas y texto principal */
-/* --primary-glow: rgba(0, 172, 193, 0.3); Efecto de brillo para enfoque */
-/* --primary-border: rgba(0, 172, 193, 0.5); Borde para elementos primarios */
+:root {
+  --primary-color: #00acc1; /* Azul cian vibrante (principal) */
+  --primary-light: #4dd0e1; /* Azul cian más claro para acentos y hover */
+  --primary-dark: #007c91;  /* Azul cian más oscuro para sombras profundas y texto principal */
+  --primary-glow: rgba(0, 172, 193, 0.3); /* Efecto de brillo para enfoque */
+  --primary-border: rgba(0, 172, 193, 0.5); /* Borde para elementos primarios */
 
-/* Colores de Fondo y Superficie */
-/* --secondary-background: #ecf0f1; Gris muy claro para fondos generales (suave) */
-/* --surface-white: #ffffff;       Blanco puro para tarjetas, modales y superficies */
-/* --surface-light-grey: #f4f6f9;  Gris muy claro para fondos sutiles de componentes */
+  /* Colores de Fondo y Superficie */
+  --secondary-background: #ecf0f1; /* Gris muy claro para fondos generales (suave) */
+  --surface-white: #ffffff;      /* Blanco puro para tarjetas, modales y superficies */
+  --surface-light-grey: #f4f6f9; /* Gris muy claro para fondos sutiles de componentes */
 
-/* Colores de Texto */
-/* --text-dark: #2c3e50;     Gris oscuro profundo para texto principal */
-/* --text-medium: #555;     Gris medio para texto secundario */
-/* --text-light: #7f8c8d;    Gris claro para placeholders y texto menos prominente */
-/* --text-white: #ffffff;    Blanco para texto sobre fondos oscuros */
+  /* Colores de Texto */
+  --text-dark: #2c3e50;    /* Gris oscuro profundo para texto principal */
+  --text-medium: #555;     /* Gris medio para texto secundario */
+  --text-light: #7f8c8d;    /* Gris claro para placeholders y texto menos prominente */
+  --text-white: #ffffff;    /* Blanco para texto sobre fondos oscuros */
 
-/* Colores de Estado */
-/* --success-color: #4CAF50;  Verde para éxito */
-/* --error-color: #F44336;   Rojo para errores */
-/* --warning-color: #FFC107; Amarillo para advertencias */
-/* --info-color: #2196F3;    Azul para información */
+  /* Colores de Estado */
+  --success-color: #4CAF50;  /* Verde para éxito */
+  --error-color: #F44336;   /* Rojo para errores */
+  --warning-color: #FFC107; /* Amarillo para advertencias */
+  --info-color: #2196F3;    /* Azul para información */
 
-/* Sombras */
-/* --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.08); */
-/* --shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.1); */
-/* --shadow-deep: 0 8px 20px rgba(0, 0, 0, 0.15); */
+  /* Sombras */
+  --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --shadow-deep: 0 8px 20px rgba(0, 0, 0, 0.15);
 
-/* Bordes y Radios */
-/* --border-radius-sm: 6px; */
-/* --border-radius-md: 10px; */
-/* --border-radius-lg: 14px; */
+  /* Bordes y Radios */
+  --border-radius-sm: 6px;
+  --border-radius-md: 10px;
+  --border-radius-lg: 14px;
 
-/* Transiciones */
-/* --transition-ease: all 0.3s ease; */
-/* --transition-fast: all 0.2s ease-out; */
-
-
-/* ===================================================================== */
-/* 1. Estilos Generales del Contenedor de Administración                 */
-/* Aplica a los contenedores principales de cada sección de gestión.     */
-/* ===================================================================== */
-.admin-content-container {
-  background-color: #ffffff; /* Blanco puro para el fondo del contenido */
-  border-radius: 14px; /* Bordes redondeados grandes */
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Sombra suave */
-  padding: 2rem; /* Espaciado interno generoso */
-  margin-bottom: 2rem; /* Margen inferior para separar secciones */
-  transition: all 0.3s ease; /* Transición suave para cambios */
-  overflow-x: auto; /* Permite desplazamiento horizontal en caso de tablas grandes */
+  /* Transiciones */
+  --transition-ease: all 0.3s ease;
+  --transition-fast: all 0.2s ease-out;
 }
 
-/* Estilo para el contenedor principal del dashboard (si aplica) */
+/* Estructura principal del dashboard */
 .admin-dashboard {
   display: flex;
   flex-direction: column;
-  min-height: 100vh; /* Ocupa al menos el alto de la ventana */
-  background-color: #ecf0f1; /* Fondo gris claro */
-  font-family: 'Inter', sans-serif; /* Fuente Inter */
-  color: #2c3e50; /* Color de texto oscuro */
+  min-height: 100vh;
+  background-color: var(--secondary-background);
+  font-family: 'Inter', sans-serif;
+  color: var(--text-dark);
+  overflow-x: hidden; /* Previene scroll horizontal no deseado en el body */
 }
 
-/* Contenedor del contenido principal */
+/* Contenedor principal de la aplicación (sidebar + content) */
 .admin-container {
   display: flex;
-  flex: 1; /* Permite que el contenedor crezca */
+  flex: 1;
+  position: relative;
   margin-top: 60px; /* Espacio para la barra de navegación superior */
 }
 
-/* Contenido principal (donde se renderizan las pestañas) */
+/* Contenido principal de cada sección de administración */
 .admin-content {
   flex-grow: 1; /* Ocupa el espacio restante */
-  padding: 1.5rem; /* Espaciado interno */
-  overflow-y: auto; /* Permite desplazamiento vertical */
+  padding: 1.5rem;
+  overflow-y: auto; /* Permite desplazamiento vertical si el contenido es largo */
+  background-color: var(--secondary-background); /* Fondo para el contenido */
+  /* Ajuste crucial: Margen izquierdo para dejar espacio al sidebar */
+  margin-left: 250px; /* Ancho por defecto del sidebar */
+  transition: margin-left 0.3s ease; /* Transición suave para el margen */
+  min-height: calc(100vh - 60px); /* Altura mínima, restando la navbar superior */
 }
 
 /* ===================================================================== */
-/* 2. Encabezados de Sección (Header)                                    */
+/* 1. Encabezados de Sección (Header)                                    */
 /* Estilos para los títulos y acciones principales de cada sección.      */
 /* ===================================================================== */
+.admin-content-container {
+  background-color: var(--surface-white); /* Blanco puro para el fondo del contenido */
+  border-radius: var(--border-radius-lg); /* Bordes redondeados grandes */
+  box-shadow: var(--shadow-medium); /* Sombra suave */
+  padding: 2rem; /* Espaciado interno generoso */
+  margin-bottom: 2rem; /* Margen inferior para separar secciones */
+  transition: var(--transition-ease); /* Transición suave para cambios */
+  /* Removed overflow-x: auto here, it should be on specific table containers */
+}
+
 .admin-content-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid #e0e0e0; /* Línea divisoria sutil */
-  flex-wrap: wrap; /* Permite que los elementos se envuelvan en pantallas pequeñas */
-  gap: 1rem; /* Espacio entre elementos */
+  border-bottom: 1px solid #e0e0e0;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
 .admin-content-header h2 {
   display: flex;
   align-items: center;
   font-size: 1.8rem;
-  color: #007c91; /* Azul oscuro para los títulos */
-  font-weight: 700; /* Negrita */
+  color: var(--primary-dark);
+  font-weight: 700;
   margin: 0;
 }
 
 .header-icon {
   font-size: 2.2rem;
   margin-right: 0.8rem;
-  color: #00acc1; /* Azul vibrante */
-  animation: fadeIn 0.5s ease-out; /* Animación de aparición */
+  color: var(--primary-color);
+  animation: fadeIn 0.5s ease-out;
 }
 
 .badge {
-  background-color: #e0f7fa; /* Fondo azul muy claro */
-  color: #007c91; /* Texto azul oscuro */
+  background-color: var(--primary-light);
+  color: var(--primary-dark);
   padding: 0.4rem 0.8rem;
-  border-radius: 20px; /* Pastilla */
+  border-radius: 20px;
   font-size: 0.85rem;
   font-weight: 600;
   margin-left: 1rem;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05); /* Sombra interna sutil */
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .header-actions {
   display: flex;
   gap: 1rem;
   align-items: center;
-  flex-wrap: wrap; /* Permite que los botones se envuelvan */
+  flex-wrap: wrap;
 }
 
 /* ===================================================================== */
-/* 3. Barra de Búsqueda y Filtros                                        */
+/* 2. Barra de Búsqueda y Filtros                                        */
 /* Estilos para los inputs de búsqueda y botones de filtro.              */
 /* ===================================================================== */
 .search-box {
   position: relative;
   display: flex;
   align-items: center;
-  flex-grow: 1; /* Permite que la caja de búsqueda crezca */
-  max-width: 350px; /* Ancho máximo para la búsqueda */
+  flex-grow: 1;
+  max-width: 350px;
 }
 
 .search-box input {
   width: 100%;
-  padding: 0.8rem 1rem 0.8rem 2.8rem; /* Espacio para icono y texto */
-  border: 1px solid #b0bec5; /* Borde gris suave */
-  border-radius: 10px; /* Bordes redondeados */
+  padding: 0.8rem 1rem 0.8rem 2.8rem;
+  border: 1px solid #b0bec5;
+  border-radius: var(--border-radius-md);
   font-size: 0.95rem;
-  color: #2c3e50;
-  background-color: #f4f6f9; /* Fondo gris muy claro */
-  transition: all 0.3s ease;
+  color: var(--text-dark);
+  background-color: var(--surface-light-grey);
+  transition: var(--transition-ease);
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .search-box input::placeholder {
-  color: #7f8c8d; /* Color de placeholder */
+  color: var(--text-light);
 }
 
 .search-box input:focus {
-  border-color: #00acc1; /* Borde azul al enfocar */
-  box-shadow: 0 0 0 3px rgba(0, 172, 193, 0.3); /* Sombra de enfoque azul */
-  outline: none; /* Elimina el contorno predeterminado */
-  background-color: #ffffff; /* Fondo blanco al enfocar */
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px var(--primary-glow);
+  outline: none;
+  background-color: var(--surface-white);
 }
 
 .search-icon {
   position: absolute;
   left: 1rem;
-  color: #7f8c8d; /* Color del icono de búsqueda */
+  color: var(--text-light);
   font-size: 1rem;
 }
 
@@ -177,21 +180,21 @@
   right: 0.8rem;
   background: none;
   border: none;
-  color: #7f8c8d;
+  color: var(--text-light);
   cursor: pointer;
   font-size: 0.9rem;
   transition: color 0.2s ease;
 }
 
 .clear-search:hover {
-  color: #e74c3c; /* Rojo al pasar el ratón */
+  color: var(--error-color);
 }
 
 .filter-buttons {
   display: flex;
   gap: 0.5rem;
-  background-color: #f4f6f9; /* Fondo para los botones de filtro */
-  border-radius: 10px;
+  background-color: var(--surface-light-grey);
+  border-radius: var(--border-radius-md);
   padding: 0.3rem;
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
 }
@@ -201,54 +204,54 @@
   border: none;
   border-radius: 8px;
   background-color: transparent;
-  color: #555;
+  color: var(--text-medium);
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: var(--transition-ease);
   font-size: 0.9rem;
 }
 
 .filter-btn:hover {
-  background-color: #e0e0e0; /* Gris claro al pasar el ratón */
-  color: #2c3e50;
+  background-color: #e0e0e0;
+  color: var(--text-dark);
 }
 
 .filter-btn.active {
-  background-color: #00acc1; /* Azul vibrante para el activo */
-  color: #ffffff; /* Texto blanco */
-  box-shadow: 0 2px 6px rgba(0, 172, 193, 0.3);
+  background-color: var(--primary-color);
+  color: var(--text-white);
+  box-shadow: 0 2px 6px var(--primary-glow);
 }
 
 /* ===================================================================== */
-/* 4. Botones de Acción (Add, Edit, Delete, Save, Cancel, Toggle Status) */
+/* 3. Botones de Acción (Add, Edit, Delete, Save, Cancel, Toggle Status) */
 /* Estilos para los botones principales de acción.                       */
 /* ===================================================================== */
 .add-btn,
 .btn-primary,
 .save-btn {
-  background-color: #00acc1; /* Azul vibrante */
-  color: #ffffff;
+  background-color: var(--primary-color);
+  color: var(--text-white);
   padding: 0.8rem 1.5rem;
   border: none;
-  border-radius: 10px;
+  border-radius: var(--border-radius-md);
   cursor: pointer;
   font-size: 0.95rem;
   font-weight: 600;
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  transition: all 0.3s ease;
+  transition: var(--transition-ease);
   box-shadow: 0 4px 8px rgba(0, 172, 193, 0.2);
-  text-transform: uppercase; /* Texto en mayúsculas */
+  text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .add-btn:hover,
 .btn-primary:hover,
 .save-btn:hover {
-  background-color: #007c91; /* Azul más oscuro al pasar el ratón */
-  box-shadow: 0 6px 12px rgba(0, 172, 193, 0.3);
-  transform: translateY(-2px); /* Pequeño levantamiento */
+  background-color: var(--primary-dark);
+  box-shadow: 0 6px 12px var(--primary-glow);
+  transform: translateY(-2px);
 }
 
 .add-btn:active,
@@ -260,8 +263,8 @@
 
 .edit-btn,
 .btn-edit {
-  background-color: #2196F3; /* Azul para editar */
-  color: #ffffff;
+  background-color: var(--info-color);
+  color: var(--text-white);
   padding: 0.6rem 1.2rem;
   border: none;
   border-radius: 8px;
@@ -271,21 +274,21 @@
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  transition: all 0.3s ease;
+  transition: var(--transition-ease);
   box-shadow: 0 2px 6px rgba(33, 150, 243, 0.2);
 }
 
 .edit-btn:hover,
 .btn-edit:hover {
-  background-color: #1976D2; /* Azul más oscuro al pasar el ratón */
+  background-color: #1976D2;
   box-shadow: 0 4px 10px rgba(33, 150, 243, 0.3);
   transform: translateY(-1px);
 }
 
 .delete-btn,
 .btn-delete {
-  background-color: #F44336; /* Rojo para eliminar */
-  color: #ffffff;
+  background-color: var(--error-color);
+  color: var(--text-white);
   padding: 0.6rem 1.2rem;
   border: none;
   border-radius: 8px;
@@ -295,37 +298,37 @@
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  transition: all 0.3s ease;
+  transition: var(--transition-ease);
   box-shadow: 0 2px 6px rgba(244, 67, 54, 0.2);
 }
 
 .delete-btn:hover,
 .btn-delete:hover {
-  background-color: #D32F2F; /* Rojo más oscuro al pasar el ratón */
+  background-color: #D32F2F;
   box-shadow: 0 4px 10px rgba(244, 67, 54, 0.3);
   transform: translateY(-1px);
 }
 
 .cancel-btn {
-  background-color: #9e9e9e; /* Gris para cancelar */
-  color: #ffffff;
+  background-color: #9e9e9e;
+  color: var(--text-white);
   padding: 0.8rem 1.5rem;
   border: none;
-  border-radius: 10px;
+  border-radius: var(--border-radius-md);
   cursor: pointer;
   font-size: 0.95rem;
   font-weight: 600;
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  transition: all 0.3s ease;
+  transition: var(--transition-ease);
   box-shadow: 0 4px 8px rgba(158, 158, 158, 0.2);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .cancel-btn:hover {
-  background-color: #757575; /* Gris más oscuro al pasar el ratón */
+  background-color: #757575;
   box-shadow: 0 6px 12px rgba(158, 158, 158, 0.3);
   transform: translateY(-2px);
 }
@@ -346,39 +349,39 @@
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  transition: all 0.3s ease;
+  transition: var(--transition-ease);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
 .status-toggle-btn.active,
-.btn-status.active { /* Para activar */
-  background-color: #4CAF50; /* Verde */
-  color: #ffffff;
+.btn-status.active {
+  background-color: var(--success-color);
+  color: var(--text-white);
 }
 
 .status-toggle-btn.active:hover,
 .btn-status.active:hover {
-  background-color: #388E3C; /* Verde más oscuro */
+  background-color: #388E3C;
   box-shadow: 0 4px 10px rgba(76, 175, 80, 0.3);
   transform: translateY(-1px);
 }
 
 .status-toggle-btn.inactive,
-.btn-status.inactive { /* Para desactivar */
-  background-color: #FFC107; /* Amarillo/Naranja */
-  color: #2c3e50; /* Texto oscuro para contraste */
+.btn-status.inactive {
+  background-color: var(--warning-color);
+  color: var(--text-dark);
 }
 
 .status-toggle-btn.inactive:hover,
 .btn-status.inactive:hover {
-  background-color: #FFA000; /* Naranja más oscuro */
+  background-color: #FFA000;
   box-shadow: 0 4px 10px rgba(255, 193, 7, 0.3);
   transform: translateY(-1px);
 }
 
 .btn-details {
-  background-color: #607D8B; /* Azul grisáceo para detalles */
-  color: #ffffff;
+  background-color: #607D8B;
+  color: var(--text-white);
   padding: 0.6rem 1.2rem;
   border: none;
   border-radius: 8px;
@@ -388,12 +391,12 @@
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  transition: all 0.3s ease;
+  transition: var(--transition-ease);
   box-shadow: 0 2px 6px rgba(96, 125, 139, 0.2);
 }
 
 .btn-details:hover {
-  background-color: #455A64; /* Azul grisáceo más oscuro */
+  background-color: #455A64;
   box-shadow: 0 4px 10px rgba(96, 125, 139, 0.3);
   transform: translateY(-1px);
 }
@@ -418,80 +421,81 @@
 
 
 /* ===================================================================== */
-/* 5. Tablas de Datos                                                    */
+/* 4. Tablas de Datos                                                    */
 /* Estilos para la visualización de datos en formato de tabla.           */
 /* ===================================================================== */
 .admin-table-container {
   overflow-x: auto; /* Permite desplazamiento horizontal en tablas */
   margin-top: 1.5rem;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); /* Sombra suave para el contenedor de la tabla */
-  background-color: #ffffff; /* Fondo blanco */
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-light);
+  background-color: var(--surface-white);
 }
 
 .admin-table {
   width: 100%;
-  border-collapse: separate; /* Permite border-radius en las celdas */
+  border-collapse: separate;
   border-spacing: 0;
   min-width: 800px; /* Ancho mínimo para evitar el colapso en pantallas pequeñas */
 }
 
 .admin-table thead {
-  background-color: #e0f7fa; /* Fondo azul muy claro para el encabezado */
+  background-color: #e0f7fa;
 }
 
 .admin-table th {
   padding: 1rem 1.2rem;
   text-align: left;
   font-size: 0.9rem;
-  color: #007c91; /* Azul oscuro para el texto del encabezado */
+  color: var(--primary-dark);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  border-bottom: 2px solid #00acc1; /* Borde inferior azul vibrante */
+  border-bottom: 2px solid var(--primary-color);
 }
 
-/* Bordes redondeados para las esquinas de la cabecera */
 .admin-table th:first-child {
-  border-top-left-radius: 10px;
+  border-top-left-radius: var(--border-radius-md);
 }
 .admin-table th:last-child {
-  border-top-right-radius: 10px;
+  border-top-right-radius: var(--border-radius-md);
 }
 
 .admin-table td {
   padding: 0.9rem 1.2rem;
-  border-bottom: 1px solid #eceff1; /* Línea divisoria suave entre filas */
-  color: #2c3e50; /* Color de texto para celdas */
+  border-bottom: 1px solid #eceff1;
+  color: var(--text-dark);
   font-size: 0.9rem;
+  vertical-align: top; /* Asegura que el contenido se alinee en la parte superior */
+  white-space: normal; /* Permite que el texto se envuelva */
+  word-break: break-word; /* Rompe palabras largas si es necesario */
 }
 
 .admin-table tbody tr:last-child td {
-  border-bottom: none; /* Elimina el borde inferior de la última fila */
+  border-bottom: none;
 }
 
 .admin-table tbody tr:hover {
-  background-color: #f8fcfd; /* Fondo muy claro al pasar el ratón */
+  background-color: #f8fcfd;
   transition: background-color 0.2s ease;
 }
 
-/* Estilo para la fila del usuario actual (en AdminsManagement) */
 .current-user-row {
-  background-color: #e3f2fd; /* Azul claro para resaltar */
+  background-color: #e3f2fd;
   font-weight: 600;
-  border-left: 5px solid #2196F3; /* Borde izquierdo azul */
+  border-left: 5px solid var(--info-color);
 }
 
 .current-user-row:hover {
-  background-color: #bbdefb; /* Azul un poco más oscuro al pasar el ratón */
+  background-color: #bbdefb;
 }
 
 .actions-cell {
   display: flex;
-  gap: 0.5rem; /* Espacio entre botones de acción */
-  flex-wrap: wrap; /* Permite que los botones se envuelvan en celdas estrechas */
-  justify-content: center; /* Centra los botones horizontalmente */
-  align-items: center; /* Centra los botones verticalmente */
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
 }
 
 .status-badge {
@@ -500,44 +504,44 @@
   font-size: 0.8rem;
   font-weight: 600;
   text-transform: uppercase;
-  display: inline-block; /* Para que ocupe solo el ancho necesario */
-  min-width: 70px; /* Ancho mínimo para consistencia */
+  display: inline-block;
+  min-width: 70px;
   text-align: center;
 }
 
 .status-badge.active {
-  background-color: #e8f5e9; /* Verde muy claro */
-  color: #2e7d32; /* Verde oscuro */
+  background-color: #e8f5e9;
+  color: #2e7d32;
 }
 
 .status-badge.inactive {
-  background-color: #ffebee; /* Rojo muy claro */
-  color: #c62828; /* Rojo oscuro */
+  background-color: #ffebee;
+  color: #c62828;
 }
 
 /* ===================================================================== */
-/* 6. Mensajes de No Resultados, Carga y Error                           */
+/* 5. Mensajes de No Resultados, Carga y Error                           */
 /* Estilos para cuando no hay datos, se están cargando o hay errores.    */
 /* ===================================================================== */
 .no-results {
   text-align: center;
   padding: 3rem 1rem;
-  color: #555;
+  color: var(--text-medium);
   font-size: 1.1rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 1.5rem;
-  background-color: #fcfcfc;
-  border-radius: 10px;
-  border: 1px dashed #cfd8dc; /* Borde punteado */
+  background-color: var(--surface-light-grey);
+  border-radius: var(--border-radius-md);
+  border: 1px dashed #cfd8dc;
   margin-top: 1.5rem;
 }
 
 .no-results .info-icon {
   font-size: 3rem;
-  color: #b0bec5; /* Gris suave */
-  animation: bounceIn 0.8s ease-out; /* Animación de rebote */
+  color: #b0bec5;
+  animation: bounceIn 0.8s ease-out;
 }
 
 .no-results .add-btn {
@@ -549,21 +553,21 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 300px; /* Altura fija para el contenedor de carga */
+  height: 300px;
   gap: 1.5rem;
-  color: #007c91;
+  color: var(--primary-dark);
   font-size: 1.1rem;
-  background-color: #f4f6f9;
-  border-radius: 14px;
+  background-color: var(--surface-light-grey);
+  border-radius: var(--border-radius-lg);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  margin: 2rem auto; /* Centrar */
+  margin: 2rem auto;
   max-width: 600px;
 }
 
 .spinner-icon {
   font-size: 3rem;
-  color: #00acc1;
-  animation: spin 1.5s linear infinite; /* Animación de giro */
+  color: var(--primary-color);
+  animation: spin 1.5s linear infinite;
 }
 
 @keyframes spin {
@@ -599,10 +603,10 @@
 }
 
 .error-message {
-  background-color: #ffebee; /* Fondo rojo muy claro */
-  color: #c62828; /* Texto rojo oscuro */
+  background-color: #ffebee;
+  color: #c62828;
   padding: 1.5rem;
-  border-radius: 10px;
+  border-radius: var(--border-radius-md);
   text-align: center;
   margin: 2rem auto;
   max-width: 700px;
@@ -611,16 +615,16 @@
   align-items: center;
   gap: 1rem;
   font-weight: 500;
-  border: 1px solid #ef9a9a; /* Borde rojo suave */
+  border: 1px solid #ef9a9a;
 }
 
 .error-message .icon {
   font-size: 1.8rem;
-  color: #d32f2f; /* Rojo más oscuro para el icono */
+  color: #d32f2f;
 }
 
 /* ===================================================================== */
-/* 7. Modales (Formularios y Detalles)                                   */
+/* 6. Modales (Formularios y Detalles)                                   */
 /* Estilos para las ventanas emergentes de formularios y detalles.       */
 /* ===================================================================== */
 .modal-overlay {
@@ -629,28 +633,28 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.6); /* Fondo semi-transparente oscuro */
+  background-color: rgba(0, 0, 0, 0.6);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000; /* Asegura que esté por encima de todo */
-  backdrop-filter: blur(5px); /* Efecto de desenfoque */
+  z-index: 1000;
+  backdrop-filter: blur(5px);
 }
 
 .modal-content {
-  background-color: #ffffff;
-  border-radius: 14px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25); /* Sombra más pronunciada */
+  background-color: var(--surface-white);
+  border-radius: var(--border-radius-lg);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
   padding: 2.5rem;
   width: 90%;
-  max-width: 700px; /* Ancho máximo para modales de formulario */
+  max-width: 700px;
   position: relative;
-  animation: slideInUp 0.5s ease-out; /* Animación de entrada */
-  transform-origin: center bottom; /* Punto de origen para la animación */
+  animation: slideInUp 0.5s ease-out;
+  transform-origin: center bottom;
 }
 
 .modal-detail-content {
-  max-width: 900px; /* Ancho un poco mayor para modales de detalle */
+  max-width: 900px;
   padding: 2rem 3rem;
 }
 
@@ -672,15 +676,15 @@
   background: none;
   border: none;
   font-size: 1.5rem;
-  color: #7f8c8d;
+  color: var(--text-light);
   cursor: pointer;
   transition: color 0.2s ease, transform 0.2s ease;
-  z-index: 10; /* Asegura que el botón de cierre esté clickable */
+  z-index: 10;
 }
 
 .close-modal-btn:hover {
-  color: #e74c3c; /* Rojo al pasar el ratón */
-  transform: rotate(90deg); /* Animación de giro */
+  color: var(--error-color);
+  transform: rotate(90deg);
 }
 
 .modal-header {
@@ -692,7 +696,7 @@
 
 .modal-header h3 {
   font-size: 1.8rem;
-  color: #007c91;
+  color: var(--primary-dark);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -702,7 +706,7 @@
 
 .modal-form .form-icon {
   font-size: 2rem;
-  color: #00acc1;
+  color: var(--primary-color);
 }
 
 .modal-form {
@@ -713,7 +717,7 @@
 
 .form-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Columnas responsivas */
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1.5rem;
 }
 
@@ -724,7 +728,7 @@
 
 .form-group label {
   font-size: 0.9rem;
-  color: #555;
+  color: var(--text-medium);
   margin-bottom: 0.5rem;
   font-weight: 600;
 }
@@ -736,35 +740,35 @@
   border: 1px solid #b0bec5;
   border-radius: 8px;
   font-size: 0.95rem;
-  color: #2c3e50;
-  background-color: #f4f6f9;
-  transition: all 0.3s ease;
+  color: var(--text-dark);
+  background-color: var(--surface-light-grey);
+  transition: var(--transition-ease);
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .form-group input:focus,
 .form-group textarea:focus,
 .form-group select:focus {
-  border-color: #00acc1;
-  box-shadow: 0 0 0 3px rgba(0, 172, 193, 0.3);
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px var(--primary-glow);
   outline: none;
-  background-color: #ffffff;
+  background-color: var(--surface-white);
 }
 
 .form-group textarea {
-  resize: vertical; /* Solo permite redimensionar verticalmente */
+  resize: vertical;
   min-height: 80px;
 }
 
 .disabled-input-text {
-  background-color: #eceff1 !important; /* Fondo gris para campos deshabilitados */
+  background-color: #eceff1 !important;
   color: #7f8c8d !important;
   cursor: not-allowed;
   box-shadow: none !important;
 }
 
 .error-message-inline {
-  color: #e74c3c; /* Rojo para mensajes de error en línea */
+  color: var(--error-color);
   font-size: 0.8rem;
   margin-top: 0.4rem;
   animation: fadeIn 0.3s ease-out;
@@ -780,7 +784,7 @@
 }
 
 /* ===================================================================== */
-/* 8. Notificaciones Flotantes                                           */
+/* 7. Notificaciones Flotantes                                           */
 /* Estilos para mensajes de éxito, error o información temporales.       */
 /* ===================================================================== */
 .notification {
@@ -788,26 +792,26 @@
   top: 20px;
   right: 20px;
   padding: 1rem 1.5rem;
-  border-radius: 10px;
+  border-radius: var(--border-radius-md);
   font-size: 0.95rem;
   font-weight: 600;
   display: flex;
   align-items: center;
   gap: 0.8rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  z-index: 1001; /* Por encima del modal */
+  z-index: 1001;
   animation: slideInRight 0.4s ease-out;
 }
 
 .notification.success {
-  background-color: #e8f5e9; /* Verde muy claro */
-  color: #2e7d32; /* Verde oscuro */
+  background-color: #e8f5e9;
+  color: #2e7d32;
   border: 1px solid #a5d6a7;
 }
 
 .notification.error {
-  background-color: #ffebee; /* Rojo muy claro */
-  color: #c62828; /* Rojo oscuro */
+  background-color: #ffebee;
+  color: #c62828;
   border: 1px solid #ef9a9a;
 }
 
@@ -818,7 +822,7 @@
 .close-notification {
   background: none;
   border: none;
-  color: inherit; /* Hereda el color del texto de la notificación */
+  color: inherit;
   font-size: 1rem;
   cursor: pointer;
   margin-left: 0.5rem;
@@ -841,458 +845,96 @@
 }
 
 /* ===================================================================== */
-/* 9. Detalles de Usuario/Mascota (AdminUserDetail)                      */
-/* Estilos para la visualización de información detallada.               */
-/* ===================================================================== */
-.user-detail-header {
-  text-align: center;
-  margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #e0e0e0;
-}
-
-.user-detail-header h3 {
-  font-size: 1.6rem;
-  color: #007c91;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.6rem;
-  margin: 0;
-}
-
-.user-detail-header .icon {
-  font-size: 1.8rem;
-  color: #00acc1;
-}
-
-.user-detail-info {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1rem;
-  margin-bottom: 2rem;
-  padding-bottom: 1.5rem;
-  border-bottom: 1px solid #e0e0e0;
-}
-
-.info-item {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  font-size: 0.95rem;
-  color: #2c3e50;
-  background-color: #fcfcfc;
-  padding: 0.8rem;
-  border-radius: 8px;
-  border: 1px solid #eceff1;
-}
-
-.info-item strong {
-  color: #007c91;
-  font-weight: 700;
-  min-width: 100px; /* Ancho mínimo para las etiquetas */
-}
-
-.info-item .icon {
-  color: #00acc1;
-  font-size: 1.1rem;
-}
-
-.capitalize {
-  text-transform: capitalize;
-}
-
-.user-detail-pets h4 {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  font-size: 1.5rem;
-  color: #007c91;
-  margin-bottom: 1.5rem;
-  padding-bottom: 0.8rem;
-  border-bottom: 1px solid #e0e0e0;
-}
-
-.user-detail-pets h4 .icon {
-  font-size: 1.7rem;
-  color: #00acc1;
-}
-
-.pets-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.5rem;
-}
-
-.pet-card {
-  background-color: #f4f6f9; /* Fondo gris claro para la tarjeta de mascota */
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  padding: 1.5rem;
-  border: 1px solid #cfd8dc;
-  transition: all 0.3s ease;
-}
-
-.pet-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
-}
-
-.pet-card .card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-  padding-bottom: 0.8rem;
-  border-bottom: 1px solid #b0bec5;
-}
-
-.pet-card .card-header h3 {
-  font-size: 1.4rem;
-  color: #007c91;
-  margin: 0;
-}
-
-.pet-card .vet-id {
-  background-color: #b2ebf2;
-  color: #007c91;
-  padding: 0.3rem 0.7rem;
-  border-radius: 15px;
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-
-.pet-card .card-body .info-item {
-  background-color: transparent;
-  border: none;
-  padding: 0.4rem 0;
-  gap: 0.8rem;
-}
-
-.pet-card .card-body .info-item strong {
-  color: #555;
-  min-width: 80px;
-}
-
-.pet-card .card-body .info-item .icon {
-  color: #00acc1;
-  font-size: 1rem;
-}
-
-.no-results.small {
-  padding: 1.5rem;
-  font-size: 0.95rem;
-  margin-top: 1rem;
-  border: 1px dashed #cfd8dc;
-}
-
-.no-results.small .info-icon {
-  font-size: 2rem;
-}
-
-/* ===================================================================== */
-/* 10. Navegación de Administración (AdminNavbar)                        */
-/* ===================================================================== */
-.admin-navbar {
-  background-color: #00acc1; /* Azul principal */
-  color: #ffffff;
-  padding: 0.8rem 1.5rem;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  position: fixed;
-  width: 100%;
-  top: 0;
-  left: 0;
-  z-index: 999;
-  transition: all 0.3s ease;
-}
-
-.admin-navbar.scrolled {
-  background-color: #007c91; /* Azul más oscuro al hacer scroll */
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-}
-
-.navbar-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  max-width: 1400px; /* Ancho máximo del contenido de la barra */
-  margin: 0 auto;
-}
-
-.navbar-left {
-  display: flex;
-  align-items: center;
-}
-
-.navbar-brand {
-  display: flex;
-  align-items: center;
-  text-decoration: none;
-  color: #ffffff;
-  font-size: 1.5rem;
-  font-weight: 700;
-  gap: 0.8rem;
-}
-
-.navbar-logo {
-  height: 40px; /* Tamaño del logo */
-  border-radius: 50%;
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3); /* Borde blanco sutil */
-  transition: transform 0.3s ease;
-}
-
-.navbar-logo:hover {
-  transform: rotate(10deg);
-}
-
-.brand-text {
-  display: none; /* Ocultar en móvil por defecto */
-}
-
-/* Mostrar texto de marca en pantallas más grandes */
-@media (min-width: 768px) {
-  .brand-text {
-      display: inline;
-  }
-}
-
-.navbar-right {
-  position: relative;
-}
-
-.user-profile {
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
-  cursor: pointer;
-  padding: 0.5rem 1rem;
-  border-radius: 25px;
-  background-color: rgba(255, 255, 255, 0.1);
-  transition: background-color 0.3s ease;
-}
-
-.user-profile:hover {
-  background-color: rgba(255, 255, 255, 0.2);
-}
-
-.user-avatar {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  background-color: #4dd0e1; /* Azul claro */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.2rem;
-  color: #007c91;
-}
-
-.user-info {
-  display: flex;
-  flex-direction: column;
-  font-size: 0.9rem;
-  line-height: 1.2;
-}
-
-.user-name {
-  font-weight: 600;
-  color: #ffffff;
-}
-
-.user-role {
-  font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.8);
-}
-
-.menu-arrow {
-  margin-left: 0.5rem;
-  font-size: 0.8rem;
-  transition: transform 0.3s ease;
-}
-
-.user-profile[aria-expanded="true"] .menu-arrow {
-  transform: rotate(180deg);
-}
-
-.dropdown-menu {
-  position: absolute;
-  top: calc(100% + 10px); /* Debajo del perfil de usuario */
-  right: 0;
-  background-color: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-  min-width: 180px;
-  overflow: hidden;
-  z-index: 100;
-  animation: fadeInScale 0.3s ease-out;
-}
-
-@keyframes fadeInScale {
-  from {
-      opacity: 0;
-      transform: scale(0.95) translateY(-10px);
-  }
-  to {
-      opacity: 1;
-      transform: scale(1) translateY(0);
-  }
-}
-
-.dropdown-item {
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
-  width: 100%;
-  padding: 0.8rem 1.2rem;
-  background: none;
-  border: none;
-  text-align: left;
-  font-size: 0.95rem;
-  color: #2c3e50;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.dropdown-item:hover {
-  background-color: #e0f7fa; /* Azul claro al pasar el ratón */
-  color: #007c91;
-}
-
-.dropdown-item.logout-item {
-  border-top: 1px solid #eceff1;
-  color: #e74c3c; /* Rojo para cerrar sesión */
-}
-
-.dropdown-item.logout-item:hover {
-  background-color: #ffebee;
-  color: #c62828;
-}
-
-/* ===================================================================== */
-/* 11. Barra Lateral de Navegación (AdminSidebar)                        */
-/* ===================================================================== */
-.admin-sidebar {
-  width: 250px; /* Ancho fijo del sidebar */
-  background-color: #ffffff;
-  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
-  padding-top: 1.5rem;
-  flex-shrink: 0; /* Evita que se encoja */
-  transition: width 0.3s ease;
-  border-right: 1px solid #eceff1;
-}
-
-.admin-sidebar-nav {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.admin-sidebar-nav-item {
-  margin-bottom: 0.5rem;
-}
-
-.admin-sidebar-nav-link {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 0.9rem 1.5rem;
-  text-decoration: none;
-  color: #555;
-  font-size: 1rem;
-  font-weight: 500;
-  border-radius: 0 25px 25px 0; /* Bordes redondeados a la derecha */
-  transition: all 0.3s ease;
-}
-
-.admin-sidebar-nav-link .icon {
-  font-size: 1.2rem;
-  color: #7f8c8d;
-  transition: color 0.3s ease;
-}
-
-.admin-sidebar-nav-link:hover {
-  background-color: #e0f7fa; /* Fondo azul claro al pasar el ratón */
-  color: #007c91;
-  transform: translateX(5px); /* Pequeño desplazamiento */
-}
-
-.admin-sidebar-nav-link:hover .icon {
-  color: #00acc1;
-}
-
-.admin-sidebar-nav-link.active {
-  background-color: #00acc1; /* Azul principal para el activo */
-  color: #ffffff;
-  font-weight: 700;
-  box-shadow: 0 4px 10px rgba(0, 172, 193, 0.2);
-  border-left: 5px solid #005f6b; /* Borde más oscuro para el activo */
-}
-
-.admin-sidebar-nav-link.active .icon {
-  color: #ffffff;
-}
-
-/* ===================================================================== */
-/* 12. Media Queries para Responsividad                                  */
+/* 8. Media Queries para Responsividad                                   */
 /* Ajustes para diferentes tamaños de pantalla.                          */
 /* ===================================================================== */
 
-/* Móviles (menos de 768px) */
+/* Tablets y Laptops pequeñas (menos de 1024px, donde el sidebar se colapsa) */
+@media (max-width: 1024px) {
+  .admin-content {
+    margin-left: 65px; /* Ancho del sidebar colapsado */
+    padding: 1.2rem; /* Ligeramente menos padding */
+  }
+
+  .admin-content-container {
+      padding: 1.5rem;
+      margin: 1rem auto;
+  }
+
+  .admin-content-header h2 {
+      font-size: 1.6rem;
+  }
+
+  .header-icon {
+      font-size: 2rem;
+  }
+
+  .header-actions {
+      flex-direction: column;
+      align-items: stretch;
+  }
+
+  .search-box {
+      max-width: 100%;
+  }
+
+  .add-btn, .btn-primary, .save-btn {
+      width: 100%;
+      justify-content: center;
+      padding: 0.7rem 1.2rem;
+      font-size: 0.9rem;
+  }
+
+  .admin-table th,
+  .admin-table td {
+      padding: 0.8rem 1rem;
+      font-size: 0.85rem;
+  }
+
+  .edit-btn, .delete-btn, .status-toggle-btn, .btn-details, .btn-edit, .btn-status, .btn-delete {
+      padding: 0.5rem 1rem;
+      font-size: 0.8rem;
+  }
+
+  .modal-content {
+      max-width: 600px;
+      padding: 2rem;
+  }
+
+  .form-grid {
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
+
+  .notification {
+      width: calc(100% - 40px);
+      left: 20px;
+      right: 20px;
+      padding: 0.8rem 1rem;
+      font-size: 0.85rem;
+  }
+}
+
+/* Móviles (menos de 767px) */
 @media (max-width: 767px) {
   .admin-container {
-      flex-direction: column; /* Apilar sidebar y contenido */
-      margin-top: 55px; /* Ajustar margen superior para navbar */
-  }
-
-  .admin-sidebar {
-      width: 100%; /* Sidebar ocupa todo el ancho */
-      padding-top: 0.5rem;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-      border-right: none;
-      border-bottom: 1px solid #eceff1;
-  }
-
-  .admin-sidebar-nav {
-      display: flex; /* Mostrar ítems en fila */
-      overflow-x: auto; /* Permite scroll horizontal si hay muchos ítems */
-      padding: 0.5rem 1rem;
-      justify-content: flex-start; /* Alinear al inicio */
-  }
-
-  .admin-sidebar-nav-item {
-      flex-shrink: 0; /* Evita que los ítems se encojan */
-      margin-right: 1rem; /* Espacio entre ítems */
-      margin-bottom: 0;
-  }
-
-  .admin-sidebar-nav-link {
-      padding: 0.6rem 1rem;
-      border-radius: 20px; /* Más redondeado para pastillas */
-      font-size: 0.85rem;
-      gap: 0.5rem;
-      white-space: nowrap; /* Evita que el texto se rompa */
-  }
-
-  .admin-sidebar-nav-link .icon {
-      font-size: 1rem;
-  }
-
-  .admin-sidebar-nav-link.active {
-      border-left: none; /* Eliminar borde izquierdo en móvil */
-      border: 1px solid #005f6b; /* Borde completo para el activo */
+      flex-direction: column;
   }
 
   .admin-content {
+      margin-left: 0; /* No margin if sidebar is hidden or becomes a top bar */
       padding: 1rem; /* Menor padding en móvil */
   }
 
   .admin-content-header {
-      flex-direction: column; /* Apilar elementos del header */
-      align-items: flex-start; /* Alinear a la izquierda */
+      flex-direction: column;
+      align-items: flex-start;
   }
 
   .admin-content-header h2 {
       font-size: 1.4rem;
+      width: 100%;
+      text-align: center;
+      justify-content: center;
   }
 
   .header-icon {
@@ -1301,24 +943,17 @@
 
   .header-actions {
       width: 100%;
-      flex-direction: column; /* Apilar acciones */
+      flex-direction: column;
       gap: 0.8rem;
   }
 
   .search-box {
-      max-width: 100%; /* Ocupa todo el ancho disponible */
+      max-width: 100%;
   }
 
   .filter-buttons {
       width: 100%;
-      justify-content: center; /* Centrar botones de filtro */
-  }
-
-  .add-btn {
-      width: 100%; /* Botón de añadir ocupa todo el ancho */
       justify-content: center;
-      padding: 0.7rem 1rem;
-      font-size: 0.9rem;
   }
 
   .admin-table {
@@ -1332,7 +967,7 @@
   }
 
   .actions-cell {
-      flex-direction: column; /* Apilar botones de acción en celdas */
+      flex-direction: column;
       gap: 0.3rem;
       align-items: flex-start;
   }
@@ -1358,11 +993,11 @@
   }
 
   .form-grid {
-      grid-template-columns: 1fr; /* Una columna en móvil */
+      grid-template-columns: 1fr;
   }
 
   .form-actions {
-      flex-direction: column; /* Apilar botones del formulario */
+      flex-direction: column;
       gap: 0.8rem;
   }
 
@@ -1374,83 +1009,16 @@
   }
 
   .notification {
-      width: calc(100% - 40px); /* Ancho completo menos padding */
+      width: calc(100% - 40px);
       left: 20px;
       right: 20px;
       padding: 0.8rem 1rem;
       font-size: 0.85rem;
-      top: 15px; /* Ajustar posición superior */
-  }
-
-  .user-detail-info,
-  .pets-grid {
-      grid-template-columns: 1fr; /* Una columna en móvil */
-  }
-
-  .user-detail-header h3 {
-      font-size: 1.4rem;
-  }
-
-  .user-detail-pets h4 {
-      font-size: 1.3rem;
-  }
-}
-
-/* Tablets (768px a 1024px) */
-@media (min-width: 768px) and (max-width: 1024px) {
-  .admin-sidebar {
-      width: 200px; /* Ancho más pequeño para sidebar */
-  }
-
-  .admin-sidebar-nav-link {
-      padding: 0.8rem 1rem;
-      font-size: 0.95rem;
-  }
-
-  .admin-content {
-      padding: 1.2rem;
-  }
-
-  .admin-content-header h2 {
-      font-size: 1.6rem;
-  }
-
-  .header-actions {
-      gap: 0.8rem;
-  }
-
-  .search-box {
-      max-width: 300px;
-  }
-
-  .add-btn {
-      padding: 0.7rem 1.2rem;
-      font-size: 0.9rem;
-  }
-
-  .admin-table th,
-  .admin-table td {
-      padding: 0.8rem 1rem;
-      font-size: 0.85rem;
-  }
-
-  .edit-btn, .delete-btn, .status-toggle-btn, .btn-details, .btn-edit, .btn-status, .btn-delete {
-      padding: 0.5rem 1rem;
-      font-size: 0.8rem;
-  }
-
-  .modal-content {
-      max-width: 600px;
-      padding: 2rem;
-  }
-
-  .form-grid {
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      top: 15px;
   }
 }
 
 /* Animaciones adicionales */
-/* Fade in para elementos que aparecen */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -1463,7 +1031,7 @@
 
 /* Animación de entrada para modales (ya manejada por Framer Motion, pero CSS fallback) */
 .modal-content {
-  animation: fadeInScale 0.3s ease-out; /* Fallback si Framer Motion no carga */
+  animation: fadeInScale 0.3s ease-out;
 }
 
 /* Animación para el badge del header */
@@ -1487,11 +1055,3 @@
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
-
-/* Ejemplo de cómo aplicar fadeInRow con un delay en React:
- filteredVets.map((vet, index) => (
-   <tr key={vet.id} style={{ animationDelay: `${index * 0.05}s` }}>
-     ...
-   </tr>
- ))
-*/

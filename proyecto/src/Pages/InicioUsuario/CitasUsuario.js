@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styles from './Styles/CitasUsuario.module.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCalendarAlt, faPlusCircle, faArrowLeft, faClock, faMapMarkerAlt } from '@fortawesome/free-solid-svg-icons'; // Importa más iconos
+import { faCalendarAlt, faPlusCircle, faClock, faMapMarkerAlt } from '@fortawesome/free-solid-svg-icons'; // Importa más iconos
 
 const CitasUsuario = () => {
   const navigate = useNavigate(); // Inicializa useNavigate

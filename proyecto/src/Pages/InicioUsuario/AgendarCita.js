@@ -1,23 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import styles from './Styles/AgendarCita.module.css';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
-  faArrowLeft, 
-  faPaw, 
-  faUser, 
+import {
+  faArrowLeft,
+  faPaw,
+  faUser,
   faInfoCircle,
   faCalendarAlt,
   faClock,
   faCheckCircle,
   faSpinner
 } from '@fortawesome/free-solid-svg-icons';
-import axios from 'axios';
+import { authFetch } from './api'; // Importa authFetch
 
-const AgendarCita = () => {
+const AgendarCita = ({ user }) => { // Recibe el objeto 'user' como prop
   const [date, setDate] = useState(new Date());
   const [selectedTime, setSelectedTime] = useState('');
   const [citaAgendada, setCitaAgendada] = useState(false);
@@ -30,40 +30,77 @@ const AgendarCita = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Horarios disponibles (pueden ser dinámicos desde la DB en un futuro)
   const horariosDisponibles = [
-    '09:00', '10:00', '11:00', '15:00', '16:00', '17:00'
+    '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'
   ];
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const servicioId = location.state?.servicioId;
-        
-        if (servicioId) {
-          const [servicioRes, mascotasRes, veterinariosRes] = await Promise.all([
-            axios.get(`/api/servicios/${servicioId}`),
-            axios.get('/api/mascotas'),
-            axios.get('/api/veterinarios')
-          ]);
-          
-          setServicio(servicioRes.data);
-          setMascotas(mascotasRes.data);
-          setVeterinarios(veterinariosRes.data);
-        }
-        setLoading(false);
-      } catch (err) {
-        setError('Error al cargar los datos');
-        setLoading(false);
-        console.error(err);
-      }
-    };
+  const fetchInitialData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const servicioId = location.state?.servicioId;
+      const userId = user?.id; // Obtener el ID del usuario logueado
 
-    fetchData();
-  }, [location.state]);
+      if (!userId) {
+        setError('No se pudo obtener la información del usuario. Por favor, inicia sesión nuevamente.');
+        setLoading(false);
+        return;
+      }
+
+      // Fetch del servicio seleccionado
+      let fetchedService = null;
+      if (servicioId) {
+        const serviceRes = await authFetch(`/servicios/${servicioId}`);
+        if (serviceRes.success) {
+          fetchedService = serviceRes.data;
+          setServicio(fetchedService);
+        } else {
+          setError(serviceRes.message || 'Error al cargar el servicio seleccionado.');
+          setLoading(false);
+          return;
+        }
+      } else {
+        setError('No se ha seleccionado un servicio para agendar.');
+        setLoading(false);
+        return;
+      }
+
+      // Fetch de las mascotas del usuario
+      const petsRes = await authFetch(`/mascotas?id_propietario=${userId}`);
+      if (petsRes.success) {
+        setMascotas(petsRes.data);
+      } else {
+        setError(petsRes.message || 'Error al cargar tus mascotas.');
+        setLoading(false);
+        return;
+      }
+
+      // Fetch de los veterinarios (solo activos)
+      const vetsRes = await authFetch('/usuarios/veterinarios'); // Este endpoint debería ser accesible para usuarios normales para ver veterinarios disponibles
+      if (vetsRes.success) {
+        setVeterinarios(vetsRes.data.filter(vet => vet.active)); // Solo veterinarios activos
+      } else {
+        setError(vetsRes.message || 'Error al cargar los veterinarios.');
+        setLoading(false);
+        return;
+      }
+
+      setLoading(false);
+    } catch (err) {
+      console.error("Error fetching initial data for AgendarCita:", err);
+      setError('Error de conexión al servidor al cargar los datos iniciales.');
+      setLoading(false);
+    }
+  }, [location.state, user]); // Dependencia del user object para obtener su ID
+
+  useEffect(() => {
+    fetchInitialData();
+  }, [fetchInitialData]);
 
   const handleDateChange = (newDate) => {
     setDate(newDate);
@@ -78,37 +115,45 @@ const AgendarCita = () => {
   };
 
   const handleSubmit = async () => {
-    if (!selectedMascota || !selectedTime) {
-      setErrorSeleccion('Por favor, completa todos los campos.');
+    if (!selectedMascota || !selectedTime || !servicio || !user?.id) {
+      setErrorSeleccion('Por favor, selecciona una mascota, una fecha y una hora.');
       return;
     }
 
     setIsSubmitting(true);
+    setErrorSeleccion('');
     try {
       const fechaHora = new Date(date);
       const [hours, minutes] = selectedTime.split(':');
       fechaHora.setHours(parseInt(hours, 10));
       fechaHora.setMinutes(parseInt(minutes, 10));
-      
+      fechaHora.setSeconds(0); // Asegurarse de que los segundos sean 0
+
       const nuevaCita = {
-        id_cliente: 1,
+        id_cliente: user.id, // ID del usuario logueado
         id_servicio: servicio.id_servicio,
-        id_veterinario: selectedVeterinario || null,
-        id_mascota: selectedMascota,
-        fecha: fechaHora.toISOString(),
-        ubicacion: 'Clínica Veterinaria Principal',
-        estado: 'pendiente'
+        id_veterinario: selectedVeterinario || null, // Puede ser null si no selecciona
+        fecha: fechaHora.toISOString().slice(0, 19).replace('T', ' '), // Formato 'YYYY-MM-DD HH:MM:SS'
+        servicios: servicio.nombre, // Puedes usar el nombre del servicio como descripción adicional
+        estado: 'pendiente' // Por defecto, las citas agendadas por el usuario son 'pendiente'
       };
 
-      await axios.post('/api/citas', nuevaCita);
-      
-      setCitaAgendada(true);
-      setTimeout(() => {
-        navigate('/mis-citas');
-      }, 3000);
+      const response = await authFetch('/citas', {
+        method: 'POST',
+        body: JSON.stringify(nuevaCita),
+      });
+
+      if (response.success) {
+        setCitaAgendada(true);
+        setTimeout(() => {
+          navigate('/usuario/citas'); // Redirigir a la lista de citas del usuario
+        }, 3000);
+      } else {
+        setErrorSeleccion(response.message || 'Error al agendar la cita. Por favor, intenta nuevamente.');
+      }
     } catch (err) {
-      setErrorSeleccion('Error al agendar la cita. Por favor, intenta nuevamente.');
-      console.error(err);
+      console.error("Error submitting appointment:", err);
+      setErrorSeleccion('Error de conexión al servidor al agendar la cita.');
     } finally {
       setIsSubmitting(false);
     }
@@ -124,7 +169,7 @@ const AgendarCita = () => {
       <p>Cargando información...</p>
     </div>
   );
-  
+
   if (error) return (
     <div className={styles.errorContainer}>
       <p>{error}</p>
@@ -135,13 +180,13 @@ const AgendarCita = () => {
   );
 
   return (
-    <motion.div 
+    <motion.div
       className={styles.container}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
     >
-      <motion.div 
+      <motion.div
         className={styles.header}
         initial={{ y: -20 }}
         animate={{ y: 0 }}
@@ -152,7 +197,7 @@ const AgendarCita = () => {
           <h2>Agendar Nueva Cita</h2>
           <p>Programa una consulta para tu mascota</p>
         </div>
-        <motion.button 
+        <motion.button
           onClick={handleVolver}
           className={styles.backButton}
           whileHover={{ scale: 1.05 }}
@@ -163,7 +208,7 @@ const AgendarCita = () => {
       </motion.div>
 
       {servicio && (
-        <motion.div 
+        <motion.div
           className={styles.serviceCard}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -184,7 +229,7 @@ const AgendarCita = () => {
       )}
 
       <div className={styles.formContainer}>
-        <motion.div 
+        <motion.div
           className={styles.formSection}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -201,12 +246,21 @@ const AgendarCita = () => {
               className={styles.selectInput}
             >
               <option value="">Selecciona una mascota</option>
-              {mascotas.map(mascota => (
-                <option key={mascota.id_mascota} value={mascota.id_mascota}>
-                  {mascota.nombre} ({mascota.especie})
-                </option>
-              ))}
+              {mascotas.length > 0 ? (
+                mascotas.map(mascota => (
+                  <option key={mascota.id_mascota} value={mascota.id_mascota}>
+                    {mascota.nombre} ({mascota.especie})
+                  </option>
+                ))
+              ) : (
+                <option value="" disabled>No tienes mascotas registradas.</option>
+              )}
             </select>
+            {mascotas.length === 0 && (
+              <p className={styles.formHint}>
+                <Link to="/usuario/mascotas/agregar">Agrega una mascota</Link> para agendar una cita.
+              </p>
+            )}
           </div>
 
           <div className={styles.formGroup}>
@@ -220,16 +274,20 @@ const AgendarCita = () => {
               className={styles.selectInput}
             >
               <option value="">Sin preferencia</option>
-              {veterinarios.map(vet => (
-                <option key={vet.id} value={vet.id}>
-                  Dr. {vet.nombre} {vet.apellido} - {vet.especialidad}
-                </option>
-              ))}
+              {veterinarios.length > 0 ? (
+                veterinarios.map(vet => (
+                  <option key={vet.id} value={vet.id}>
+                    Dr. {vet.nombre} {vet.apellido}
+                  </option>
+                ))
+              ) : (
+                <option value="" disabled>No hay veterinarios disponibles.</option>
+              )}
             </select>
           </div>
         </motion.div>
 
-        <motion.div 
+        <motion.div
           className={styles.scheduleSection}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -299,7 +357,7 @@ const AgendarCita = () => {
         )}
       </AnimatePresence>
 
-      <motion.div 
+      <motion.div
         className={styles.actions}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

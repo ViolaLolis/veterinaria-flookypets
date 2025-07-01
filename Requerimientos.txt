@@ -54,6 +54,25 @@ npm install react-calendar
 npm install @fortawesome/free-brands-svg-icons
 npm install react-big-calendar moment
 npm install chart.js react-chartjs-2
+npm install cloudinary-react --legacy-peer-deps
+npm install @cloudinary/url-gen @cloudinary/react
+npm install cloudinary express-fileupload
+npm install react-datepicker@5.0.0-beta.6 chart.js@4.0.0 --legacy-peer-deps
+npm install @craco/craco
+npm install react-datepicker@4.8.0 chart.js@3.9.1 --legacy-peer-deps
+npm install @cloudinary/url-gen @cloudinary/react
+npm install chart.js@4.5.0 react-chartjs-2@5.3.0 --legacy-peer-deps
+npm install react-datepicker@5.0.0-beta.6 --legacy-peer-deps
+npm install react-datepicker@4.10.0 --legacy-peer-deps
+npm install @duckies/react-datepicker@4.3.7 --legacy-peer-deps
+npm install @types/react-datepicker --save-dev
+npm install react-day-picker@8.6.0 date-fns@2.30.0 --legacy-peer-deps
+npm install --legacy-peer-deps --force
+npm install react-day-picker@8.6.0 --legacy-peer-deps
+npm install react-scripts@5.0.1 --legacy-peer-deps
+npm install react-day-picker date-fns@latest --legacy-peer-deps
+npm install @mui/x-date-pickers @mui/material --legacy-peer-deps
+npm install @types/react-day-picker @types/date-fns --save-dev
 
 Comando para permisos sin perfil
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser

@@ -10,8 +10,6 @@ import ServiciosVeterinaria from "./Pages/InicioUsuario/ServiciosVeterinaria.js"
 import PerfilUsuario from "./Pages/InicioUsuario/PerfilUsuario.js";
 import AyudaSoporte from "./Pages/InicioUsuario/AyudaSoporte.js";
 import ConfiguracionPerfil from "./Pages/InicioUsuario/ConfiguracionPerfil.js";
-import MetodosPago from "./Pages/InicioUsuario/MetodosPago.js";
-import AgregarMetodoPago from "./Pages/InicioUsuario/AgregarMetodoPago.js";
 import HistorialMedico from "./Pages/InicioUsuario/HistorialMedico.js";
 import AgendarCita from "./Pages/InicioUsuario/AgendarCita.js";
 import DetalleMascota from "./Pages/InicioUsuario/DetalleMascota.js";
@@ -24,9 +22,6 @@ import ChatSoporte from "./Pages/InicioUsuario/ChatSoporte.js";
 import { Protegida } from "./Seguridad/Protegidos.js";
 import EditarCita from "./Pages/InicioUsuario/EditarCita.js";
 import DetalleHistorial from "./Pages/InicioUsuario/DetalleHistorial.js";
-import AgregarHistorial from "./Pages/InicioUsuario/AgregarHistorial.js";
-import EditarHistorial from "./Pages/InicioUsuario/EditarHistorial.js";
-import EliminarMetodoPago from "./Pages/InicioUsuario/EliminarMetodoPago.js";
 
 // Componentes de Veterinario
 import ListaPropietarios from "./Pages/InicioVeterinario/ListaPropietarios";
@@ -51,10 +46,10 @@ import CrearCitaVeterinario from "./Pages/InicioVeterinario/CrearCitaVeterinario
 
 // Componentes de Administrador
 import AdminDashboard from "./Pages/InicioAdministrador/AdminDashboard";
-import AdminServices from "./Pages/InicioAdministrador/AdminServices";
-import AdminVets from "./Pages/InicioAdministrador/AdminVets";
-import AdminAdmins from "./Pages/InicioAdministrador/AdminAdmins";
-import AdminProfile from "./Pages/InicioAdministrador/AdminProfile";
+// import AdminServices from "./Pages/InicioAdministrador/AdminServices";
+// import AdminVets from "./Pages/InicioAdministrador/AdminVets";
+// import AdminAdmins from "./Pages/InicioAdministrador/AdminAdmins";
+// import AdminProfile from "./Pages/InicioAdministrador/AdminProfile";
 import AdminStats from "./Pages/InicioAdministrador/AdminStats";
 import AdminUsers from "./Pages/InicioAdministrador/AdminUsers";
 import AdminUserDetail from "./Pages/InicioAdministrador/AdminUserDetail";
@@ -128,17 +123,12 @@ function App() {
           <Route path="/usuario/perfil" element={<PerfilUsuario />} />
           <Route path="/usuario/perfil/editar" element={<EditarPerfil />} />
           <Route path="/usuario/perfil/configuracion" element={<ConfiguracionPerfil />} />
-          <Route path="/usuario/perfil/pagos" element={<MetodosPago />} />
-          <Route path="/usuario/perfil/pagos/agregar" element={<AgregarMetodoPago />} />
-          <Route path="/usuario/perfil/pagos/eliminar/:id" element={<EliminarMetodoPago />} />
 
           <Route path="/usuario/ayuda" element={<AyudaSoporte />} />
           <Route path="/usuario/ayuda/chat" element={<ChatSoporte />} />
 
           <Route path="/usuario/historial/:mascotaId" element={<HistorialMedico />} />
-          <Route path="/usuario/historial/:mascotaId/agregar" element={<AgregarHistorial />} />
           <Route path="/usuario/historial/:mascotaId/:historialId" element={<DetalleHistorial />} />
-          <Route path="/usuario/historial/:mascotaId/editar/:historialId" element={<EditarHistorial />} />
 
           <Route path="/usuario" element={<InicioUsuario user={user} setUser={setUser} />}>
             <Route index element={<Navigate to="inicio" replace />} />

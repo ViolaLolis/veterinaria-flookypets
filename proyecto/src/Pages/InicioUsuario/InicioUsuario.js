@@ -25,9 +25,11 @@ const InicioUsuario = ({ user, setUser }) => {
   const [userDataApi, setUserDataApi] = useState(null); // Datos del usuario
   const [userPets, setUserPets] = useState([]); // Mascotas del usuario
   const [userAppointments, setUserAppointments] = useState([]); // Citas del usuario
+  const [userNotifications, setUserNotifications] = useState([]); // Nuevas notificaciones del usuario
   const [loadingUserData, setLoadingUserData] = useState(true);
   const [loadingPets, setLoadingPets] = useState(true);
   const [loadingAppointments, setLoadingAppointments] = useState(true);
+  const [loadingNotifications, setLoadingNotifications] = useState(true); // Nuevo estado de carga
   const [error, setError] = useState('');
   const [notification, setNotification] = useState(null);
 
@@ -38,6 +40,9 @@ const InicioUsuario = ({ user, setUser }) => {
   const [newRescheduleDate, setNewRescheduleDate] = useState('');
   const [newRescheduleTime, setNewRescheduleTime] = useState('');
   const [isManagingAppointment, setIsManagingAppointment] = useState(false); // Para el spinner en los modales
+  const [showNotificationModal, setShowNotificationModal] = useState(false); // Modal para ver notificaciones
+  const [selectedNotification, setSelectedNotification] = useState(null); // Notificación seleccionada para ver detalles
+
 
   // Función auxiliar para obtener el token de autenticación del localStorage
   const getAuthToken = useCallback(() => {
@@ -106,7 +111,7 @@ const InicioUsuario = ({ user, setUser }) => {
 
   // useEffect para controlar el overflow del body cuando los modales están abiertos
   useEffect(() => {
-    if (showConfirmModal || showRescheduleModal) {
+    if (showConfirmModal || showRescheduleModal || showNotificationModal) {
       document.body.classList.add(styles['modal-open']);
     } else {
       document.body.classList.remove(styles['modal-open']);
@@ -115,7 +120,7 @@ const InicioUsuario = ({ user, setUser }) => {
     return () => {
       document.body.classList.remove(styles['modal-open']);
     };
-  }, [showConfirmModal, showRescheduleModal]);
+  }, [showConfirmModal, showRescheduleModal, showNotificationModal]);
 
   // Cargar datos del usuario
   useEffect(() => {
@@ -202,6 +207,37 @@ const InicioUsuario = ({ user, setUser }) => {
   useEffect(() => {
     fetchUserAppointments();
   }, [fetchUserAppointments]);
+
+  // Cargar notificaciones del usuario
+  const fetchUserNotifications = useCallback(async () => {
+    if (!user || !user.id) {
+      setLoadingNotifications(false);
+      return;
+    }
+    setLoadingNotifications(true);
+    setError('');
+    try {
+      const responseData = await authFetch(`/notifications/user/${user.id}`);
+      if (responseData.success && responseData.data) {
+        setUserNotifications(responseData.data);
+      } else {
+        setUserNotifications([]);
+        setError(responseData.message || 'Error al cargar notificaciones.');
+      }
+    } catch (err) {
+      // setError handled by authFetch
+    } finally {
+      setLoadingNotifications(false);
+    }
+  }, [user?.id, authFetch]);
+
+  useEffect(() => {
+    fetchUserNotifications();
+    // Opcional: Refrescar notificaciones periódicamente
+    const interval = setInterval(fetchUserNotifications, 60000); // Cada 1 minuto
+    return () => clearInterval(interval);
+  }, [fetchUserNotifications]);
+
 
   // Determinar la próxima cita
   const proximaCita = userAppointments
@@ -314,12 +350,26 @@ const InicioUsuario = ({ user, setUser }) => {
     }
   }, [appointmentToManage, newRescheduleDate, newRescheduleTime, authFetch, showNotification, fetchUserAppointments]);
 
+  // Función para abrir el modal de notificación y marcarla como leída
+  const handleViewNotification = useCallback(async (notification) => {
+    setSelectedNotification(notification);
+    setShowNotificationModal(true);
+    if (!notification.leida) {
+      try {
+        await authFetch(`/notifications/${notification.id_notificacion}/read`, { method: 'PUT' });
+        fetchUserNotifications(); // Refrescar la lista de notificaciones
+      } catch (error) {
+        console.error('Error al marcar notificación como leída:', error);
+      }
+    }
+  }, [authFetch, fetchUserNotifications]);
+
 
   const currentPet = userPets[currentPetIndex];
 
   // Función para renderizar el contenido dinámico según la pestaña activa
   const renderContent = () => {
-    if (loadingPets || loadingAppointments || loadingUserData) {
+    if (loadingPets || loadingAppointments || loadingUserData || loadingNotifications) {
       return (
         <div className={styles.loadingState}>
           <FaSpinner className={styles.spinnerIcon} />
@@ -400,7 +450,7 @@ const InicioUsuario = ({ user, setUser }) => {
 
   return (
     <div className={styles.container}>
-      {/* Notificaciones */}
+      {/* Notificaciones globales (toast) */}
       <AnimatePresence>
         {notification && (
           <motion.div
@@ -503,13 +553,6 @@ const InicioUsuario = ({ user, setUser }) => {
                   <motion.button
                     className={styles.menuItem}
                     onClick={() => navigate('/usuario/perfil/pagos')}
-                    whileHover={{ x: 5 }}
-                  >
-                    <FaHeart className={styles.menuIcon} /> Métodos de Pago
-                  </motion.button>
-                  <motion.button
-                    className={styles.menuItem}
-                    onClick={handleLogout}
                     whileHover={{ x: 5 }}
                   >
                     <FaSignOutAlt className={styles.menuIcon} /> Cerrar sesión
@@ -763,7 +806,7 @@ const InicioUsuario = ({ user, setUser }) => {
 
       {/* Sidebar con recordatorios y más información */}
       <div className={styles.sidebar}>
-        {/* Los recordatorios se mantienen estáticos ya que no hay una tabla para ellos */}
+        {/* Notificaciones del usuario */}
         <motion.div
           className={styles.remindersCard}
           initial="hidden"
@@ -772,26 +815,45 @@ const InicioUsuario = ({ user, setUser }) => {
         >
           <div className={styles.cardHeader}>
             <FaBell className={styles.cardIcon} />
-            <h3>Recordatorios importantes</h3>
+            <h3>Notificaciones</h3>
+            <span className={styles.notificationCount}>
+              {userNotifications.filter(n => !n.leida).length}
+            </span>
           </div>
-          <ul className={styles.remindersList}>
-            {/* Hardcoded reminders, replace with API if you add a table for them */}
-            {[
-              { id: 1, texto: "Vacuna antirrábica para Max - Vence en 15 días", importante: true },
-              { id: 4, texto: "Renovar membresía premium - Vence en 1 mes", importante: true }
-            ].filter(r => r.importante).map(item => (
-              <motion.li
-                key={item.id}
-                className={styles.importantReminder}
-                whileHover={{ x: 5 }}
-              >
-                <div className={styles.reminderDot}></div>
-                <span>{item.texto}</span>
-              </motion.li>
-            ))}
-          </ul>
+          {loadingNotifications ? (
+            <div className={styles.loadingSection}>
+              <FaSpinner className={styles.spinnerIcon} />
+              <p>Cargando notificaciones...</p>
+            </div>
+          ) : userNotifications.length > 0 ? (
+            <ul className={styles.remindersList}>
+              {userNotifications.slice(0, 5).map(item => ( // Mostrar las 5 más recientes
+                <motion.li
+                  key={item.id_notificacion}
+                  className={`${styles.notificationItem} ${item.leida ? styles.read : ''}`}
+                  whileHover={{ x: 5 }}
+                  onClick={() => handleViewNotification(item)}
+                >
+                  <div className={styles.notificationDot} style={{ backgroundColor: item.leida ? '#ccc' : '#00acc1' }}></div>
+                  <span>{item.mensaje}</span>
+                </motion.li>
+              ))}
+              {userNotifications.length > 5 && (
+                <motion.button
+                  className={styles.viewAllButton}
+                  onClick={() => { /* Lógica para ver todas las notificaciones */ }}
+                  whileHover={{ scale: 1.05 }}
+                >
+                  Ver todas
+                </motion.button>
+              )}
+            </ul>
+          ) : (
+            <p className={styles.noDataMessage}>No tienes notificaciones.</p>
+          )}
         </motion.div>
 
+        {/* Los recordatorios se mantienen estáticos ya que no hay una tabla para ellos */}
         <motion.div
           className={styles.remindersCard}
           initial="hidden"
@@ -950,7 +1012,7 @@ const InicioUsuario = ({ user, setUser }) => {
               <div className={styles.modalActions}>
                 <motion.button
                   className={styles.primaryButton}
-                  onClick={rescheduleAppointment} // Corrected function name here
+                  onClick={rescheduleAppointment}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   disabled={isManagingAppointment}
@@ -965,6 +1027,43 @@ const InicioUsuario = ({ user, setUser }) => {
                   disabled={isManagingAppointment}
                 >
                   Cancelar
+                </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Modal para ver detalles de la notificación */}
+      <AnimatePresence>
+        {showNotificationModal && selectedNotification && (
+          <motion.div
+            className={styles.modalOverlay}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowNotificationModal(false)}
+          >
+            <motion.div
+              className={styles.modalContent}
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3>Detalles de la Notificación</h3>
+              <p><strong>Tipo:</strong> {selectedNotification.tipo}</p>
+              <p><strong>Mensaje:</strong> {selectedNotification.mensaje}</p>
+              <p><strong>Fecha:</strong> {new Date(selectedNotification.fecha_creacion).toLocaleString()}</p>
+              <p><strong>Estado:</strong> {selectedNotification.leida ? 'Leída' : 'No Leída'}</p>
+              <div className={styles.modalActions}>
+                <motion.button
+                  className={styles.primaryButton}
+                  onClick={() => setShowNotificationModal(false)}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Cerrar
                 </motion.button>
               </div>
             </motion.div>
