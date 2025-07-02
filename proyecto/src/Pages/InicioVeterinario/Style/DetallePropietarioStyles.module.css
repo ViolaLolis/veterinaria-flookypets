@@ -1,33 +1,56 @@
-/* veteDetallePropietarioStyles.module.css */
+/* Style/DetallePropietarioStyles.module.css */
+
+:root {
+    --primary-color: #00acc1; /* Azul turquesa vibrante */
+    --secondary-color: #00798c; /* Azul turquesa más oscuro */
+    --accent-color: #ffd700; /* Amarillo dorado para acentos */
+    --text-dark: #333333;
+    --text-medium: #555555;
+    --text-light: #777777;
+    --bg-light: #f5f5f0; /* Blanco hueso para el fondo general */
+    --bg-card: #ffffff;
+    --bg-card-light: #f8fcfc; /* Fondo muy claro para tarjetas */
+    --bg-mascota-item: #e0f7fa; /* Fondo para elementos de mascota */
+    --border-color: #e0e0e0;
+    --border-accent-light: #b2ebf2; /* Borde turquesa más claro */
+    --shadow-light: rgba(0, 0, 0, 0.08);
+    --shadow-medium: rgba(0, 0, 0, 0.15);
+    --shadow-primary: rgba(0, 172, 193, 0.3);
+    --shadow-primary-hover: rgba(0, 172, 193, 0.45);
+    --success-color: #388e3c;
+    --error-color: #f44336;
+    --border-radius-sm: 8px;
+    --border-radius-md: 12px;
+    --border-radius-lg: 15px;
+}
 
 .veteDetalleContainer {
-    max-width: 800px;
+    max-width: 950px;
     margin: 50px auto;
     padding: 35px;
-    background-color: #ffffff;
-    border-radius: 18px;
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
-    font-family: 'Poppins', sans-serif;
-    color: #333;
-    border-top: 5px solid #00acc1; /* Accent top border */
+    background-color: var(--bg-card);
+    border-radius: var(--border-radius-lg);
+    box-shadow: 0 12px 30px var(--shadow-medium);
+    font-family: 'Inter', sans-serif;
+    color: var(--text-dark);
+    border-top: 5px solid var(--primary-color);
     display: flex;
     flex-direction: column;
     gap: 30px;
 }
 
-/* Header Section */
 .veteHeader {
     display: flex;
     align-items: center;
     gap: 20px;
     margin-bottom: 20px;
     padding-bottom: 20px;
-    border-bottom: 1px solid #e0f7fa; /* Light blue subtle separator */
+    border-bottom: 1px solid var(--info-bg);
 }
 
 .veteHeader h2 {
     font-size: 2.5em;
-    color: #00acc1;
+    color: var(--primary-color);
     margin: 0;
     font-weight: 700;
     display: flex;
@@ -41,7 +64,7 @@
 
 .veteVolverBtn {
     padding: 10px 18px;
-    border-radius: 10px;
+    border-radius: var(--border-radius-sm);
     font-size: 1em;
     font-weight: 600;
     cursor: pointer;
@@ -51,104 +74,135 @@
     gap: 8px;
     transition: all 0.3s ease;
     background-color: transparent;
-    border: 2px solid #b2ebf2; /* Lighter teal border */
-    color: #00acc1;
+    border: 2px solid var(--border-accent-light);
+    color: var(--primary-color);
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
 }
 
 .veteVolverBtn:hover {
-    background-color: #e0f7fa; /* Light blue background on hover */
-    border-color: #00acc1;
-    box-shadow: 0 5px 15px rgba(0, 172, 193, 0.2);
+    background-color: var(--info-bg);
+    border-color: var(--primary-color);
+    box-shadow: 0 5px 15px var(--shadow-primary);
+    transform: translateY(-2px);
 }
 
-/* Detail Info Section */
-.veteDetalleInfo {
+/* Sección de imagen de perfil */
+.veteProfileImageSection {
     display: flex;
-    flex-direction: column;
-    gap: 15px; /* Spacing between info paragraphs */
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.veteProfileImage {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid var(--primary-color);
+    box-shadow: 0 4px 15px var(--shadow-primary);
+    transition: transform 0.3s ease;
+}
+
+.veteProfileImage:hover {
+    transform: scale(1.03);
+}
+
+/* Sección de información y tarjetas */
+.veteDetalleInfo {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    background-color: var(--bg-card-light);
+    padding: 25px;
+    border-radius: var(--border-radius-md);
+    box-shadow: 0 4px 15px var(--shadow-light);
+    border-left: 5px solid var(--primary-color);
 }
 
 .veteDetalleInfo p {
-    background-color: #f8fcfc; /* Very light background for info items */
-    padding: 15px 20px;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
-    border-left: 4px solid #b2ebf2; /* Subtle light blue left border */
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 1.1em;
-    color: #444;
-    transition: all 0.2s ease-in-out;
-}
-
-.veteDetalleInfo p:hover {
-    box-shadow: 0 4px 15px rgba(0, 172, 193, 0.1);
-    transform: translateY(-2px);
-    border-color: #00acc1; /* Stronger border on hover */
+    margin: 5px 0;
+    color: var(--text-medium);
+    font-size: 1em;
+    line-height: 1.5;
 }
 
 .veteDetalleInfo p strong {
-    color: #00acc1;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-weight: 600;
-    min-width: 120px; /* Align content better */
+    color: var(--text-dark);
+    font-weight: 700;
 }
 
-.veteDetalleInfo p svg {
-    color: #00acc1; /* Icon color for info items */
+.veteDetalleInfo p a {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: color 0.2s ease;
 }
 
-/* Mascotas Section */
+.veteDetalleInfo p a:hover {
+    color: var(--secondary-color);
+    text-decoration: underline;
+}
+
+/* Sección de mascotas */
 .veteMascotasSection {
-    margin-top: 20px;
-    background-color: #f8fcfc;
+    grid-column: 1 / -1;
+    background-color: var(--bg-card-light);
     padding: 25px;
-    border-radius: 15px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-    border-left: 5px solid #00acc1;
+    border-radius: var(--border-radius-md);
+    box-shadow: 0 4px 15px var(--shadow-light);
+    border-left: 5px solid var(--primary-color);
+    margin-top: 20px; /* Espacio entre la info y las mascotas */
 }
 
 .veteMascotasSection h3 {
-    font-size: 1.6em;
-    color: #00acc1;
+    font-size: 1.4em;
+    color: var(--primary-color);
     margin-top: 0;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     display: flex;
     align-items: center;
     gap: 10px;
     font-weight: 600;
+    border-bottom: 1px dashed var(--border-color);
+    padding-bottom: 10px;
 }
 
 .veteMascotasList {
     display: flex;
     flex-wrap: wrap;
-    gap: 15px;
+    gap: 10px;
 }
 
 .veteMascotaItem {
-    background-color: #e0f7fa; /* Light blue for mascot tags */
-    color: #00acc1;
-    padding: 10px 20px;
-    border-radius: 25px; /* Pill shape */
-    font-weight: 600;
+    background-color: var(--bg-mascota-item);
+    color: var(--text-dark);
+    padding: 8px 15px;
+    border-radius: var(--border-radius-sm);
+    border: 1px solid var(--border-accent-light);
+    font-size: 0.9em;
+    font-weight: 500;
+    transition: all 0.2s ease;
     cursor: pointer;
-    transition: all 0.3s ease;
-    border: 1px solid #b2ebf2;
-    white-space: nowrap; /* Prevent wrapping inside the tag */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
 .veteMascotaItem:hover {
-    background-color: #00acc1;
+    background-color: var(--primary-color);
     color: white;
-    transform: translateY(-3px) scale(1.02);
-    box-shadow: 0 5px 15px rgba(0, 172, 193, 0.3);
+    box-shadow: 0 4px 10px var(--shadow-primary);
+    transform: translateY(-2px);
 }
 
-/* Loading and Error States */
+.noMascotasMessage {
+    color: var(--text-light);
+    font-style: italic;
+    text-align: center;
+    padding: 10px;
+    border: 1px dashed var(--border-color);
+    border-radius: var(--border-radius-sm);
+    margin-top: 15px;
+}
+
+/* Estados de carga y error */
 .veteLoadingContainer,
 .veteErrorContainer {
     display: flex;
@@ -158,17 +212,17 @@
     min-height: 400px;
     padding: 20px;
     text-align: center;
-    background-color: #ffffff;
-    border-radius: 15px;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+    background-color: var(--bg-card);
+    border-radius: var(--border-radius-md);
+    box-shadow: 0 5px 20px var(--shadow-light);
     margin: 40px auto;
     max-width: 600px;
-    border-top: 5px solid #00acc1;
+    border-top: 5px solid var(--primary-color);
 }
 
 .veteLoadingSpinner {
-    border: 8px solid #f3f3f3;
-    border-top: 8px solid #00acc1; /* Teal spinner */
+    border: 8px solid var(--border-color);
+    border-top: 8px solid var(--primary-color);
     border-radius: 50%;
     width: 60px;
     height: 60px;
@@ -182,19 +236,19 @@
 }
 
 .veteLoadingContainer p {
-    color: #00acc1;
+    color: var(--primary-color);
     font-size: 1.2em;
     font-weight: 500;
 }
 
 .veteErrorContainer h3 {
-    color: #f44336; /* Red for error messages */
+    color: var(--error-color);
     font-size: 1.8em;
     margin-bottom: 10px;
 }
 
 .veteErrorContainer p {
-    color: #555;
+    color: var(--text-medium);
     font-size: 1.1em;
     margin-bottom: 20px;
 }
@@ -204,6 +258,7 @@
     .veteDetalleContainer {
         margin: 30px 20px;
         padding: 25px;
+        gap: 20px;
     }
     .veteHeader {
         flex-direction: column;
@@ -215,30 +270,43 @@
         text-align: center;
         width: 100%;
         justify-content: center;
+        gap: 10px;
+    }
+    .veteHeader h2 svg {
+        font-size: 0.9em;
     }
     .veteVolverBtn {
         width: 100%;
         justify-content: center;
         padding: 10px 15px;
+        font-size: 0.95em;
+    }
+    .veteProfileImage {
+        width: 120px;
+        height: 120px;
+    }
+    .veteDetalleInfo {
+        grid-template-columns: 1fr;
+        gap: 15px;
+        padding: 20px;
     }
     .veteDetalleInfo p {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 5px;
-        padding: 12px 15px;
-    }
-    .veteDetalleInfo p strong {
-        min-width: unset;
+        font-size: 0.95em;
     }
     .veteMascotasSection {
         padding: 20px;
+        margin-top: 15px;
     }
     .veteMascotasSection h3 {
-        font-size: 1.4em;
+        font-size: 1.3em;
+        gap: 8px;
+    }
+    .veteMascotasList {
+        justify-content: center;
     }
     .veteMascotaItem {
-        padding: 8px 15px;
-        font-size: 0.9em;
+        font-size: 0.85em;
+        padding: 6px 12px;
     }
 }
 
@@ -246,30 +314,35 @@
     .veteDetalleContainer {
         margin: 20px 15px;
         padding: 20px;
+        gap: 15px;
     }
     .veteHeader h2 {
         font-size: 1.6em;
         gap: 8px;
     }
     .veteHeader h2 svg {
-        font-size: 1em;
+        font-size: 0.8em;
     }
     .veteVolverBtn {
-        font-size: 0.9em;
+        font-size: 0.85em;
         padding: 8px 12px;
     }
+    .veteProfileImage {
+        width: 100px;
+        height: 100px;
+    }
+    .veteDetalleInfo {
+        padding: 15px;
+    }
     .veteDetalleInfo p {
-        font-size: 1em;
-        gap: 8px;
+        font-size: 0.85em;
     }
     .veteMascotasSection h3 {
-        font-size: 1.2em;
-    }
-    .veteMascotasList {
-        flex-direction: column; /* Stack pet tags on very small screens */
+        font-size: 1.1em;
+        gap: 6px;
     }
     .veteMascotaItem {
-        width: 100%;
-        text-align: center;
+        font-size: 0.8em;
+        padding: 5px 10px;
     }
 }

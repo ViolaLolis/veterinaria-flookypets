@@ -233,3 +233,9 @@ SELECT * FROM mascotas;
 SELECT * FROM historial_medico;
 SELECT * FROM citas;
 SELECT * FROM notificaciones;
+
+ALTER TABLE usuarios
+ADD COLUMN notificaciones_activas BOOLEAN DEFAULT TRUE,
+ADD COLUMN sonido_notificacion VARCHAR(50) DEFAULT 'default',
+ADD COLUMN recordatorios_cita BOOLEAN DEFAULT TRUE,
+ADD COLUMN intervalo_recordatorio VARCHAR(50) DEFAULT '30 minutos';

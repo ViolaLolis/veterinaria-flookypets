@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import veteStyles from './Style/ListaCitasVeterinarioStyles.module.css'; // Asegúrate de que este archivo CSS exista y contenga los estilos correspondientes
+import React, { useState, useEffect, useCallback } from 'react';
+import { Link, useNavigate, useOutletContext } from 'react-router-dom';
+import veteStyles from './Style/ListaCitasVeterinarioStyles.module.css';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -15,10 +15,12 @@ import {
   faSearch,
   faPlus,
   faSpinner,
-  faExclamationTriangle // Añadido para un ícono de error más explícito
+  faExclamationTriangle,
+  faSync // Añadido para el botón de refrescar
 } from '@fortawesome/free-solid-svg-icons';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
+import { authFetch } from './api'; // Importa authFetch (asegúrate que la ruta sea correcta, si api.js está en la raíz de src, entonces './api' o '../api' dependiendo de la estructura)
 
 // Las variantes de Framer Motion pueden ser reutilizadas o adaptadas
 // para mantener la coherencia en las animaciones.
@@ -29,13 +31,13 @@ const containerVariants = {
     transition: {
       when: "beforeChildren",
       staggerChildren: 0.1,
-      duration: 0.3 // Ajuste de duración para que sea más similar a AgendarCita
+      duration: 0.3
     }
   }
 };
 
 const headerVariants = {
-  initial: { y: -30, opacity: 0 }, // Un poco más pronunciado que en AgendarCita
+  initial: { y: -30, opacity: 0 },
   animate: { y: 0, opacity: 1, transition: { type: 'spring', stiffness: 120, damping: 10, delay: 0.1 } }
 };
 
@@ -57,7 +59,7 @@ const itemVariants = {
   },
   hover: {
     scale: 1.03,
-    boxShadow: "0 10px 20px rgba(0, 172, 193, 0.1)", // Color de sombra adaptado
+    boxShadow: "0 10px 20px rgba(0, 172, 193, 0.1)",
     transition: { duration: 0.3 }
   },
   tap: { scale: 0.98 }
@@ -71,116 +73,77 @@ const buttonVariants = {
 const calendarTileVariants = {
   hover: {
     scale: 1.05,
-    backgroundColor: "rgba(0, 172, 193, 0.1)" // Mantener el color del tile
+    backgroundColor: "rgba(0, 172, 193, 0.1)"
   },
   tap: { scale: 0.95 }
 };
 
 const ListaCitasVeterinario = () => {
+  const { user, showNotification } = useOutletContext(); // Obtener el usuario logeado y la función de notificación
   const [citas, setCitas] = useState([]);
-  const [servicios, setServicios] = useState([]);
+  const [servicios, setServicios] = useState([]); // Aunque no se usan directamente en la lista, se mantienen por si se necesitan
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [searchTerm, setSearchTerm] = useState('');
+  const [refreshing, setRefreshing] = useState(false); // Nuevo estado para el botón de refrescar
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchData = async () => { // Usamos una función async para manejar las promesas
-      setLoading(true);
-      setError(null); // Resetear error en cada nueva carga
-      const formattedDate = selectedDate.toISOString().split('T')[0];
+  const fetchCitasAndServicios = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    setRefreshing(true); // Activa el spinner del botón de refrescar
+    const formattedDate = selectedDate.toISOString().split('T')[0];
 
-      try {
-        // Simular fetching de citas
-        const citasData = await new Promise(resolve => setTimeout(() => {
-          const allCitas = [
-            {
-              id: 1,
-              fecha: '2025-06-20T10:00:00Z',
-              propietarioNombre: 'Ana Pérez',
-              mascotaNombre: 'Max',
-              servicio: 'Consulta general',
-              telefono: '3001234567',
-              direccion: 'Calle 123 #45-67',
-              mascotaEspecie: 'Perro',
-              mascotaRaza: 'Labrador'
-            },
-            {
-              id: 2,
-              fecha: '2025-06-20T14:30:00Z',
-              propietarioNombre: 'Carlos López',
-              mascotaNombre: 'Luna',
-              servicio: 'Vacunación',
-              telefono: '3109876543',
-              direccion: 'Avenida 456 #78-90',
-              mascotaEspecie: 'Gato',
-              mascotaRaza: 'Siamés'
-            },
-            {
-              id: 3,
-              fecha: '2025-06-21T09:00:00Z',
-              propietarioNombre: 'Laura García',
-              mascotaNombre: 'Firulais',
-              servicio: 'Desparasitación',
-              telefono: '3205551122',
-              direccion: 'Carrera 7 #1-23',
-              mascotaEspecie: 'Perro',
-              mascotaRaza: 'Golden Retriever'
-            },
-            {
-              id: 4,
-              fecha: '2025-06-21T11:00:00Z',
-              propietarioNombre: 'Marta Díaz',
-              mascotaNombre: 'Copito',
-              servicio: 'Peluquería Canina',
-              telefono: '3112223344',
-              direccion: 'Diagonal 80 #9-10',
-              mascotaEspecie: 'Conejo',
-              mascotaRaza: 'Mini Lop'
-            }
-          ];
-          resolve(allCitas.filter(cita => cita.fecha.startsWith(formattedDate)));
-        }, 500));
-        setCitas(citasData);
-
-        // Simular fetching de servicios
-        const serviciosData = await new Promise(resolve => setTimeout(() => {
-          resolve([
-            { id: 'sg1', nombre: 'Consulta General', descripcion: 'Examen médico general de la mascota.' },
-            { id: 'sv2', nombre: 'Vacunación', descripcion: 'Aplicación de vacunas según el esquema.' },
-            { id: 'sp3', nombre: 'Desparasitación', descripcion: 'Tratamiento contra parásitos internos y externos.' },
-            { id: 'sq4', nombre: 'Cirugía', descripcion: 'Procedimientos quirúrgicos diversos.' },
-            { id: 'sl5', nombre: 'Peluquería Canina', descripcion: 'Cortes de pelo y acicalamiento.' },
-          ]);
-        }, 750));
-        setServicios(serviciosData);
-
-      } catch (err) {
-        setError('No se pudo cargar la lista de citas o servicios.');
-        console.error("Error al cargar datos:", err);
-      } finally {
-        setLoading(false);
+    try {
+      // *** CORRECCIÓN CLAVE AQUÍ: Cambiar la URL a /citas ***
+      // El backend ya filtra por el ID del veterinario logeado si el rol es 'veterinario'
+      const citasResponse = await authFetch(`/citas?fecha=${formattedDate}`);
+      if (citasResponse.success) {
+        setCitas(citasResponse.data);
+      } else {
+        setError(citasResponse.message || 'Error al cargar las citas.');
+        showNotification(citasResponse.message || 'Error al cargar las citas.', 'error');
       }
-    };
 
-    fetchData();
-  }, [selectedDate]);
+      // Endpoint para obtener servicios (si se necesitan para algo en esta vista, aunque no se usen directamente en la lista)
+      const serviciosResponse = await authFetch('/servicios');
+      if (serviciosResponse.success) {
+        setServicios(serviciosResponse.data);
+      } else {
+        console.warn("Error al cargar servicios:", serviciosResponse.message);
+        // No se establece error general si solo fallan los servicios, ya que las citas son lo principal aquí
+      }
+
+    } catch (err) {
+      console.error("Error al cargar datos:", err);
+      setError('Error de conexión al servidor al cargar citas o servicios.');
+      showNotification('Error de conexión al servidor al cargar citas o servicios.', 'error');
+    } finally {
+      setLoading(false);
+      setRefreshing(false); // Desactiva el spinner del botón de refrescar
+    }
+  }, [selectedDate, showNotification]);
+
+  useEffect(() => {
+    fetchCitasAndServicios();
+  }, [fetchCitasAndServicios]);
 
   const onChangeDate = (date) => {
     setSelectedDate(date);
   };
 
   const filteredCitas = citas.filter(cita =>
-    cita.propietarioNombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    cita.mascotaNombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    cita.servicio.toLowerCase().includes(searchTerm.toLowerCase())
+    (cita.propietario_nombre && cita.propietario_nombre.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (cita.propietario_apellido && cita.propietario_apellido.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (cita.mascota_nombre && cita.mascota_nombre.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (cita.servicio_nombre && cita.servicio_nombre.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   const tileContent = ({ date, view }) => {
     if (view === 'month') {
       const dateStr = date.toISOString().split('T')[0];
-      const hasCitas = citas.some(cita => cita.fecha.startsWith(dateStr));
+      const hasCitas = citas.some(cita => new Date(cita.fecha_cita).toISOString().split('T')[0] === dateStr);
       return hasCitas ? (
         <motion.div
           className={veteStyles.veteCalendarDot}
@@ -193,7 +156,10 @@ const ListaCitasVeterinario = () => {
     return null;
   };
 
-  // Manejo de estados de carga y error similar a AgendarCita
+  const handleRefresh = () => {
+    fetchCitasAndServicios();
+  };
+
   if (loading) {
     return (
       <motion.div
@@ -219,13 +185,20 @@ const ListaCitasVeterinario = () => {
         <FontAwesomeIcon icon={faExclamationTriangle} className={veteStyles.veteErrorIcon} />
         <p>Error al cargar la información: {error}</p>
         <motion.button
-          onClick={() => window.location.reload()} // O una función para reintentar la carga
-          className={veteStyles.veteReloadButton} // Crear un estilo para este botón
+          onClick={handleRefresh}
+          className={veteStyles.veteReloadButton}
           variants={buttonVariants}
           whileHover="hover"
           whileTap="tap"
+          disabled={refreshing}
         >
-          <FontAwesomeIcon icon={faSpinner} spin={loading} /> Reintentar
+          {refreshing ? (
+            <>
+              <FontAwesomeIcon icon={faSpinner} spin /> Reintentando...
+            </>
+          ) : (
+            'Reintentar'
+          )}
         </motion.button>
       </motion.div>
     );
@@ -244,7 +217,7 @@ const ListaCitasVeterinario = () => {
         initial="initial"
         animate="animate"
       >
-        <div className={veteStyles.veteHeaderContent}> {/* Agregado para agrupar contenido y darle más control de layout */}
+        <div className={veteStyles.veteHeaderContent}>
           <FontAwesomeIcon icon={faCalendarAlt} className={veteStyles.veteHeaderIcon} />
           <h2>Citas Agendadas</h2>
         </div>
@@ -265,9 +238,8 @@ const ListaCitasVeterinario = () => {
           />
         </motion.div>
 
-        {/* El calendario se mantiene separado como un panel, pero con animaciones coherentes */}
         <motion.div
-          className={veteStyles.veteCalendarPanel} // Nuevo estilo para el panel del calendario
+          className={veteStyles.veteCalendarPanel}
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.3 }}
@@ -280,61 +252,72 @@ const ListaCitasVeterinario = () => {
             tileContent={tileContent}
             className={veteStyles.veteCalendar}
           />
+          <motion.button
+            onClick={handleRefresh}
+            className={veteStyles.veteRefreshButton}
+            variants={buttonVariants}
+            whileHover="hover"
+            whileTap="tap"
+            disabled={refreshing}
+          >
+            <FontAwesomeIcon icon={faSync} spin={refreshing} />
+            {refreshing ? ' Actualizando...' : ' Actualizar Citas'}
+          </motion.button>
         </motion.div>
       </motion.div>
 
-      <AnimatePresence mode="wait"> {/* Añadido mode="wait" para transiciones más suaves entre la lista vacía y llena */}
+      <AnimatePresence mode="wait">
         {filteredCitas.length > 0 ? (
           <motion.ul
             className={veteStyles.veteLista}
-            key="citas-list" // Key para AnimatePresence
+            key="citas-list"
             initial="hidden"
             animate="visible"
             exit="hidden"
-            variants={containerVariants} // Reutilizar variantes para la lista
+            variants={containerVariants}
           >
             {filteredCitas.map((cita) => (
               <motion.li
-                key={cita.id}
+                key={cita.id_cita} // Usa el ID de la cita de la base de datos
                 className={veteStyles.veteListItem}
                 variants={itemVariants}
                 whileHover="hover"
                 whileTap="tap"
-                layout // Para animaciones de layout si la lista cambia
+                layout
               >
                 <div className={veteStyles.veteCitaInfo}>
                   <div className={veteStyles.veteInfoRow}>
                     <FontAwesomeIcon icon={faClock} className={veteStyles.veteInfoIcon} />
                     <span className={veteStyles.veteFecha}>
-                      {new Date(cita.fecha).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      {new Date(cita.fecha_cita).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
                   </div>
 
                   <div className={veteStyles.veteInfoRow}>
                     <FontAwesomeIcon icon={faUser} className={veteStyles.veteInfoIcon} />
-                    <span className={veteStyles.vetePropietario}>{cita.propietarioNombre}</span>
+                    <span className={veteStyles.vetePropietario}>{cita.propietario_nombre} {cita.propietario_apellido}</span>
                   </div>
 
                   <div className={veteStyles.veteInfoRow}>
                     <FontAwesomeIcon icon={faPaw} className={veteStyles.veteInfoIcon} />
                     <span className={veteStyles.veteMascota}>
-                      {cita.mascotaNombre} ({cita.mascotaEspecie} - {cita.mascotaRaza})
+                      {cita.mascota_nombre} ({cita.mascota_especie} - {cita.mascota_raza})
                     </span>
                   </div>
 
                   <div className={veteStyles.veteInfoRow}>
                     <FontAwesomeIcon icon={faTag} className={veteStyles.veteInfoIcon} />
-                    <span className={veteStyles.veteServicio}>{cita.servicio}</span>
+                    <span className={veteStyles.veteServicio}>{cita.servicio_nombre}</span>
                   </div>
 
                   <div className={veteStyles.veteInfoRow}>
                     <FontAwesomeIcon icon={faPhone} className={veteStyles.veteInfoIcon} />
-                    <span className={veteStyles.veteTelefono}>{cita.telefono}</span>
+                    <span className={veteStyles.veteTelefono}>{cita.propietario_telefono}</span>
                   </div>
 
                   <div className={veteStyles.veteInfoRow}>
                     <FontAwesomeIcon icon={faMapMarkerAlt} className={veteStyles.veteInfoIcon} />
-                    <span className={veteStyles.veteDireccion}>{cita.direccion}</span>
+                    <span className={veteStyles.veteDireccion}>{cita.propietario_direccion}</span>
                   </div>
                 </div>
 
@@ -344,7 +327,7 @@ const ListaCitasVeterinario = () => {
                   whileTap="tap"
                 >
                   <Link
-                    to={`/veterinario/citas/${cita.id}`}
+                    to={`/veterinario/citas/${cita.id_cita}`}
                     className={veteStyles.veteVerButton}
                     title="Ver detalles de la cita"
                   >
@@ -356,7 +339,7 @@ const ListaCitasVeterinario = () => {
           </motion.ul>
         ) : (
           <motion.div
-            key="empty-message" // Key para AnimatePresence
+            key="empty-message"
             className={veteStyles.veteEmptyMessage}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -372,7 +355,6 @@ const ListaCitasVeterinario = () => {
               whileHover="hover"
               whileTap="tap"
             >
-              {/* Botón para agendar nueva cita (Veterinario) */}
               <Link to="/veterinario/citas/agendar" className={veteStyles.veteAddButton}>
                 <FontAwesomeIcon icon={faPlus} /> Agendar Nueva Cita
               </Link>
@@ -395,7 +377,7 @@ const ListaCitasVeterinario = () => {
         <ul className={veteStyles.veteServiciosLista}>
           {servicios.map((servicio) => (
             <motion.li
-              key={servicio.id}
+              key={servicio.id_servicio}
               className={veteStyles.veteServicioItem}
               variants={itemVariants}
               whileHover="hover"

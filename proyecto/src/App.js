@@ -44,6 +44,9 @@ import MainVeterinario from "./Pages/InicioVeterinario/MainVeterinario";
 import NavegacionVeterinario from "./Pages/InicioVeterinario/NavegacionVeterinario";
 import ConfiguracionVeterinario from "./Pages/InicioVeterinario/ConfiguracionVeterinario";
 import CrearCitaVeterinario from "./Pages/InicioVeterinario/CrearCitaVeterinario";
+import RegistrarHistorialMedico from "./Pages/InicioVeterinario/RegistrarHistorialMedico"; // Importar nuevo componente
+import EditarHistorialMedico from "./Pages/InicioVeterinario/EditarHistorialMedico"; // Importar nuevo componente
+
 
 // Componentes de Administrador
 import AdminDashboard from "./Pages/InicioAdministrador/AdminDashboard";
@@ -95,13 +98,14 @@ function App() {
 
         {/* Rutas de veterinario */}
         <Route element={<Protegida user={user} allowedRoles={['veterinario', 'admin']} />}>
-          <Route path="/veterinario" element={<MainVeterinario />}>
+          {/* MainVeterinario ahora recibe user y setUser */}
+          <Route path="/veterinario" element={<MainVeterinario user={user} setUser={setUser} />}>
             <Route index element={<NavegacionVeterinario />} />
             <Route path="navegacion" element={<NavegacionVeterinario />} />
             <Route path="propietarios" element={<ListaPropietarios />} />
-            <Route path="propietarios/:id" element={<DetallePropietario />} />
             <Route path="propietarios/registrar" element={<RegistrarPropietario />} />
-            <Route path="propietarios/editar/:id" element={<EditarPropietario />} />
+            <Route path="propietarios/:id" element={<DetallePropietario />} />
+            <Route path="propietarios/editar/:id" element={<EditarPropietario />} /> {/* NUEVA RUTA */}
             <Route path="mascotas" element={<ListaMascotasVeterinario />} />
             <Route path="mascotas/:id" element={<DetalleMascotaVeterinario />} />
             <Route path="mascotas/registrar" element={<RegistrarMascotaVeterinario />} />
@@ -110,7 +114,9 @@ function App() {
             <Route path="citas/agendar" element={<CrearCitaVeterinario />} />
             <Route path="citas/:id" element={<DetalleCitaVeterinario />} />
             <Route path="historiales" element={<ListaHistorialesVeterinario />} />
+            <Route path="historiales/registrar" element={<RegistrarHistorialMedico />} /> {/* Nueva ruta */}
             <Route path="historiales/:id" element={<DetalleHistorialVeterinario />} />
+            <Route path="historiales/editar/:id" element={<EditarHistorialMedico />} /> {/* Nueva ruta */}
             <Route path="perfil" element={<VerPerfilVeterinario setUser={setUser} />} />
             <Route path="perfil/editar" element={<EditarPerfilVeterinario />} />
             <Route path="configuracion" element={<ConfiguracionVeterinario />} />
@@ -149,8 +155,6 @@ function App() {
                 y hacer que InicioUsuario las muestre en su Outlet, o que InicioUsuario sea un layout
                 más general que englobe todas las rutas de usuario.
             */}
-            {/* Las siguientes rutas se quedan como estaban, fuera del layout de InicioUsuario,
-                pero protegidas por el mismo <Protegida /> */}
             <Route path="/usuario/perfil" element={<PerfilUsuario user={user} setUser={setUser} />} />
             <Route path="/usuario/perfil/editar" element={<EditarPerfil user={user} setUser={setUser} />} />
             <Route path="/usuario/perfil/configuracion" element={<ConfiguracionPerfil user={user} setUser={setUser} />} />
