@@ -1,534 +1,807 @@
 /* ListaHistorialesStyles.module.css */
 
-/* Nueva paleta de colores */
+/* Nueva paleta de colores (tonos de azul) */
 :root {
-    --primary-color: #00bcd4; /* Cyan principal */
-    --primary-hover: #00acc1;
-    --primary-light: #e0f7fa;
-    --secondary-color: #00838f;
-    --secondary-hover: #006064;
-    --text-color: #263238;
-    --text-light: #546e7a;
-    --bg-color: #f5f5f5;
-    --card-bg: #ffffff;
-    --border-radius: 8px;
-    --box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-    --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    --error-color: #f44336;
-    --success-color: #4caf50;
-    --warning-color: #ff9800;
+  --primary-color: #00acc1; /* Teal principal */
+  --primary-hover: #00838f; /* Teal más oscuro para hover */
+  --primary-light: #e0f7fa; /* Azul claro para fondos */
+  --secondary-color: #4dd0e1; /* Azul más claro */
+  --secondary-hover: #26c6da;
+  --text-color: #263238; /* Gris oscuro para texto */
+  --text-light: #546e7a; /* Gris medio para texto secundario */
+  --bg-color: #f5f9fa; /* Fondo general muy claro */
+  --card-bg: #ffffff; /* Fondo de tarjetas blanco */
+  --border-radius: 12px;
+  --box-shadow-light: 0 4px 15px rgba(0, 0, 0, 0.05);
+  --box-shadow-medium: 0 8px 25px rgba(0, 0, 0, 0.1);
+  --transition-speed: 0.3s;
+  --transition-ease: cubic-bezier(0.25, 0.8, 0.25, 1);
+  --error-color: #ef5350; /* Rojo suave */
+  --success-color: #66bb6a; /* Verde suave */
+  --warning-color: #ffb300; /* Naranja suave */
+}
+
+/* Contenedor principal */
+.vetMainContainer {
+  padding: 2.5rem;
+  background-color: var(--bg-color);
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+/* Barra superior */
+.vetTopBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2.5rem;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.vetSearchBar {
+  position: relative;
+  flex-grow: 1;
+  max-width: 650px;
+  min-width: 280px;
+}
+
+.vetSearchIcon {
+  position: absolute;
+  left: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-light);
+  font-size: 1.1rem;
+}
+
+.vetSearchInput {
+  width: 100%;
+  padding: 14px 20px 14px 50px;
+  border: 1px solid #e0e0e0;
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  transition: var(--transition-speed) var(--transition-ease);
+  background-color: var(--card-bg);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+  color: var(--text-color);
+}
+
+.vetSearchInput:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 4px rgba(0, 172, 193, 0.25);
+}
+
+.vetTopBarActions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+/* Botones genéricos para la barra superior */
+.vetRefreshButton,
+.vetAddButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 22px;
+  border-radius: 30px; /* Más redondeado */
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-speed) var(--transition-ease);
+  border: none;
+  font-size: 0.95rem;
+  box-shadow: var(--box-shadow-light);
+}
+
+.vetRefreshButton {
+  background-color: #eceff1; /* Gris claro */
+  color: var(--text-color);
+}
+
+.vetRefreshButton:hover {
+  background-color: #cfd8dc; /* Gris un poco más oscuro */
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+}
+
+.vetAddButton {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.vetAddButton:hover {
+  background-color: var(--primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0, 172, 193, 0.3);
+}
+
+.vetAddButtonLink {
+  color: inherit;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Contenedor de contenido */
+.vetContentWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+/* Estadísticas */
+.vetStatsContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.8rem;
+}
+
+.vetStatCard {
+  background-color: var(--card-bg);
+  border-radius: var(--border-radius);
+  padding: 1.8rem;
+  box-shadow: var(--box-shadow-light);
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  transition: var(--transition-speed) var(--transition-ease);
+  border-left: 5px solid var(--primary-color); /* Borde de color */
+}
+
+.vetStatCard:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--box-shadow-medium);
+}
+
+.vetStatIcon {
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  background-color: rgba(0, 172, 193, 0.1); /* Fondo del icono con transparencia */
+  color: var(--primary-color);
+  flex-shrink: 0;
+}
+
+.vetStatContent {
+  flex: 1;
+}
+
+.vetStatContent h3 {
+  font-size: 2rem;
+  margin: 0;
+  color: var(--text-color);
+  font-weight: 700;
+}
+
+.vetStatContent p {
+  margin: 5px 0 0;
+  color: var(--text-light);
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.vetTrendUp,
+.vetTrendSteady {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  margin-top: 8px;
+  font-weight: 600;
+}
+
+.vetTrendUp {
+  background-color: rgba(102, 187, 106, 0.15); /* Verde claro con transparencia */
+  color: var(--success-color);
+}
+
+.vetTrendSteady {
+  background-color: rgba(255, 179, 0, 0.15); /* Naranja claro con transparencia */
+  color: var(--warning-color);
+}
+
+/* Sección de historiales */
+.vetHistorialesSection {
+  background-color: var(--card-bg);
+  border-radius: var(--border-radius);
+  padding: 2rem;
+  box-shadow: var(--box-shadow-light);
+}
+
+.vetSectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.vetSectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.vetSectionTitle h2 {
+  margin: 0;
+  color: var(--text-color);
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+.vetSectionIcon {
+  color: var(--primary-color);
+  font-size: 1.8rem;
+}
+
+/* Grid de historiales */
+.vetHistorialesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.8rem;
+}
+
+/* Tarjeta de historial */
+.vetHistorialCard {
+  background-color: var(--card-bg);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  box-shadow: var(--box-shadow-light);
+  transition: var(--transition-speed) var(--transition-ease);
+  border: 1px solid #e0e0e0;
+  display: flex;
+  flex-direction: column;
+}
+
+.vetHistorialCard:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--box-shadow-medium);
+  border-color: var(--primary-light);
+}
+
+.vetHistorialHeader {
+  display: flex;
+  align-items: center;
+  padding: 1.2rem;
+  gap: 1rem;
+  border-bottom: 1px solid #f5f5f5;
+  background-color: var(--primary-light); /* Fondo azul claro para el header de la tarjeta */
+}
+
+.vetHistorialImage {
+  width: 70px; /* Tamaño más grande para la imagen de la mascota */
+  height: 70px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid white; /* Borde blanco alrededor de la imagen */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+}
+
+.vetHistorialImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Asegúrate de que el placeholder también se vea bien */
+  background-color: var(--primary-color); /* Fondo azul para el placeholder */
+  color: white;
+  font-size: 2rem; /* Tamaño de la letra para las iniciales */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vetHistorialTitle {
+  flex: 1;
+}
+
+.vetHistorialTitle h3 {
+  margin: 0;
+  font-size: 1.3rem;
+  color: var(--text-color);
+  font-weight: 600;
+}
+
+.vetHistorialTitle p {
+  margin: 5px 0 0;
+  font-size: 0.9rem;
+  color: var(--text-light);
+}
+
+.vetHistorialContent {
+  padding: 1.2rem;
+  flex-grow: 1; /* Permite que el contenido crezca */
+}
+
+.vetHistorialDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.vetDetailItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.95rem;
+  color: var(--text-color);
+}
+
+.vetDetailItem svg {
+  color: var(--primary-color);
+  margin-top: 2px;
+  flex-shrink: 0;
+  font-size: 1.1rem;
+}
+
+.vetDiagnostico {
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.vetNotes {
+  color: var(--text-light);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* Footer de la tarjeta */
+.vetHistorialFooter {
+  display: flex;
+  padding: 1.2rem;
+  border-top: 1px solid #f5f5f5;
+  gap: 0.8rem;
+  background-color: var(--card-bg);
+  justify-content: flex-end; /* Alinea los botones a la derecha */
+  flex-wrap: wrap; /* Permite que los botones se envuelvan */
+}
+
+/* Botones de acción en el footer de la tarjeta */
+.vetActionButton {
+  flex: 1; /* Permite que los botones se expandan */
+  min-width: 120px; /* Ancho mínimo para los botones */
+  padding: 10px 15px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-speed) var(--transition-ease);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+}
+
+.vetActionButton a {
+  color: inherit;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%; /* Asegura que el enlace ocupe todo el botón */
+  justify-content: center;
+}
+
+.vetActionButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+}
+
+.vetActionButton:active {
+  transform: translateY(0);
+}
+
+.vetActionButton svg {
+  font-size: 1rem;
+}
+
+/* Estilos específicos para los botones */
+.vetActionButton { /* Ver Detalles */
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+}
+
+.vetActionButton:hover {
+  background-color: var(--primary-hover);
+}
+
+.vetEditButton { /* Editar */
+  background-color: var(--secondary-color);
+  color: white;
+  border: none;
+}
+
+.vetEditButton:hover {
+  background-color: var(--secondary-hover);
+}
+
+.vetDeleteButton { /* Eliminar */
+  background-color: var(--error-color);
+  color: white;
+  border: none;
+}
+
+.vetDeleteButton:hover {
+  background-color: #d32f2f; /* Rojo más oscuro */
+}
+
+.vetActionButton:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+  opacity: 0.7;
+  box-shadow: none;
+  transform: none;
+}
+
+/* Estados vacíos */
+.vetNoHistoriales {
+  text-align: center;
+  padding: 4rem 2rem;
+  background-color: var(--primary-light);
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow-light);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.vetNoHistorialesIcon {
+  color: var(--primary-color);
+  margin-bottom: 1rem;
+  font-size: 3.5rem;
+}
+
+.vetNoHistoriales h3 {
+  color: var(--text-color);
+  margin-bottom: 0.5rem;
+  font-size: 1.6rem;
+}
+
+.vetNoHistoriales p {
+  color: var(--text-light);
+  max-width: 500px;
+  margin: 0 auto 1.5rem;
+  font-size: 1rem;
+}
+
+/* Loading y errores */
+.vetLoadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 70vh;
+  gap: 1.5rem;
+  background-color: var(--bg-color);
+}
+
+.vetLoadingSpinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary-color);
+}
+
+.vetLoadingSpinner svg {
+  color: var(--primary-color); /* Asegura que el spinner sea azul */
+}
+
+.vetLoadingText {
+  font-size: 1.2rem;
+  color: var(--text-light);
+  font-weight: 500;
+}
+
+.vetErrorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 70vh;
+  gap: 1.5rem;
+  text-align: center;
+  background-color: var(--bg-color);
+}
+
+.vetErrorMessage {
+  font-size: 1.1rem;
+  color: var(--error-color);
+  font-weight: 500;
+}
+
+.vetRetryButton {
+  padding: 12px 25px;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 30px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-speed) var(--transition-ease);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 10px rgba(0, 172, 193, 0.2);
+}
+
+.vetRetryButton:hover {
+  background-color: var(--primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0, 172, 193, 0.3);
+}
+
+/* Modal de Confirmación */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.modalContent {
+  background-color: var(--card-bg);
+  border-radius: var(--border-radius);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  width: 90%;
+  max-width: 450px;
+  overflow: hidden;
+  animation: modalEnter 0.3s ease-out forwards;
+  border-top: 5px solid var(--error-color);
+}
+
+@keyframes modalEnter {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
   }
-  
-  /* Contenedor principal */
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modalContent h3 {
+  background-color: var(--error-color);
+  color: white;
+  padding: 1.2rem;
+  margin: 0;
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.modalContent p {
+  padding: 1.5rem;
+  margin: 0;
+  color: var(--text-light);
+  text-align: center;
+  line-height: 1.6;
+}
+
+.warningText {
+  color: var(--error-color);
+  font-weight: 600;
+  display: block;
+  margin-top: 1rem;
+  padding: 0.8rem;
+  background-color: rgba(239, 83, 80, 0.1);
+  border-radius: 8px;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-top: 1px solid #e0e0e0;
+  background-color: #fcfcfc;
+}
+
+.vetDeleteButton,
+.vetCancelButton {
+  padding: 10px 20px;
+  border-radius: 30px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-speed) var(--transition-ease);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+}
+
+.vetDeleteButton {
+  background-color: var(--error-color);
+  color: white;
+  border: none;
+}
+
+.vetDeleteButton:hover {
+  background-color: #d32f2f;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(239, 83, 80, 0.3);
+}
+
+.vetCancelButton {
+  background-color: var(--card-bg);
+  color: var(--text-light);
+  border: 1px solid #cfd8dc;
+}
+
+.vetCancelButton:hover {
+  background-color: #eceff1;
+  color: var(--text-color);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+}
+
+/* Responsive */
+@media (max-width: 992px) {
   .vetMainContainer {
     padding: 2rem;
-    background-color: var(--bg-color);
-    min-height: 100vh;
   }
-  
-  /* Barra superior */
-  .vetTopBar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-    flex-wrap: wrap;
-    gap: 1rem;
-  }
-  
-  .vetSearchBar {
-    position: relative;
-    flex-grow: 1;
-    max-width: 600px;
-    min-width: 250px;
-  }
-  
-  .vetSearchIcon {
-    position: absolute;
-    left: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--text-light);
-  }
-  
-  .vetSearchInput {
-    width: 100%;
-    padding: 12px 20px 12px 45px;
-    border: 2px solid #e0e0e0;
-    border-radius: var(--border-radius);
-    font-size: 1rem;
-    transition: var(--transition);
-    background-color: var(--card-bg);
-  }
-  
-  .vetSearchInput:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(0, 188, 212, 0.2);
-  }
-  
-  .vetTopBarActions {
-    display: flex;
-    gap: 1rem;
-    align-items: center;
-  }
-  
-  /* Botones - Estilo sólido */
-  .vetRefreshButton {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 18px;
-    border-radius: var(--border-radius);
-    font-weight: 600;
-    cursor: pointer;
-    transition: var(--transition);
-    border: none;
-    font-size: 0.95rem;
-    background-color: #eceff1;
-    color: var(--text-color);
-  }
-  
-  .vetRefreshButton:hover {
-    background-color: #cfd8dc;
-  }
-  
-  .vetNewButton {
-    background-color: var(--primary-color);
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: var(--border-radius);
-    font-weight: 600;
-    transition: var(--transition);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-  
-  .vetNewButton:hover {
-    background-color: var(--primary-hover);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 188, 212, 0.3);
-  }
-  
-  .vetNewButtonLink {
-    color: inherit;
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  
-  /* BOTÓN VER DETALLES - Estilo sólido */
-  .vetActionButton {
-    background-color: var(--primary-color);
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: var(--border-radius);
-    font-weight: 600;
-    transition: var(--transition);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-  
-  .vetActionButton:hover {
-    background-color: var(--primary-hover);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 188, 212, 0.3);
-  }
-  
-  .vetActionButton:active {
-    transform: translateY(0);
-  }
-  
-  /* BOTÓN AGREGAR NOTAS - Estilo secundario */
-  .vetEditButton {
-    background-color: var(--secondary-color);
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: var(--border-radius);
-    font-weight: 600;
-    transition: var(--transition);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-  
-  .vetEditButton:hover {
-    background-color: var(--secondary-hover);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 131, 143, 0.3);
-  }
-  
-  .vetEditButton:active {
-    transform: translateY(0);
-  }
-  
-  .vetAddButton {
-    background-color: var(--primary-color);
-    color: white;
-    margin-top: 1rem;
-    border-radius: var(--border-radius);
-    padding: 10px 20px;
-    border: none;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-  
-  .vetAddButton:hover {
-    background-color: var(--primary-hover);
-  }
-  
-  .vetAddButtonLink {
-    color: inherit;
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  
-  /* Contenedor de contenido */
-  .vetContentWrapper {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-  }
-  
-  /* Estadísticas */
-  .vetStatsContainer {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1.5rem;
-  }
-  
-  .vetStatCard {
-    background-color: var(--primary-light);
-    border-radius: var(--border-radius);
-    padding: 1.5rem;
-    box-shadow: var(--box-shadow);
-    display: flex;
-    gap: 1rem;
-    align-items: center;
-    transition: var(--transition);
-    border-left: 4px solid var(--primary-color);
-  }
-  
-  .vetStatCard:hover {
-    transform: translateY(-5px);
-  }
-  
-  .vetStatIcon {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.2rem;
-    background-color: rgba(255, 255, 255, 0.9);
-    color: var(--primary-color);
-  }
-  
-  .vetStatContent {
-    flex: 1;
-  }
-  
-  .vetStatContent h3 {
-    font-size: 1.8rem;
-    margin: 0;
-    color: var(--text-color);
-  }
-  
-  .vetStatContent p {
-    margin: 5px 0 0;
-    color: var(--text-light);
-    font-size: 0.9rem;
-  }
-  
-  .vetTrendUp {
-    display: inline-block;
-    background-color: rgba(76, 175, 80, 0.1);
-    color: var(--success-color);
-    padding: 2px 8px;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    margin-top: 5px;
-  }
-  
-  .vetTrendSteady {
-    display: inline-block;
-    background-color: rgba(255, 152, 0, 0.1);
-    color: var(--warning-color);
-    padding: 2px 8px;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    margin-top: 5px;
-  }
-  
-  /* Sección de historiales */
-  .vetHistorialesSection {
-    background-color: var(--card-bg);
-    border-radius: var(--border-radius);
-    padding: 1.5rem;
-    box-shadow: var(--box-shadow);
-  }
-  
-  .vetSectionHeader {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
-  }
-  
-  .vetSectionTitle {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  
-  .vetSectionTitle h2 {
-    margin: 0;
-    color: var(--text-color);
-  }
-  
-  .vetSectionIcon {
-    color: var(--primary-color);
-    font-size: 1.5rem;
-  }
-  
-  /* Grid de historiales */
   .vetHistorialesGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   }
-  
-  /* Tarjeta de historial */
-  .vetHistorialCard {
-    background-color: var(--card-bg);
-    border-radius: var(--border-radius);
-    overflow: hidden;
-    box-shadow: var(--box-shadow);
-    transition: var(--transition);
-    border: 1px solid #e0e0e0;
+  .vetStatCard {
+    padding: 1.5rem;
   }
-  
-  .vetHistorialCard:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0, 188, 212, 0.1);
-    border-color: var(--primary-light);
+  .vetStatContent h3 {
+    font-size: 1.6rem;
   }
-  
-  .vetHistorialHeader {
-    display: flex;
-    align-items: center;
-    padding: 1rem;
-    gap: 1rem;
-    border-bottom: 1px solid #f5f5f5;
-    background-color: var(--primary-light);
+}
+
+@media (max-width: 768px) {
+  .vetTopBar {
+    flex-direction: column;
+    align-items: stretch;
   }
-  
-  .vetHistorialImage {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    overflow: hidden;
-    border: 2px solid white;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  .vetSearchBar {
+    max-width: 100%;
   }
-  
-  .vetHistorialImage img {
+  .vetTopBarActions {
     width: 100%;
-    height: 100%;
-    object-fit: cover;
+    justify-content: center;
+    flex-wrap: wrap;
   }
-  
-  .vetHistorialTitle h3 {
-    margin: 0;
-    font-size: 1.2rem;
-    color: var(--text-color);
+  .vetRefreshButton,
+  .vetAddButton {
+    flex-grow: 1;
   }
-  
-  .vetHistorialTitle p {
-    margin: 5px 0 0;
-    font-size: 0.85rem;
-    color: var(--text-light);
+  .vetStatsContainer {
+    grid-template-columns: 1fr 1fr;
+    gap: 1.2rem;
   }
-  
-  .vetHistorialContent {
-    padding: 1rem;
+  .vetHistorialesGrid {
+    grid-template-columns: 1fr;
   }
-  
-  .vetHistorialDetails {
-    display: flex;
+  .vetHistorialFooter {
     flex-direction: column;
     gap: 0.8rem;
   }
-  
-  .vetDetailItem {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
+  .vetActionButton {
+    width: 100%;
+    min-width: unset;
+  }
+  .vetSectionTitle h2 {
+    font-size: 1.6rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .vetMainContainer {
+    padding: 1rem;
+  }
+  .vetTopBar {
+    gap: 1rem;
+  }
+  .vetSearchBar {
+    min-width: unset;
+  }
+  .vetSearchInput {
+    padding: 10px 15px 10px 40px;
     font-size: 0.9rem;
   }
-  
-  .vetDetailItem svg {
-    color: var(--primary-color);
-    margin-top: 2px;
-    flex-shrink: 0;
+  .vetSearchIcon {
+    left: 12px;
+    font-size: 0.9rem;
   }
-  
-  .vetDiagnostico {
-    font-weight: 600;
-    color: var(--text-color);
-  }
-  
-  .vetNotes {
-    color: var(--text-light);
+  .vetRefreshButton,
+  .vetAddButton {
+    padding: 10px 15px;
     font-size: 0.85rem;
-    line-height: 1.4;
   }
-  
-  /* Footer de la tarjeta */
-  .vetHistorialFooter {
-    display: flex;
-    padding: 1rem;
-    border-top: 1px solid #f5f5f5;
+  .vetStatsContainer {
+    grid-template-columns: 1fr;
     gap: 1rem;
-    background-color: white;
   }
-  
-  .vetHistorialFooter button {
-    flex: 1;
+  .vetStatCard {
+    padding: 1.2rem;
   }
-  
-  /* Estados vacíos */
+  .vetStatContent h3 {
+    font-size: 1.4rem;
+  }
+  .vetStatContent p {
+    font-size: 0.85rem;
+  }
+  .vetSectionTitle h2 {
+    font-size: 1.4rem;
+  }
+  .vetHistorialHeader {
+    padding: 0.8rem;
+  }
+  .vetHistorialImage {
+    width: 50px;
+    height: 50px;
+  }
+  .vetHistorialImage img {
+    font-size: 1.5rem;
+  }
+  .vetHistorialTitle h3 {
+    font-size: 1.1rem;
+  }
+  .vetHistorialTitle p {
+    font-size: 0.8rem;
+  }
+  .vetHistorialContent {
+    padding: 0.8rem;
+  }
+  .vetDetailItem {
+    font-size: 0.85rem;
+  }
+  .vetNotes {
+    font-size: 0.8rem;
+  }
+  .vetHistorialFooter {
+    padding: 0.8rem;
+  }
+  .vetActionButton {
+    padding: 8px 12px;
+    font-size: 0.8rem;
+  }
   .vetNoHistoriales {
-    text-align: center;
-    padding: 3rem 2rem;
-    background-color: var(--primary-light);
-    border-radius: var(--border-radius);
+    padding: 2rem 1rem;
   }
-  
   .vetNoHistorialesIcon {
-    color: var(--primary-color);
-    margin-bottom: 1rem;
     font-size: 3rem;
   }
-  
   .vetNoHistoriales h3 {
-    color: var(--text-color);
-    margin-bottom: 0.5rem;
+    font-size: 1.4rem;
   }
-  
   .vetNoHistoriales p {
-    color: var(--text-light);
-    max-width: 500px;
-    margin: 0 auto 1.5rem;
+    font-size: 0.9rem;
   }
-  
-  /* Loading y errores */
-  .vetLoadingContainer {
-    display: flex;
+  .modalContent h3 {
+    font-size: 1.3rem;
+  }
+  .modalContent p {
+    padding: 1rem;
+    font-size: 0.9rem;
+  }
+  .modalActions {
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 60vh;
-    gap: 1.5rem;
+    gap: 0.8rem;
   }
-  
-  .vetLoadingSpinner {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--primary-color);
+  .vetDeleteButton,
+  .vetCancelButton {
+    width: 100%;
+    font-size: 0.9rem;
   }
-  
-  .vetLoadingText {
-    font-size: 1.2rem;
-    color: var(--text-light);
-  }
-  
-  .vetErrorContainer {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 60vh;
-    gap: 1.5rem;
-    text-align: center;
-  }
-  
-  .vetErrorMessage {
-    font-size: 1.1rem;
-    color: var(--error-color);
-  }
-  
-  .vetRetryButton {
-    padding: 10px 20px;
-    background-color: var(--primary-color);
-    color: white;
-    border: none;
-    border-radius: var(--border-radius);
-    font-weight: 600;
-    cursor: pointer;
-    transition: var(--transition);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  
-  .vetRetryButton:hover {
-    background-color: var(--primary-hover);
-  }
-  
-  /* Responsive */
-  @media (max-width: 768px) {
-    .vetTopBar {
-      flex-direction: column;
-      align-items: stretch;
-    }
-    
-    .vetSearchBar {
-      max-width: 100%;
-    }
-    
-    .vetTopBarActions {
-      justify-content: flex-end;
-    }
-    
-    .vetStatsContainer {
-      grid-template-columns: 1fr 1fr;
-    }
-    
-    .vetHistorialesGrid {
-      grid-template-columns: 1fr;
-    }
-  }
-  
-  @media (max-width: 480px) {
-    .vetMainContainer {
-      padding: 1rem;
-    }
-    
-    .vetStatsContainer {
-      grid-template-columns: 1fr;
-    }
-    
-    .vetHistorialFooter {
-      flex-direction: column;
-    }
-    
-    .vetHistorialFooter button {
-      width: 100%;
-    }
-  }
+}

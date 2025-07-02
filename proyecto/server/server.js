@@ -11,7 +11,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Configuración de Cloudinary
-const CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME || 'dnemd8wp0'; // Corregido a dnemd8wp0
+const CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME || 'dnemd9wp0'; // Corregido a dnemd8wp0
 const API_KEY = process.env.CLOUDINARY_API_KEY || '418626316652541';
 const API_SECRET = process.env.CLOUDINARY_API_SECRET || 'NKTrcFgCXc-SUX_HNu61chc-f4M'; // Asegúrate de que este sea el valor completo
 
