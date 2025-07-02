@@ -30,10 +30,10 @@ import ListaPropietarios from "./Pages/InicioVeterinario/ListaPropietarios";
 import DetallePropietario from "./Pages/InicioVeterinario/DetallePropietario";
 import RegistrarPropietario from "./Pages/InicioVeterinario/RegistrarPropietario";
 import EditarPropietario from "./Pages/InicioVeterinario/EditarPropietario";
-import ListaMascotasVeterinario from "./Pages/InicioVeterinario/ListaMascotas";
-import DetalleMascotaVeterinario from "./Pages/InicioVeterinario/DetalleMascota";
-import RegistrarMascotaVeterinario from "./Pages/InicioVeterinario/RegistrarMascota";
-import EditarMascotaVeterinario from "./Pages/InicioVeterinario/EditarMascota";
+import ListaMascotasVeterinario from "./Pages/InicioVeterinario/ListaMascotas"; // Asegúrate de que el nombre del archivo sea ListaMascotas.js
+import DetalleMascotaVeterinario from "./Pages/InicioVeterinario/DetalleMascota"; // Asegúrate de que el nombre del archivo sea DetalleMascota.js
+import RegistrarMascotaVeterinario from "./Pages/InicioVeterinario/RegistrarMascota"; // Asegúrate de que el nombre del archivo sea RegistrarMascota.js
+import EditarMascotaVeterinario from "./Pages/InicioVeterinario/EditarMascota"; // Asegúrate de que el nombre del archivo sea EditarMascota.js
 import ListaCitasVeterinario from "./Pages/InicioVeterinario/ListaCitasVeterinario";
 import DetalleCitaVeterinario from "./Pages/InicioVeterinario/DetalleCitaVeterinario";
 import ListaHistorialesVeterinario from "./Pages/InicioVeterinario/ListaHistoriales";

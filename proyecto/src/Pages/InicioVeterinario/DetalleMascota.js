@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate, useParams, useOutletContext } from 'react-router-dom';
 import veteStyles from './Style/DetalleMascotaStyles.module.css';
 import { motion } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -12,9 +12,11 @@ import {
   faCalendarAlt,
   faUser,
   faFileMedical,
-  faPills,
-  faNotesMedical // Added for loading state
+  faNotesMedical,
+  faSpinner, // Added for loading state
+  faExclamationTriangle // Added for error state
 } from '@fortawesome/free-solid-svg-icons';
+import { authFetch } from './api'; // Asegúrate de que la ruta sea correcta
 
 const containerVariants = {
   hidden: { opacity: 0, x: '-100vw' },
@@ -48,58 +50,67 @@ const cardVariants = {
   }
 };
 
-const DetalleMascota = () => {
+const DetalleMascotaVeterinario = () => { // Renombrado para claridad
   const navigate = useNavigate();
-  const { id } = useParams();
+  const { id } = useParams(); // id_mascota
+  const { showNotification } = useOutletContext();
   const [mascota, setMascota] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    // Simulate API call to fetch pet details
-    setTimeout(() => {
-      try {
-        const mascotaData = {
-          id: parseInt(id),
-          nombre: 'Max',
-          especie: 'Perro',
-          raza: 'Labrador Retriever',
-          sexo: 'Macho',
-          fechaNacimiento: '10/05/2020',
-          edad: '4 años', // Updated age based on current date (June 2025)
-          propietario: 'Ana Pérez',
-          telefonoPropietario: '3101234567',
-          ultimaVisita: '01/04/2024', // Updated last visit
-          alergias: 'Ninguna conocida',
-          peso: '28 kg',
-          condicionMedica: 'Saludable',
-          medicamentosActuales: 'Ninguno'
-        };
-        if (mascotaData.id === parseInt(id)) {
-          setMascota(mascotaData);
-          setLoading(false);
+  const fetchMascotaDetails = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await authFetch(`/mascotas/${id}`); // Endpoint para obtener detalles de mascota por ID
+      if (response.success) {
+        const fetchedMascota = response.data;
+        // Calcular edad si la fecha de nacimiento está disponible
+        if (fetchedMascota.fecha_nacimiento) {
+          const birthDate = new Date(fetchedMascota.fecha_nacimiento);
+          const today = new Date();
+          let age = today.getFullYear() - birthDate.getFullYear();
+          const m = today.getMonth() - birthDate.getMonth();
+          if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+          }
+          fetchedMascota.edad_calculada = `${age} años`;
         } else {
-          throw new Error('Mascota no encontrada');
+          fetchedMascota.edad_calculada = 'N/A';
         }
-      } catch (err) {
-        setError(err.message);
-        setLoading(false);
+
+        setMascota(fetchedMascota);
+      } else {
+        setError(response.message || 'Mascota no encontrada.');
+        showNotification(response.message || 'Mascota no encontrada.', 'error');
       }
-    }, 800);
-  }, [id]);
+    } catch (err) {
+      console.error("Error fetching mascota details:", err);
+      setError('Error de conexión al servidor al cargar los detalles de la mascota.');
+      showNotification('Error de conexión al servidor al cargar los detalles de la mascota.', 'error');
+    } finally {
+      setLoading(false);
+    }
+  }, [id, showNotification]);
+
+  useEffect(() => {
+    fetchMascotaDetails();
+  }, [fetchMascotaDetails]);
 
   const handleVolver = () => {
     navigate(-1);
   };
 
   const getEspecieIcon = () => {
-    return mascota.especie.toLowerCase() === 'perro' ? faDog : faCat;
+    if (!mascota || !mascota.especie) return faPaw; // Default icon
+    return mascota.especie.toLowerCase() === 'perro' ? faDog :
+           mascota.especie.toLowerCase() === 'gato' ? faCat : faPaw;
   };
 
   if (loading) {
     return (
-      <div className={veteStyles.veteLoadingContainer}> {/* Corrected class */}
-        <div className={veteStyles.veteLoadingSpinner}></div> {/* Corrected class */}
+      <div className={veteStyles.veteLoadingContainer}>
+        <FontAwesomeIcon icon={faSpinner} spin size="3x" className={veteStyles.veteLoadingSpinner} />
         <p>Cargando detalles de la mascota...</p>
       </div>
     );
@@ -107,12 +118,12 @@ const DetalleMascota = () => {
 
   if (error) {
     return (
-      <div className={veteStyles.veteErrorContainer}> {/* Corrected class */}
-        <h3>Error</h3>
+      <div className={veteStyles.veteErrorContainer}>
+        <h3><FontAwesomeIcon icon={faExclamationTriangle} /> Error</h3>
         <p>{error}</p>
         <motion.button
           onClick={handleVolver}
-          className={veteStyles.veteVolverBtn} /* Reusing primary button style */
+          className={veteStyles.veteVolverBtn}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
@@ -140,16 +151,16 @@ const DetalleMascota = () => {
 
   return (
     <motion.div
-      className={veteStyles.veteDetalleContainer} /* Corrected class */
+      className={veteStyles.veteDetalleContainer}
       variants={containerVariants}
       initial="hidden"
       animate="visible"
       exit="exit"
     >
-      <div className={veteStyles.veteHeader}> 
+      <div className={veteStyles.veteHeader}>
         <motion.button
           onClick={handleVolver}
-          className={veteStyles.veteVolverBtn} /* Corrected class */
+          className={veteStyles.veteVolverBtn}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
@@ -158,10 +169,10 @@ const DetalleMascota = () => {
         <h2><FontAwesomeIcon icon={faPaw} /> Detalle de la Mascota</h2>
       </div>
 
-      <div className={veteStyles.veteDetalleInfo}> {/* Corrected class */}
-        <div className={veteStyles.veteInfoGrid}> 
+      <div className={veteStyles.veteDetalleInfo}>
+        <div className={veteStyles.veteInfoGrid}>
           <motion.div
-            className={veteStyles.veteInfoCard} /* Corrected class */
+            className={veteStyles.veteInfoCard}
             variants={cardVariants}
             whileHover="hover"
           >
@@ -170,7 +181,7 @@ const DetalleMascota = () => {
           </motion.div>
 
           <motion.div
-            className={veteStyles.veteInfoCard} /* Corrected class */
+            className={veteStyles.veteInfoCard}
             variants={cardVariants}
             whileHover="hover"
           >
@@ -179,58 +190,39 @@ const DetalleMascota = () => {
           </motion.div>
 
           <motion.div
-            className={veteStyles.veteInfoCard} /* Corrected class */
+            className={veteStyles.veteInfoCard}
             variants={cardVariants}
             whileHover="hover"
           >
             <h3><FontAwesomeIcon icon={faPaw} /> Raza</h3>
-            <p>{mascota.raza}</p>
+            <p>{mascota.raza || 'N/A'}</p>
           </motion.div>
 
           <motion.div
-            className={veteStyles.veteInfoCard} /* Corrected class */
+            className={veteStyles.veteInfoCard}
             variants={cardVariants}
             whileHover="hover"
           >
             <h3><FontAwesomeIcon icon={faVenusMars} /> Sexo</h3>
-            <p>{mascota.sexo}</p>
+            <p>{mascota.sexo || 'N/A'}</p>
           </motion.div>
 
           <motion.div
-            className={veteStyles.veteInfoCard} /* Corrected class */
+            className={veteStyles.veteInfoCard}
             variants={cardVariants}
             whileHover="hover"
           >
             <h3><FontAwesomeIcon icon={faCalendarAlt} /> Fecha Nacimiento</h3>
-            <p>{mascota.fechaNacimiento} ({mascota.edad})</p>
+            <p>{mascota.fecha_nacimiento ? new Date(mascota.fecha_nacimiento).toLocaleDateString('es-ES') : 'N/A'} ({mascota.edad_calculada})</p>
           </motion.div>
 
           <motion.div
-            className={veteStyles.veteInfoCard} /* Corrected class */
+            className={veteStyles.veteInfoCard}
             variants={cardVariants}
             whileHover="hover"
           >
             <h3><FontAwesomeIcon icon={faUser} /> Propietario</h3>
-            <p>{mascota.propietario}<br />({mascota.telefonoPropietario})</p>
-          </motion.div>
-
-          {/* New Cards for additional info */}
-          <motion.div
-            className={veteStyles.veteInfoCard}
-            variants={cardVariants}
-            whileHover="hover"
-          >
-            <h3><FontAwesomeIcon icon={faCalendarAlt} /> Última Visita</h3>
-            <p>{mascota.ultimaVisita}</p>
-          </motion.div>
-
-          <motion.div
-            className={veteStyles.veteInfoCard}
-            variants={cardVariants}
-            whileHover="hover"
-          >
-            <h3><FontAwesomeIcon icon={faNotesMedical} /> Alergias</h3>
-            <p>{mascota.alergias}</p>
+            <p>{mascota.propietario_nombre}<br />({mascota.propietario_telefono || 'N/A'})</p>
           </motion.div>
 
           <motion.div
@@ -239,7 +231,7 @@ const DetalleMascota = () => {
             whileHover="hover"
           >
             <h3><FontAwesomeIcon icon={faPaw} /> Peso</h3>
-            <p>{mascota.peso}</p>
+            <p>{mascota.peso ? `${mascota.peso} kg` : 'N/A'}</p>
           </motion.div>
 
           <motion.div
@@ -247,8 +239,8 @@ const DetalleMascota = () => {
             variants={cardVariants}
             whileHover="hover"
           >
-            <h3><FontAwesomeIcon icon={faFileMedical} /> Condición Médica</h3>
-            <p>{mascota.condicionMedica}</p>
+            <h3><FontAwesomeIcon icon={faNotesMedical} /> Características Especiales</h3>
+            <p>{mascota.caracteristicas_especiales || 'Ninguna'}</p>
           </motion.div>
 
           <motion.div
@@ -256,16 +248,14 @@ const DetalleMascota = () => {
             variants={cardVariants}
             whileHover="hover"
           >
-            <h3><FontAwesomeIcon icon={faPills} /> Medicamentos Actuales</h3>
-            <p>{mascota.medicamentosActuales}</p>
+            <h3><FontAwesomeIcon icon={faFileMedical} /> Microchip</h3>
+            <p>{mascota.microchip || 'No registrado'}</p>
           </motion.div>
 
         </div>
-
-        
       </div>
     </motion.div>
   );
 };
 
-export default DetalleMascota;
+export default DetalleMascotaVeterinario;

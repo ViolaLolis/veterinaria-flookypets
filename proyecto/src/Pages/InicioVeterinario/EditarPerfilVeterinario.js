@@ -82,12 +82,21 @@ const EditarPerfilVeterinario = () => {
   };
 
   const handleFileChange = (e) => {
-    setSelectedFile(e.target.files[0]);
+    const file = e.target.files[0];
+    setSelectedFile(file);
+    // --- DEBUGGING: Log file info ---
+    if (file) {
+      console.log("Archivo seleccionado:", file.name, file.type, file.size, "bytes");
+    } else {
+      console.log("No se seleccionó ningún archivo.");
+    }
+    // ---------------------------------
   };
 
   const handleUploadImage = async () => {
     if (!selectedFile) {
       showNotification('Por favor, selecciona una imagen para subir.', 'info');
+      console.warn("handleUploadImage: selectedFile es nulo."); // Debugging
       return null;
     }
 
@@ -96,14 +105,18 @@ const EditarPerfilVeterinario = () => {
     setSuccessMessage('');
 
     const imageData = new FormData();
-    imageData.append('image', selectedFile);
+    imageData.append('image', selectedFile); // 'image' debe coincidir con req.files.image en el servidor
+
+    // --- DEBUGGING: Log FormData content ---
+    console.log("Contenido de FormData:");
+    for (let [key, value] of imageData.entries()) {
+      console.log(`${key}:`, value);
+    }
+    // ---------------------------------------
 
     try {
       const response = await authFetch('/upload-image', {
         method: 'POST',
-        headers: {
-          // No Content-Type aquí, FormData lo establece automáticamente con el boundary
-        },
         body: imageData,
       });
 
@@ -113,6 +126,7 @@ const EditarPerfilVeterinario = () => {
         setSelectedFile(null); // Limpiar el archivo seleccionado
         return response.imageUrl;
       } else {
+        // Ahora el mensaje de error del servidor será más específico
         setError(response.message || 'Error al subir la imagen.');
         if (showNotification) showNotification(response.message || 'Error al subir la imagen.', 'error');
         return null;
@@ -141,7 +155,8 @@ const EditarPerfilVeterinario = () => {
 
     let updatedImageUrl = formData.imagen_url;
     if (selectedFile) {
-      updatedImageUrl = await handleUploadImage(); // Sube la imagen primero
+      // Sube la imagen primero y obtén la URL de Cloudinary
+      updatedImageUrl = await handleUploadImage();
       if (!updatedImageUrl) {
         setIsSubmitting(false);
         return; // Si la subida falla, detener el proceso
@@ -157,7 +172,7 @@ const EditarPerfilVeterinario = () => {
       experiencia: formData.experiencia,
       universidad: formData.universidad,
       horario: formData.horario,
-      imagen_url: updatedImageUrl, // Usar la URL actualizada
+      imagen_url: updatedImageUrl, // Usar la URL actualizada de la imagen (o la existente si no se subió una nueva)
     };
 
     // Añadir la contraseña solo si se ha introducido una nueva
@@ -170,13 +185,15 @@ const EditarPerfilVeterinario = () => {
     try {
       const response = await authFetch(`/usuarios/${user.id}`, {
         method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify(dataToUpdate),
       });
 
       if (response.success) {
         setSuccessMessage('Perfil actualizado exitosamente.');
         if (showNotification) showNotification('Perfil actualizado exitosamente.', 'success');
-        // Actualizar el estado global del usuario si es necesario (ej. nombre, imagen_url)
         if (setUser) {
           setUser(prevUser => ({
             ...prevUser,
@@ -184,12 +201,9 @@ const EditarPerfilVeterinario = () => {
             apellido: response.data.apellido,
             email: response.data.email,
             imagen_url: response.data.imagen_url,
-            // Actualizar otros campos relevantes en el estado global si se usan
           }));
         }
-        // Recargar los datos del perfil para asegurar que todo esté sincronizado
-        loadProfileData(); 
-        // Limpiar campos de contraseña después de un cambio exitoso
+        loadProfileData();
         setFormData(prev => ({ ...prev, new_password: '', confirm_password: '' }));
       } else {
         setError(response.message || 'Error al actualizar el perfil.');

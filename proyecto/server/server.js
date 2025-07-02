@@ -22,10 +22,11 @@ app.use(cors({
     origin: process.env.FRONTEND_URL || 'http://localhost:3000',
     credentials: true
 }));
-app.use(express.json());
+
 app.use(fileUpload({
-    useTempFiles: true,
-    tempFileDir: '/tmp/'
+    limits: { fileSize: 5 * 1024 * 1024 }, // Límite de 5MB
+    abortOnLimit: true,
+    debug: true // Añadir para ver más logs de fileUpload
 }));
 
 // Configuración del pool de conexiones a la base de datos
@@ -259,8 +260,8 @@ app.get("/", (req, res) => {
 // RUTAS DE AUTENTICACIÓN
 // =============================================
 
-// Ruta de login
-app.post("/login", async (req, res) => {
+// Aplicar express.json solo a las rutas que lo necesitan
+app.post("/login", express.json(), async (req, res) => {
     const { email, password } = req.body;
 
     try {
@@ -302,7 +303,7 @@ app.post("/login", async (req, res) => {
 });
 
 // Ruta de registro para usuarios normales (rol 'usuario')
-app.post("/register", async (req, res) => {
+app.post("/register", express.json(), async (req, res) => {
     const { nombre, apellido, email, password, telefono, direccion, tipo_documento, numero_documento, fecha_nacimiento } = req.body;
 
     // Validación básica de campos requeridos
@@ -343,7 +344,7 @@ app.post("/register", async (req, res) => {
 });
 
 // Ruta para recuperación de contraseña (generación de token)
-app.post("/forgot-password", async (req, res) => {
+app.post("/forgot-password", express.json(), async (req, res) => {
     const { email } = req.body;
 
     try {
@@ -381,7 +382,7 @@ app.post("/forgot-password", async (req, res) => {
 });
 
 // Ruta para verificar el código de recuperación
-app.post("/verify-reset-code", async (req, res) => {
+app.post("/verify-reset-code", express.json(), async (req, res) => {
     const { email, token } = req.body;
 
     if (!email || !token) {
@@ -438,7 +439,7 @@ app.post("/verify-reset-code", async (req, res) => {
 });
 
 // Ruta para resetear contraseña
-app.post("/reset-password", async (req, res) => {
+app.post("/reset-password", express.json(), async (req, res) => {
     const { email, token, newPassword } = req.body;
 
     if (!email || !token || !newPassword) {
@@ -489,26 +490,51 @@ app.post("/reset-password", async (req, res) => {
 // RUTAS DE CLOUDINARY
 // =============================================
 
+// Esta ruta no necesita express.json() porque fileUpload ya maneja el body
 app.post('/upload-image', authenticateToken, async (req, res) => {
     try {
-        if (!req.files || Object.keys(req.files).length === 0) {
-            return res.status(400).json({ success: false, message: 'No se ha subido ningún archivo.' });
+        console.log("Received upload request. Files:", req.files);
+        if (!req.files || Object.keys(req.files).length === 0 || !req.files.image) {
+            return res.status(400).json({ success: false, message: 'No se ha subido ningún archivo o el campo "image" está vacío.' });
         }
 
         const file = req.files.image;
-        const result = await cloudinary.uploader.upload(file.tempFilePath, {
-            folder: 'flookypets_profiles',
+        console.log("File received:", file.name, file.mimetype, file.size);
+
+        const uploadOptions = {};
+        if (file.tempFilePath) {
+            // Si express-fileupload usa archivos temporales (useTempFiles: true)
+            uploadOptions.file = file.tempFilePath;
+        } else if (file.data) {
+            // Si express-fileupload maneja el archivo en memoria (useTempFiles: false o por defecto para pequeños)
+            // Cloudinary puede subir desde un Buffer directamente si se le pasa como data URI
+            uploadOptions.file = `data:${file.mimetype};base64,${file.data.toString('base64')}`;
+        } else {
+            return res.status(500).json({ success: false, message: 'No se pudo acceder al archivo subido (ni tempFilePath ni data).' });
+        }
+
+        const result = await cloudinary.uploader.upload(uploadOptions.file, {
+            folder: 'flookypets_profiles', // Asegúrate de que esta carpeta exista o se cree automáticamente
         });
 
-        require('fs').unlink(file.tempFilePath, (err) => {
-            if (err) console.error("Error al eliminar archivo temporal:", err);
-        });
+        // Si se usaron archivos temporales, eliminarlos después de subir
+        if (file.tempFilePath) {
+            const fs = require('fs'); // Importar 'fs' solo si es necesario
+            fs.unlink(file.tempFilePath, (err) => {
+                if (err) console.error("Error al eliminar archivo temporal:", err);
+            });
+        }
 
         res.json({ success: true, message: 'Imagen subida correctamente.', imageUrl: result.secure_url });
 
     } catch (error) {
         console.error("Error al subir imagen a Cloudinary:", error);
-        res.status(500).json({ success: false, message: "Error al subir imagen.", error: process.env.NODE_ENV === 'development' ? error.stack : error.message });
+        // Envía el mensaje de error de Cloudinary al frontend para una depuración más fácil
+        res.status(500).json({
+            success: false,
+            message: `Error al subir imagen: ${error.message || 'Error desconocido de Cloudinary.'}`,
+            error: process.env.NODE_ENV === 'development' ? error.stack : error.message
+        });
     }
 });
 
@@ -636,7 +662,7 @@ app.get("/api/admin/administrators", authenticateToken, isAdmin, async (req, res
 });
 
 // Crear nuevo administrador
-app.post("/api/admin/administrators", authenticateToken, isAdmin, async (req, res) => {
+app.post("/api/admin/administrators", authenticateToken, express.json(), isAdmin, async (req, res) => {
     const { nombre, apellido, email, telefono, direccion, password, imagen_url } = req.body;
 
     // Validación mejorada
@@ -704,7 +730,7 @@ app.post("/api/admin/administrators", authenticateToken, isAdmin, async (req, re
 });
 
 // Actualizar administrador
-app.put("/api/admin/administrators/:id", authenticateToken, isAdmin, async (req, res) => {
+app.put("/api/admin/administrators/:id", authenticateToken, express.json(), isAdmin, async (req, res) => {
     const { id } = req.params;
     const { nombre, apellido, telefono, direccion, imagen_url } = req.body;
 
@@ -872,7 +898,7 @@ app.get("/usuarios/veterinarios", authenticateToken, isVetOrAdmin, async (req, r
 });
 
 // Crear nuevo veterinario
-app.post("/usuarios/veterinarios", authenticateToken, isAdmin, async (req, res) => {
+app.post("/usuarios/veterinarios", authenticateToken, express.json(), isAdmin, async (req, res) => {
     const { nombre, apellido, email, telefono, direccion, password, experiencia, universidad, horario, imagen_url } = req.body;
 
     // Validación de campos requeridos
@@ -920,7 +946,7 @@ app.post("/usuarios/veterinarios", authenticateToken, isAdmin, async (req, res) 
 });
 
 // Actualizar veterinario
-app.put("/usuarios/veterinarios/:id", authenticateToken, isAdmin, async (req, res) => {
+app.put("/usuarios/veterinarios/:id", authenticateToken, express.json(), isAdmin, async (req, res) => {
     const { id } = req.params;
     const { nombre, apellido, telefono, direccion, active, experiencia, universidad, horario, imagen_url } = req.body;
 
@@ -1046,7 +1072,7 @@ app.get("/servicios", authenticateToken, async (req, res) => {
 });
 
 // Crear nuevo servicio
-app.post("/servicios", authenticateToken, isAdmin, async (req, res) => {
+app.post("/servicios", authenticateToken, express.json(), isAdmin, async (req, res) => {
     const { nombre, descripcion, precio } = req.body;
 
     if (!nombre || !descripcion || !precio) {
@@ -1072,7 +1098,7 @@ app.post("/servicios", authenticateToken, isAdmin, async (req, res) => {
 });
 
 // Actualizar servicio
-app.put("/servicios/:id", authenticateToken, isAdmin, async (req, res) => {
+app.put("/servicios/:id", authenticateToken, express.json(), isAdmin, async (req, res) => {
     const { id } = req.params;
     const { nombre, descripcion, precio } = req.body;
 
@@ -1181,7 +1207,7 @@ app.get("/usuarios/:id", authenticateToken, isOwnerOrAdmin, async (req, res) => 
 });
 
 // Actualizar usuario (general, para clientes, veterinarios, admins)
-app.put("/usuarios/:id", authenticateToken, isOwnerOrAdmin, async (req, res) => {
+app.put("/usuarios/:id", authenticateToken, express.json(), isOwnerOrAdmin, async (req, res) => {
     const { id } = req.params;
     const {
         nombre, apellido, email, telefono, direccion, tipo_documento, numero_documento,
@@ -1228,6 +1254,7 @@ app.put("/usuarios/:id", authenticateToken, isOwnerOrAdmin, async (req, res) => 
             if (horario !== undefined) { fields.push('horario = ?'); values.push(horario); }
         }
 
+        // La imagen_url puede venir en el body si no se cambió el archivo, o se actualizó con la URL de Cloudinary
         if (imagen_url !== undefined) { fields.push('imagen_url = ?'); values.push(imagen_url); }
 
         if (notificaciones_activas !== undefined) { fields.push('notificaciones_activas = ?'); values.push(notificaciones_activas ? 1 : 0); }
@@ -1353,7 +1380,7 @@ app.get("/mascotas/:id", authenticateToken, isOwnerOrAdmin, async (req, res) => 
 });
 
 // Registrar nueva mascota
-app.post("/mascotas", authenticateToken, isVetOrAdmin, async (req, res) => {
+app.post("/mascotas", authenticateToken, express.json(), isVetOrAdmin, async (req, res) => {
     const { nombre, especie, raza, edad, peso, sexo, color, microchip, id_propietario, imagen_url } = req.body;
 
     if (!nombre || !especie || !id_propietario) {
@@ -1364,7 +1391,7 @@ app.post("/mascotas", authenticateToken, isVetOrAdmin, async (req, res) => {
         // Verificar que el propietario exista y sea un usuario regular
         const [owner] = await pool.query("SELECT id FROM usuarios WHERE id = ? AND role = 'usuario'", [id_propietario]);
         if (owner.length === 0) {
-            return res.status(400).json({ success: false, message: "El ID de propietario no es válido o no corresponde a un usuario regular." });
+            return res.status(400).json({ success: false, message: "ID de propietario no válido." });
         }
 
         const [result] = await pool.query(
@@ -1383,7 +1410,7 @@ app.post("/mascotas", authenticateToken, isVetOrAdmin, async (req, res) => {
 });
 
 // Actualizar mascota
-app.put("/mascotas/:id", authenticateToken, isOwnerOrAdmin, async (req, res) => {
+app.put("/mascotas/:id", authenticateToken, express.json(), isOwnerOrAdmin, async (req, res) => {
     const { id } = req.params;
     const { nombre, especie, raza, edad, peso, sexo, color, microchip, id_propietario, imagen_url } = req.body;
 
@@ -1441,7 +1468,7 @@ app.delete("/mascotas/:id", authenticateToken, isVetOrAdmin, async (req, res) =>
             return res.status(404).json({ success: false, message: "Mascota no encontrada." });
         }
         res.json({ success: true, message: "Mascota y sus historiales/citas asociados eliminados correctamente." });
-    } catch (error) { // <-- ¡Aquí estaba el error! Se cambió '=>' por '{'
+    } catch (error) {
         console.error("Error al eliminar mascota:", error);
         res.status(500).json({ success: false, message: "Error al eliminar mascota.", error: process.env.NODE_ENV === 'development' ? error.stack : error.message });
     }
@@ -1498,7 +1525,7 @@ app.get("/historial_medico/:id", authenticateToken, isOwnerOrAdmin, async (req, 
 });
 
 // Registrar nuevo historial médico (solo para veterinarios o admins)
-app.post("/historial_medico", authenticateToken, isVetOrAdmin, async (req, res) => {
+app.post("/historial_medico", authenticateToken, express.json(), isVetOrAdmin, async (req, res) => {
     const { id_mascota, fecha_consulta, diagnostico, tratamiento, observaciones, veterinario, peso_actual, temperatura, proxima_cita } = req.body;
 
     if (!id_mascota || !fecha_consulta || !diagnostico || !tratamiento || !veterinario) {
@@ -1534,7 +1561,7 @@ app.post("/historial_medico", authenticateToken, isVetOrAdmin, async (req, res) 
 });
 
 // Actualizar historial médico (solo para veterinarios o admins)
-app.put("/historial_medico/:id", authenticateToken, isVetOrAdmin, async (req, res) => {
+app.put("/historial_medico/:id", authenticateToken, express.json(), isVetOrAdmin, async (req, res) => {
     const { id } = req.params;
     const { fecha_consulta, diagnostico, tratamiento, observaciones, veterinario, peso_actual, temperatura, proxima_cita } = req.body;
 
@@ -1735,7 +1762,7 @@ app.get("/citas/:id", authenticateToken, isOwnerOrAdmin, async (req, res) => {
 });
 
 // Registrar nueva cita (para usuarios y admins/vets)
-app.post("/citas/agendar", authenticateToken, async (req, res) => { // Cambiado a /citas/agendar para mayor claridad
+app.post("/citas/agendar", authenticateToken, express.json(), async (req, res) => { // Cambiado a /citas/agendar para mayor claridad
     const { fecha_cita, notas_adicionales, id_servicio, id_cliente, id_veterinario, id_mascota } = req.body;
     let estado = req.body.estado || 'pendiente';
 
@@ -1842,7 +1869,7 @@ app.post("/citas/agendar", authenticateToken, async (req, res) => { // Cambiado 
 });
 
 // Actualizar cita (admin/vet/owner for cancel)
-app.put("/citas/:id", authenticateToken, async (req, res) => {
+app.put("/citas/:id", authenticateToken, express.json(), async (req, res) => {
     const { id } = req.params;
     let { fecha_cita, estado, notas_adicionales, id_servicio, id_cliente, id_veterinario, id_mascota } = req.body;
 

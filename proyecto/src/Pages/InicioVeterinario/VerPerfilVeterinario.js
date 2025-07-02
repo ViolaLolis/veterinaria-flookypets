@@ -7,7 +7,9 @@ import {
   faEdit,
   faSignOutAlt,
   faSyncAlt,
-  faSpinner // Importar spinner
+  faSpinner, // Importar spinner
+  faUser, // Importar faUser para el fallback
+  faEnvelope, faPhone, faMapMarkerAlt, faBriefcaseMedical, faGraduationCap, faClock
 } from '@fortawesome/free-solid-svg-icons';
 import { authFetch } from './api'; // Asegúrate de que la ruta sea correcta a tu archivo api.js
 
@@ -190,12 +192,9 @@ const VerPerfilVeterinario = () => {
         <h3>Información Personal</h3>
 
         <motion.p variants={itemVariants}>
-          <strong>Nombre:</strong> {perfil.nombre} {perfil.apellido}
+          <strong><FontAwesomeIcon icon={faUser} /> Nombre:</strong> {perfil.nombre} {perfil.apellido}
         </motion.p>
 
-        {/* La "especialidad" no es un campo directo en la tabla de usuarios,
-            pero se puede inferir o añadir si es necesario.
-            Por ahora, usaremos "role" o "experiencia" si es para veterinarios. */}
         {perfil.role === 'veterinario' && (
             <motion.p variants={itemVariants}>
                 <strong>Rol:</strong> {perfil.role}
@@ -203,29 +202,29 @@ const VerPerfilVeterinario = () => {
         )}
         
         <motion.p variants={itemVariants}>
-          <strong>Email:</strong> {perfil.email}
+          <strong><FontAwesomeIcon icon={faEnvelope} /> Email:</strong> {perfil.email}
         </motion.p>
 
         <motion.p variants={itemVariants}>
-          <strong>Teléfono:</strong> {perfil.telefono}
+          <strong><FontAwesomeIcon icon={faPhone} /> Teléfono:</strong> {perfil.telefono}
         </motion.p>
 
         <motion.p variants={itemVariants}>
-          <strong>Dirección:</strong> {perfil.direccion}
+          <strong><FontAwesomeIcon icon={faMapMarkerAlt} /> Dirección:</strong> {perfil.direccion}
         </motion.p>
 
         {perfil.role === 'veterinario' && (
           <>
             <motion.p variants={itemVariants}>
-              <strong>Experiencia:</strong> {perfil.experiencia || 'No especificado'}
+              <strong><FontAwesomeIcon icon={faBriefcaseMedical} /> Experiencia:</strong> {perfil.experiencia || 'No especificado'}
             </motion.p>
 
             <motion.p variants={itemVariants}>
-              <strong>Universidad:</strong> {perfil.universidad || 'No especificado'}
+              <strong><FontAwesomeIcon icon={faGraduationCap} /> Universidad:</strong> {perfil.universidad || 'No especificado'}
             </motion.p>
 
             <motion.p variants={itemVariants}>
-              <strong>Horario:</strong> {perfil.horario || 'No especificado'}
+              <strong><FontAwesomeIcon icon={faClock} /> Horario:</strong> {perfil.horario || 'No especificado'}
             </motion.p>
           </>
         )}

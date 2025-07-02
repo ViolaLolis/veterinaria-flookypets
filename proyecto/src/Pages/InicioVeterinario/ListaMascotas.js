@@ -1,14 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Link, useOutletContext } from 'react-router-dom';
 import styles from './Style/ListaMascotasStyles.module.css';
-import { motion} from 'framer-motion';
+import { motion } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
-  faEye, faEdit, faPlus, faBan, 
-  faPaw, faSearch, faSync, faDog, 
+import {
+  faEye, faEdit, faPlus, faBan, faUser,
+  faPaw, faSearch, faSync, faDog,
   faCat, faVenusMars, faBirthdayCake,
-  faWeight, faNotesMedical
+  faWeight, faNotesMedical, faSpinner, faExclamationTriangle
 } from '@fortawesome/free-solid-svg-icons';
+import { authFetch } from './api'; // Asegúrate de que la ruta sea correcta
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -48,6 +49,7 @@ const statCardVariants = {
 };
 
 const ListaMascotasVeterinario = () => {
+  const { showNotification } = useOutletContext(); // Obtener la función de notificación
   const [mascotas, setMascotas] = useState([]);
   const [filteredMascotas, setFilteredMascotas] = useState([]);
   const [stats, setStats] = useState({
@@ -55,102 +57,70 @@ const ListaMascotasVeterinario = () => {
     perros: 0,
     gatos: 0,
     otros: 0,
-    ultimoMes: 0
+    ultimoMes: 0 // Esto podría ser el número de mascotas registradas el último mes
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
-  useEffect(() => {
-    fetchMascotas();
-  }, []);
-
-  const fetchMascotas = async () => {
+  const fetchMascotas = useCallback(async () => {
     setLoading(true);
     setRefreshing(true);
+    setError(null);
     try {
-      // Simulación de datos
-      await new Promise(resolve => setTimeout(resolve, 800));
-      const data = [
-        { 
-          id: 1, 
-          nombre: 'Max', 
-          especie: 'Perro', 
-          raza: 'Labrador Retriever', 
-          edad: '3 años',
-          peso: '28 kg',
-          sexo: 'Macho',
-          propietario: 'Juan Pérez',
-          telefono: '3001234567',
-          ultimaVisita: '2024-05-15',
-          foto: 'https://images.unsplash.com/photo-1586671267731-da2cf3ceeb80?w=200',
-          historial: 'Vacunación al día. Control anual pendiente.'
-        },
-        { 
-          id: 2, 
-          nombre: 'Luna', 
-          especie: 'Gato', 
-          raza: 'Siamés', 
-          edad: '2 años',
-          peso: '4.5 kg',
-          sexo: 'Hembra',
-          propietario: 'María García',
-          telefono: '3109876543',
-          ultimaVisita: '2024-05-10',
-          foto: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=200',
-          historial: 'Vacuna antirrábica pendiente. Dieta especial.'
-        },
-        { 
-          id: 3, 
-          nombre: 'Rocky', 
-          especie: 'Perro', 
-          raza: 'Bulldog Francés', 
-          edad: '4 años',
-          peso: '12 kg',
-          sexo: 'Macho',
-          propietario: 'Carlos López',
-          telefono: '3201122334',
-          ultimaVisita: '2024-04-28',
-          foto: 'https://images.unsplash.com/photo-1544568100-847a948585b9?w=200',
-          historial: 'Control de peso mensual. Problemas respiratorios.'
-        },
-        { 
-          id: 4, 
-          nombre: 'Bella', 
-          especie: 'Perro', 
-          raza: 'Golden Retriever', 
-          edad: '5 años',
-          peso: '30 kg',
-          sexo: 'Hembra',
-          propietario: 'Ana Martínez',
-          telefono: '3055678901',
-          ultimaVisita: '2024-05-18',
-          foto: 'https://images.unsplash.com/photo-1588943211346-0908a1fb0b01?w=200',
-          historial: 'Desparasitación reciente. Excelente condición física.'
-        }
-      ];
-      
-      setMascotas(data);
-      setFilteredMascotas(data);
-      
-      // Calcular estadísticas
-      setStats({
-        totalMascotas: data.length,
-        perros: data.filter(m => m.especie === 'Perro').length,
-        gatos: data.filter(m => m.especie === 'Gato').length,
-        otros: 0,
-        ultimoMes: data.filter(m => new Date(m.ultimaVisita) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)).length
-      });
-      
+      const response = await authFetch('/mascotas'); // Endpoint para obtener todas las mascotas
+      if (response.success) {
+        const fetchedMascotas = response.data.map(mascota => ({
+          ...mascota,
+          // Asegúrate de que 'edad' y 'ultimaVisita' se manejen correctamente si vienen de la BD
+          // Si la BD devuelve 'fecha_nacimiento', calcula la edad aquí
+          edad: mascota.edad ? `${mascota.edad} años` : 'N/A', // Asumiendo que 'edad' viene como número de años
+          ultimaVisita: mascota.ultima_visita ? new Date(mascota.ultima_visita).toLocaleDateString('es-ES') : 'N/A',
+          foto: mascota.imagen_url || `https://placehold.co/100x100/00acc1/ffffff?text=${mascota.nombre.charAt(0)}`,
+          historial: mascota.caracteristicas_especiales || 'Sin historial resumido', // Usar caracteristicas_especiales como historial
+          propietario: mascota.propietario_nombre // Asegúrate de que el backend devuelva este campo
+        }));
+        setMascotas(fetchedMascotas);
+        setFilteredMascotas(fetchedMascotas);
+
+        // Calcular estadísticas
+        const total = fetchedMascotas.length;
+        const perros = fetchedMascotas.filter(m => m.especie?.toLowerCase() === 'perro').length;
+        const gatos = fetchedMascotas.filter(m => m.especie?.toLowerCase() === 'gato').length;
+        const otros = total - perros - gatos;
+
+        // Para 'ultimoMes', necesitarías una columna 'fecha_registro' en la tabla de mascotas
+        // o un endpoint específico en el backend. Por ahora, se simulará o se dejará en 0.
+        const unMesAtras = new Date();
+        unMesAtras.setMonth(unMesAtras.getMonth() - 1);
+        const mascotasUltimoMes = fetchedMascotas.filter(m => new Date(m.created_at) > unMesAtras).length; // Asumiendo 'created_at' en mascotas
+
+        setStats({
+          totalMascotas: total,
+          perros: perros,
+          gatos: gatos,
+          otros: otros,
+          ultimoMes: mascotasUltimoMes
+        });
+
+      } else {
+        setError(response.message || "Error al cargar las mascotas.");
+        showNotification(response.message || "Error al cargar las mascotas.", 'error');
+      }
     } catch (err) {
-      setError("Error al cargar las mascotas");
-      console.error("Error:", err);
+      console.error("Error fetching mascotas:", err);
+      setError("Error de conexión al servidor al cargar mascotas.");
+      showNotification("Error de conexión al servidor al cargar mascotas.", 'error');
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  };
+  }, [showNotification]);
+
+  useEffect(() => {
+    fetchMascotas();
+  }, [fetchMascotas]);
 
   useEffect(() => {
     if (searchTerm.trim() === '') {
@@ -162,8 +132,8 @@ const ListaMascotasVeterinario = () => {
           mascota.nombre.toLowerCase().includes(searchLower) ||
           mascota.especie.toLowerCase().includes(searchLower) ||
           mascota.raza.toLowerCase().includes(searchLower) ||
-          mascota.propietario.toLowerCase().includes(searchLower) ||
-          mascota.telefono.includes(searchTerm)
+          (mascota.propietario && mascota.propietario.toLowerCase().includes(searchLower)) ||
+          (mascota.telefono && mascota.telefono.includes(searchTerm)) // Asumiendo que mascota.telefono existe
         );
       });
       setFilteredMascotas(filtered);
@@ -171,38 +141,49 @@ const ListaMascotasVeterinario = () => {
   }, [searchTerm, mascotas]);
 
   const handleRefresh = () => {
-    setRefreshing(true);
     fetchMascotas();
   };
 
-  const handleDisable = (id) => {
-    if (window.confirm('¿Estás seguro de que deseas deshabilitar esta mascota?')) {
+  const handleDisable = async (id_mascota) => {
+    if (window.confirm('¿Estás seguro de que deseas eliminar esta mascota? Esto eliminará también sus historiales médicos y citas asociadas.')) {
       setRefreshing(true);
-      setTimeout(() => {
-        setMascotas(prev => prev.filter(m => m.id !== id));
-        setFilteredMascotas(prev => prev.filter(m => m.id !== id));
+      try {
+        const response = await authFetch(`/mascotas/${id_mascota}`, {
+          method: 'DELETE',
+        });
+        if (response.success) {
+          showNotification('Mascota eliminada exitosamente.', 'success');
+          fetchMascotas(); // Recargar la lista de mascotas
+        } else {
+          showNotification(response.message || 'Error al eliminar la mascota.', 'error');
+        }
+      } catch (err) {
+        console.error("Error deleting mascota:", err);
+        showNotification('Error de conexión al servidor al eliminar mascota.', 'error');
+      } finally {
         setRefreshing(false);
-      }, 500);
+      }
     }
   };
 
+
   if (loading) {
     return (
-      <motion.div 
+      <motion.div
         className={styles.vetLoadingContainer}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
       >
         <motion.div
-          animate={{ 
+          animate={{
             rotate: 360,
             scale: [1, 1.2, 1]
           }}
-          transition={{ 
-            repeat: Infinity, 
-            duration: 1.5, 
-            ease: "easeInOut" 
+          transition={{
+            repeat: Infinity,
+            duration: 1.5,
+            ease: "easeInOut"
           }}
           className={styles.vetLoadingSpinner}
         >
@@ -221,21 +202,21 @@ const ListaMascotasVeterinario = () => {
 
   if (error) {
     return (
-      <motion.div 
+      <motion.div
         className={styles.vetErrorContainer}
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ type: "spring" }}
       >
-        <motion.div 
+        <motion.div
           animate={{ scale: [1, 1.05, 1] }}
           transition={{ repeat: Infinity, duration: 2 }}
         >
-          <FontAwesomeIcon icon={faPaw} size="2x" color="#00bcd4" />
+          <FontAwesomeIcon icon={faExclamationTriangle} size="2x" color="#dc3545" /> {/* Icono de error */}
         </motion.div>
         <p className={styles.vetErrorMessage}>Error: {error}</p>
-        <motion.button 
-          onClick={fetchMascotas}
+        <motion.button
+          onClick={handleRefresh}
           className={styles.vetRetryButton}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
@@ -243,7 +224,7 @@ const ListaMascotasVeterinario = () => {
         >
           {refreshing ? (
             <>
-              <FontAwesomeIcon icon={faSync} spin /> Cargando...
+              <FontAwesomeIcon icon={faSpinner} spin /> Cargando...
             </>
           ) : (
             'Reintentar'
@@ -265,12 +246,12 @@ const ListaMascotasVeterinario = () => {
       <div className={styles.vetTopBar}>
         <div className={styles.vetSearchBar}>
           <FontAwesomeIcon icon={faSearch} className={styles.vetSearchIcon} />
-          <motion.input 
-            type="text" 
-            placeholder="Buscar mascotas por nombre, especie, raza o dueño..." 
+          <motion.input
+            type="text"
+            placeholder="Buscar mascotas por nombre, especie, raza o dueño..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            whileFocus={{ 
+            whileFocus={{
               boxShadow: "0 0 0 2px rgba(0, 188, 212, 0.3)",
               borderColor: "#00bcd4"
             }}
@@ -278,7 +259,7 @@ const ListaMascotasVeterinario = () => {
           />
         </div>
         <div className={styles.vetTopBarActions}>
-          <motion.button 
+          <motion.button
             onClick={handleRefresh}
             className={styles.vetRefreshButton}
             whileHover={{ scale: 1.05 }}
@@ -288,47 +269,50 @@ const ListaMascotasVeterinario = () => {
             <FontAwesomeIcon icon={faSync} spin={refreshing} />
             {refreshing ? ' Actualizando...' : ' Actualizar'}
           </motion.button>
-          
+          <Link to="/veterinario/mascotas/registrar" className={styles.vetAddButton}>
+            <FontAwesomeIcon icon={faPlus} />
+            <span>Registrar Nueva Mascota</span>
+          </Link>
         </div>
       </div>
 
       <div className={styles.vetContentWrapper}>
         {/* Estadísticas */}
-        <motion.div 
+        <motion.div
           className={styles.vetStatsContainer}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
         >
           {[
-            { 
-              icon: faPaw, 
-              value: stats.totalMascotas, 
+            {
+              icon: faPaw,
+              value: stats.totalMascotas,
               label: "Mascotas totales",
               color: "#00bcd4",
               bgColor: "rgba(0, 188, 212, 0.1)",
               trend: "up"
             },
-            { 
-              icon: faDog, 
-              value: stats.perros, 
+            {
+              icon: faDog,
+              value: stats.perros,
               label: "Perros registrados",
               color: "#4CAF50",
               bgColor: "rgba(76, 175, 80, 0.1)",
               trend: "up"
             },
-            { 
-              icon: faCat, 
-              value: stats.gatos, 
+            {
+              icon: faCat,
+              value: stats.gatos,
               label: "Gatos registrados",
               color: "#FF9800",
               bgColor: "rgba(255, 152, 0, 0.1)",
               trend: "steady"
             },
-            { 
-              icon: faNotesMedical, 
-              value: stats.ultimoMes, 
-              label: "Visitas este mes",
+            {
+              icon: faNotesMedical,
+              value: stats.ultimoMes,
+              label: "Registradas este mes", // Cambiado de "Visitas este mes"
               color: "#9C27B0",
               bgColor: "rgba(156, 39, 176, 0.1)",
               trend: "up"
@@ -340,8 +324,8 @@ const ListaMascotasVeterinario = () => {
               variants={statCardVariants}
               whileHover="hover"
             >
-              <div 
-                className={styles.vetStatIcon} 
+              <div
+                className={styles.vetStatIcon}
                 style={{ backgroundColor: stat.bgColor }}
               >
                 <FontAwesomeIcon icon={stat.icon} style={{ color: stat.color }} />
@@ -350,12 +334,12 @@ const ListaMascotasVeterinario = () => {
                 <h3>{stat.value}</h3>
                 <p>{stat.label}</p>
                 {stat.trend === "up" && (
-                  <motion.span 
+                  <motion.span
                     className={styles.vetTrendUp}
                     animate={{ scale: [1, 1.1, 1] }}
                     transition={{ repeat: Infinity, duration: 1.5 }}
                   >
-                    
+                    {/* Icono de tendencia arriba, si lo deseas */}
                   </motion.span>
                 )}
                 {stat.trend === "steady" && (
@@ -381,7 +365,7 @@ const ListaMascotasVeterinario = () => {
           </div>
 
           {filteredMascotas.length > 0 ? (
-            <motion.div 
+            <motion.div
               className={styles.vetMascotasGrid}
               initial="hidden"
               animate="visible"
@@ -398,7 +382,7 @@ const ListaMascotasVeterinario = () => {
             >
               {filteredMascotas.map((mascota) => (
                 <motion.div
-                  key={mascota.id}
+                  key={mascota.id_mascota} // Usa id_mascota de la BD
                   className={styles.vetMascotaCard}
                   variants={cardVariants}
                   whileHover="hover"
@@ -406,7 +390,14 @@ const ListaMascotasVeterinario = () => {
                 >
                   <div className={styles.vetMascotaHeader}>
                     <div className={styles.vetMascotaImage}>
-                      <img src={mascota.foto} alt={mascota.nombre} />
+                      <img
+                        src={mascota.foto}
+                        alt={mascota.nombre}
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = `https://placehold.co/100x100/00acc1/ffffff?text=${mascota.nombre.charAt(0)}`;
+                        }}
+                      />
                     </div>
                     <div className={styles.vetMascotaTitle}>
                       <h3>{mascota.nombre}</h3>
@@ -426,10 +417,10 @@ const ListaMascotasVeterinario = () => {
                       </div>
                       <div className={styles.vetDetailItem}>
                         <FontAwesomeIcon icon={faWeight} />
-                        <span>{mascota.peso}</span>
+                        <span>{mascota.peso} kg</span> {/* Añadir 'kg' */}
                       </div>
                       <div className={styles.vetDetailItem}>
-                        
+                        <FontAwesomeIcon icon={faUser} /> {/* Icono para propietario */}
                         <span>{mascota.propietario}</span>
                       </div>
                       {mascota.historial && (
@@ -447,38 +438,38 @@ const ListaMascotasVeterinario = () => {
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                     >
-                      <Link to={`/veterinario/mascotas/${mascota.id}`}>
+                      <Link to={`/veterinario/mascotas/${mascota.id_mascota}`}> {/* Usar id_mascota */}
                         <FontAwesomeIcon icon={faEye} />
                         <span>Ver Detalles</span>
                       </Link>
                     </motion.button>
-                    
+
                     <motion.button
                       className={`${styles.vetActionButton} ${styles.vetEditButton}`}
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                     >
-                      <Link to={`/veterinario/mascotas/editar/${mascota.id}`}>
+                      <Link to={`/veterinario/mascotas/editar/${mascota.id_mascota}`}> {/* Usar id_mascota */}
                         <FontAwesomeIcon icon={faEdit} />
                         <span>Editar</span>
                       </Link>
                     </motion.button>
-                    
+
                     <motion.button
                       className={`${styles.vetActionButton} ${styles.vetDisableButton}`}
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      onClick={() => handleDisable(mascota.id)}
+                      onClick={() => handleDisable(mascota.id_mascota)}
                     >
                       <FontAwesomeIcon icon={faBan} />
-                      <span>Deshabilitar</span>
+                      <span>Eliminar</span> {/* Cambiado a "Eliminar" */}
                     </motion.button>
                   </div>
                 </motion.div>
               ))}
             </motion.div>
           ) : (
-            <motion.div 
+            <motion.div
               className={styles.vetNoMascotas}
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -492,19 +483,14 @@ const ListaMascotasVeterinario = () => {
               </motion.div>
               <h3>No se encontraron mascotas</h3>
               <p>
-                {searchTerm ? 
-                'No hay resultados que coincidan con tu búsqueda.' : 
-                'No hay mascotas registradas en el sistema.'}
+                {searchTerm ?
+                  'No hay resultados que coincidan con tu búsqueda.' :
+                  'No hay mascotas registradas en el sistema.'}
               </p>
-              <motion.button 
-                className={styles.vetAddButton}
-                
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
+              <Link to="/veterinario/mascotas/registrar" className={styles.vetAddButton}>
                 <FontAwesomeIcon icon={faPlus} />
                 <span>Registrar nueva mascota</span>
-              </motion.button>
+              </Link>
             </motion.div>
           )}
         </div>

@@ -11,10 +11,23 @@
  */
 export const authFetch = async (url, options = {}) => {
   const token = localStorage.getItem('token'); // Obtener el token JWT del localStorage
-  const headers = {
-    'Content-Type': 'application/json',
-    ...options.headers, // Permitir que las opciones sobrescriban el Content-Type si es necesario (ej. para FormData)
-  };
+  
+  // Inicializar headers.
+  // Si el body es FormData, NO establecer Content-Type,
+  // el navegador lo hará automáticamente y correctamente.
+  // De lo contrario, por defecto a application/json.
+  const headers = {};
+
+  if (options.body instanceof FormData) {
+    // No establecer Content-Type. El navegador lo hará automáticamente para FormData.
+    // Si options.headers ya tiene Content-Type, lo respetará.
+  } else {
+    headers['Content-Type'] = 'application/json';
+  }
+
+  // Fusionar los headers proporcionados en las opciones,
+  // permitiendo que sobrescriban el Content-Type por defecto si es necesario.
+  Object.assign(headers, options.headers);
 
   if (token) {
     headers['Authorization'] = `Bearer ${token}`; // Añadir el token al header de autorización
