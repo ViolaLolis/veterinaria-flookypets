@@ -1,18 +1,20 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useOutletContext } from 'react-router-dom';
 import styles from './Style/NavegacionVeterinarioStyles.module.css';
 import { motion, AnimatePresence } from 'framer-motion';
+import { authFetch } from './api'; // Asegúrate de que la ruta sea correcta
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faPaw, faUser, faCalendarAlt,
   faNotesMedical, faCheckCircle, faClock,
-  faStar, faSyringe, faStethoscope, faDog,
-  faPlus, faUserPlus, faClipboardList, faChevronRight
+  faStar, faPlus, faUserPlus, faClipboardList, faChevronRight,
+  faSpinner, faExclamationTriangle // Añadidos para carga y error
 } from '@fortawesome/free-solid-svg-icons';
 
 const NavegacionVeterinario = () => {
   const navigate = useNavigate();
+  const { user, showNotification } = useOutletContext(); // Obtener user y showNotification del contexto
 
   const getVetDashGreeting = useCallback(() => {
     const hour = new Date().getHours();
@@ -22,7 +24,21 @@ const NavegacionVeterinario = () => {
   }, []);
 
   const [vetDashGreeting, setVetDashGreeting] = useState(getVetDashGreeting());
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
+  const [vetDashStats, setVetDashStats] = useState({
+    totalCitasHoy: 0,
+    citasCompletadasHoy: 0,
+    pacientesNuevosSemana: 0, // Dummy data for now, requires specific backend logic
+    mascotasAtendidasTotal: 0, // Dummy data for now, requires specific backend logic
+    ratingPromedio: 4.8, // Dummy data for now, requires a rating system
+    recordatoriosActivos: 0
+  });
+
+  const [vetDashPendingAppointments, setVetDashPendingAppointments] = useState([]);
+
+  // Actualizar el saludo cada hora
   useEffect(() => {
     const interval = setInterval(() => {
       setVetDashGreeting(getVetDashGreeting());
@@ -30,79 +46,133 @@ const NavegacionVeterinario = () => {
     return () => clearInterval(interval);
   }, [getVetDashGreeting]);
 
-  const [vetDashStats, setVetDashStats] = useState({
-    totalCitasHoy: 4,
-    citasCompletadasHoy: 1,
-    pacientesNuevosSemana: 3,
-    mascotasAtendidasTotal: 150,
-    ratingPromedio: 4.8,
-    recordatoriosActivos: 5
-  });
+  // Función para cargar los datos del dashboard
+  const fetchVetDashboardData = useCallback(async () => {
+    if (!user?.id) {
+      setIsLoading(false);
+      return;
+    }
+    setIsLoading(true);
+    setError(null);
+    try {
+      // 1. Fetch pending appointments for today
+      const today = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
+      const appointmentsResponse = await authFetch(`/citas?fecha=${today}`);
+      let pendingToday = [];
+      if (appointmentsResponse.success) {
+        // Filter appointments for the logged-in veterinarian and 'pendiente' status
+        pendingToday = appointmentsResponse.data.filter(
+          cita => cita.id_veterinario === user.id && cita.estado === 'pendiente'
+        );
+      } else {
+        showNotification(appointmentsResponse.message || 'Error al cargar citas pendientes.', 'error');
+        setError(appointmentsResponse.message || 'Error al cargar citas pendientes.');
+      }
 
-  const [vetDashPendingAppointments, setVetDashPendingAppointments] = useState([
-    {
-      id: 1,
-      time: "09:00 AM",
-      mascota: "Max",
-      propietario: "Juan Pérez",
-      servicio: "Consulta general",
-      estado: "pendiente",
-      icon: faPaw,
-      color: "#00acc1",
-      avatar: "https://images.unsplash.com/photo-1598133894008-6f7f201889a2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w1ODU2NTh8MHwxfGFsbHwxfHxkb2d8ZW58MHx8fHwxNzE5NTA1MjE3fDA&ixlib=rb-4.0.3&q=80&w=40"
-    },
-    {
-      id: 2,
-      time: "10:30 AM",
-      mascota: "Bella",
-      propietario: "María García",
-      servicio: "Vacunación anual",
-      estado: "pendiente",
-      icon: faSyringe,
-      color: "#FF9800",
-      avatar: "https://images.unsplash.com/photo-1626017042898-1e427770068a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w1ODU2NTh8MHwxfGFsbHwxfHxDYXQlMjBwb3J0cmFpdHxlbnwwfHx8fDE3MTk1MDUyMjB8MA&ixlib=rb-4.0.3&q=80&w=40"
-    },
-    {
-      id: 3,
-      time: "11:45 AM",
-      mascota: "Rocky",
-      propietario: "Pedro Ramirez",
-      servicio: "Revisión post-operatoria",
-      estado: "pendiente",
-      icon: faStethoscope,
-      color: "#4CAF50",
-      avatar: "https://images.unsplash.com/photo-1543463102-12e3e528b3e8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w1ODU2NTh8MHwxfGFsbHwxfHxkb2cxfGVufDB8fHx8MTcxOTUwNTIyMnww&ixlib=rb-4.0.3&q=80&w=40"
-    },
-    {
-      id: 4,
-      time: "02:00 PM",
-      mascota: "Luna",
-      propietario: "Laura Sánchez",
-      servicio: "Revisión de piel",
-      estado: "pendiente",
-      icon: faDog,
-      color: "#F44336",
-      avatar: "https://images.unsplash.com/photo-1591965584570-5b583f707f1d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w1ODU2NTh8MHwxfGFsbHwxfHxkb2d8ZW58MHx8fHwxNzE5NTA1MjE3fDA&ixlib=rb-4.0.3&q=80&w=40"
-    },
-  ]);
+      // 2. Fetch completed appointments count for today
+      const completedCountResponse = await authFetch(`/veterinario/citas/completadas/count`);
+      let completedTodayCount = 0;
+      if (completedCountResponse.success) {
+        completedTodayCount = completedCountResponse.count;
+      } else {
+        showNotification(completedCountResponse.message || 'Error al cargar citas completadas.', 'error');
+        setError(prev => prev ? prev + ' ' + completedCountResponse.message : completedCountResponse.message);
+      }
 
-  const handleCompleteVetAppointment = useCallback((id) => {
+      // 3. Fetch unread notifications
+      const notificationsResponse = await authFetch(`/notifications/user/${user.id}`);
+      let unreadNotificationsCount = 0;
+      if (notificationsResponse.success) {
+        unreadNotificationsCount = notificationsResponse.data.filter(n => !n.leida).length;
+      } else {
+        showNotification(notificationsResponse.message || 'Error al cargar notificaciones.', 'error');
+        setError(prev => prev ? prev + ' ' + notificationsResponse.message : notificationsResponse.message);
+      }
+
+      // Update pending appointments state
+      setVetDashPendingAppointments(pendingToday.map(cita => ({
+        id: cita.id_cita,
+        time: cita.fecha_cita.substring(11, 16), // Extract HH:MM from "YYYY-MM-DD HH:MM"
+        mascota: cita.mascota_nombre,
+        propietario: cita.propietario_nombre,
+        servicio: cita.servicio_nombre,
+        estado: cita.estado,
+        icon: faPaw, // Default icon, consider dynamic based on service type
+        color: "#00acc1", // Default color, consider dynamic
+        avatar: cita.mascota_imagen_url || `https://placehold.co/40x40/cccccc/ffffff?text=${cita.mascota_nombre?.charAt(0) || 'M'}`
+      })));
+
+      // Update stats state
+      setVetDashStats(prevStats => ({
+        ...prevStats,
+        totalCitasHoy: pendingToday.length,
+        citasCompletadasHoy: completedTodayCount,
+        recordatoriosActivos: unreadNotificationsCount
+      }));
+
+    } catch (err) {
+      console.error("Error fetching vet dashboard data:", err);
+      setError('Error de conexión al servidor.');
+      showNotification('Error de conexión al servidor al cargar el dashboard.', 'error');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user, showNotification]);
+
+  useEffect(() => {
+    fetchVetDashboardData();
+  }, [fetchVetDashboardData]);
+
+  // Manejar el marcado de cita como completada
+  const handleCompleteVetAppointment = useCallback(async (id) => {
+    // Optimistic UI update
     setVetDashPendingAppointments(prevCitas =>
       prevCitas.map(cita =>
         cita.id === id ? { ...cita, estado: "completado" } : cita
       )
     );
 
-    setTimeout(() => {
+    try {
+      const response = await authFetch(`/citas/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ estado: 'completa' })
+      });
+
+      if (response.success) {
+        showNotification('Cita marcada como completada.', 'success');
+        // Actualizar estadísticas y remover de la lista después de un pequeño delay para la animación
+        setTimeout(() => {
+          setVetDashPendingAppointments(prevCitas =>
+            prevCitas.filter(cita => cita.id !== id)
+          );
+          setVetDashStats(prevStats => ({
+            ...prevStats,
+            citasCompletadasHoy: prevStats.citasCompletadasHoy + 1,
+            totalCitasHoy: prevStats.totalCitasHoy - 1 // Decrement pending count
+          }));
+        }, 400);
+      } else {
+        showNotification(response.message || 'Error al marcar cita como completada.', 'error');
+        // Revert optimistic update if API call fails
+        setVetDashPendingAppointments(prevCitas =>
+          prevCitas.map(cita =>
+            cita.id === id ? { ...cita, estado: "pendiente" } : cita
+          )
+        );
+      }
+    } catch (err) {
+      console.error("Error completing appointment:", err);
+      showNotification('Error de conexión al servidor al completar cita.', 'error');
+      // Revert optimistic update on network error
       setVetDashPendingAppointments(prevCitas =>
-        prevCitas.filter(cita => cita.id !== id)
+        prevCitas.map(cita =>
+          cita.id === id ? { ...cita, estado: "pendiente" } : cita
+        )
       );
-      setVetDashStats(prevStats => ({
-        ...prevStats,
-        citasCompletadasHoy: prevStats.citasCompletadasHoy + 1
-      }));
-    }, 400);
-  }, []);
+    }
+  }, [showNotification]);
+
 
   const vetDashQuickActions = [
     { name: "Registrar Mascota", icon: faPaw, path: "/veterinario/mascotas/registrar", color: "#00bcd4" },
@@ -123,6 +193,25 @@ const NavegacionVeterinario = () => {
     completed: { opacity: 0, x: -100, transition: { duration: 0.3, ease: "easeIn" } }
   };
 
+  if (isLoading) {
+    return (
+      <div className={styles.loadingContainer}>
+        <FontAwesomeIcon icon={faSpinner} spin size="3x" color="#00acc1" />
+        <p>Cargando datos del dashboard...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className={styles.errorContainer}>
+        <FontAwesomeIcon icon={faExclamationTriangle} size="3x" color="#FF5252" />
+        <p>Error al cargar el dashboard: {error}</p>
+        <button onClick={fetchVetDashboardData} className={styles.retryButton}>Reintentar</button>
+      </div>
+    );
+  }
+
   return (
     <motion.div
       className={styles.vetDash_mainContainer}
@@ -131,7 +220,7 @@ const NavegacionVeterinario = () => {
       transition={{ duration: 0.6, ease: "easeOut" }}
     >
       <h1 className={styles.vetDash_greetingText}>
-        {vetDashGreeting}, Dr/a. **<span style={{ fontWeight: 'bold' }}>[Nombre Veterinario]</span>**!
+        {vetDashGreeting}, Dr/a. **<span style={{ fontWeight: 'bold' }}>{user?.nombre || 'Veterinario'}</span>**!
       </h1>
       <p className={styles.vetDash_subHeaderMessage}>Aquí tienes un **resumen rápido** de tu jornada y las **acciones clave**.</p>
 
@@ -177,7 +266,7 @@ const NavegacionVeterinario = () => {
               <FontAwesomeIcon icon={faCalendarAlt} className={styles.vetDash_statIcon} style={{ color: 'var(--color-primary)' }} />
               <h3>Citas Pendientes Hoy</h3>
             </div>
-            <p className={styles.vetDash_statHighlight}>{vetDashPendingAppointments.length}</p>
+            <p className={styles.vetDash_statHighlight}>{vetDashStats.totalCitasHoy}</p>
             <span className={styles.vetDash_statFooter}>¡Concéntrate en estas!</span>
           </motion.div>
 
@@ -199,7 +288,7 @@ const NavegacionVeterinario = () => {
             <span className={styles.vetDash_statFooter}>¡Excelente trabajo!</span>
           </motion.div>
 
-          {/* Card: Nuevos Pacientes (Semana) */}
+          {/* Card: Nuevos Pacientes (Semana) - DUMMY DATA */}
           <motion.div
             className={styles.vetDash_statCard}
             whileHover={{ scale: 1.02 }}
@@ -217,7 +306,7 @@ const NavegacionVeterinario = () => {
             <span className={styles.vetDash_statFooter}>¡Bienvenida la nueva familia!</span>
           </motion.div>
 
-          {/* Card: Mascotas Atendidas (Total) */}
+          {/* Card: Mascotas Atendidas (Total) - DUMMY DATA */}
           <motion.div
             className={styles.vetDash_statCard}
             whileHover={{ scale: 1.02 }}
@@ -235,7 +324,7 @@ const NavegacionVeterinario = () => {
             <span className={styles.vetDash_statFooter}>¡Impacto en muchas vidas!</span>
           </motion.div>
 
-          {/* Card: Tu Rating Promedio */}
+          {/* Card: Tu Rating Promedio - DUMMY DATA */}
           <motion.div
             className={styles.vetDash_statCard}
             whileHover={{ scale: 1.02 }}
@@ -303,7 +392,15 @@ const NavegacionVeterinario = () => {
                   layout
                 >
                   <div className={styles.vetDash_appointmentTimeAvatar}>
-                    <img src={cita.avatar} alt={`${cita.mascota} avatar`} className={styles.vetDash_mascotaAvatar} />
+                    <img
+                      src={cita.avatar}
+                      alt={`${cita.mascota} avatar`}
+                      className={styles.vetDash_mascotaAvatar}
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = `https://placehold.co/40x40/cccccc/ffffff?text=${cita.mascota?.charAt(0) || 'M'}`;
+                      }}
+                    />
                     <span className={styles.vetDash_timeDisplay} style={{ color: cita.color }}>{cita.time}</span>
                   </div>
                   <div className={styles.vetDash_appointmentDetails}>

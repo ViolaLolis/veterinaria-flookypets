@@ -1,869 +1,510 @@
-/* MainVeterinarioStyles.module.css */
-
-/* Variables de color y estilos base */
-:root {
-  --vet-primary: #00bcd4;
-  --vet-primary-light: rgba(0, 188, 212, 0.1);
-  --vet-primary-dark: #008ba3;
-  --vet-secondary: #4CAF50;
-  --vet-warning: #FF9800;
-  --vet-danger: #FF5252;
-  --vet-info: #2196F3;
-  --vet-dark: #333333;
-  --vet-light: #f5f5f5;
-  --vet-gray: #757575;
-  --vet-light-gray: #e0e0e0;
-  --vet-white: #ffffff;
-  --vet-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  --vet-transition: all 0.3s ease;
-}
-
-/* Reset y estilos base */
+/* Base Styles for MainVeterinario */
 .vetMainContainer {
   display: flex;
-  flex-direction: column;
   min-height: 100vh;
-  background-color: var(--vet-light);
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: var(--vet-dark);
+  background-color: #f5f9fa;
+  font-family: 'Poppins', sans-serif;
 }
 
-/* Barra superior */
-.vetTopBar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 2rem;
-  background-color: var(--vet-white);
-  box-shadow: var(--vet-shadow);
-  z-index: 10;
-}
-
-.vetSearchBar {
-  position: relative;
-  flex: 1;
-  max-width: 500px;
-  margin-right: 2rem;
-}
-
-.vetSearchIcon {
-  position: absolute;
-  left: 1rem;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--vet-gray);
-}
-
-.vetSearchInput {
-  width: 100%;
-  padding: 0.75rem 1rem 0.75rem 3rem;
-  border: 1px solid var(--vet-light-gray);
-  border-radius: 50px;
-  font-size: 0.9rem;
-  transition: var(--vet-transition);
-}
-
-.vetSearchInput:focus {
-  outline: none;
-  border-color: var(--vet-primary);
-  box-shadow: 0 0 0 3px var(--vet-primary-light);
-}
-
-.vetTopBarActions {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-}
-
-/* Widget de estadísticas */
-.vetStatsWidget {
-  display: flex;
-  gap: 1.5rem;
-  padding: 0.5rem 1rem;
-  border-radius: 50px;
-  background-color: var(--vet-primary-light);
-  cursor: pointer;
-  transition: var(--vet-transition);
-}
-
-.vetStatItem {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-.vetStatItem span {
-  font-weight: 600;
-  color: var(--vet-primary);
-}
-
-.vetStatItem small {
-  font-size: 0.7rem;
-  color: var(--vet-gray);
-}
-
-/* Notificaciones */
-.vetNotificationWrapper {
-  position: relative;
-}
-
-.vetNotificationButton {
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: transparent;
-  border: none;
-  border-radius: 50%;
-  color: var(--vet-gray);
-  cursor: pointer;
-  transition: var(--vet-transition);
-}
-
-.vetNotificationButton:hover {
-  background-color: var(--vet-primary-light);
-  color: var(--vet-primary);
-}
-
-.vetNotificationBadge {
-  position: absolute;
-  top: -5px;
-  right: -5px;
-  width: 20px;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: var(--vet-danger);
-  color: var(--vet-white);
-  border-radius: 50%;
-  font-size: 0.7rem;
-  font-weight: 600;
-}
-
-.vetNotificationPanel {
-  position: absolute;
-  right: 0;
-  top: calc(100% + 10px);
-  width: 350px;
-  max-height: 500px;
-  overflow-y: auto;
-  background-color: var(--vet-white);
-  border-radius: 10px;
-  box-shadow: var(--vet-shadow);
-  z-index: 100;
-}
-
-.vetNotificationHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem;
-  border-bottom: 1px solid var(--vet-light-gray);
-}
-
-.vetNotificationHeader h4 {
-  margin: 0;
-  font-size: 1rem;
-}
-
-.vetMarkAsRead, .vetClosePanel {
-  background: none;
-  border: none;
-  color: var(--vet-primary);
-  font-size: 0.8rem;
-  cursor: pointer;
-  padding: 0.25rem 0.5rem;
-}
-
-.vetClosePanel {
-  font-size: 1.2rem;
-  margin-left: 0.5rem;
-}
-
-.vetNotificationList {
-  padding: 0.5rem;
-}
-
-.vetNotificationItem {
-  display: flex;
-  gap: 1rem;
-  padding: 1rem;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: var(--vet-transition);
-}
-
-.vetNotificationItem:hover {
-  background-color: var(--vet-light);
-}
-
-.vetUnread {
-  background-color: var(--vet-primary-light);
-}
-
-.vetNotificationIcon {
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.vetNotificationContent {
-  flex: 1;
-}
-
-.vetNotificationContent h5 {
-  margin: 0 0 0.25rem;
-  font-size: 0.9rem;
-}
-
-.vetNotificationContent p {
-  margin: 0 0 0.25rem;
-  font-size: 0.8rem;
-  color: var(--vet-gray);
-}
-
-.vetNotificationContent span {
-  font-size: 0.7rem;
-  color: var(--vet-gray);
-}
-
-.vetNotificationUnreadDot {
-  width: 8px;
-  height: 8px;
-  background-color: var(--vet-primary);
-  border-radius: 50%;
-  align-self: center;
-}
-
-.vetNoNotifications {
-  padding: 2rem 1rem;
-  text-align: center;
-}
-
-.vetNoNotifications p {
-  margin: 0.5rem 0 0;
-  font-weight: 500;
-}
-
-.vetNoNotifications small {
-  font-size: 0.8rem;
-  color: var(--vet-gray);
-}
-
-/* Botones */
-.vetNewAppointmentButton {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  background-color: var(--vet-primary);
-  color: var(--vet-white);
-  border: none;
-  border-radius: 50px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: var(--vet-transition);
-}
-
-.vetNewAppointmentButton:hover {
-  background-color: var(--vet-primary-dark);
-  box-shadow: 0 4px 12px rgba(0, 188, 212, 0.3);
-}
-
-/* Perfil rápido */
-.vetProfileQuickview {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.5rem;
-  border-radius: 50px;
-  cursor: pointer;
-  transition: var(--vet-transition);
-}
-
-.vetProfileAvatar {
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: var(--vet-primary);
-  color: var(--vet-white);
-  border-radius: 50%;
-  font-weight: 600;
-  font-size: 0.8rem;
-}
-
-.vetProfileDropdown {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.vetProfileDropdown span {
-  font-size: 0.9rem;
-  font-weight: 500;
-}
-
-/* Contenedor principal */
 .vetContentWrapper {
   display: flex;
-  flex: 1;
+  flex-grow: 1;
 }
 
-/* Barra lateral */
+/* Sidebar */
 .vetSidebar {
   width: 280px;
-  padding: 1.5rem;
-  background-color: var(--vet-white);
+  min-width: 280px;
+  background-color: #ffffff;
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
+  padding: 20px 0;
+  position: sticky;
+  top: 0;
+  height: 100vh; /* Ensure sidebar takes full viewport height */
+  overflow-y: auto; /* Enable scrolling for long content */
 }
 
 .vetSidebarHeader {
-  margin-bottom: 2rem;
   text-align: center;
+  padding: 10px 20px 20px;
+  border-bottom: 1px solid #e0f7fa;
 }
 
 .vetLogoContainer {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.75rem;
-  margin-bottom: 0.5rem;
+  gap: 10px;
   cursor: pointer;
+  margin-bottom: 5px;
 }
 
 .vetLogoIcon {
-  color: var(--vet-primary);
-  font-size: 1.5rem;
+  font-size: 2.2rem;
+  color: #00acc1; /* Primary color */
 }
 
-.vetSidebarHeader h2 {
+.vetLogoContainer h2 {
+  font-size: 1.8rem;
+  color: #2c3e50;
+  font-weight: 700;
   margin: 0;
-  font-size: 1.25rem;
-  color: var(--vet-primary);
 }
 
 .vetClinicName {
+  font-size: 0.9rem;
+  color: #7f8c8d;
   margin: 0;
-  font-size: 0.8rem;
-  color: var(--vet-gray);
 }
 
-/* Perfil de usuario */
 .vetUserProfile {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 2rem;
-  padding-bottom: 1.5rem;
-  border-bottom: 1px solid var(--vet-light-gray);
+  padding: 20px;
+  border-bottom: 1px solid #e0f7fa;
+  margin-bottom: 20px;
 }
 
 .vetAvatar {
-  width: 80px;
-  height: 80px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: var(--vet-primary);
-  color: var(--vet-white);
+  width: 80px; /* Increased size for better visibility */
+  height: 80px; /* Increased size for better visibility */
   border-radius: 50%;
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  cursor: pointer;
-  transition: var(--vet-transition);
+  background-color: #00acc1; /* primary color */
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 2.5rem; /* Adjusted font size for initials */
+  font-weight: 700;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden; /* Crucial: ensures image stays within circle */
+  border: 3px solid #b2ebf2; /* Subtle border */
+}
+
+.vetAvatarImage {
+  width: 100%; /* Make image fill the container */
+  height: 100%; /* Make image fill the container */
+  object-fit: cover; /* Crop image to fit without distortion */
+  border-radius: 50%; /* Ensure image itself is circular */
 }
 
 .vetUserInfo {
   text-align: center;
+  margin-top: 15px;
 }
 
 .vetUserInfo h3 {
-  margin: 0 0 0.25rem;
-  font-size: 1.1rem;
+  font-size: 1.3rem;
+  color: #2c3e50;
+  margin: 0 0 5px;
 }
 
 .vetUserInfo p {
-  margin: 0 0 1rem;
-  font-size: 0.8rem;
-  color: var(--vet-gray);
+  font-size: 0.9rem;
+  color: #7f8c8d;
+  margin: 0 0 10px;
 }
 
 .vetProfileButton {
-  padding: 0.5rem 1rem;
   background-color: transparent;
-  border: 1px solid var(--vet-primary);
-  border-radius: 50px;
-  color: var(--vet-primary);
-  font-size: 0.8rem;
+  border: 1px solid #00acc1;
+  color: #00acc1;
+  padding: 8px 15px;
+  border-radius: 20px;
+  font-size: 0.9rem;
   cursor: pointer;
-  transition: var(--vet-transition);
+  transition: all 0.3s ease;
 }
 
 .vetProfileButton:hover {
-  background-color: var(--vet-primary-light);
+  background-color: #00acc1;
+  color: white;
 }
 
-/* Menú de navegación */
+.vetNavMenu {
+  flex-grow: 1; /* Allows navigation to take available space */
+}
+
 .vetNavMenu ul {
   list-style: none;
   padding: 0;
-  margin: 0 0 2rem;
+  margin: 0;
 }
 
 .vetNavMenu li {
-  position: relative;
-  margin-bottom: 0.5rem;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.vetNavMenu li > div {
   display: flex;
   align-items: center;
-  padding: 0.75rem 1rem;
+  padding: 12px 20px;
+  margin: 5px 0;
+  color: #555;
+  font-size: 1rem;
+  font-weight: 500;
   cursor: pointer;
+  transition: all 0.3s ease;
+  border-radius: 0 25px 25px 0; /* Rounded right corners */
+  position: relative;
+}
+
+.vetNavMenu li:hover {
+  color: #00acc1;
+}
+
+.vetNavMenu li.vetActive {
+  background-color: #e0f7fa; /* Light teal */
+  color: #00acc1;
+  font-weight: 600;
 }
 
 .vetNavIcon {
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 1rem;
-  color: var(--vet-gray);
+  font-size: 1.2rem;
+  margin-right: 15px;
+  width: 25px; /* Fixed width for icons */
+  text-align: center;
 }
 
 .vetActiveIndicator {
   position: absolute;
+  left: 0;
   top: 0;
-  right: 0;
-  width: 3px;
   height: 100%;
-  background-color: var(--vet-primary);
+  width: 5px;
+  background-color: #00acc1;
+  border-radius: 0 5px 5px 0;
 }
 
-.vetActive {
-  background-color: var(--vet-primary-light);
-}
-
-.vetActive .vetNavIcon {
-  color: var(--vet-primary);
-}
-
-/* Acciones rápidas */
 .vetQuickActions {
-  margin-bottom: 2rem;
+  padding: 20px;
+  border-top: 1px solid #e0f7fa;
+  margin-top: 20px;
 }
 
 .vetQuickActions h4 {
-  margin: 0 0 1rem;
-  font-size: 0.9rem;
-  color: var(--vet-gray);
+  font-size: 1rem;
+  color: #7f8c8d;
+  margin-bottom: 15px;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
 }
 
 .vetQuickButton {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 10px;
   width: 100%;
-  padding: 0.75rem 1rem;
-  margin-bottom: 0.5rem;
-  background-color: transparent;
+  padding: 10px 15px;
+  margin-bottom: 10px;
   border: none;
   border-radius: 8px;
-  text-align: left;
-  cursor: pointer;
-  transition: var(--vet-transition);
-}
-
-/* Pie de barra lateral */
-.vetSidebarFooter {
-  margin-top: auto;
-}
-
-.vetStatusCard {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem;
-  background-color: var(--vet-primary-light);
-  border-radius: 8px;
-  margin-bottom: 1.5rem;
-}
-
-.vetStatusCard svg {
-  color: var(--vet-primary);
-}
-
-.vetStatusCard div {
-  flex: 1;
-}
-
-.vetStatusCard span {
-  display: block;
-  font-size: 0.8rem;
-  color: var(--vet-gray);
-}
-
-.vetStatusCard p {
-  margin: 0;
-  font-size: 0.9rem;
+  background-color: #f0f4f7;
+  color: #2c3e50;
+  font-size: 0.95rem;
   font-weight: 500;
-  color: var(--vet-primary);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.vetQuickButton:hover {
+  transform: translateX(5px);
+}
+
+.vetSidebarFooter {
+  padding: 20px;
+  border-top: 1px solid #e0f7fa;
+  text-align: center;
 }
 
 .vetLogoutButton {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  width: 100%;
-  padding: 0.75rem;
   background-color: transparent;
   border: none;
-  cursor: pointer;
-  transition: var(--vet-transition);
-}
-
-.vetLogoutButton span {
-  font-size: 0.9rem;
-}
-
-/* Contenido principal */
-.vetMainContent {
-  flex: 1;
-  padding: 2rem;
-  background-color: var(--vet-light);
-  overflow-y: auto;
-}
-
-/* Pantalla de carga */
-.vetLoadingContainer {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  gap: 1.5rem;
-}
-
-.vetLoadingSpinner {
-  width: 80px;
-  height: 80px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.vetLoadingText {
-  font-size: 1.2rem;
-  color: var(--vet-primary);
-}
-
-.vetLoadingProgress {
-  height: 4px;
-  background-color: var(--vet-primary-light);
-  border-radius: 2px;
-  overflow: hidden;
-}
-
-.vetLoadingProgress::after {
-  content: '';
-  display: block;
-  height: 100%;
-  width: 100%;
-  background-color: var(--vet-primary);
-  animation: loading 1.5s ease-in-out infinite;
-}
-
-@keyframes loading {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
-}
-
-/* Pantalla de error */
-.vetErrorContainer {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  gap: 1.5rem;
-  text-align: center;
-  padding: 2rem;
-}
-
-.vetErrorMessage {
-  font-size: 1.5rem;
-  font-weight: 500;
-  color: var(--vet-danger);
-}
-
-.vetErrorDetail {
+  color: #7f8c8d;
   font-size: 1rem;
-  color: var(--vet-gray);
-  max-width: 500px;
-}
-
-.vetErrorActions {
-  display: flex;
-  gap: 1rem;
-  margin-top: 1rem;
-}
-
-.vetRetryButton {
-  padding: 0.75rem 1.5rem;
-  background-color: var(--vet-primary);
-  color: var(--vet-white);
-  border: none;
-  border-radius: 50px;
   font-weight: 500;
   cursor: pointer;
-  transition: var(--vet-transition);
-}
-
-.vetHomeButton {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  background-color: var(--vet-secondary);
-  color: var(--vet-white);
-  border: none;
-  border-radius: 50px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: var(--vet-transition);
+  justify-content: center;
+  gap: 10px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  width: 100%;
 }
 
-/* Estilos responsivos */
+.vetLogoutButton:hover {
+  background-color: rgba(255, 82, 82, 0.1);
+  color: #FF5252;
+}
+
+/* Main Content Area */
+.vetMainContent {
+  flex-grow: 1;
+  padding: 30px;
+  background-color: #f5f9fa;
+}
+
+/* Loading and Error States */
+.loadingContainer,
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  text-align: center;
+  color: #555;
+}
+
+.loadingContainer p,
+.errorContainer p {
+  margin-top: 20px;
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
+.errorContainer .retryButton {
+  background-color: #00acc1;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 20px;
+  transition: background-color 0.3s ease;
+}
+
+.errorContainer .retryButton:hover {
+  background-color: #0097a7;
+}
+
+/* Floating Notification */
+.floatingNotification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 15px 25px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  color: white;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  z-index: 1000; /* Ensure it's on top */
+}
+
+.floatingNotification.success {
+  background-color: #4CAF50; /* Green */
+}
+
+.floatingNotification.error {
+  background-color: #F44336; /* Red */
+}
+
+.floatingNotification.info {
+  background-color: #2196F3; /* Blue */
+}
+
+.notificationIcon {
+  font-size: 1.2rem;
+}
+
+
+/* Responsive Adjustments */
 @media (max-width: 1200px) {
   .vetSidebar {
-    width: 240px;
-    padding: 1rem;
-  }
-  
-  .vetTopBar {
-    padding: 1rem;
-  }
-  
-  .vetStatsWidget {
-    gap: 1rem;
-    padding: 0.5rem;
+    width: 250px;
+    min-width: 250px;
   }
 }
 
-@media (max-width: 992px) {
-  .vetContentWrapper {
-    flex-direction: column;
-  }
-  
+@media (max-width: 1024px) {
   .vetSidebar {
-    width: 100%;
-    padding: 1rem;
+    width: 220px;
+    min-width: 220px;
+    padding: 15px 0;
   }
-  
-  .vetNavMenu ul {
-    display: flex;
-    overflow-x: auto;
-    padding-bottom: 0.5rem;
+
+  .vetLogoContainer h2 {
+    font-size: 1.6rem;
   }
-  
+
+  .vetUserProfile {
+    padding: 15px;
+  }
+
+  .vetAvatar {
+    width: 70px;
+    height: 70px;
+    font-size: 2rem;
+  }
+
+  .vetUserInfo h3 {
+    font-size: 1.2rem;
+  }
+
   .vetNavMenu li {
-    min-width: 120px;
-    margin-bottom: 0;
-    margin-right: 0.5rem;
+    padding: 10px 15px;
+    font-size: 0.95rem;
   }
-  
-  .vetActiveIndicator {
-    top: auto;
-    bottom: 0;
-    width: 100%;
-    height: 3px;
-  }
-  
+
   .vetQuickActions {
-    display: none;
+    padding: 15px;
+  }
+
+  .vetQuickButton {
+    padding: 8px 12px;
+    font-size: 0.9rem;
+  }
+
+  .vetMainContent {
+    padding: 20px;
   }
 }
 
 @media (max-width: 768px) {
-  .vetTopBar {
-    flex-direction: column;
-    gap: 1rem;
-    padding: 1rem;
+  .vetMainContainer {
+    flex-direction: column; /* Stack sidebar and main content */
   }
-  
-  .vetSearchBar {
-    max-width: 100%;
-    margin-right: 0;
-  }
-  
-  .vetTopBarActions {
+
+  .vetSidebar {
     width: 100%;
-    justify-content: space-between;
+    min-width: unset;
+    height: auto; /* Allow sidebar to collapse */
+    position: relative; /* No sticky on mobile */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    padding-bottom: 0;
   }
-  
-  .vetStatsWidget {
-    display: none;
+
+  .vetSidebarHeader {
+    padding-bottom: 10px;
   }
-  
+
+  .vetUserProfile {
+    flex-direction: row; /* Keep user profile in a row */
+    justify-content: center;
+    gap: 20px;
+    border-bottom: none; /* Remove border when stacked */
+    padding-bottom: 0;
+  }
+
+  .vetUserInfo {
+    text-align: left;
+    margin-top: 0;
+  }
+
+  .vetNavMenu {
+    display: flex; /* Make nav items horizontal */
+    overflow-x: auto; /* Allow horizontal scrolling for nav */
+    padding: 10px 0;
+    border-top: 1px solid #e0f7fa;
+    border-bottom: 1px solid #e0f7fa;
+  }
+
+  .vetNavMenu ul {
+    display: flex;
+    white-space: nowrap; /* Prevent wrapping */
+    padding: 0 10px;
+  }
+
+  .vetNavMenu li {
+    flex-shrink: 0; /* Prevent items from shrinking */
+    padding: 8px 15px;
+    border-radius: 8px; /* More uniform rounding */
+    margin: 0 5px; /* Small gap between items */
+  }
+
+  .vetNavMenu li.vetActive {
+    border-radius: 8px; /* Consistent rounding */
+  }
+
+  .vetNavIcon {
+    margin-right: 8px;
+  }
+
+  .vetActiveIndicator {
+    display: none; /* Hide active indicator when horizontal */
+  }
+
+  .vetQuickActions {
+    display: grid; /* Use grid for quick actions */
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+    padding: 15px;
+    border-top: none;
+  }
+
+  .vetQuickButton {
+    justify-content: center; /* Center content in quick buttons */
+  }
+
+  .vetSidebarFooter {
+    padding: 15px;
+    border-top: 1px solid #e0f7fa;
+  }
+
+  .vetLogoutButton {
+    font-size: 0.95rem;
+  }
+
   .vetMainContent {
-    padding: 1rem;
+    padding: 15px;
   }
 }
 
-/* Estilos para el perfil */
-.vetProfileContainer {
-  max-width: 800px;
-  margin: 0 auto;
-  background-color: var(--vet-white);
-  border-radius: 10px;
-  box-shadow: var(--vet-shadow);
-  overflow: hidden;
-}
+@media (max-width: 480px) {
+  .vetLogoContainer h2 {
+    font-size: 1.5rem;
+  }
 
-.vetProfileHeader {
-  position: relative;
-  height: 150px;
-  background: linear-gradient(135deg, var(--vet-primary), var(--vet-primary-dark));
-}
+  .vetClinicName {
+    font-size: 0.8rem;
+  }
 
-.vetProfileAvatarLarge {
-  position: absolute;
-  bottom: -50px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100px;
-  height: 100px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: var(--vet-white);
-  color: var(--vet-primary);
-  border-radius: 50%;
-  border: 4px solid var(--vet-white);
-  font-size: 2rem;
-  font-weight: 600;
-}
+  .vetAvatar {
+    width: 60px;
+    height: 60px;
+    font-size: 1.8rem;
+  }
 
-.vetProfileBody {
-  padding: 4rem 2rem 2rem;
-  text-align: center;
-}
+  .vetUserInfo h3 {
+    font-size: 1.1rem;
+  }
 
-.vetProfileName {
-  margin: 0 0 0.5rem;
-  font-size: 1.5rem;
-  color: var(--vet-dark);
-}
+  .vetUserInfo p {
+    font-size: 0.85rem;
+  }
 
-.vetProfileTitle {
-  margin: 0 0 1.5rem;
-  font-size: 1rem;
-  color: var(--vet-gray);
-}
+  .vetProfileButton {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+  }
 
-.vetProfileStats {
-  display: flex;
-  justify-content: center;
-  gap: 2rem;
-  margin-bottom: 2rem;
-}
+  .vetNavMenu li {
+    font-size: 0.9rem;
+    padding: 8px 12px;
+  }
 
-.vetProfileStat {
-  text-align: center;
-}
+  .vetNavIcon {
+    font-size: 1rem;
+    margin-right: 10px;
+  }
 
-.vetProfileStat h4 {
-  margin: 0;
-  font-size: 1.5rem;
-  color: var(--vet-primary);
-}
+  .vetQuickActions {
+    grid-template-columns: 1fr; /* Stack quick actions on smallest screens */
+  }
 
-.vetProfileStat p {
-  margin: 0;
-  font-size: 0.8rem;
-  color: var(--vet-gray);
+  .floatingNotification {
+    top: 10px;
+    right: 10px;
+    padding: 10px 20px;
+    font-size: 0.9rem;
+  }
 }
-
-.vetProfileDetails {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
-  margin-top: 2rem;
-}
-
-.vetProfileCard {
-  padding: 1.5rem;
-  background-color: var(--vet-light);
-  border-radius: 8px;
-}
-
-.vetProfileCard h3 {
-  margin: 0 0 1rem;
-  font-size: 1rem;
-  color: var(--vet-primary);
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.vetProfileInfo {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.vetProfileInfo li {
-  display: flex;
-  justify-content: space-between;
-  padding: 0.5rem 0;
-  border-bottom: 1px solid var(--vet-light-gray);
-}
-
-.vetProfileInfo li:last-child {
-  border-bottom: none;
-}
-
-.vetProfileInfo span:first-child {
-  font-weight: 500;
-  color: var(--vet-gray);
-}
-
-.vetProfileActions {
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-  margin-top: 2rem;
-}
-
-.vetProfileEditButton {
-  padding: 0.75rem 1.5rem;
-  background-color: var(--vet-primary);
-  color: var(--vet-white);
-  border: none;
-  border-radius: 50px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: var(--vet-transition);
-}
-
-.vetProfileEditButton:hover {
-  background-color: var(--vet-primary-dark);
-}
-
