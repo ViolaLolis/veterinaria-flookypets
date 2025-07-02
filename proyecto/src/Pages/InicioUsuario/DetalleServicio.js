@@ -1,9 +1,30 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FaSpinner, FaInfoCircle, FaCalendarCheck } from 'react-icons/fa'; // Importar iconos
-import { authFetch } from './api'; // Asegúrate de que la ruta sea correcta
-import './Styles/DetalleServicio.css'; // Importa el CSS
+import { FaSpinner, FaInfoCircle, FaCalendarCheck } from 'react-icons/fa';
+import './Styles/DetalleServicio.css';
+
+// Datos locales simulando la "base de datos"
+const serviciosLocales = [
+  {
+    id_servicio: '1',
+    nombre: 'Corte de pelo',
+    precio: '$30',
+    descripcion: 'Corte de pelo profesional para tu mascota con productos especializados.'
+  },
+  {
+    id_servicio: '2',
+    nombre: 'Vacunación',
+    precio: '$50',
+    descripcion: 'Vacunación completa para mantener a tu mascota saludable.'
+  },
+  {
+    id_servicio: '3',
+    nombre: 'Consulta general',
+    precio: '$40',
+    descripcion: 'Consulta veterinaria general para revisión y diagnóstico.'
+  }
+];
 
 const DetalleServicio = () => {
   const { id } = useParams();
@@ -12,27 +33,18 @@ const DetalleServicio = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const fetchServiceDetail = useCallback(async () => {
+  useEffect(() => {
     setIsLoading(true);
     setError('');
-    try {
-      const response = await authFetch(`/servicios/${id}`);
-      if (response.success) {
-        setServicio(response.data);
-      } else {
-        setError(response.message || 'Error al cargar el detalle del servicio.');
-      }
-    } catch (err) {
-      console.error("Error fetching service detail:", err);
-      setError('Error de conexión al servidor.');
-    } finally {
-      setIsLoading(false);
+    // Simular búsqueda local
+    const servicioEncontrado = serviciosLocales.find(s => s.id_servicio === id);
+    if (servicioEncontrado) {
+      setServicio(servicioEncontrado);
+    } else {
+      setError('No se encontró el servicio.');
     }
+    setIsLoading(false);
   }, [id]);
-
-  useEffect(() => {
-    fetchServiceDetail();
-  }, [fetchServiceDetail]);
 
   const handleAgendar = () => {
     if (servicio) {
@@ -75,7 +87,6 @@ const DetalleServicio = () => {
     <div className="detalle-servicio-container">
       <h2 className="detalle-servicio-title">{servicio.nombre}</h2>
       <div className="detalle-servicio-content">
-        {/* Usar un placeholder de imagen si no hay URL real en la DB */}
         <img
           src={`https://placehold.co/400x250/cccccc/ffffff?text=${servicio.nombre.replace(/\s/g, '+')}`}
           alt={servicio.nombre}

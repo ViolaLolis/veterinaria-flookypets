@@ -1,52 +1,61 @@
-// src/Pages/InicioUsuario/ListaMascotasUsuario.jsx
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
-import { FaPaw, FaChevronLeft, FaChevronRight, FaPlus, FaInfoCircle, FaSpinner, FaSearch } from 'react-icons/fa';
-// import { motion, AnimatePresence } from 'framer-motion'; // ¡QUITAMOS ESTA IMPORTACIÓN!
+import { FaPaw, FaChevronLeft, FaChevronRight, FaPlus, FaInfoCircle, FaSearch } from 'react-icons/fa';
 import TarjetaMascota from './TarjetaMascota';
 import styles from './Styles/MisMascotas.module.css';
-import { authFetch } from './api';
 
 const ListaMascotasUsuario = () => {
-  const { user, showNotification } = useOutletContext();
+  const { user } = useOutletContext(); // Puedes mantener user si quieres
   const navigate = useNavigate();
   const [allUserPets, setAllUserPets] = useState([]);
   const [currentPetIndex, setCurrentPetIndex] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
 
-  const fetchUserPets = useCallback(async () => {
-    if (!user || !user.id) {
-      setError('No se pudo obtener la información del usuario. Por favor, inicia sesión.');
-      setIsLoading(false);
-      return;
-    }
-    try {
-      const response = await authFetch(`/mascotas?id_propietario=${user.id}`);
-      if (response.success) {
-        const petsWithImages = response.data.map(pet => ({
-          ...pet,
-          imagen: pet.imagen_url || `https://api.dicebear.com/7.x/initials/svg?seed=${pet.nombre.charAt(0) || 'P'}&chars=1&backgroundColor=00acc1,007c91,4dd0e1&fontFamily=Poppins`
-        }));
-        setAllUserPets(petsWithImages);
-        if (petsWithImages.length > 0) {
-          setCurrentPetIndex(0);
-        }
-      } else {
-        setError(response.message || 'Error al obtener mascotas.');
-      }
-    } catch (err) {
-      console.error("Error en authFetch para /mascotas:", err);
-      setError('Error de conexión al servidor.');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [user]); // Eliminamos authFetch del array de dependencias si es una función global y no cambia.
+  // Mascotas locales hardcodeadas simulando datos
+  const mascotasSimuladas = [
+    {
+      id_mascota: '001',
+      nombre: 'Luna',
+      especie: 'Gato',
+      raza: 'Siames',
+      edad: 2,
+      peso: 4,
+      sexo: 'Hembra',
+      estado_salud: 'Saludable',
+      imagen: 'https://cdn.pixabay.com/photo/2017/11/09/21/41/cat-2934720_1280.jpg',
+      proxima_cita: '2025-08-10T09:00:00',
+    },
+    {
+      id_mascota: '002',
+      nombre: 'Max',
+      especie: 'Perro',
+      raza: 'Bulldog',
+      edad: 5,
+      peso: 20,
+      sexo: 'Macho',
+      estado_salud: 'Vacunado',
+      imagen: 'https://cdn.pixabay.com/photo/2015/03/26/09/54/bulldog-690563_1280.jpg',
+      proxima_cita: '2025-07-20T11:30:00',
+    },
+    {
+      id_mascota: '003',
+      nombre: 'Nina',
+      especie: 'Perro',
+      raza: 'Golden Retriever',
+      edad: 4,
+      peso: 30,
+      sexo: 'Hembra',
+      estado_salud: 'En tratamiento',
+      imagen: 'https://cdn.pixabay.com/photo/2015/03/26/09/41/golden-retriever-690566_1280.jpg',
+      proxima_cita: null,
+    },
+  ];
 
+  // Simulamos cargar los datos locales en lugar de llamar a la API
   useEffect(() => {
-    fetchUserPets();
-  }, [fetchUserPets]);
+    setAllUserPets(mascotasSimuladas);
+    setCurrentPetIndex(0);
+  }, []);
 
   const filteredPets = allUserPets.filter(pet =>
     pet.nombre.toLowerCase().includes(searchTerm.toLowerCase())
@@ -68,30 +77,6 @@ const ListaMascotasUsuario = () => {
     setCurrentPetIndex((prevIndex) => (prevIndex - 1 + filteredPets.length) % filteredPets.length);
   };
 
-  // ¡QUITAMOS cardVariants y paginate de aquí!
-  // const cardVariants = {...};
-  // const [direction, setDirection] = useState(0);
-  // const paginate = (newDirection) => {...};
-
-
-  if (isLoading) {
-    return (
-      <div className={styles.loadingContainer}>
-        <FaSpinner className={styles.spinnerIcon} />
-        <p>Cargando mascotas...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className={styles.errorMessage}>
-        <FaInfoCircle className={styles.errorIcon} />
-        <p>{error}</p>
-      </div>
-    );
-  }
-
   const currentPet = filteredPets[currentPetIndex];
 
   return (
@@ -108,7 +93,7 @@ const ListaMascotasUsuario = () => {
         </p>
       </div>
 
-      {allUserPets.length > 0 ? (
+      {allUserPets.length > 0 && (
         <div className={styles.searchBarContainer}>
           <FaSearch className={styles.searchIcon} />
           <input
@@ -119,28 +104,25 @@ const ListaMascotasUsuario = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-      ) : null}
+      )}
 
       {filteredPets.length > 0 ? (
         <div className={styles.petCarouselContainer}>
           <div className={styles.petCarousel}>
             <button
-              onClick={showPreviousPet} // Llamamos directamente a showPreviousPet
+              onClick={showPreviousPet}
               className={styles.carouselButton}
               disabled={filteredPets.length <= 1}
             >
               <FaChevronLeft />
             </button>
             <div className={styles.carouselContentWrapper}>
-              {/* ¡QUITAMOS AnimatePresence y motion.div! */}
-              {currentPet && (
-                <div className={styles.staticCardWrapper}> {/* Nuevo div para envolver sin animación */}
-                  <TarjetaMascota mascota={currentPet} />
-                </div>
-              )}
+              <div className={styles.staticCardWrapper}>
+                <TarjetaMascota mascota={currentPet} />
+              </div>
             </div>
             <button
-              onClick={showNextPet} // Llamamos directamente a showNextPet
+              onClick={showNextPet}
               className={styles.carouselButton}
               disabled={filteredPets.length <= 1}
             >
@@ -153,29 +135,28 @@ const ListaMascotasUsuario = () => {
               <span
                 key={index}
                 className={`${styles.indicatorDot} ${index === currentPetIndex ? styles.activeDot : ''}`}
-                // Puedes habilitar el click aquí si quieres un salto directo al índice
                 onClick={() => setCurrentPetIndex(index)}
-              ></span>
+              />
             ))}
           </div>
         </div>
       ) : (
         allUserPets.length > 0 ? (
-            <div className={styles.noContent}>
-                <FaInfoCircle className={styles.infoIcon} />
-                <p>No se encontraron mascotas con ese nombre.</p>
-                <button className={styles.primaryButton} onClick={() => setSearchTerm('')}>
-                    Ver todas las mascotas
-                </button>
-            </div>
+          <div className={styles.noContent}>
+            <FaInfoCircle className={styles.infoIcon} />
+            <p>No se encontraron mascotas con ese nombre.</p>
+            <button className={styles.primaryButton} onClick={() => setSearchTerm('')}>
+              Ver todas las mascotas
+            </button>
+          </div>
         ) : (
-            <div className={styles.noContent}>
-                <FaInfoCircle className={styles.infoIcon} />
-                <p>No tienes mascotas registradas. ¡Añade una ahora!</p>
-                <button className={styles.primaryButton} onClick={() => navigate('/usuario/mascotas/agregar')}>
-                    <FaPlus /> Registrar Mascota
-                </button>
-            </div>
+          <div className={styles.noContent}>
+            <FaInfoCircle className={styles.infoIcon} />
+            <p>No tienes mascotas registradas. ¡Añade una ahora!</p>
+            <button className={styles.primaryButton} onClick={() => navigate('/usuario/mascotas/agregar')}>
+              <FaPlus /> Registrar Mascota
+            </button>
+          </div>
         )
       )}
     </section>

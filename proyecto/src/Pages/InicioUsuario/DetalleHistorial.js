@@ -1,18 +1,47 @@
-import React from 'react';
-import { useParams, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import './Styles/DetalleHistorial.css';
+
+// Función para obtener todos los historiales guardados en localStorage
+const getHistoriales = () => {
+  const stored = localStorage.getItem('historiales');
+  return stored ? JSON.parse(stored) : [];
+};
 
 const DetalleHistorial = () => {
   const { mascotaId, historialId } = useParams();
-  const historial = {
-    id: historialId,
-    mascotaId: mascotaId,
-    fecha: '2025-03-10',
-    veterinario: 'Dra. Ana Pérez',
-    diagnostico: 'Gastroenteritis leve',
-    tratamiento: 'Dieta blanda y probióticos',
-    notas: 'Se recomienda seguimiento en 3 días si los síntomas persisten.',
+  const navigate = useNavigate();
+
+  const [historial, setHistorial] = useState(null);
+
+  useEffect(() => {
+    const historiales = getHistoriales();
+    const foundHistorial = historiales.find(h => h.id === historialId && h.mascotaId === mascotaId);
+    if (foundHistorial) {
+      setHistorial(foundHistorial);
+    } else {
+      setHistorial(null); // No encontrado
+    }
+  }, [mascotaId, historialId]);
+
+  const handleEliminar = () => {
+    if (!historial) return;
+    if (window.confirm('¿Estás seguro que deseas eliminar esta entrada del historial?')) {
+      const historiales = getHistoriales();
+      const filtrados = historiales.filter(h => h.id !== historialId);
+      localStorage.setItem('historiales', JSON.stringify(filtrados));
+      navigate(`/usuario/historial/${mascotaId}`);
+    }
   };
+
+  if (!historial) {
+    return (
+      <div className="detalle-historial-container">
+        <p>Historial no encontrado.</p>
+        <Link to={`/usuario/historial/${mascotaId}`} className="detalle-historial-back">Volver al Historial</Link>
+      </div>
+    );
+  }
 
   return (
     <div className="detalle-historial-container">
@@ -25,11 +54,9 @@ const DetalleHistorial = () => {
         {historial.notas && <p><strong>Notas:</strong> {historial.notas}</p>}
       </div>
       <div className="detalle-historial-actions">
-        {/* NOTA: La ruta /usuario/historial/:mascotaId/editar/:historialId debe estar definida en App.js */}
-        <Link to={`/usuario/historial/${mascotaId}/editar/${historialId}`} className="detalle-historial-button editar">Editar Entrada</Link> {/* CORREGIDO */}
-        {/* Implementar lógica de eliminación */}
-        <button className="detalle-historial-button eliminar">Eliminar Entrada</button>
-        <Link to={`/usuario/historial/${mascotaId}`} className="detalle-historial-back">Volver al Historial</Link> {/* CORREGIDO */}
+        <Link to={`/usuario/historial/${mascotaId}/editar/${historialId}`} className="detalle-historial-button editar">Editar Entrada</Link>
+        <button onClick={handleEliminar} className="detalle-historial-button eliminar">Eliminar Entrada</button>
+        <Link to={`/usuario/historial/${mascotaId}`} className="detalle-historial-back">Volver al Historial</Link>
       </div>
     </div>
   );

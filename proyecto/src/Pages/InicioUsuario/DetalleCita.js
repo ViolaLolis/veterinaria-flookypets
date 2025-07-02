@@ -8,56 +8,15 @@ import {
 } from 'react-icons/fa';
 import styles from './Styles/DetalleCita.css';
 
-const localAppointments = [
-  {
-    id: '1',
-    fecha: '2025-07-15 10:00:00',
-    servicio_nombre: 'Consulta General',
-    precio: 50.00,
-    estado: 'aceptada',
-    veterinario_nombre: 'Dr. Smith',
-    id_veterinario: 'vet123',
-    cliente_nombre: 'Juan Pérez',
-    id_cliente: 'user123',
-    servicios: 'Chequeo de rutina, vacunación'
-  },
-  {
-    id: '2',
-    fecha: '2025-07-20 14:30:00',
-    servicio_nombre: 'Peluquería Canina',
-    precio: 30.00,
-    estado: 'pendiente',
-    veterinario_nombre: 'No Asignado',
-    id_veterinario: null,
-    cliente_nombre: 'María Gómez',
-    id_cliente: 'user456',
-    servicios: 'Corte de pelo, baño, cepillado'
-  },
-  {
-    id: '3',
-    fecha: '2025-07-10 09:00:00',
-    servicio_nombre: 'Urgencia',
-    precio: 100.00,
-    estado: 'completa',
-    veterinario_nombre: 'Dra. García',
-    id_veterinario: 'vet456',
-    cliente_nombre: 'Carlos Ruiz',
-    id_cliente: 'user123',
-    servicios: 'Atención por herida'
-  },
-  {
-    id: '4',
-    fecha: '2025-07-25 11:00:00',
-    servicio_nombre: 'Vacunación',
-    precio: 40.00,
-    estado: 'cancelada',
-    veterinario_nombre: 'Dr. López',
-    id_veterinario: 'vet789',
-    cliente_nombre: 'Ana Torres',
-    id_cliente: 'user789',
-    servicios: 'Vacuna anual'
-  }
-];
+// Funciones auxiliares
+const getAppointments = () => {
+  const stored = localStorage.getItem('citas');
+  return stored ? JSON.parse(stored) : [];
+};
+
+const saveAppointments = (appointments) => {
+  localStorage.setItem('citas', JSON.stringify(appointments));
+};
 
 const DetalleCita = () => {
   const { citaId } = useParams();
@@ -71,7 +30,7 @@ const DetalleCita = () => {
   const [newDate, setNewDate] = useState('');
   const [newTime, setNewTime] = useState('');
 
-  // Usuario local fijo (para simular roles)
+  // Simulación de usuario actual
   const user = {
     id: 'user123',
     role: 'usuario'
@@ -80,7 +39,8 @@ const DetalleCita = () => {
   useEffect(() => {
     setIsLoading(true);
     setTimeout(() => {
-      const foundCita = localAppointments.find(c => c.id === citaId);
+      const storedCitas = getAppointments();
+      const foundCita = storedCitas.find(c => c.id === citaId);
       if (foundCita) {
         setCita({ ...foundCita });
         if (foundCita.estado !== 'completa' && foundCita.estado !== 'cancelada') {
@@ -97,11 +57,19 @@ const DetalleCita = () => {
     setTimeout(() => setNotification(null), 3000);
   };
 
+  const updateCitaInStorage = (updatedCita) => {
+    const citas = getAppointments();
+    const updatedList = citas.map(c => c.id === updatedCita.id ? updatedCita : c);
+    saveAppointments(updatedList);
+    setCita(updatedCita);
+  };
+
   const handleCancel = () => {
     if (!cita || cita.estado === 'cancelada' || cita.estado === 'completa') return;
     setIsManaging(true);
     setTimeout(() => {
-      setCita(prev => ({ ...prev, estado: 'cancelada' }));
+      const updated = { ...cita, estado: 'cancelada' };
+      updateCitaInStorage(updated);
       showNotif('Cita cancelada.');
       setIsManaging(false);
     }, 500);
@@ -111,7 +79,8 @@ const DetalleCita = () => {
     if (!cita || cita.estado !== 'aceptada') return;
     setIsManaging(true);
     setTimeout(() => {
-      setCita(prev => ({ ...prev, estado: 'completa' }));
+      const updated = { ...cita, estado: 'completa' };
+      updateCitaInStorage(updated);
       showNotif('Cita completada.');
       setIsManaging(false);
     }, 500);
@@ -125,7 +94,8 @@ const DetalleCita = () => {
     setIsManaging(true);
     setTimeout(() => {
       const newFecha = `${newDate} ${newTime}:00`;
-      setCita(prev => ({ ...prev, fecha: newFecha, estado: 'pendiente' }));
+      const updated = { ...cita, fecha: newFecha, estado: 'pendiente' };
+      updateCitaInStorage(updated);
       showNotif('Cita reagendada.');
       setShowRescheduleModal(false);
       setIsManaging(false);
@@ -190,12 +160,12 @@ const DetalleCita = () => {
           </motion.button>
         )}
         {canCancel && (
-          <motion.button onClick={handleCancel}>
+          <motion.button onClick={handleCancel} disabled={isManaging}>
             {isManaging ? <FaSpinner /> : <FaTimesCircle />} Cancelar
           </motion.button>
         )}
         {canComplete && (
-          <motion.button onClick={handleComplete}>
+          <motion.button onClick={handleComplete} disabled={isManaging}>
             {isManaging ? <FaSpinner /> : <FaRegCheckCircle />} Completar
           </motion.button>
         )}

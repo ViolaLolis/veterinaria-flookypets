@@ -1,52 +1,71 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faConciergeBell, faSearch, faInfoCircle, faSpinner } from '@fortawesome/free-solid-svg-icons';
-import TarjetaServicio from './TarjetaServicio'; // Asegúrate de que esta importación sea correcta
-import styles from './Styles/ServiciosVeterinaria.module.css'; // Asegúrate de que este CSS exista
-import { authFetch } from './api'; // Importa la función authFetch
+import { faConciergeBell, faSearch, faInfoCircle, faSpinner, faBroom } from '@fortawesome/free-solid-svg-icons'; // Added faBroom for clear search
+import TarjetaServicio from './TarjetaServicio';
+import styles from './Styles/ServiciosVeterinaria.module.css';
+import { authFetch } from './api';
+import { toast } from 'react-toastify'; // Import toast for user feedback
 
 function ServiciosVeterinaria() {
     const [services, setServices] = useState([]);
-    const [filteredServices, setFilteredServices] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
 
+    // --- Data Fetching ---
     const fetchServices = useCallback(async () => {
         setIsLoading(true);
-        setError('');
+        setError(''); // Clear previous errors
         try {
             const response = await authFetch('/servicios'); // Endpoint para obtener servicios
             if (response.success) {
-                setServices(response.data);
-                setFilteredServices(response.data); // Inicialmente, mostrar todos los servicios
+                setServices(response.data || []); // Ensure it's an array, even if empty
             } else {
-                setError(response.message || 'Error al cargar los servicios.');
+                // More specific error message if available
+                setError(response.message || 'Error al cargar los servicios. Por favor, inténtalo de nuevo.');
+                toast.error(response.message || 'Error al cargar los servicios.'); // User feedback
             }
         } catch (err) {
             console.error("Error fetching services:", err);
-            setError('Error de conexión al servidor.');
+            setError('Error de conexión con el servidor. No se pudieron cargar los servicios.');
+            toast.error('Error de conexión al cargar servicios.'); // User feedback
         } finally {
             setIsLoading(false);
         }
-    }, []);
+    }, []); // No dependencies, runs once on mount
 
     useEffect(() => {
         fetchServices();
-    }, [fetchServices]);
+    }, [fetchServices]); // `fetchServices` is stable due to useCallback
 
-    useEffect(() => {
-        const results = services.filter(service =>
-            service.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            service.descripcion.toLowerCase().includes(searchTerm.toLowerCase())
+    // --- Search Filtering (Optimized with useMemo) ---
+    const filteredServices = useMemo(() => {
+        if (!searchTerm) {
+            return services; // Return all services if search term is empty
+        }
+        const lowerCaseSearchTerm = searchTerm.toLowerCase();
+        return services.filter(service =>
+            service.nombre.toLowerCase().includes(lowerCaseSearchTerm) ||
+            service.descripcion.toLowerCase().includes(lowerCaseSearchTerm) ||
+            (service.categoria && service.categoria.toLowerCase().includes(lowerCaseSearchTerm)) || // Search by category
+            (service.especialista && service.especialista.toLowerCase().includes(lowerCaseSearchTerm)) // Search by specialist
         );
-        setFilteredServices(results);
-    }, [searchTerm, services]);
+    }, [searchTerm, services]); // Recalculate only when searchTerm or services change
 
+    // --- Handlers ---
+    const handleSearchChange = (e) => {
+        setSearchTerm(e.target.value);
+    };
+
+    const handleClearSearch = () => {
+        setSearchTerm('');
+    };
+
+    // --- Render Logic ---
     if (isLoading) {
         return (
-            <div className={styles.loadingContainer}>
+            <div className={styles.loadingContainer} aria-live="polite" aria-busy="true">
                 <FontAwesomeIcon icon={faSpinner} spin className={styles.spinnerIcon} />
                 <p>Cargando servicios...</p>
             </div>
@@ -55,9 +74,12 @@ function ServiciosVeterinaria() {
 
     if (error) {
         return (
-            <div className={styles.errorMessage}>
+            <div className={styles.errorMessage} role="alert">
                 <FontAwesomeIcon icon={faInfoCircle} className={styles.errorIcon} />
                 <p>{error}</p>
+                <button onClick={fetchServices} className={styles.retryButton}>
+                    Reintentar
+                </button>
             </div>
         );
     }
@@ -72,23 +94,34 @@ function ServiciosVeterinaria() {
             <div className={styles.dashboardHeader}>
                 <div className={styles.headerTitle}>
                     <FontAwesomeIcon icon={faConciergeBell} className={styles.titleIcon} />
-                    <h2>Gestión de Servicios</h2>
+                    <h2>Servicios Disponibles</h2> {/* Changed title for better clarity */}
                 </div>
                 <div className={styles.searchContainer}>
                     <input
                         type="text"
-                        placeholder="Buscar servicios..."
+                        placeholder="Buscar por nombre, descripción, categoría o especialista..."
                         value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
+                        onChange={handleSearchChange}
                         className={styles.searchInput}
+                        aria-label="Buscar servicios"
                     />
+                    {searchTerm && ( // Show clear button only when there's a search term
+                        <button
+                            onClick={handleClearSearch}
+                            className={styles.clearSearchButton}
+                            aria-label="Limpiar búsqueda"
+                            title="Limpiar búsqueda"
+                        >
+                            <FontAwesomeIcon icon={faBroom} />
+                        </button>
+                    )}
                     <FontAwesomeIcon icon={faSearch} className={styles.searchIcon} />
                 </div>
             </div>
 
             {filteredServices.length > 0 ? (
                 <div className={styles.servicesGrid}>
-                    <AnimatePresence>
+                    <AnimatePresence mode="popLayout"> {/* Use mode="popLayout" for smoother exit animations */}
                         {filteredServices.map(service => (
                             <TarjetaServicio key={service.id_servicio} servicio={service} />
                         ))}
@@ -97,7 +130,12 @@ function ServiciosVeterinaria() {
             ) : (
                 <div className={styles.noResults}>
                     <FontAwesomeIcon icon={faInfoCircle} className={styles.infoIcon} />
-                    <p>{searchTerm ? 'No se encontraron servicios que coincidan con la búsqueda.' : 'No hay servicios registrados.'}</p>
+                    <p>{searchTerm ? `No se encontraron resultados para "${searchTerm}".` : 'Actualmente no hay servicios disponibles.'}</p>
+                    {searchTerm && ( // Suggest clearing search if no results
+                        <button onClick={handleClearSearch} className={styles.clearSearchButtonInNoResults}>
+                            Limpiar búsqueda
+                        </button>
+                    )}
                 </div>
             )}
         </motion.div>
