@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaUserCog, FaEdit, FaSave, FaTimes, FaLock, FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaShieldAlt, FaSpinner, FaInfoCircle, FaBriefcase, FaGraduationCap, FaClock } from 'react-icons/fa';
+import { FaUserCog, FaEdit, FaSave, FaTimes, FaLock, FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaShieldAlt, FaSpinner, FaInfoCircle, FaBriefcase, FaGraduationCap, FaClock, FaCamera } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 import './Styles/AdminProfile.css';
 
@@ -13,6 +13,12 @@ function AdminProfile({ user, setUser }) {
     const [notification, setNotification] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [validationErrors, setValidationErrors] = useState({});
+
+    // Estados para la subida de imagen
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [previewImage, setPreviewImage] = useState(null);
+    const [isUploading, setIsUploading] = useState(false);
+    const fileInputRef = useRef(null); // Referencia para el input de archivo
 
     const getAuthToken = () => {
         return localStorage.getItem('token');
@@ -43,9 +49,13 @@ function AdminProfile({ user, setUser }) {
         }
 
         const defaultHeaders = {
-            'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
         };
+
+        // Si el body es FormData, no establecer Content-Type, el navegador lo hará automáticamente
+        if (!(options.body instanceof FormData)) {
+            defaultHeaders['Content-Type'] = 'application/json';
+        }
 
         const config = {
             ...options,
@@ -55,7 +65,8 @@ function AdminProfile({ user, setUser }) {
             }
         };
 
-        if (options.body && typeof options.body !== 'string') {
+        // Si el body no es FormData y es un objeto, stringify
+        if (options.body && typeof options.body === 'object' && !(options.body instanceof FormData)) {
             config.body = JSON.stringify(options.body);
         }
 
@@ -77,6 +88,40 @@ function AdminProfile({ user, setUser }) {
     }, [showNotification]);
 
     /**
+     * Función para subir una imagen a Cloudinary.
+     * @param {File} file - El archivo de imagen a subir.
+     * @returns {Promise<string>} La URL segura de la imagen subida.
+     * @throws {Error} Si la subida falla.
+     */
+    const handleImageUpload = useCallback(async (file) => {
+        setIsUploading(true);
+        try {
+            const formData = new FormData();
+            formData.append('image', file);
+
+            const response = await authFetch('/upload-image', {
+                method: 'POST',
+                body: formData,
+                // No Content-Type header needed for FormData; browser sets it
+                headers: {} // Override default Content-Type if it was set
+            });
+
+            if (response.success && response.imageUrl) {
+                showNotification('Imagen subida correctamente.', 'success');
+                return response.imageUrl;
+            } else {
+                throw new Error(response.message || 'Error desconocido al subir la imagen.');
+            }
+        } catch (err) {
+            console.error("Error al subir la imagen:", err);
+            showNotification(`Error al subir la imagen: ${err.message}`, 'error');
+            throw err;
+        } finally {
+            setIsUploading(false);
+        }
+    }, [authFetch, showNotification]);
+
+    /**
      * Función de validación EXTREMADAMENTE EXHAUSTIVA para los campos del formulario de perfil.
      * Retorna un mensaje de error si el campo no es válido, o una cadena vacía si es válido.
      * @param {string} name - Nombre del campo a validar.
@@ -88,12 +133,12 @@ function AdminProfile({ user, setUser }) {
         const trimmedValue = value ? String(value).trim() : ''; // Asegurar que value sea string para trim
 
         // --- Patrones y listas de palabras clave para validaciones generales y de seguridad ---
-        const commonSpecialChars = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`€£¥§°¶™®©₽₹¢\p{Emoji}]/u;
+        const commonSpecialChars = /[!@#$%^&*()_+\-=[{};':"\\|,.<>/?~`€£¥§°¶™®©₽₹¢\p{Emoji}]/u;
         const sqlInjectionKeywords = /(union\s+select|select\s+from|drop\s+table|insert\s+into|delete\s+from|alter\s+table|--|;|xp_cmdshell|exec\s+\(|sleep\(|benchmark\()/i;
         const xssKeywords = /(<script|javascript:|onmouseover|onerror|onload|onclick|alert\(|prompt\(|confirm\(|<iframe|<img|<svg|<body|<div|<style)/i;
         const commonBadWords = ['sexo', 'puta', 'mierda', 'nazi', 'fuck', 'shit', 'asshole', 'bitch', 'joder']; // Ejemplos, ampliar según necesidad
         const repetitivePattern = /(.)\1{4,}/; // Más de 4 caracteres idénticos consecutivos
-        const sequentialPattern = /(?:01234|12345|23456|34567|45678|56789|7890|9876|8765|7654|6543|5432|4321|3210)/; // Secuencias numéricas
+        const sequentialPattern = /(?:01234|12345|233456|34567|45678|56789|7890|9876|8765|7654|6543|5432|4321|3210)/; // Secuencias numéricas
         const keyboardSequencesRegex = new RegExp( // Reconstrucción de la regex para evitar errores
             [
                 "qwer", "wert", "erty", "rtyu", "tyui", "yuio", "uiop",
@@ -313,7 +358,7 @@ function AdminProfile({ user, setUser }) {
                     const hasStreetNumber = hasStreetNumberMatch !== null && hasStreetNumberMatch[1] !== undefined;
 
                     const hasHashAndNumber = /#\s*\d+/.test(trimmedValue);
-                    const hasHyphenAndNumber = /\-\s*\d+/.test(trimmedValue);
+                    const hasHyphenAndNumber = /-\s*\d+/.test(trimmedValue);
 
                     if (trimmedValue.includes('Apartamento') && !hasHyphenAndNumber) {
                         message = 'Si especifica "Apartamento", debe seguir el formato "Calle # - Número Apartamento".';
@@ -406,7 +451,9 @@ function AdminProfile({ user, setUser }) {
                     experiencia: responseData.data.experiencia || '',
                     universidad: responseData.data.universidad || '',
                     horario: responseData.data.horario || '',
+                    imagen_url: responseData.data.imagen_url || null, // Asegurar que imagen_url se carga
                 });
+                setPreviewImage(responseData.data.imagen_url || null); // Establecer la imagen de perfil existente como preview
             } else {
                 setError(responseData.message || 'Formato de datos de perfil incorrecto recibido del servidor.');
                 console.error("Error: Formato de datos de perfil incorrecto:", responseData);
@@ -443,6 +490,17 @@ function AdminProfile({ user, setUser }) {
         setValidationErrors(prev => ({ ...prev, [name]: errorMessage }));
     }, [validateField]);
 
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setSelectedFile(file);
+            setPreviewImage(URL.createObjectURL(file)); // Crear URL para la vista previa
+            setValidationErrors(prev => ({ ...prev, imagen_url: '' })); // Limpiar error si había
+        } else {
+            setSelectedFile(null);
+            setPreviewImage(currentAdminData?.imagen_url || null); // Volver a la imagen original o null
+        }
+    };
 
     const handleSave = useCallback(async () => {
         if (!currentAdminData) {
@@ -474,12 +532,26 @@ function AdminProfile({ user, setUser }) {
         try {
             setIsSubmitting(true);
             setError('');
+            let newImageUrl = currentAdminData.imagen_url;
 
+            // Paso 1: Subir la imagen si se seleccionó una nueva
+            if (selectedFile) {
+                try {
+                    newImageUrl = await handleImageUpload(selectedFile);
+                } catch (uploadError) {
+                    // El error ya se maneja en handleImageUpload y showNotification
+                    setIsSubmitting(false);
+                    return; // Detener el proceso de guardado si la subida de imagen falla
+                }
+            }
+
+            // Paso 2: Guardar los datos del perfil (incluyendo la nueva URL de la imagen)
             const dataToUpdate = {
                 nombre: currentAdminData.nombre,
                 apellido: currentAdminData.apellido,
                 telefono: currentAdminData.telefono,
                 direccion: currentAdminData.direccion,
+                imagen_url: newImageUrl, // Usar la nueva URL o la existente
             };
 
             // Añadir campos específicos del rol si aplica
@@ -505,6 +577,8 @@ function AdminProfile({ user, setUser }) {
                 localStorage.setItem('user', JSON.stringify(updatedGlobalUser));
 
                 setEditMode(false);
+                setSelectedFile(null); // Limpiar el archivo seleccionado después de guardar
+                // setPreviewImage(responseData.data.imagen_url || null); // Asegurar que la preview sea la imagen guardada
                 showNotification('Perfil actualizado correctamente.');
             } else {
                 showNotification(responseData.message || 'Error al actualizar perfil.', 'error');
@@ -515,11 +589,14 @@ function AdminProfile({ user, setUser }) {
         } finally {
             setIsSubmitting(false);
         }
-    }, [authFetch, currentAdminData, showNotification, setUser, user, setEditMode, setIsSubmitting, setError, validateField]);
+    }, [authFetch, currentAdminData, showNotification, setUser, user, setEditMode, setIsSubmitting, setError, validateField, selectedFile, handleImageUpload]);
 
     const handlePasswordChangeRedirect = useCallback(() => {
         navigate('/olvidar-contrasena');
     }, [navigate]);
+
+    // Determinar la URL de la imagen a mostrar
+    const displayImageUrl = previewImage || currentAdminData?.imagen_url || `https://placehold.co/150x150/00acc1/ffffff?text=${user?.nombre?.charAt(0) || 'A'}`;
 
     if (isLoading) {
         return (
@@ -579,7 +656,7 @@ function AdminProfile({ user, setUser }) {
             <div className="admin-content-header">
                 <h2>
                     <FaUserCog className="header-icon" />
-                    Mi Perfil de Administrador
+                    Mi Perfil de {user.role === 'admin' ? 'Administrador' : 'Veterinario'}
                 </h2>
             </div>
 
@@ -591,7 +668,7 @@ function AdminProfile({ user, setUser }) {
                             <button
                                 onClick={() => setEditMode(true)}
                                 className="edit-btn"
-                                disabled={isSubmitting}
+                                disabled={isSubmitting || isUploading}
                             >
                                 <FaEdit /> Editar
                             </button>
@@ -600,15 +677,60 @@ function AdminProfile({ user, setUser }) {
                                 onClick={() => {
                                     setEditMode(false);
                                     setValidationErrors({});
+                                    setSelectedFile(null); // Limpiar archivo seleccionado
+                                    setPreviewImage(currentAdminData?.imagen_url || null); // Restaurar preview a la imagen original
                                     fetchAdminProfile(); // Recargar datos originales al cancelar para descartar cambios
                                 }}
                                 className="cancel-btn"
-                                disabled={isSubmitting}
+                                disabled={isSubmitting || isUploading}
                             >
                                 <FaTimes /> Cancelar
                             </button>
                         )}
                     </div>
+
+                    {/* Sección de Imagen de Perfil */}
+                    <div className="profile-image-upload-section">
+                        <div className="profile-image-container">
+                            <img
+                                src={displayImageUrl}
+                                alt="Foto de Perfil"
+                                className="profile-image"
+                                onError={(e) => {
+                                    e.target.onerror = null; // Evita bucles infinitos de error
+                                    e.target.src = `https://placehold.co/150x150/00acc1/ffffff?text=${user?.nombre?.charAt(0) || 'A'}`;
+                                }}
+                            />
+                            {editMode && (
+                                <motion.button
+                                    className="upload-overlay-button"
+                                    onClick={() => fileInputRef.current.click()}
+                                    whileHover={{ scale: 1.1 }}
+                                    whileTap={{ scale: 0.9 }}
+                                    disabled={isSubmitting || isUploading}
+                                >
+                                    {isUploading ? <FaSpinner className="spinner-icon" /> : <FaCamera />}
+                                </motion.button>
+                            )}
+                        </div>
+                        {editMode && (
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                onChange={handleFileChange}
+                                style={{ display: 'none' }} // Ocultar el input de archivo nativo
+                                accept="image/*"
+                                disabled={isSubmitting || isUploading}
+                            />
+                        )}
+                        {editMode && !selectedFile && (
+                             <p className="upload-help-text">Haz clic en el icono de la cámara para cambiar tu foto de perfil.</p>
+                        )}
+                        {selectedFile && (
+                            <p className="selected-file-name">Archivo seleccionado: {selectedFile.name}</p>
+                        )}
+                    </div>
+
 
                     {editMode ? (
                         <div className="edit-form">
@@ -623,7 +745,7 @@ function AdminProfile({ user, setUser }) {
                                         onChange={handleInputChange}
                                         onBlur={handleInputBlur}
                                         placeholder="Tu nombre"
-                                        disabled={isSubmitting}
+                                        disabled={isSubmitting || isUploading}
                                         required
                                     />
                                     {validationErrors.nombre && <span className="error-message-inline">{validationErrors.nombre}</span>}
@@ -639,7 +761,7 @@ function AdminProfile({ user, setUser }) {
                                         onChange={handleInputChange}
                                         onBlur={handleInputBlur}
                                         placeholder="Tu apellido"
-                                        disabled={isSubmitting}
+                                        disabled={isSubmitting || isUploading}
                                     />
                                     {validationErrors.apellido && <span className="error-message-inline">{validationErrors.apellido}</span>}
                                 </div>
@@ -661,7 +783,7 @@ function AdminProfile({ user, setUser }) {
                                         onChange={handleInputChange}
                                         onBlur={handleInputBlur}
                                         placeholder="Tu teléfono"
-                                        disabled={isSubmitting}
+                                        disabled={isSubmitting || isUploading}
                                         required
                                     />
                                     {validationErrors.telefono && <span className="error-message-inline">{validationErrors.telefono}</span>}
@@ -677,7 +799,7 @@ function AdminProfile({ user, setUser }) {
                                         onChange={handleInputChange}
                                         onBlur={handleInputBlur}
                                         placeholder="Tu dirección"
-                                        disabled={isSubmitting}
+                                        disabled={isSubmitting || isUploading}
                                     />
                                     {validationErrors.direccion && <span className="error-message-inline">{validationErrors.direccion}</span>}
                                 </div>
@@ -695,7 +817,7 @@ function AdminProfile({ user, setUser }) {
                                                 onChange={handleInputChange}
                                                 onBlur={handleInputBlur}
                                                 placeholder="Ej: 5 AÑOS o 10+ AÑOS"
-                                                disabled={isSubmitting}
+                                                disabled={isSubmitting || isUploading}
                                                 required
                                             />
                                             {validationErrors.experiencia && <span className="error-message-inline">{validationErrors.experiencia}</span>}
@@ -711,7 +833,7 @@ function AdminProfile({ user, setUser }) {
                                                 onChange={handleInputChange}
                                                 onBlur={handleInputBlur}
                                                 placeholder="Ej: Universidad Nacional de Colombia"
-                                                disabled={isSubmitting}
+                                                disabled={isSubmitting || isUploading}
                                                 required
                                             />
                                             {validationErrors.universidad && <span className="error-message-inline">{validationErrors.universidad}</span>}
@@ -727,7 +849,7 @@ function AdminProfile({ user, setUser }) {
                                                 onChange={handleInputChange}
                                                 onBlur={handleInputBlur}
                                                 placeholder="Ej: LUNES A VIERNES: 8:00 AM - 5:00 PM"
-                                                disabled={isSubmitting}
+                                                disabled={isSubmitting || isUploading}
                                                 required
                                             />
                                             {validationErrors.horario && <span className="error-message-inline">{validationErrors.horario}</span>}
@@ -741,9 +863,9 @@ function AdminProfile({ user, setUser }) {
                                     type="button"
                                     onClick={handleSave}
                                     className="save-btn"
-                                    disabled={isSubmitting || Object.keys(validationErrors).some(key => validationErrors[key])}
+                                    disabled={isSubmitting || isUploading || Object.keys(validationErrors).some(key => validationErrors[key])}
                                 >
-                                    {isSubmitting ? <><FaSpinner className="spinner-icon" /> Guardando...</> : <><FaSave /> Guardar Cambios</>}
+                                    {isSubmitting || isUploading ? <><FaSpinner className="spinner-icon" /> Guardando...</> : <><FaSave /> Guardar Cambios</>}
                                 </button>
                             </div>
                         </div>
@@ -817,22 +939,6 @@ function AdminProfile({ user, setUser }) {
                             )}
                         </div>
                     )}
-                </div>
-
-                <div className="password-section">
-                    <div className="section-header">
-                        <h3>
-                            <FaLock className="section-icon" />
-                            Seguridad
-                        </h3>
-                        <button
-                            onClick={handlePasswordChangeRedirect}
-                            className="toggle-btn"
-                            disabled={isSubmitting}
-                        >
-                            Cambiar Contraseña
-                        </button>
-                    </div>
                 </div>
             </div>
         </div>

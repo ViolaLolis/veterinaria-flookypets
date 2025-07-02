@@ -65,17 +65,43 @@
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background-color: #e0f7fa;
+  /* Changed background to a blue tone for consistency */
+  background-color: #00acc1; /* Blue background for initials placeholder */
   display: flex;
   align-items: center;
   justify-content: center;
   margin-right: 10px;
+  overflow: hidden; /* Ensures image stays within the circle */
+  border: 2px solid white; /* White border around the avatar */
 }
 
+/* Styles for the actual profile image */
+.profile-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Ensures the image covers the area without distortion */
+  border-radius: 50%; /* Makes the image circular */
+}
+
+/* Styles for the placeholder text (initials) if image fails to load or is not present */
+.profile-img[src*="placehold.co"] {
+  font-size: 1.2rem; /* Adjust font size for initials */
+  color: white; /* White text for initials */
+  background-color: #00acc1; /* Blue background for initials */
+  object-fit: contain; /* Ensure text is not cut off */
+  display: flex; /* To center the text */
+  align-items: center;
+  justify-content: center;
+}
+
+
+/* The .user-icon class is no longer needed if you're using an <img> tag for the profile picture.
+   If you still have fallback logic that uses FaUserCog, you might keep this, but it won't affect the image.
 .user-icon {
   color: #00acc1;
   font-size: 1.1rem;
 }
+*/
 
 .user-info {
   display: flex;
