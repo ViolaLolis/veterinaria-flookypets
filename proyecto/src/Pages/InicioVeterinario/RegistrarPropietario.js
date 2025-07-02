@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import styles from './Style/RegistrarPropietarioStyles.module.css';
-import { motion } from 'framer-motion';
+import { useNavigate, useOutletContext } from 'react-router-dom';
+import styles from './Style/RegistrarPropietarioStyles.module.css'; // Asegúrate de que este CSS exista
+import { motion, AnimatePresence } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowLeft, faUserPlus, faSpinner, faCheckCircle, faExclamationTriangle, faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
+import {
+  faArrowLeft, faUserPlus, faSpinner, faCheckCircle, faExclamationTriangle,
+  faEye, faEyeSlash, faCamera
+} from '@fortawesome/free-solid-svg-icons';
+import { authFetch } from './api'; // Asegúrate de que la ruta sea correcta a tu archivo api.js
 
 // --- Framer Motion Variants ---
 const containerVariants = {
@@ -49,6 +53,7 @@ const buttonVariants = {
 
 const RegistrarPropietario = () => {
   const navigate = useNavigate();
+  const { showNotification } = useOutletContext(); // Para mostrar notificaciones
 
   // Estados para los campos del formulario
   const [nombre, setNombre] = useState('');
@@ -61,6 +66,7 @@ const RegistrarPropietario = () => {
   const [fechaNacimiento, setFechaNacimiento] = useState('');
   const [contrasena, setContrasena] = useState('');
   const [verificarContrasena, setVerificarContrasena] = useState('');
+  const [selectedFile, setSelectedFile] = useState(null); // Para la imagen de perfil
 
   // Estados para la UI y validación
   const [errors, setErrors] = useState({}); // Objeto para almacenar mensajes de error por campo
@@ -82,7 +88,7 @@ const RegistrarPropietario = () => {
         if (!value.trim()) {
           error = 'Este campo es obligatorio';
         } else if (value.length < 2) {
-            error = 'Mínimo 2 caracteres';
+          error = 'Mínimo 2 caracteres';
         } else if (value.length > 50) {
           error = `Máximo 50 caracteres`;
         } else if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(value)) {
@@ -94,7 +100,7 @@ const RegistrarPropietario = () => {
         if (!value.trim()) {
           error = 'Este campo es obligatorio';
         } else if (!/^\d{7,10}$/.test(value)) {
-            error = 'Número de teléfono inválido (7-10 dígitos)';
+          error = 'Número de teléfono inválido (7-10 dígitos)';
         }
         break;
 
@@ -104,7 +110,7 @@ const RegistrarPropietario = () => {
         } else if (!/^(Calle|Cll|Cl|Carrera|Cra|Cr|Avenida|Av|Avda|Avd|Transversal|Trans|Circular|Cir|Vereda|Vda)\s?(\d+\s?[a-zA-Z]?\s?#\s?\d+\s?[a-zA-Z]?\s?-\s?\d+|[a-zA-Z0-9\s]+),?.*$/i.test(value)) {
           error = 'Formato de dirección inválido (Ej: Calle 123 #45-67, Av. Principal)';
         } else if (value.length < 5) {
-            error = 'Mínimo 5 caracteres';
+          error = 'Mínimo 5 caracteres';
         } else if (value.length > 100) {
           error = 'Máximo 100 caracteres';
         }
@@ -139,21 +145,21 @@ const RegistrarPropietario = () => {
             error = 'La cédula debe tener entre 7 y 10 dígitos';
           }
         } else if (allFormData.tipoDocumento === 'CEDULA DE EXTRANJERIA') {
-             if (!/^[a-zA-Z0-9]+$/.test(value)) { // Alfanumérico para cédula extranjera
-                 error = 'La cédula de extranjería solo puede contener números y letras';
-             } else if (value.length < 6 || value.length > 15) { // Rango estimado para cédula extranjera
-                 error = 'La cédula de extranjería debe tener entre 6 y 15 caracteres';
-             }
+          if (!/^[a-zA-Z0-9]+$/.test(value)) { // Alfanumérico para cédula extranjera
+            error = 'La cédula de extranjería solo puede contener números y letras';
+          } else if (value.length < 6 || value.length > 15) { // Rango estimado para cédula extranjera
+            error = 'La cédula de extranjería debe tener entre 6 y 15 caracteres';
+          }
         } else if (allFormData.tipoDocumento === 'PASAPORTE') {
-             if (!/^[a-zA-Z0-9]+$/.test(value)) { // Alfanumérico para pasaporte
-                 error = 'El pasaporte solo puede contener números y letras';
-             } else if (value.length < 6 || value.length > 20) { // Rango estimado para pasaporte
-                 error = 'El pasaporte debe tener entre 6 y 20 caracteres';
-             }
+          if (!/^[a-zA-Z0-9]+$/.test(value)) { // Alfanumérico para pasaporte
+            error = 'El pasaporte solo puede contener números y letras';
+          } else if (value.length < 6 || value.length > 20) { // Rango estimado para pasaporte
+            error = 'El pasaporte debe tener entre 6 y 20 caracteres';
+          }
         } else if (!/^[a-zA-Z0-9]+$/.test(value)) { // Validación genérica si no es CC, CE o Pasaporte
-            error = 'Este campo solo puede contener números y letras';
+          error = 'Este campo solo puede contener números y letras';
         } else if (value.length < 5 || value.length > 20) { // Longitud genérica
-            error = 'Debe tener entre 5 y 20 caracteres';
+          error = 'Debe tener entre 5 y 20 caracteres';
         }
         break;
 
@@ -210,7 +216,7 @@ const RegistrarPropietario = () => {
     return error;
   };
 
-  // Handler para cambios en los inputs, que actualiza el estado y valida el campo
+  // Handler para cambios en los inputs
   const handleChange = (e) => {
     const { name, value } = e.target;
     let newValue = value;
@@ -220,16 +226,13 @@ const RegistrarPropietario = () => {
       newValue = value.toUpperCase();
     }
 
-    // Actualizar el estado del campo usando una función para evitar cierres (closures)
-    // y asegurar que `allFormData` en `validateField` tenga los valores más recientes.
-    // Esto es crucial para las validaciones en vivo y cruzadas.
     setErrors(prevErrors => {
-        const currentFormData = { // Crear un objeto con los datos más recientes incluyendo el cambio actual
-            nombre, apellido, telefono, email, direccion, tipoDocumento, numeroDocumento, fechaNacimiento, contrasena, verificarContrasena,
-            [name]: newValue
-        };
-        const error = validateField(name, newValue, currentFormData);
-        return { ...prevErrors, [name]: error };
+      const currentFormData = {
+        nombre, apellido, telefono, email, direccion, tipoDocumento, numeroDocumento, fechaNacimiento, contrasena, verificarContrasena,
+        [name]: newValue
+      };
+      const error = validateField(name, newValue, currentFormData);
+      return { ...prevErrors, [name]: error };
     });
 
     switch (name) {
@@ -246,6 +249,44 @@ const RegistrarPropietario = () => {
       default: break;
     }
   };
+
+  const handleFileChange = (e) => {
+    setSelectedFile(e.target.files[0]);
+  };
+
+  // Función para subir la imagen a Cloudinary
+  const uploadImage = async () => {
+    if (!selectedFile) {
+      return null; // No hay archivo para subir
+    }
+
+    const imageData = new FormData();
+    imageData.append('image', selectedFile);
+
+    try {
+      const response = await authFetch('/upload-image', {
+        method: 'POST',
+        headers: {
+          // No Content-Type aquí, FormData lo establece automáticamente con el boundary
+        },
+        body: imageData,
+      });
+
+      if (response.success) {
+        showNotification('Imagen de perfil subida exitosamente.', 'success');
+        setSelectedFile(null); // Limpiar el archivo seleccionado
+        return response.imageUrl;
+      } else {
+        showNotification(response.message || 'Error al subir la imagen.', 'error');
+        return null;
+      }
+    } catch (err) {
+      console.error("Error uploading image:", err);
+      showNotification(err.message || 'Error de conexión al servidor al subir imagen.', 'error');
+      return null;
+    }
+  };
+
 
   // Handler para el envío del formulario
   const handleSubmit = async (event) => {
@@ -269,50 +310,71 @@ const RegistrarPropietario = () => {
     setErrors(newErrors);
 
     // Si hay errores, detener el envío y mostrar un mensaje general
-    if (Object.keys(newErrors).some(key => newErrors[key])) { // Si algún error no está vacío
+    if (Object.keys(newErrors).some(key => newErrors[key])) {
       setMensaje({ texto: 'Por favor, corrige los errores en el formulario antes de enviar.', tipo: 'error' });
       setIsSubmitting(false);
       return;
     }
 
+    let imagenUrl = null;
+    if (selectedFile) {
+      imagenUrl = await uploadImage(); // Subir la imagen si hay una seleccionada
+      if (!imagenUrl) {
+        // Si la subida de imagen falla, detener el proceso de registro
+        setIsSubmitting(false);
+        return;
+      }
+    }
+
     const propietarioData = {
       nombre: nombre.toUpperCase(),
       apellido: apellido.toUpperCase(),
-      telefono: telefono.toUpperCase(),
+      telefono: telefono, // Mantener como está, la validación ya lo maneja
       email: email.toLowerCase(),
       direccion: direccion.toUpperCase(),
-      tipoDocumento: tipoDocumento.toUpperCase(),
-      numeroDocumento: numeroDocumento.toUpperCase(),
-      fechaNacimiento: fechaNacimiento,
-      contrasena: contrasena
+      tipo_documento: tipoDocumento.toUpperCase(),
+      numero_documento: numeroDocumento.toUpperCase(),
+      fecha_nacimiento: fechaNacimiento,
+      password: contrasena, // Usar 'password' para el backend
+      imagen_url: imagenUrl // Añadir la URL de la imagen
     };
 
     console.log('Datos del propietario a registrar:', propietarioData);
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500)); // Simula un retraso de API
-      // Aquí iría la lógica real para enviar los datos:
-      // const response = await api.post('/propietarios', propietarioData);
-      // console.log('Propietario registrado:', response.data);
+      const response = await authFetch('/register', {
+        method: 'POST',
+        body: JSON.stringify(propietarioData),
+      });
 
-      setMensaje({ texto: '¡Propietario registrado exitosamente!', tipo: 'exito' });
-      // Limpia el formulario después de un envío exitoso
-      setNombre(''); setApellido(''); setTelefono(''); setEmail(''); setDireccion('');
-      setTipoDocumento(''); setNumeroDocumento(''); setFechaNacimiento('');
-      setContrasena(''); setVerificarContrasena('');
-      setErrors({}); // Limpiar errores visuales
+      if (response.success) {
+        setMensaje({ texto: '¡Propietario registrado exitosamente!', tipo: 'exito' });
+        showNotification('Propietario registrado exitosamente.', 'success');
+        // Limpia el formulario después de un envío exitoso
+        setNombre(''); setApellido(''); setTelefono(''); setEmail(''); setDireccion('');
+        setTipoDocumento(''); setNumeroDocumento(''); setFechaNacimiento('');
+        setContrasena(''); setVerificarContrasena(''); setSelectedFile(null);
+        setErrors({}); // Limpiar errores visuales
 
-      setTimeout(() => {
-        navigate('/veterinario/propietarios');
-      }, 1500);
+        setTimeout(() => {
+          navigate('/veterinario/propietarios'); // Redirigir a la lista de propietarios
+        }, 1500);
 
+      } else {
+        setMensaje({ texto: response.message || 'Error al registrar el propietario.', tipo: 'error' });
+        showNotification(response.message || 'Error al registrar el propietario.', 'error');
+      }
     } catch (error) {
       console.error('Error al registrar propietario:', error);
-      setMensaje({ texto: 'Error al registrar el propietario. Inténtalo de nuevo.', tipo: 'error' });
+      setMensaje({ texto: 'Error de conexión al servidor al registrar el propietario. Inténtalo de nuevo.', tipo: 'error' });
+      showNotification('Error de conexión al servidor al registrar el propietario.', 'error');
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  // URL de previsualización de la imagen
+  const previewImageUrl = selectedFile ? URL.createObjectURL(selectedFile) : `https://placehold.co/150x150/00acc1/ffffff?text=${nombre.charAt(0) || 'P'}`;
 
   return (
     <motion.div
@@ -336,6 +398,33 @@ const RegistrarPropietario = () => {
       </div>
 
       <form onSubmit={handleSubmit} className={styles.formulario}>
+        {/* Sección de Imagen de Perfil */}
+        <div className={styles.profileImageSection}>
+          <img
+            src={previewImageUrl}
+            alt="Previsualización de Perfil"
+            className={styles.profileImagePreview}
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = `https://placehold.co/150x150/00acc1/ffffff?text=${nombre.charAt(0) || 'P'}`;
+            }}
+          />
+          <label htmlFor="file-upload" className={styles.uploadButton}>
+            <FontAwesomeIcon icon={faCamera} /> Subir Foto
+            <input
+              id="file-upload"
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className={styles.fileInput}
+              disabled={isSubmitting}
+            />
+          </label>
+          {selectedFile && (
+            <p className={styles.fileName}>Archivo seleccionado: {selectedFile.name}</p>
+          )}
+        </div>
+
         {/* Sección de Datos Personales */}
         <div className={styles.formSection}>
           <h3>Datos Personales</h3>
@@ -352,6 +441,7 @@ const RegistrarPropietario = () => {
                 className={`${styles.uppercaseInput} ${errors.nombre ? styles.inputError : ''}`}
                 variants={inputVariants}
                 whileFocus="focus"
+                disabled={isSubmitting}
               />
               {errors.nombre && <span className={styles.errorMessageField}>{errors.nombre}</span>}
             </div>
@@ -367,6 +457,7 @@ const RegistrarPropietario = () => {
                 className={`${styles.uppercaseInput} ${errors.apellido ? styles.inputError : ''}`}
                 variants={inputVariants}
                 whileFocus="focus"
+                disabled={isSubmitting}
               />
               {errors.apellido && <span className={styles.errorMessageField}>{errors.apellido}</span>}
             </div>
@@ -385,6 +476,7 @@ const RegistrarPropietario = () => {
                 className={`${styles.uppercaseInput} ${errors.telefono ? styles.inputError : ''}`}
                 variants={inputVariants}
                 whileFocus="focus"
+                disabled={isSubmitting}
               />
               {errors.telefono && <span className={styles.errorMessageField}>{errors.telefono}</span>}
             </div>
@@ -400,6 +492,7 @@ const RegistrarPropietario = () => {
                 className={errors.email ? styles.inputError : ''}
                 variants={inputVariants}
                 whileFocus="focus"
+                disabled={isSubmitting}
               />
               {errors.email && <span className={styles.errorMessageField}>{errors.email}</span>}
             </div>
@@ -417,6 +510,7 @@ const RegistrarPropietario = () => {
               className={`${styles.uppercaseInput} ${errors.direccion ? styles.inputError : ''}`}
               variants={inputVariants}
               whileFocus="focus"
+              disabled={isSubmitting}
             />
             {errors.direccion && <span className={styles.errorMessageField}>{errors.direccion}</span>}
           </div>
@@ -437,6 +531,7 @@ const RegistrarPropietario = () => {
                 className={`${styles.selectInput} ${errors.tipoDocumento ? styles.inputError : ''}`}
                 variants={inputVariants}
                 whileFocus="focus"
+                disabled={isSubmitting}
               >
                 <option value="">Seleccione un tipo</option>
                 <option value="CEDULA DE CIUDADANIA">Cédula de Ciudadanía</option>
@@ -457,6 +552,7 @@ const RegistrarPropietario = () => {
                 className={`${styles.uppercaseInput} ${errors.numeroDocumento ? styles.inputError : ''}`}
                 variants={inputVariants}
                 whileFocus="focus"
+                disabled={isSubmitting}
               />
               {errors.numeroDocumento && <span className={styles.errorMessageField}>{errors.numeroDocumento}</span>}
             </div>
@@ -474,6 +570,7 @@ const RegistrarPropietario = () => {
               className={`${styles.dateInput} ${errors.fechaNacimiento ? styles.inputError : ''}`}
               variants={inputVariants}
               whileFocus="focus"
+              disabled={isSubmitting}
             />
             {errors.fechaNacimiento && <span className={styles.errorMessageField}>{errors.fechaNacimiento}</span>}
           </div>
@@ -495,6 +592,7 @@ const RegistrarPropietario = () => {
                 className={errors.contrasena ? styles.inputError : ''}
                 variants={inputVariants}
                 whileFocus="focus"
+                disabled={isSubmitting}
               />
               <FontAwesomeIcon
                 icon={showPassword ? faEyeSlash : faEye}
@@ -518,6 +616,7 @@ const RegistrarPropietario = () => {
                 className={errors.verificarContrasena ? styles.inputError : ''}
                 variants={inputVariants}
                 whileFocus="focus"
+                disabled={isSubmitting}
               />
               <FontAwesomeIcon
                 icon={showConfirmPassword ? faEyeSlash : faEye}
@@ -530,19 +629,21 @@ const RegistrarPropietario = () => {
         </div>
 
         {/* Mensajes de estado (éxito/error) */}
-        {mensaje.texto && (
-          <motion.div
-            className={`${styles.message} ${
-              mensaje.tipo === 'exito' ? styles.successMessage : styles.errorMessage
-            }`}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-          >
-            <FontAwesomeIcon icon={mensaje.tipo === 'exito' ? faCheckCircle : faExclamationTriangle} />
-            <span>{mensaje.texto}</span>
-          </motion.div>
-        )}
+        <AnimatePresence>
+          {mensaje.texto && (
+            <motion.div
+              className={`${styles.message} ${
+                mensaje.tipo === 'exito' ? styles.successMessage : styles.errorMessage
+              }`}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+            >
+              <FontAwesomeIcon icon={mensaje.tipo === 'exito' ? faCheckCircle : faExclamationTriangle} />
+              <span>{mensaje.texto}</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Botones de acción */}
         <div className={styles.formActions}>

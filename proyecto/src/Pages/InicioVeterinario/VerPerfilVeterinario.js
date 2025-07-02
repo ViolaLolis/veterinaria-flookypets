@@ -1,17 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate, Link, useOutletContext } from 'react-router-dom';
 import veteStyles from './Style/VerPerfilVeterinarioStyles.module.css';
 import { motion } from 'framer-motion';
-
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  FontAwesomeIcon
-} from '@fortawesome/react-fontawesome';
-import {
-  faUserCircle,
   faEdit,
   faSignOutAlt,
-  faSyncAlt // Added for refresh button in error state
+  faSyncAlt,
+  faSpinner, // Importar spinner
+  faUser, // Importar faUser para el fallback
+  faEnvelope, faPhone, faMapMarkerAlt, faBriefcaseMedical, faGraduationCap, faClock
 } from '@fortawesome/free-solid-svg-icons';
+import { authFetch } from './api'; // Asegúrate de que la ruta sea correcta a tu archivo api.js
 
 const containerVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -43,68 +43,62 @@ const itemVariants = {
   visible: { opacity: 1, x: 0 }
 };
 
-const VerPerfilVeterinario = ({ setUser }) => {
+const VerPerfilVeterinario = () => {
+  const { user, setUser, showNotification } = useOutletContext(); // Obtener user y setUser del contexto
   const navigate = useNavigate();
   const [perfil, setPerfil] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const handleCerrarSesion = () => {
-    // Limpia la información del usuario del localStorage
-    localStorage.removeItem('user');
-    // Si la función setUser fue proporcionada, úsala para limpiar el estado de usuario global
+    localStorage.removeItem('token'); // Limpia el token JWT
+    localStorage.removeItem('user'); // Limpia la información del usuario del localStorage
     if (setUser) {
-      setUser(null);
+      setUser(null); // Limpia el estado de usuario global
     } else {
       console.warn("La función 'setUser' no fue proporcionada. Asegúrate de pasarla desde App.js.");
     }
-    // Redirige al usuario a la página de login
-    navigate('/login');
+    navigate('/login'); // Redirige al usuario a la página de login
   };
 
-  const loadProfileData = () => {
+  const loadProfileData = useCallback(async () => {
     setLoading(true);
-    setError(null); // Limpiar errores previos
+    setError(null);
 
-    setTimeout(() => {
-      try {
-        // Intenta cargar el perfil desde localStorage primero
-        const savedPerfil = localStorage.getItem('veterinarioProfile');
-        if (savedPerfil) {
-          setPerfil(JSON.parse(savedPerfil));
-        } else {
-          // Si no hay datos en localStorage, usa los datos simulados
-          const veterinarioData = {
-            nombre: 'DRA. SOFIA VARGAS', // En mayúsculas
-            especialidad: 'MEDICINA GENERAL VETERINARIA', // En mayúsculas
-            email: 'sofia.vargas@example.com', // Sin mayúsculas
-            telefono: '3001234567', // En mayúsculas
-            direccion: 'CARRERA 10 # 20-30, BOGOTA', // En mayúsculas
-            experiencia: '5 AÑOS', // En mayúsculas
-            universidad: 'UNIVERSIDAD NACIONAL DE COLOMBIA', // En mayúsculas
-            horario: 'LUNES A VIERNES: 8:00 AM - 5:00 PM' // En mayúsculas
-          };
-          setPerfil(veterinarioData);
-          // Opcional: Guarda estos datos simulados en localStorage para futuras cargas
-          localStorage.setItem('veterinarioProfile', JSON.stringify(veterinarioData));
-        }
-        setLoading(false);
-      } catch (err) {
-        console.error("Error al cargar datos del perfil:", err);
-        setError('Error al cargar los datos del perfil. Por favor, inténtalo de nuevo más tarde.');
-        setLoading(false);
+    if (!user || !user.id) {
+      setError('No se pudo cargar el perfil: ID de usuario no disponible. Por favor, inicia sesión de nuevo.');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      // Usar authFetch para obtener los datos del perfil del usuario logueado
+      const response = await authFetch(`/usuarios/${user.id}`);
+      if (response.success) {
+        setPerfil(response.data);
+        // Opcional: Actualizar el localStorage 'user' con los datos más recientes del perfil
+        localStorage.setItem('user', JSON.stringify(response.data));
+      } else {
+        setError(response.message || 'Error al cargar los datos del perfil.');
+        if (showNotification) showNotification(response.message || 'Error al cargar los datos del perfil.', 'error');
       }
-    }, 800); // Simulate network delay
-  };
+    } catch (err) {
+      console.error("Error al cargar datos del perfil:", err);
+      setError('Error de conexión al servidor al cargar el perfil. Por favor, inténtalo de nuevo más tarde.');
+      if (showNotification) showNotification('Error de conexión al servidor al cargar el perfil.', 'error');
+    } finally {
+      setLoading(false);
+    }
+  }, [user, showNotification]); // Dependencias: user para que se recargue si el usuario cambia, showNotification para usarlo
 
   useEffect(() => {
     loadProfileData();
-  }, []); // Empty dependency array means this runs once on mount
+  }, [loadProfileData]); // Ejecutar cuando loadProfileData cambie (que solo será si user o showNotification cambian)
 
   if (loading) {
     return (
       <div className={veteStyles.veteLoadingContainer}>
-        <div className={veteStyles.veteLoadingSpinner}></div>
+        <FontAwesomeIcon icon={faSpinner} spin size="3x" className={veteStyles.veteLoadingSpinner} />
         <p>Cargando perfil...</p>
       </div>
     );
@@ -117,7 +111,7 @@ const VerPerfilVeterinario = ({ setUser }) => {
         <p>{error}</p>
         <motion.button
           onClick={loadProfileData} // Intenta cargar de nuevo los datos
-          className={`${veteStyles.veteActionButton} ${veteStyles.veteReloadButton}`} // Nuevo estilo
+          className={`${veteStyles.veteActionButton} ${veteStyles.veteReloadButton}`}
           variants={buttonVariants}
           whileHover="hover"
           whileTap="tap"
@@ -139,6 +133,9 @@ const VerPerfilVeterinario = ({ setUser }) => {
     );
   }
 
+  // Fallback para la imagen de perfil si no hay URL o si falla la carga
+  const profileImageUrl = perfil.imagen_url || `https://placehold.co/150x150/00acc1/ffffff?text=${perfil.nombre?.charAt(0) || 'V'}`;
+
   return (
     <motion.div
       className={veteStyles.vetePerfilContainer}
@@ -152,18 +149,21 @@ const VerPerfilVeterinario = ({ setUser }) => {
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
         >
-          <FontAwesomeIcon
-            icon={faUserCircle}
-            className={veteStyles.veteUserIcon}
-            size="3x"
+          {/* Mostrar imagen de perfil o icono de usuario por defecto */}
+          <img
+            src={profileImageUrl}
+            alt="Foto de Perfil"
+            className={veteStyles.veteProfileImage}
+            onError={(e) => {
+              e.target.onerror = null; // Evita bucles infinitos de error
+              e.target.src = `https://placehold.co/150x150/00acc1/ffffff?text=${perfil.nombre?.charAt(0) || 'V'}`;
+            }}
           />
         </motion.div>
 
         <h2>Mi Perfil</h2>
 
         <div className={veteStyles.veteActions}>
-          {/* El botón de configuración (faCog) ha sido eliminado de aquí */}
-
           <motion.div
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -192,36 +192,42 @@ const VerPerfilVeterinario = ({ setUser }) => {
         <h3>Información Personal</h3>
 
         <motion.p variants={itemVariants}>
-          <strong>Nombre:</strong> {perfil.nombre}
+          <strong><FontAwesomeIcon icon={faUser} /> Nombre:</strong> {perfil.nombre} {perfil.apellido}
+        </motion.p>
+
+        {perfil.role === 'veterinario' && (
+            <motion.p variants={itemVariants}>
+                <strong>Rol:</strong> {perfil.role}
+            </motion.p>
+        )}
+        
+        <motion.p variants={itemVariants}>
+          <strong><FontAwesomeIcon icon={faEnvelope} /> Email:</strong> {perfil.email}
         </motion.p>
 
         <motion.p variants={itemVariants}>
-          <strong>Especialidad:</strong> {perfil.especialidad}
+          <strong><FontAwesomeIcon icon={faPhone} /> Teléfono:</strong> {perfil.telefono}
         </motion.p>
 
         <motion.p variants={itemVariants}>
-          <strong>Email:</strong> {perfil.email}
+          <strong><FontAwesomeIcon icon={faMapMarkerAlt} /> Dirección:</strong> {perfil.direccion}
         </motion.p>
 
-        <motion.p variants={itemVariants}>
-          <strong>Teléfono:</strong> {perfil.telefono}
-        </motion.p>
+        {perfil.role === 'veterinario' && (
+          <>
+            <motion.p variants={itemVariants}>
+              <strong><FontAwesomeIcon icon={faBriefcaseMedical} /> Experiencia:</strong> {perfil.experiencia || 'No especificado'}
+            </motion.p>
 
-        <motion.p variants={itemVariants}>
-          <strong>Dirección:</strong> {perfil.direccion}
-        </motion.p>
+            <motion.p variants={itemVariants}>
+              <strong><FontAwesomeIcon icon={faGraduationCap} /> Universidad:</strong> {perfil.universidad || 'No especificado'}
+            </motion.p>
 
-        <motion.p variants={itemVariants}>
-          <strong>Experiencia:</strong> {perfil.experiencia}
-        </motion.p>
-
-        <motion.p variants={itemVariants}>
-          <strong>Universidad:</strong> {perfil.universidad}
-        </motion.p>
-
-        <motion.p variants={itemVariants}>
-          <strong>Horario:</strong> {perfil.horario}
-        </motion.p>
+            <motion.p variants={itemVariants}>
+              <strong><FontAwesomeIcon icon={faClock} /> Horario:</strong> {perfil.horario || 'No especificado'}
+            </motion.p>
+          </>
+        )}
       </motion.div>
     </motion.div>
   );

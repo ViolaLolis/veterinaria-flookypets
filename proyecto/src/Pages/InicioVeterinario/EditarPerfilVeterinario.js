@@ -1,383 +1,441 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import veteStyles from './Style/EditarPerfilVeterinarioStyles.module.css'; // Asegúrate que esta ruta sea correcta
-import { motion } from 'framer-motion';
-import { FontAwesomeIcon }
-from '@fortawesome/react-fontawesome';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate, useOutletContext } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faArrowLeft,
-  faUserCog,
-  faSave,
-  faSpinner,
-  faCheckCircle,
-  faExclamationTriangle
+  faArrowLeft, faSave, faSpinner, faCheckCircle, faTimesCircle,
+  faUser, faEnvelope, faPhone, faMapMarkerAlt, faBriefcaseMedical,
+  faGraduationCap, faClock, faCamera, faEdit
 } from '@fortawesome/free-solid-svg-icons';
+import { authFetch } from './api'; // Asegúrate de que la ruta sea correcta
+import styles from './Style/EditarPerfilVeterinarioStyles.module.css'; // Crear este archivo CSS
 
-// --- Framer Motion Variants ---
-const containerVariants = {
-  hidden: { opacity: 0, x: '-100vw' },
-  visible: {
-    opacity: 1,
-    x: 0,
-    transition: {
-      type: 'spring',
-      delay: 0.2,
-      damping: 20,
-      stiffness: 100
-    }
-  },
-  exit: {
-    x: '100vw',
-    transition: {
-      ease: 'easeInOut',
-      duration: 0.3
-    }
-  },
-};
-
-const buttonVariants = {
-  hover: {
-    scale: 1.05,
-    boxShadow: "0 5px 15px rgba(0, 172, 193, 0.4)"
-  },
-  tap: {
-    scale: 0.95,
-    boxShadow: "0 2px 5px rgba(0, 172, 193, 0.2)"
-  },
-};
-
-const inputVariants = {
-  focus: {
-    scale: 1.005,
-    boxShadow: "0 0 0 4px rgba(0, 172, 193, 0.15)",
-    borderColor: "#00acc1"
-  }
-};
-
-// --- Componente EditarPerfilVeterinario ---
 const EditarPerfilVeterinario = () => {
+  const { user, setUser, showNotification } = useOutletContext();
   const navigate = useNavigate();
 
-  // Estados para los campos del formulario
-  const [nombre, setNombre] = useState('');
-  const [especialidad, setEspecialidad] = useState(''); // Campo de solo lectura
-  const [email, setEmail] = useState('');
-  const [telefono, setTelefono] = useState('');
-  const [direccion, setDireccion] = useState('');
-  const [experiencia, setExperiencia] = useState(''); // Campo de solo lectura
-  const [universidad, setUniversidad] = useState(''); // Campo de solo lectura
-  const [horario, setHorario] = useState(''); // Campo de solo lectura
+  const [formData, setFormData] = useState({
+    nombre: '',
+    apellido: '',
+    email: '',
+    telefono: '',
+    direccion: '',
+    experiencia: '',
+    universidad: '',
+    horario: '',
+    imagen_url: '', // Para la URL de la imagen actual
+    new_password: '', // Para cambiar la contraseña
+    confirm_password: ''
+  });
 
-  // Estados de UI y control de flujo
+  const [selectedFile, setSelectedFile] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [mensaje, setMensaje] = useState({ texto: '', tipo: '' }); // Para mensajes de éxito/error
+  const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
-  // Efecto para cargar los datos del perfil al montar el componente
-  useEffect(() => {
-    const loadProfile = () => {
-      setLoading(true);
-      setError(null);
-      setMensaje({ texto: '', tipo: '' }); // Limpia mensajes anteriores al recargar
-
-      setTimeout(() => { // Simula una llamada asíncrona a una API
-        try {
-          const savedProfile = localStorage.getItem('veterinarioProfile');
-          let currentProfileData = {};
-
-          if (savedProfile) {
-            currentProfileData = JSON.parse(savedProfile);
-          } else {
-            // Datos predeterminados si no hay nada guardado, para que los campos de solo lectura tengan contenido inicial
-            currentProfileData = {
-              nombre: '',
-              especialidad: 'MEDICINA VETERINARIA Y ZOOTECNIA', // Valor inicial de solo lectura en mayúsculas
-              email: '', // Correo electrónico sin mayúsculas iniciales
-              telefono: '',
-              direccion: '',
-              experiencia: '5 AÑOS EN CLÍNICA DE PEQUEÑOS ANIMALES', // Valor inicial de solo lectura en mayúsculas
-              universidad: 'UNIVERSIDAD NACIONAL', // Valor inicial de solo lectura en mayúsculas
-              horario: 'L-V: 9 AM - 6 PM, S: 9 AM - 1 PM' // Valor inicial de solo lectura en mayúsculas
-            };
-          }
-
-          // Asigna los datos a los estados del formulario
-          setNombre(currentProfileData.nombre || '');
-          setEspecialidad(currentProfileData.especialidad || '');
-          setEmail(currentProfileData.email || '');
-          setTelefono(currentProfileData.telefono || '');
-          setDireccion(currentProfileData.direccion || '');
-          setExperiencia(currentProfileData.experiencia || '');
-          setUniversidad(currentProfileData.universidad || '');
-          setHorario(currentProfileData.horario || '');
-
-          setLoading(false);
-        } catch (err) {
-          console.error("Error al cargar el perfil desde localStorage:", err);
-          setError('Error al cargar los datos del perfil. Por favor, inténtalo de nuevo.');
-          setLoading(false);
-        }
-      }, 800); // 800ms de simulación de carga
-    };
-
-    loadProfile();
-  }, []); // El array vacío asegura que este efecto se ejecute solo una vez al montar
-
-  // Función para volver a la página anterior
-  const handleVolver = () => {
-    navigate(-1);
-  };
-
-  // Función para manejar el envío del formulario
-  const handleSubmit = async (event) => {
-    event.preventDefault(); // Previene el comportamiento por defecto del formulario
-    setIsSubmitting(true);
-    setMensaje({ texto: '', tipo: '' }); // Limpia cualquier mensaje anterior
-
-    // --- Validaciones básicas de campos editables ---
-    if (!nombre.trim()) {
-      setMensaje({ texto: 'El campo Nombre es obligatorio.', tipo: 'error' });
-      setIsSubmitting(false);
+  const loadProfileData = useCallback(async () => {
+    setLoading(true);
+    setError('');
+    if (!user || !user.id) {
+      setError('ID de usuario no disponible. Por favor, inicia sesión de nuevo.');
+      setLoading(false);
       return;
     }
-    if (!email.trim()) {
-      setMensaje({ texto: 'El campo Email es obligatorio.', tipo: 'error' });
-      setIsSubmitting(false);
-      return;
-    }
-    // Simple validación de formato de email
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setMensaje({ texto: 'Por favor, introduce un email válido.', tipo: 'error' });
-      setIsSubmitting(false);
-      return;
-    }
-
-    // Objeto con todos los datos del perfil, incluyendo los campos de solo lectura
-    const updatedProfile = {
-      // Aseguramos que los campos editables también se guarden en mayúsculas
-      nombre: nombre.toUpperCase(),
-      especialidad, // Se incluye aunque sea de solo lectura para persistirlo
-      email: email.toLowerCase(), // ¡Convertir a minúsculas antes de guardar!
-      telefono: telefono.toUpperCase(), // Convertir a mayúsculas antes de guardar
-      direccion: direccion.toUpperCase(), // Convertir a mayúsculas antes de guardar
-      experiencia,  // Se incluye aunque sea de solo lectura
-      universidad,  // Se incluye aunque sea de solo lectura
-      horario       // Se incluye aunque sea de solo lectura
-    };
-
-    // --- Simulación de envío a una API (aquí se usa localStorage) ---
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500)); // Simula un retraso de API
-
-      localStorage.setItem('veterinarioProfile', JSON.stringify(updatedProfile)); // Guarda en localStorage
-
-      setMensaje({ texto: '¡Perfil actualizado exitosamente!', tipo: 'exito' });
-      // Navega de vuelta al perfil después de un breve momento para que el mensaje sea visible
-      setTimeout(() => {
-        navigate('/veterinario/perfil');
-      }, 1500); // Espera 1.5 segundos antes de navegar
-
+      const response = await authFetch(`/usuarios/${user.id}`);
+      if (response.success) {
+        const userData = response.data;
+        setFormData({
+          nombre: userData.nombre || '',
+          apellido: userData.apellido || '',
+          email: userData.email || '',
+          telefono: userData.telefono || '',
+          direccion: userData.direccion || '',
+          experiencia: userData.experiencia || '',
+          universidad: userData.universidad || '',
+          horario: userData.horario || '',
+          imagen_url: userData.imagen_url || '',
+          new_password: '',
+          confirm_password: ''
+        });
+      } else {
+        setError(response.message || 'Error al cargar los datos del perfil.');
+        if (showNotification) showNotification(response.message || 'Error al cargar los datos del perfil.', 'error');
+      }
     } catch (err) {
-      console.error('Error al guardar el perfil:', err);
-      setMensaje({ texto: 'Error al guardar los cambios. Por favor, inténtalo de nuevo.', tipo: 'error' });
-      setIsSubmitting(false); // Permite al usuario reintentar
+      console.error("Error fetching profile:", err);
+      setError('Error de conexión al servidor al cargar el perfil.');
+      if (showNotification) showNotification('Error de conexión al servidor al cargar el perfil.', 'error');
+    } finally {
+      setLoading(false);
+    }
+  }, [user, showNotification]);
+
+  useEffect(() => {
+    loadProfileData();
+  }, [loadProfileData]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    setSelectedFile(file);
+    // --- DEBUGGING: Log file info ---
+    if (file) {
+      console.log("Archivo seleccionado:", file.name, file.type, file.size, "bytes");
+    } else {
+      console.log("No se seleccionó ningún archivo.");
+    }
+    // ---------------------------------
+  };
+
+  const handleUploadImage = async () => {
+    if (!selectedFile) {
+      showNotification('Por favor, selecciona una imagen para subir.', 'info');
+      console.warn("handleUploadImage: selectedFile es nulo."); // Debugging
+      return null;
+    }
+
+    setIsSubmitting(true);
+    setError('');
+    setSuccessMessage('');
+
+    const imageData = new FormData();
+    imageData.append('image', selectedFile); // 'image' debe coincidir con req.files.image en el servidor
+
+    // --- DEBUGGING: Log FormData content ---
+    console.log("Contenido de FormData:");
+    for (let [key, value] of imageData.entries()) {
+      console.log(`${key}:`, value);
+    }
+    // ---------------------------------------
+
+    try {
+      const response = await authFetch('/upload-image', {
+        method: 'POST',
+        body: imageData,
+      });
+
+      if (response.success) {
+        showNotification('Imagen de perfil subida exitosamente.', 'success');
+        setFormData(prev => ({ ...prev, imagen_url: response.imageUrl }));
+        setSelectedFile(null); // Limpiar el archivo seleccionado
+        return response.imageUrl;
+      } else {
+        // Ahora el mensaje de error del servidor será más específico
+        setError(response.message || 'Error al subir la imagen.');
+        if (showNotification) showNotification(response.message || 'Error al subir la imagen.', 'error');
+        return null;
+      }
+    } catch (err) {
+      console.error("Error uploading image:", err);
+      setError(err.message || 'Error de conexión al servidor al subir imagen.');
+      if (showNotification) showNotification(err.message || 'Error de conexión al servidor al subir imagen.', 'error');
+      return null;
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  // --- Renderizado Condicional: Carga, Error, Formulario ---
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setError('');
+    setSuccessMessage('');
 
-  // Mostrar spinner de carga si `loading` es true
+    if (formData.new_password && formData.new_password !== formData.confirm_password) {
+      setError('Las nuevas contraseñas no coinciden.');
+      setIsSubmitting(false);
+      return;
+    }
+
+    let updatedImageUrl = formData.imagen_url;
+    if (selectedFile) {
+      // Sube la imagen primero y obtén la URL de Cloudinary
+      updatedImageUrl = await handleUploadImage();
+      if (!updatedImageUrl) {
+        setIsSubmitting(false);
+        return; // Si la subida falla, detener el proceso
+      }
+    }
+
+    const dataToUpdate = {
+      nombre: formData.nombre,
+      apellido: formData.apellido,
+      email: formData.email,
+      telefono: formData.telefono,
+      direccion: formData.direccion,
+      experiencia: formData.experiencia,
+      universidad: formData.universidad,
+      horario: formData.horario,
+      imagen_url: updatedImageUrl, // Usar la URL actualizada de la imagen (o la existente si no se subió una nueva)
+    };
+
+    // Añadir la contraseña solo si se ha introducido una nueva
+    if (formData.new_password) {
+      dataToUpdate.password = formData.new_password;
+    }
+
+    console.log("Datos a enviar para actualizar perfil:", dataToUpdate);
+
+    try {
+      const response = await authFetch(`/usuarios/${user.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(dataToUpdate),
+      });
+
+      if (response.success) {
+        setSuccessMessage('Perfil actualizado exitosamente.');
+        if (showNotification) showNotification('Perfil actualizado exitosamente.', 'success');
+        if (setUser) {
+          setUser(prevUser => ({
+            ...prevUser,
+            nombre: response.data.nombre,
+            apellido: response.data.apellido,
+            email: response.data.email,
+            imagen_url: response.data.imagen_url,
+          }));
+        }
+        loadProfileData();
+        setFormData(prev => ({ ...prev, new_password: '', confirm_password: '' }));
+      } else {
+        setError(response.message || 'Error al actualizar el perfil.');
+        if (showNotification) showNotification(response.message || 'Error al actualizar el perfil.', 'error');
+      }
+    } catch (err) {
+      console.error("Error updating profile:", err);
+      setError(err.message || 'Error de conexión al servidor al actualizar perfil.');
+      if (showNotification) showNotification(err.message || 'Error de conexión al servidor al actualizar perfil.', 'error');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   if (loading) {
     return (
-      <div className={veteStyles.veteLoadingContainer}>
-        <div className={veteStyles.veteLoadingSpinner}></div>
-        <p>Cargando datos del perfil...</p>
+      <div className={styles.loadingContainer}>
+        <FontAwesomeIcon icon={faSpinner} spin size="3x" color="#00acc1" />
+        <p>Cargando perfil...</p>
       </div>
     );
   }
 
-  // Mostrar mensaje de error si `error` no es nulo
-  if (error) {
-    return (
-      <div className={veteStyles.veteErrorContainer}>
-        <h3>Error al cargar</h3>
-        <p>{error}</p>
+  return (
+    <motion.div
+      className={styles.editProfileContainer}
+      initial={{ opacity: 0, y: 50 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -50 }}
+      transition={{ duration: 0.3 }}
+    >
+      <div className={styles.header}>
         <motion.button
-          onClick={() => navigate('/veterinario/perfil')} // Botón para volver o reintentar
-          className={`${veteStyles.veteActionButton} ${veteStyles.veteVolverBtn}`}
+          onClick={() => navigate(-1)}
+          className={styles.backButton}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
-          <FontAwesomeIcon icon={faArrowLeft} /> Volver al perfil
-        </motion.button>
-      </div>
-    );
-  }
-
-  // Renderizar el formulario de edición una vez que los datos estén cargados
-  return (
-    <motion.div
-      className={veteStyles.veteEditarPerfilContainer}
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-      exit="exit"
-    >
-      <div className={veteStyles.veteHeader}>
-        <motion.button
-          onClick={handleVolver}
-          className={`${veteStyles.veteActionButton} ${veteStyles.veteVolverBtn}`}
-          variants={buttonVariants}
-          whileHover="hover"
-          whileTap="tap"
-        >
           <FontAwesomeIcon icon={faArrowLeft} /> Volver
         </motion.button>
-        <h2><FontAwesomeIcon icon={faUserCog} /> Editar Perfil</h2>
+        <h2><FontAwesomeIcon icon={faEdit} /> Editar Perfil</h2>
       </div>
 
-      <form onSubmit={handleSubmit} className={veteStyles.veteFormulario}>
-        {/* Campo Nombre (Editable y se verá en mayúsculas) */}
-        <motion.div className={veteStyles.veteFormGroup}>
-          <label htmlFor="nombre">Nombre:</label>
-          <motion.input
+      {error && (
+        <motion.div
+          className={styles.errorMessage}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          <FontAwesomeIcon icon={faTimesCircle} /> {error}
+        </motion.div>
+      )}
+
+      {successMessage && (
+        <motion.div
+          className={styles.successMessage}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          <FontAwesomeIcon icon={faCheckCircle} /> {successMessage}
+        </motion.div>
+      )}
+
+      <form onSubmit={handleSubmit} className={styles.form}>
+        <div className={styles.profileImageSection}>
+          <img
+            src={formData.imagen_url || `https://placehold.co/150x150/00acc1/ffffff?text=${formData.nombre?.charAt(0) || 'V'}`}
+            alt="Imagen de Perfil"
+            className={styles.profileImagePreview}
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = `https://placehold.co/150x150/00acc1/ffffff?text=${formData.nombre?.charAt(0) || 'V'}`;
+            }}
+          />
+          <label htmlFor="file-upload" className={styles.uploadButton}>
+            <FontAwesomeIcon icon={faCamera} /> Cambiar Foto
+            <input
+              id="file-upload"
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className={styles.fileInput}
+              disabled={isSubmitting}
+            />
+          </label>
+          {selectedFile && (
+            <p className={styles.fileName}>Archivo seleccionado: {selectedFile.name}</p>
+          )}
+        </div>
+
+        <div className={styles.formGroup}>
+          <label htmlFor="nombre"><FontAwesomeIcon icon={faUser} /> Nombre:</label>
+          <input
             type="text"
             id="nombre"
-            value={nombre}
-            onChange={(e) => setNombre(e.target.value.toUpperCase())} // Convertir a mayúsculas al escribir
+            name="nombre"
+            value={formData.nombre}
+            onChange={handleChange}
+            className={styles.inputField}
             required
-            className={veteStyles.uppercaseInput} // Clase para el CSS
-            whileFocus="focus"
-            variants={inputVariants}
+            disabled={isSubmitting}
           />
-        </motion.div>
-
-        {/* Campo Especialidad (Solo lectura y se verá en mayúsculas) */}
-        <motion.div className={veteStyles.veteFormGroup}>
-          <label htmlFor="especialidad">Especialidad:</label>
-          <motion.input
+        </div>
+        <div className={styles.formGroup}>
+          <label htmlFor="apellido">Apellido:</label>
+          <input
             type="text"
-            id="especialidad"
-            value={especialidad}
-            readOnly // ¡Importante: hace el campo de solo lectura!
-            className={`${veteStyles.readOnlyInput} ${veteStyles.uppercaseInput}`} // Aplica estilo de solo lectura y mayúsculas
-            whileFocus="focus"
-            variants={inputVariants}
+            id="apellido"
+            name="apellido"
+            value={formData.apellido}
+            onChange={handleChange}
+            className={styles.inputField}
+            disabled={isSubmitting}
           />
-        </motion.div>
-
-        {/* Campo Email (Editable y NO se verá en mayúsculas) */}
-        <motion.div className={veteStyles.veteFormGroup}>
-          <label htmlFor="email">Email:</label>
-          <motion.input
+        </div>
+        <div className={styles.formGroup}>
+          <label htmlFor="email"><FontAwesomeIcon icon={faEnvelope} /> Email:</label>
+          <input
             type="email"
             id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)} // ¡Eliminada la conversión a mayúsculas aquí!
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            className={styles.inputField}
             required
-            // NOTA: Eliminada la clase veteStyles.uppercaseInput para este campo en particular
-            whileFocus="focus"
-            variants={inputVariants}
+            disabled={isSubmitting}
           />
-        </motion.div>
-
-        {/* Campo Teléfono (Editable y se verá en mayúsculas) */}
-        <motion.div className={veteStyles.veteFormGroup}>
-          <label htmlFor="telefono">Teléfono:</label>
-          <motion.input
-            type="tel"
+        </div>
+        <div className={styles.formGroup}>
+          <label htmlFor="telefono"><FontAwesomeIcon icon={faPhone} /> Teléfono:</label>
+          <input
+            type="text"
             id="telefono"
-            value={telefono}
-            onChange={(e) => setTelefono(e.target.value.toUpperCase())} // Convertir a mayúsculas al escribir
-            className={veteStyles.uppercaseInput} // Clase para el CSS
-            whileFocus="focus"
-            variants={inputVariants}
+            name="telefono"
+            value={formData.telefono}
+            onChange={handleChange}
+            className={styles.inputField}
+            required
+            disabled={isSubmitting}
           />
-        </motion.div>
-
-        {/* Campo Dirección (Editable y se verá en mayúsculas) */}
-        <motion.div className={veteStyles.veteFormGroup}>
-          <label htmlFor="direccion">Dirección:</label>
-          <motion.input
+        </div>
+        <div className={styles.formGroup}>
+          <label htmlFor="direccion"><FontAwesomeIcon icon={faMapMarkerAlt} /> Dirección:</label>
+          <input
             type="text"
             id="direccion"
-            value={direccion}
-            onChange={(e) => setDireccion(e.target.value.toUpperCase())} // Convertir a mayúsculas al escribir
-            className={veteStyles.uppercaseInput} // Clase para el CSS
-            whileFocus="focus"
-            variants={inputVariants}
+            name="direccion"
+            value={formData.direccion}
+            onChange={handleChange}
+            className={styles.inputField}
+            disabled={isSubmitting}
           />
-        </motion.div>
+        </div>
 
-        {/* Campo Experiencia (Solo lectura y se verá en mayúsculas) */}
-        <motion.div className={veteStyles.veteFormGroup}>
-          <label htmlFor="experiencia">Experiencia:</label>
-          <motion.input
-            type="text"
-            id="experiencia"
-            value={experiencia}
-            readOnly // Campo de solo lectura
-            className={`${veteStyles.readOnlyInput} ${veteStyles.uppercaseInput}`}
-            whileFocus="focus"
-            variants={inputVariants}
-          />
-        </motion.div>
-
-        {/* Campo Universidad (Solo lectura y se verá en mayúsculas) */}
-        <motion.div className={veteStyles.veteFormGroup}>
-          <label htmlFor="universidad">Universidad:</label>
-          <motion.input
-            type="text"
-            id="universidad"
-            value={universidad}
-            readOnly // Campo de solo lectura
-            className={`${veteStyles.readOnlyInput} ${veteStyles.uppercaseInput}`}
-            whileFocus="focus"
-            variants={inputVariants}
-          />
-        </motion.div>
-
-        {/* Campo Horario (Solo lectura y se verá en mayúsculas) */}
-        <motion.div className={veteStyles.veteFormGroup}>
-          <label htmlFor="horario">Horario:</label>
-          <motion.input
-            type="text"
-            id="horario"
-            value={horario}
-            readOnly // Campo de solo lectura
-            className={`${veteStyles.readOnlyInput} ${veteStyles.uppercaseInput}`}
-            whileFocus="focus"
-            variants={inputVariants}
-          />
-        </motion.div>
-
-        {/* Sección para mostrar mensajes de estado (éxito/error) */}
-        {mensaje.texto && (
-          <motion.div
-            className={`${veteStyles.veteMessage} ${
-              mensaje.tipo === 'exito' ? veteStyles.veteSuccessMessage : veteStyles.veteErrorMessage
-            }`}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-          >
-            <FontAwesomeIcon icon={mensaje.tipo === 'exito' ? faCheckCircle : faExclamationTriangle} />
-            <span>{mensaje.texto}</span>
-          </motion.div>
+        {user?.role === 'veterinario' && (
+          <>
+            <div className={styles.formGroup}>
+              <label htmlFor="experiencia"><FontAwesomeIcon icon={faBriefcaseMedical} /> Experiencia:</label>
+              <input
+                type="text"
+                id="experiencia"
+                name="experiencia"
+                value={formData.experiencia}
+                onChange={handleChange}
+                className={styles.inputField}
+                disabled={isSubmitting}
+              />
+            </div>
+            <div className={styles.formGroup}>
+              <label htmlFor="universidad"><FontAwesomeIcon icon={faGraduationCap} /> Universidad:</label>
+              <input
+                type="text"
+                id="universidad"
+                name="universidad"
+                value={formData.universidad}
+                onChange={handleChange}
+                className={styles.inputField}
+                disabled={isSubmitting}
+              />
+            </div>
+            <div className={styles.formGroup}>
+              <label htmlFor="horario"><FontAwesomeIcon icon={faClock} /> Horario:</label>
+              <input
+                type="text"
+                id="horario"
+                name="horario"
+                value={formData.horario}
+                onChange={handleChange}
+                className={styles.inputField}
+                disabled={isSubmitting}
+              />
+            </div>
+          </>
         )}
 
-        {/* Botón de Guardar Cambios */}
+        <h3 className={styles.sectionTitle}>Cambiar Contraseña (Opcional)</h3>
+        <div className={styles.formGroup}>
+          <label htmlFor="new_password">Nueva Contraseña:</label>
+          <input
+            type="password"
+            id="new_password"
+            name="new_password"
+            value={formData.new_password}
+            onChange={handleChange}
+            className={styles.inputField}
+            disabled={isSubmitting}
+          />
+        </div>
+        <div className={styles.formGroup}>
+          <label htmlFor="confirm_password">Confirmar Nueva Contraseña:</label>
+          <input
+            type="password"
+            id="confirm_password"
+            name="confirm_password"
+            value={formData.confirm_password}
+            onChange={handleChange}
+            className={styles.inputField}
+            disabled={isSubmitting}
+          />
+        </div>
+
         <motion.button
           type="submit"
-          className={`${veteStyles.veteActionButton} ${veteStyles.veteGuardarBtn}`}
-          variants={buttonVariants}
-          whileHover="hover"
-          whileTap="tap"
-          disabled={isSubmitting} // Deshabilita el botón mientras se está enviando
+          className={styles.submitButton}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          disabled={isSubmitting}
         >
           {isSubmitting ? (
-            <><FontAwesomeIcon icon={faSpinner} spin /> Guardando...</> // Muestra spinner al guardar
+            <>
+              <FontAwesomeIcon icon={faSpinner} spin /> Guardando...
+            </>
           ) : (
             <>
               <FontAwesomeIcon icon={faSave} /> Guardar Cambios

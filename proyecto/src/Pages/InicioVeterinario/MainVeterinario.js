@@ -1,237 +1,107 @@
-import React, { useState, useEffect } from 'react';
+// src/Pages/InicioVeterinario/MainVeterinario.js
+import React, { useState, useEffect, useCallback } from 'react';
 import styles from './Style/MainVeterinarioStyles.module.css';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
-  faPaw, faUser, 
-  faCalendarAlt, faChartLine, 
-  faNotesMedical, faCheckCircle, 
-  faBell, faSearch, faPlus,
-   faSyringe,faUserMd,
-  
+import {
+  faPaw, faUser,
+  faCalendarAlt, faNotesMedical, faCheckCircle,
+  faPlus, faHome,
+  faSignOutAlt, faTimesCircle // Agregado faTimesCircle para notificaciones de error
 } from '@fortawesome/free-solid-svg-icons';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 
-// Animaciones
+// Animaciones mejoradas
 const containerVariants = {
   hidden: { opacity: 0 },
-  visible: { 
-    opacity: 1, 
-    transition: { 
+  visible: {
+    opacity: 1,
+    transition: {
       duration: 0.5,
       when: "beforeChildren",
       staggerChildren: 0.1
-    } 
+    }
   },
-  exit: { opacity: 0 }
+  exit: { opacity: 0, transition: { duration: 0.3 } }
 };
 
+const itemVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: {
+      duration: 0.5,
+      ease: "easeOut"
+    }
+  }
+};
 
-const MainVeterinario = () => {
+const MainVeterinario = ({ user, setUser }) => { // Recibe user y setUser como props
   const location = useLocation();
   const navigate = useNavigate();
-  const [activeTab] = useState('hoy');
-  const [setStats] = useState({
-    totalCitas: 12,
-    citasCompletadas: 8,
-    pacientesNuevos: 3,
-    mascotasAtendidas: 5,
-    ingresos: 2450,
-    rating: 4.8,
-    comentarios: 24
-  });
 
-  // Estado para las citas (ejemplo)
-  const [citas, setCitas] = useState({
-    hoy: [
-      {
-        id: 1,
-        fecha: new Date(Date.now() + 3600000 * 2).toISOString(),
-        mascota: "Max",
-        propietario: "Juan Pérez",
-        direccion: "Calle Principal 123",
-        servicio: "Consulta general",
-        tipoMascota: "Perro",
-        raza: "Labrador Retriever",
-        edad: "3 años",
-        estado: "pendiente",
-        notas: "Control anual de salud. Observar posible dermatitis.",
-        prioridad: "normal",
-        foto: "https://images.unsplash.com/photo-1586671267731-da2cf3ceeb80?w=200"
-      }
-    ],
-    proximas: [],
-    historial: []
-  });
+  const [notification, setNotification] = useState(null); // Estado para la notificación
+  const [notificationTimeout, setNotificationTimeout] = useState(null); // Para limpiar el timeout
 
-  // Estado para carga y errores
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [setCompletingId] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [showNotificationPanel, setShowNotificationPanel] = useState(false);
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      title: "Recordatorio de vacunación",
-      message: "Luna necesita su vacuna antirrábica anual",
-      date: "Hace 2 horas",
-      read: false,
-      icon: faSyringe,
-      color: "#FF5252"
+  // Función para mostrar notificaciones
+  const showNotification = useCallback((message, type = 'info', duration = 3000) => {
+    // Limpiar cualquier timeout existente para que la nueva notificación se muestre inmediatamente
+    if (notificationTimeout) {
+      clearTimeout(notificationTimeout);
     }
-  ]);
 
-  // Efecto para simular carga inicial
+    setNotification({ message, type });
+
+    const timeout = setTimeout(() => {
+      setNotification(null);
+    }, duration);
+    setNotificationTimeout(timeout);
+  }, [notificationTimeout]);
+
+  // Limpiar el timeout al desmontar el componente
   useEffect(() => {
-    setLoading(true);
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 1500);
-    return () => clearTimeout(timer);
-  }, []);
+    return () => {
+      if (notificationTimeout) {
+        clearTimeout(notificationTimeout);
+      }
+    };
+  }, [notificationTimeout]);
 
-  // Navegación a otras secciones
-  const navigateTo = (path) => {
+  // Add this console.log for debugging context
+  useEffect(() => {
+    console.log("MainVeterinario rendering. User:", user);
+    console.log("Context passed to Outlet:", { user, showNotification });
+  }, [user, showNotification]); // Log when user or showNotification changes
+
+
+  const navigateTo = useCallback((path) => {
     navigate(`/veterinario/${path}`);
+  }, [navigate]);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setUser(null); // Limpiar el estado del usuario en App.js
+    navigate('/login');
   };
 
-  // Manejo de completar cita con animación
-  const handleCompleteAppointment = async (id) => {
-    setCompletingId(id);
-    try {
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      setCitas(prev => ({
-        ...prev,
-        hoy: prev.hoy.map(c => 
-          c.id === id ? { ...c, estado: 'completada' } : c
-        ),
-        historial: [
-          ...prev.hoy.filter(c => c.id === id).map(c => ({ ...c, estado: 'completada' })),
-          ...prev.historial
-        ]
-      }));
-      
-      setStats(prev => ({
-        ...prev,
-        citasCompletadas: prev.citasCompletadas + 1,
-        mascotasAtendidas: prev.mascotasAtendidas + 1,
-        ingresos: prev.ingresos + 75
-      }));
+  const isDashboard = location.pathname === '/veterinario' ||
+    location.pathname === '/veterinario/' ||
+    location.pathname === '/veterinario/navegacion';
 
-      const citaCompletada = citas.hoy.find(c => c.id === id);
-      setNotifications(prev => [
-        {
-          id: Date.now(),
-          title: "Cita completada",
-          message: `Has completado la cita con ${citaCompletada.mascota}`,
-          date: "Ahora",
-          read: false,
-          icon: faCheckCircle,
-          color: "#4CAF50"
-        },
-        ...prev
-      ]);
-    } catch (err) {
-      setError("Error al completar la cita");
-    } finally {
-      setCompletingId(null);
-    }
-  };
+  // No necesitamos estados de carga y error aquí, ya que los componentes hijos los manejarán
+  // y usarán showNotification para comunicar mensajes.
 
-  // Filtrado de citas según pestaña activa y término de búsqueda
-  const getFilteredCitas = () => {
-    let filtered = [];
-    switch(activeTab) {
-      case 'hoy': filtered = citas.hoy; break;
-      case 'proximas': filtered = citas.proximas; break;
-      case 'historial': filtered = citas.historial; break;
-      default: filtered = citas.hoy;
-    }
-    
-    if (searchTerm) {
-      return filtered.filter(cita => 
-        cita.mascota.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        cita.propietario.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        cita.servicio.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        cita.raza.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-    return filtered;
-  };
+  // NOTE: The original code had a loading state and error state here.
+  // If you intend to have a global loading/error for the MainVeterinario component itself,
+  // you would need to re-implement that logic. For now, I'm assuming child components
+  // will handle their own loading/error and use the showNotification.
 
-  const filteredCitas = getFilteredCitas();
-  const isDashboard = location.pathname === '/veterinario' || 
-                      location.pathname === '/veterinario/' || 
-                      location.pathname === '/veterinario/navegacion';
-
-  // Marcar notificaciones como leídas
-  const markNotificationsAsRead = () => {
-    setNotifications(prev => 
-      prev.map(notif => ({ ...notif, read: true }))
-    );
-  };
-
-  if (loading) {
-    return (
-      <motion.div 
-        className={styles.vetLoadingContainer}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-      >
-        <motion.div
-          animate={{ 
-            rotate: 360,
-            scale: [1, 1.2, 1]
-          }}
-          transition={{ 
-            repeat: Infinity, 
-            duration: 1.5, 
-            ease: "easeInOut" 
-          }}
-          className={styles.vetLoadingSpinner}
-        >
-          <FontAwesomeIcon icon={faPaw} size="3x" color="#00bcd4" />
-        </motion.div>
-        <motion.p
-          animate={{ opacity: [0.5, 1, 0.5] }}
-          transition={{ repeat: Infinity, duration: 2 }}
-          className={styles.vetLoadingText}
-        >
-          Cargando 
-        </motion.p>
-      </motion.div>
-    );
-  }
-
-  if (error) {
-    return (
-      <motion.div 
-        className={styles.vetErrorContainer}
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ type: "spring" }}
-      >
-        <motion.div 
-          animate={{ scale: [1, 1.05, 1] }}
-          transition={{ repeat: Infinity, duration: 2 }}
-        >
-          <FontAwesomeIcon icon={faPaw} size="2x" color="#00bcd4" />
-        </motion.div>
-        <p className={styles.vetErrorMessage}>¡Ups! Algo salió mal: {error}</p>
-        <motion.button 
-          onClick={() => setError(null)}
-          className={styles.vetRetryButton}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          Reintentar
-        </motion.button>
-      </motion.div>
-    );
-  }
+  // Removed direct loading/error states from MainVeterinario to avoid conflicts
+  // with child components' loading/error states and simplify the main layout.
+  // If you need a global loading overlay for the entire veterinary section,
+  // consider adding it here, but ensure it doesn't block child component rendering.
 
   return (
     <motion.div
@@ -241,240 +111,198 @@ const MainVeterinario = () => {
       animate="visible"
       exit="exit"
     >
-      {/* Barra superior */}
-      <div className={styles.vetTopBar}>
-        <div className={styles.vetSearchBar}>
-          <FontAwesomeIcon icon={faSearch} className={styles.vetSearchIcon} />
-          <motion.input 
-            type="text" 
-            placeholder="Buscar citas, mascotas, propietarios..." 
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            whileFocus={{ 
-              boxShadow: "0 0 0 2px rgba(0, 188, 212, 0.3)",
-              borderColor: "#00bcd4"
-            }}
-            className={styles.vetSearchInput}
-          />
-        </div>
-        <div className={styles.vetTopBarActions}>
-          <div className={styles.vetNotificationWrapper}>
-            <motion.button 
-              className={styles.vetNotificationButton}
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={() => setShowNotificationPanel(!showNotificationPanel)}
-            >
-              <FontAwesomeIcon icon={faBell} color="#00bcd4" />
-              {notifications.some(n => !n.read) && (
-                <motion.span 
-                  className={styles.vetNotificationBadge}
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  exit={{ scale: 0 }}
-                >
-                  {notifications.filter(n => !n.read).length}
-                </motion.span>
-              )}
-            </motion.button>
-
-            {/* Panel de notificaciones */}
-            <AnimatePresence>
-              {showNotificationPanel && (
-                <motion.div 
-                  className={styles.vetNotificationPanel}
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ type: "spring", damping: 25 }}
-                >
-                  <div className={styles.vetNotificationHeader}>
-                    <h4>Notificaciones</h4>
-                    <button 
-                      onClick={markNotificationsAsRead}
-                      className={styles.vetMarkAsRead}
-                    >
-                      Marcar todas como leídas
-                    </button>
-                  </div>
-                  <div className={styles.vetNotificationList}>
-                    {notifications.length > 0 ? (
-                      notifications.map(notification => (
-                        <div 
-                          key={notification.id} 
-                          className={`${styles.vetNotificationItem} ${!notification.read ? styles.vetUnread : ''}`}
-                        >
-                          <div 
-                            className={styles.vetNotificationIcon}
-                            style={{ backgroundColor: `${notification.color}20`, color: notification.color }}
-                          >
-                            <FontAwesomeIcon icon={notification.icon} />
-                          </div>
-                          <div className={styles.vetNotificationContent}>
-                            <h5>{notification.title}</h5>
-                            <p>{notification.message}</p>
-                            <span>{notification.date}</span>
-                          </div>
-                        </div>
-                      ))
-                    ) : (
-                      <div className={styles.vetNoNotifications}>
-                        <FontAwesomeIcon icon={faBell} size="2x" color="#00bcd4" />
-                        <p>No hay notificaciones</p>
-                      </div>
-                    )}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-
-          <motion.button 
-            className={styles.vetNewAppointmentButton}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => navigateTo('citas')}
-          >
-            <FontAwesomeIcon icon={faPlus} />
-            <span>Ver Citas</span>
-          </motion.button>
-        </div>
-      </div>
-
       <div className={styles.vetContentWrapper}>
         {/* Barra lateral */}
-        <motion.div 
+        <motion.div
           className={styles.vetSidebar}
           initial={{ x: -50, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
-          transition={{ delay: 0.2 }}
+          transition={{ delay: 0.2, type: "spring" }}
         >
           <div className={styles.vetSidebarHeader}>
             <motion.div
               whileHover={{ scale: 1.05 }}
               className={styles.vetLogoContainer}
+              onClick={() => navigate('/veterinario')}
             >
               <FontAwesomeIcon icon={faPaw} className={styles.vetLogoIcon} />
               <h2>Flooky Pets</h2>
             </motion.div>
             <p className={styles.vetClinicName}>Centro Veterinario</p>
           </div>
-          
+
           <div className={styles.vetUserProfile}>
-            <motion.div 
+            <motion.div
               className={styles.vetAvatar}
               whileHover={{ rotate: 5, scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
             >
-              DR
+              {user?.nombre?.charAt(0).toUpperCase() || 'DR'}
             </motion.div>
             <div className={styles.vetUserInfo}>
-              <h3>Bienvenido Veterinario</h3>
-              <p>Especialista en pequeños animales</p>
+              <h3>{user?.nombre || 'Dr. Veterinario'}</h3>
+              <p>{user?.experiencia || 'Especialista'}</p>
+              <motion.button
+                className={styles.vetProfileButton}
+                whileHover={{ backgroundColor: "rgba(0, 188, 212, 0.2)" }}
+                onClick={() => navigateTo('perfil')}
+              >
+                Ver perfil
+              </motion.button>
             </div>
           </div>
-          
+
           <nav className={styles.vetNavMenu}>
             <ul>
-              <motion.li 
+              <motion.li
                 className={isDashboard ? styles.vetActive : ''}
-                whileHover={{ x: 5 }}
+                whileHover={{ x: 5, backgroundColor: "rgba(0, 188, 212, 0.1)" }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => navigate('/veterinario/navegacion')}
               >
-                <FontAwesomeIcon icon={faCalendarAlt} />
-                <span>Inicio pagina</span>
+                <div className={styles.vetNavIcon}>
+                  <FontAwesomeIcon icon={faHome} />
+                </div>
+                <span>Inicio</span>
+                {isDashboard && <motion.div className={styles.vetActiveIndicator} layoutId="activeIndicator" />}
               </motion.li>
-              <motion.li 
-                whileHover={{ x: 5 }}
+
+              <motion.li
+                whileHover={{ x: 5, backgroundColor: "rgba(0, 188, 212, 0.1)" }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => navigateTo('mascotas')}
                 className={location.pathname.includes('/veterinario/mascotas') ? styles.vetActive : ''}
               >
-                <FontAwesomeIcon icon={faPaw} />
+                <div className={styles.vetNavIcon}>
+                  <FontAwesomeIcon icon={faPaw} />
+                </div>
                 <span>Mascotas</span>
+                {location.pathname.includes('/veterinario/mascotas') && (
+                  <motion.div className={styles.vetActiveIndicator} layoutId="activeIndicator" />
+                )}
               </motion.li>
-              <motion.li 
-                whileHover={{ x: 5 }}
+
+              <motion.li
+                whileHover={{ x: 5, backgroundColor: "rgba(0, 188, 212, 0.1)" }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => navigateTo('propietarios')}
                 className={location.pathname.includes('/veterinario/propietarios') ? styles.vetActive : ''}
               >
-                <FontAwesomeIcon icon={faUser} />
+                <div className={styles.vetNavIcon}>
+                  <FontAwesomeIcon icon={faUser} />
+                </div>
                 <span>Propietarios</span>
+                {location.pathname.includes('/veterinario/propietarios') && (
+                  <motion.div className={styles.vetActiveIndicator} layoutId="activeIndicator" />
+                )}
               </motion.li>
-              <motion.li 
-                whileHover={{ x: 5 }}
+
+              <motion.li
+                whileHover={{ x: 5, backgroundColor: "rgba(0, 188, 212, 0.1)" }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => navigateTo('historiales')}
                 className={location.pathname.includes('/veterinario/historiales') ? styles.vetActive : ''}
               >
-                <FontAwesomeIcon icon={faNotesMedical} />
+                <div className={styles.vetNavIcon}>
+                  <FontAwesomeIcon icon={faNotesMedical} />
+                </div>
                 <span>Historiales</span>
+                {location.pathname.includes('/veterinario/historiales') && (
+                  <motion.div className={styles.vetActiveIndicator} layoutId="activeIndicator" />
+                )}
               </motion.li>
-              <motion.li 
-                whileHover={{ x: 5 }}
+
+              <motion.li
+                whileHover={{ x: 5, backgroundColor: "rgba(0, 188, 212, 0.1)" }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => navigateTo('citas')}
                 className={location.pathname.includes('/veterinario/citas') ? styles.vetActive : ''}
               >
-                <FontAwesomeIcon icon={faChartLine} />
+                <div className={styles.vetNavIcon}>
+                  <FontAwesomeIcon icon={faCalendarAlt} />
+                </div>
                 <span>Citas</span>
-              </motion.li>
-              <motion.li 
-                whileHover={{ x: 5 }}
-                onClick={() => navigateTo('perfil')}
-                className={location.pathname.includes('/veterinario/perfil') ? styles.vetActive : ''}
-              >
-                <FontAwesomeIcon icon={faUserMd} />
-                <span>Perfil</span>
+                {location.pathname.includes('/veterinario/citas') && (
+                  <motion.div className={styles.vetActiveIndicator} layoutId="activeIndicator" />
+                )}
               </motion.li>
             </ul>
           </nav>
-          
+
           <div className={styles.vetQuickActions}>
             <h4>Acciones rápidas</h4>
-            <motion.button 
-              whileHover={{ x: 5, backgroundColor: "#00bcd4" }}
-              onClick={() => navigateTo('citas')}
+            <motion.button
+              whileHover={{ x: 5, backgroundColor: "#00bcd4", color: "white" }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => navigateTo('citas/agendar')}
               className={styles.vetQuickButton}
             >
               <FontAwesomeIcon icon={faPlus} />
-              <span>Ver Citas</span>
+              <span>Nueva Cita</span>
             </motion.button>
-            <motion.button 
-              whileHover={{ x: 5, backgroundColor: "#4CAF50" }}
+            <motion.button
+              whileHover={{ x: 5, backgroundColor: "#4CAF50", color: "white" }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => navigateTo('mascotas/registrar')}
               className={styles.vetQuickButton}
             >
               <FontAwesomeIcon icon={faPaw} />
               <span>Registrar Mascota</span>
             </motion.button>
-            <motion.button 
-              whileHover={{ x: 5, backgroundColor: "#FF9800" }}
-              onClick={() => navigateTo('propietarios/registrar')}
+            <motion.button
+              whileHover={{ x: 5, backgroundColor: "#FF9800", color: "white" }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => navigateTo('historiales/registrar')}
               className={styles.vetQuickButton}
             >
-              <FontAwesomeIcon icon={faUser} />
-              <span>Agregar Propietario</span>
+              <FontAwesomeIcon icon={faNotesMedical} />
+              <span>Registrar Historial</span>
             </motion.button>
           </div>
 
           <div className={styles.vetSidebarFooter}>
-            <motion.div 
-              className={styles.vetStatusCard}
-              whileHover={{ scale: 1.02 }}
+            <motion.button
+              className={styles.vetLogoutButton}
+              whileHover={{ x: 5, backgroundColor: "rgba(255, 82, 82, 0.1)" }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleLogout}
             >
-              <FontAwesomeIcon icon={faUserMd} color="#00bcd4" />
-              <div>
-                <span>Modo veterinario</span>
-                <p>Activo</p>
-              </div>
-            </motion.div>
+              <FontAwesomeIcon icon={faSignOutAlt} color="#FF5252" />
+              <span>Cerrar sesión</span>
+            </motion.button>
           </div>
         </motion.div>
 
         {/* Contenido principal */}
-        <div className={styles.vetMainContent}>
+        <motion.div
+          className={styles.vetMainContent}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
+        >
           <AnimatePresence mode="wait">
-            <Outlet />
+            {/* Pasa el usuario y la función de notificación a los componentes hijos */}
+            <Outlet context={{ user, showNotification }} />
           </AnimatePresence>
-        </div>
+        </motion.div>
       </div>
+
+      {/* Notificación flotante */}
+      <AnimatePresence>
+        {notification && (
+          <motion.div
+            className={`${styles.floatingNotification} ${styles[notification.type]}`}
+            initial={{ y: -100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -100, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            onClick={() => setNotification(null)} // Cierra la notificación al hacer clic
+          >
+            <FontAwesomeIcon icon={notification.type === 'success' ? faCheckCircle : faTimesCircle} className={styles.notificationIcon} />
+            <span>{notification.message}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 };

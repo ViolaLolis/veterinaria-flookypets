@@ -6,12 +6,12 @@
   left: 0;
   top: 60px; /* Ajusta según la altura de tu navbar */
   bottom: 0;
-  width: 250px; /* Ancho del sidebar */
-  background-color: #ffffff;
-  color: #2c3e50; /* Color de texto oscuro */
+  width: 250px; /* Ancho por defecto del sidebar */
+  background-color: var(--surface-white);
+  color: var(--text-dark);
   z-index: 900;
-  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05); /* Sombra suave */
-  transition: all 0.3s ease; /* Transición para colapsar/expandir */
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+  transition: width 0.3s ease; /* Transición para colapsar/expandir */
   overflow-y: auto; /* Permite scroll si el contenido es largo */
   border-right: 1px solid #eceff1; /* Borde derecho sutil */
   padding-top: 1.5rem;
@@ -39,11 +39,11 @@
   gap: 1rem;
   padding: 0.9rem 1.5rem;
   text-decoration: none;
-  color: #555; /* Color de texto normal */
+  color: var(--text-medium); /* Color de texto normal */
   font-size: 1rem;
   font-weight: 500;
   border-radius: 0 25px 25px 0; /* Bordes redondeados a la derecha */
-  transition: all 0.3s ease;
+  transition: var(--transition-ease);
   position: relative; /* Para efectos de hover */
   overflow: hidden; /* Para que el fondo de hover no se desborde */
   cursor: pointer; /* Indica que es clickeable */
@@ -51,32 +51,32 @@
 
 .admin-sidebar nav ul li:not(.sidebar-dropdown-parent) .sidebar-icon {
   font-size: 1.2rem;
-  color: #7f8c8d; /* Color de icono normal */
+  color: var(--text-light); /* Color de icono normal */
   transition: color 0.3s ease;
 }
 
 /* Efecto de Hover para los enlaces del Sidebar */
 .admin-sidebar nav ul li:not(.sidebar-dropdown-parent):hover {
   background-color: #e0f7fa; /* Fondo azul claro al pasar el ratón */
-  color: #007c91; /* Texto azul oscuro */
+  color: var(--primary-dark); /* Texto azul oscuro */
   transform: translateX(5px); /* Pequeño desplazamiento */
 }
 
 .admin-sidebar nav ul li:not(.sidebar-dropdown-parent):hover .sidebar-icon {
-  color: #00acc1; /* Icono azul vibrante */
+  color: var(--primary-color); /* Icono azul vibrante */
 }
 
 /* Estado Activo del Ítem del Sidebar */
 .admin-sidebar nav ul li.active:not(.sidebar-dropdown-parent) {
-  background-color: #00acc1; /* Azul principal para el activo */
-  color: #ffffff; /* Texto blanco */
+  background-color: var(--primary-color); /* Azul principal para el activo */
+  color: var(--text-white); /* Texto blanco */
   font-weight: 700;
-  box-shadow: 0 4px 10px rgba(0, 172, 193, 0.2);
+  box-shadow: 0 4px 10px var(--primary-glow);
   border-left: 5px solid #005f6b; /* Borde más oscuro para el activo */
 }
 
 .admin-sidebar nav ul li.active:not(.sidebar-dropdown-parent) .sidebar-icon {
-  color: #ffffff;
+  color: var(--text-white);
 }
 
 /* Menú Desplegable (Usuarios) - Contenedor padre */
@@ -88,38 +88,38 @@
   user-select: none; /* Evita selección de texto */
   padding: 0.9rem 1.5rem;
   text-decoration: none;
-  color: #555;
+  color: var(--text-medium);
   font-size: 1rem;
   font-weight: 500;
   border-radius: 0 25px 25px 0;
-  transition: all 0.3s ease;
+  transition: var(--transition-ease);
   margin-bottom: 0.5rem;
 }
 
 .sidebar-dropdown-parent:hover {
   background-color: #e0f7fa;
-  color: #007c91;
+  color: var(--primary-dark);
   transform: translateX(5px);
 }
 
 /* Estado activo del padre desplegable */
 .sidebar-dropdown-parent.active {
-  background-color: #00acc1;
-  color: #ffffff;
+  background-color: var(--primary-color);
+  color: var(--text-white);
   font-weight: 700;
-  box-shadow: 0 4px 10px rgba(0, 172, 193, 0.2);
+  box-shadow: 0 4px 10px var(--primary-glow);
   border-left: 5px solid #005f6b;
 }
 
 .sidebar-dropdown-parent .sidebar-icon {
   font-size: 1.2rem;
-  color: #7f8c8d;
+  color: var(--text-light);
   transition: color 0.3s ease;
 }
 
 .sidebar-dropdown-parent:hover .sidebar-icon,
 .sidebar-dropdown-parent.active .sidebar-icon {
-  color: #ffffff;
+  color: var(--text-white);
 }
 
 .dropdown-arrow {
@@ -137,7 +137,7 @@
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.3s ease-out, padding 0.3s ease-out; /* También transicionar padding */
-  background-color: #f4f6f9; /* Fondo más claro para el submenú */
+  background-color: var(--surface-light-grey); /* Fondo más claro para el submenú */
   border-radius: 0 0 10px 10px; /* Bordes redondeados inferiores */
   margin-top: -0.5rem; /* Ajuste para que se vea continuo */
   margin-left: 1.5rem; /* Indentación */
@@ -160,7 +160,7 @@
 
 .sidebar-submenu .sidebar-icon.submenu-icon {
   font-size: 1rem;
-  color: #555;
+  color: var(--text-medium);
 }
 
 .sidebar-submenu li { /* Aplicar estilo a los li directamente para que sean clickeables */
@@ -170,27 +170,27 @@
   padding: 0.7rem 1.5rem 0.7rem 2.5rem; /* Más padding a la izquierda para indentación */
   font-size: 0.9rem;
   border-radius: 0 25px 25px 0;
-  color: #555;
+  color: var(--text-medium);
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: var(--transition-ease);
 }
 
 .sidebar-submenu li:hover {
   background-color: #e0f7fa;
-  color: #007c91;
+  color: var(--primary-dark);
   transform: translateX(5px);
 }
 
 .sidebar-submenu li.active {
   background-color: #b2ebf2; /* Azul muy claro para activo en submenú */
-  color: #007c91;
-  border-left: 3px solid #00acc1; /* Borde más sutil */
+  color: var(--primary-dark);
+  border-left: 3px solid var(--primary-color); /* Borde más sutil */
   box-shadow: inset 3px 0 8px rgba(0, 172, 193, 0.1);
   font-weight: 600;
 }
 
 .sidebar-submenu li.active .sidebar-icon {
-  color: #00acc1;
+  color: var(--primary-color);
 }
 
 
@@ -282,13 +282,13 @@
 
   /* Submenú en modo colapsado */
   .sidebar-submenu {
-      position: absolute; /* Superponer el submenú */
-      left: 65px; /* A la derecha del sidebar colapsado */
-      top: auto; /* Se ajustará dinámicamente */
-      width: 180px; /* Ancho del submenú */
+      position: absolute;
+      left: 65px;
+      top: auto;
+      width: 180px;
       box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.1);
       border-radius: 0 10px 10px 0;
-      z-index: 950; /* Por encima del contenido principal */
+      z-index: 950;
       margin-left: 0;
       padding-bottom: 0;
   }
@@ -297,12 +297,84 @@
       padding: 0.7rem 1rem;
       font-size: 0.85rem;
       text-align: left;
-      flex-direction: row; /* Volver a fila en el submenú */
-      border-radius: 0; /* Sin bordes redondeados en el submenú */
+      flex-direction: row;
+      border-radius: 0;
   }
 
   .sidebar-submenu li .sidebar-icon {
       margin-right: 0.5rem;
       font-size: 1rem;
   }
+}
+
+/* Móviles pequeños (menos de 767px) - El sidebar podría desaparecer o convertirse en una barra superior */
+@media (max-width: 767px) {
+    .admin-sidebar {
+        width: 100%; /* Ocupa todo el ancho si se convierte en barra superior */
+        position: relative; /* Deja de ser fixed si es una barra superior */
+        top: 0; /* Ajusta si ya no es fixed */
+        height: auto; /* Altura automática */
+        padding-top: 0.5rem;
+        border-right: none;
+        border-bottom: 1px solid #eceff1;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); /* Sombra inferior */
+    }
+
+    .admin-sidebar nav {
+        flex-direction: row; /* Elementos en fila */
+        overflow-x: auto; /* Permite scroll horizontal en el menú */
+        padding: 0.5rem 1rem;
+        justify-content: flex-start; /* Alinea al inicio */
+    }
+
+    .admin-sidebar nav ul li {
+        flex-shrink: 0; /* Evita que los ítems se encojan */
+        margin-right: 1rem; /* Espacio entre ítems */
+        margin-bottom: 0;
+    }
+
+    .admin-sidebar nav ul li:not(.sidebar-dropdown-parent) {
+        padding: 0.6rem 1rem;
+        border-radius: 20px; /* Más redondeado para pastillas */
+        font-size: 0.85rem;
+        gap: 0.5rem;
+        white-space: nowrap;
+    }
+
+    .admin-sidebar nav ul li.active:not(.sidebar-dropdown-parent) {
+        border: 1px solid #005f6b; /* Borde completo para el activo */
+    }
+
+    .sidebar-dropdown-parent {
+        padding: 0.6rem 1rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        gap: 0.5rem;
+        white-space: nowrap;
+    }
+
+    .dropdown-arrow {
+        position: static; /* Vuelve a flujo normal */
+        transform: none;
+        margin-left: 0.5rem;
+    }
+
+    .sidebar-submenu {
+        position: relative; /* Deja de ser absoluto */
+        left: 0;
+        width: 100%;
+        box-shadow: none;
+        border-radius: 0;
+        z-index: auto;
+        margin-left: 0;
+        padding-bottom: 0;
+    }
+
+    .sidebar-submenu li {
+        padding: 0.7rem 1rem;
+        font-size: 0.85rem;
+        text-align: left;
+        flex-direction: row;
+        border-radius: 0;
+    }
 }

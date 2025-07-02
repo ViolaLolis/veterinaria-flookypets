@@ -1,43 +1,167 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Link, useNavigate, useOutletContext } from 'react-router-dom'; // Importa useOutletContext
+import { motion, AnimatePresence } from 'framer-motion';
 import styles from './Styles/ConfiguracionPerfil.module.css';
+import {
+  faCog, faUserEdit, faEnvelope, faLock, faCheckCircle, faCamera,
+  faExclamationTriangle, faArrowLeft, faPhone, faMapMarkerAlt, faCalendarAlt,
+  faBell, faShieldAlt, faChevronDown, faChevronUp, faSpinner, faTimesCircle
+} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {faCog,faUserEdit,faEnvelope,faLock,faCheckCircle,faCamera,faExclamationTriangle,faArrowLeft,faPhone,faMapMarkerAlt,faBell,faShieldAlt,faChevronDown,faChevronUp} from '@fortawesome/free-solid-svg-icons';
+import { authFetch } from './api';
 
-const ConfiguracionPerfil = () => {
-  const [nombre, setNombre] = useState('Usuario Ejemplo');
-  const [email, setEmail] = useState('ejemplo@email.com');
-  const [password, setPassword] = useState('');
+const ConfiguracionPerfil = () => { // Ya no recibe user y setUser directamente como props, los obtiene del contexto
+  const { user, setUser, showNotification } = useOutletContext(); // Obtiene user, setUser y showNotification del contexto del Outlet
+  const [formData, setFormData] = useState({
+    nombre: '',
+    apellido: '',
+    email: '',
+    telefono: '',
+    direccion: '',
+    tipo_documento: '',
+    numero_documento: '',
+    fecha_nacimiento: '',
+  });
   const [imagenPerfil, setImagenPerfil] = useState(null);
-  const [mensaje, setMensaje] = useState('');
+  // const [notification, setNotification] = useState(null); // Ya se obtiene del contexto
   const [activeSection, setActiveSection] = useState('informacion');
   const [showSubMenu, setShowSubMenu] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
   const navigate = useNavigate();
 
-  const handleNombreChange = (e) => setNombre(e.target.value);
-  const handleEmailChange = (e) => setEmail(e.target.value);
-  const handlePasswordChange = (e) => setPassword(e.target.value);
+  // showNotification ya viene del contexto, no es necesario redefinirla aquí
+
+  const fetchUserData = useCallback(async () => {
+    setIsLoading(true);
+    if (!user || !user.id) {
+      showNotification('No se pudo cargar la información del usuario. Por favor, inicia sesión.', 'error');
+      setIsLoading(false);
+      return;
+    }
+    try {
+      const response = await authFetch(`/usuarios/${user.id}`);
+      if (response.success) {
+        setFormData({
+          nombre: response.data.nombre || '',
+          apellido: response.data.apellido || '',
+          email: response.data.email || '',
+          telefono: response.data.telefono || '',
+          direccion: response.data.direccion || '',
+          tipo_documento: response.data.tipo_documento || '',
+          numero_documento: response.data.numero_documento || '',
+          fecha_nacimiento: response.data.fecha_nacimiento ? response.data.fecha_nacimiento.split('T')[0] : '',
+        });
+        // setImagenPerfil(response.data.imagen_perfil_url || null);
+      } else {
+        showNotification(response.message || 'Error al cargar los datos del perfil.', 'error');
+      }
+    } catch (err) {
+      console.error("Error fetching user data:", err);
+      showNotification('Error de conexión al servidor.', 'error');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user, authFetch, showNotification]);
+
+  useEffect(() => {
+    fetchUserData();
+  }, [fetchUserData]);
+
+  const handleChange = (e) => {
+    const { id, value } = e.target;
+    setFormData(prev => ({ ...prev, [id]: value }));
+  };
 
   const handleImagenPerfilChange = (e) => {
     if (e.target.files && e.target.files[0]) {
-      setImagenPerfil(URL.createObjectURL(e.target.files[0]));
+      const file = e.target.files[0];
+      setImagenPerfil(URL.createObjectURL(file));
+      showNotification('Imagen seleccionada. Para guardar, haz clic en "Guardar Cambios". (La carga real de la imagen requiere backend)', 'info');
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Guardando cambios:', { nombre, email, password, imagenPerfil });
-    setMensaje('¡Perfil actualizado con éxito!');
-    setTimeout(() => setMensaje(''), 3000);
+    setIsSubmitting(true);
+    // setNotification(null); // Ya se maneja con showNotification
+
+    try {
+      const updatedData = {
+        nombre: formData.nombre,
+        apellido: formData.apellido,
+        email: formData.email,
+        telefono: formData.telefono,
+        direccion: formData.direccion,
+        tipo_documento: formData.tipo_documento,
+        numero_documento: formData.numero_documento,
+        fecha_nacimiento: formData.fecha_nacimiento,
+      };
+
+      const response = await authFetch(`/usuarios/${user.id}`, {
+        method: 'PUT',
+        body: JSON.stringify(updatedData),
+      });
+
+      if (response.success) {
+        showNotification('¡Perfil actualizado con éxito!', 'success');
+        setUser(prevUser => ({ ...prevUser, ...updatedData }));
+      } else {
+        showNotification(response.message || 'Error al actualizar el perfil.', 'error');
+      }
+    } catch (err) {
+      console.error("Error updating profile:", err);
+      showNotification('Error de conexión al servidor al actualizar el perfil.', 'error');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    setIsSubmitting(true);
+    setShowDeleteConfirm(false);
+    // setNotification(null); // Ya se maneja con showNotification
+
+    try {
+      const response = await authFetch(`/usuarios/${user.id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.success) {
+        showNotification('Cuenta eliminada con éxito. Redirigiendo...', 'success');
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        setUser(null);
+        setTimeout(() => {
+          navigate('/login');
+        }, 2000);
+      } else {
+        showNotification(response.message || 'Error al eliminar la cuenta.', 'error');
+      }
+    } catch (err) {
+      console.error("Error deleting account:", err);
+      showNotification('Error de conexión al servidor al eliminar la cuenta.', 'error');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleVolver = () => navigate(-1);
-
   const toggleSubMenu = () => setShowSubMenu(!showSubMenu);
+
+  if (isLoading) {
+    return (
+      <div className={styles.loadingContainer}>
+        <FontAwesomeIcon icon={faSpinner} spin className={styles.spinner} />
+        <p>Cargando perfil...</p>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.container}>
-      {/* Header con efecto de gradiente */}
       <div className={styles.header}>
         <div className={styles.headerContent}>
           <FontAwesomeIcon icon={faCog} className={styles.icon} spin />
@@ -48,22 +172,36 @@ const ConfiguracionPerfil = () => {
         </div>
       </div>
 
+      <AnimatePresence>
+        {/* {notification && ( // Notificación ahora se muestra desde el layout principal (InicioUsuario)
+          <motion.div
+            className={`${styles.notification} ${styles[notification.type]}`}
+            initial={{ opacity: 0, y: -50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -50 }}
+          >
+            <FontAwesomeIcon icon={notification.type === 'success' ? faCheckCircle : faTimesCircle} />
+            {notification.message}
+          </motion.div>
+        )} */}
+      </AnimatePresence>
+
       <div className={styles.mainLayout}>
-        {/* Panel lateral con menú interactivo */}
         <div className={styles.sidePanel}>
-          <div 
+          <div
             className={styles.profileCard}
             onClick={toggleSubMenu}
           >
             <div className={styles.profileImageContainer}>
               <img
-                src={imagenPerfil || 'https://via.placeholder.com/150'}
+                src={imagenPerfil || `https://placehold.co/150x150/cccccc/ffffff?text=${formData.nombre.charAt(0)}`}
                 alt="Perfil"
                 className={styles.profileImage}
+                onError={(e) => { e.target.onerror = null; e.target.src = `https://placehold.co/150x150/cccccc/ffffff?text=${formData.nombre.charAt(0)}`; }}
               />
-              <div className={styles.profileOverlay}>
+              <label htmlFor="uploadImagen" className={styles.profileOverlay}>
                 <FontAwesomeIcon icon={faCamera} />
-              </div>
+              </label>
               <input
                 type="file"
                 id="uploadImagen"
@@ -72,36 +210,34 @@ const ConfiguracionPerfil = () => {
                 className={styles.uploadInput}
               />
             </div>
-            <p className={styles.profileName}>{nombre}</p>
-            <FontAwesomeIcon 
-              icon={showSubMenu ? faChevronUp : faChevronDown} 
+            <p className={styles.profileName}>{formData.nombre} {formData.apellido}</p>
+            <FontAwesomeIcon
+              icon={showSubMenu ? faChevronUp : faChevronDown}
               className={styles.chevronIcon}
             />
           </div>
-          {/* Contenido adicional del panel lateral */}
           <div className={styles.sidePanelContent}>
             <h4>Estadísticas</h4>
             <div className={styles.statsContainer}>
               <div className={styles.statItem}>
-                <span className={styles.statValue}>24</span>
+                <span className={styles.statValue}>N/A</span>
                 <span className={styles.statLabel}>Actividades</span>
               </div>
               <div className={styles.statItem}>
-                <span className={styles.statValue}>89%</span>
+                <span className={styles.statValue}>N/A</span>
                 <span className={styles.statLabel}>Perfil completo</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Contenido principal */}
         <div className={styles.mainContent}>
           {activeSection === 'informacion' && (
             <form className={styles.form} onSubmit={handleSubmit}>
               <h4 className={styles.sectionTitle}>
                 <FontAwesomeIcon icon={faUserEdit} /> Información Personal
               </h4>
-              
+
               <div className={styles.formGrid}>
                 <div className={styles.formGroup}>
                   <label htmlFor="nombre" className={styles.formLabel}>
@@ -113,8 +249,24 @@ const ConfiguracionPerfil = () => {
                     id="nombre"
                     placeholder="Tu nombre"
                     className={styles.formInput}
-                    value={nombre}
-                    onChange={handleNombreChange}
+                    value={formData.nombre}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label htmlFor="apellido" className={styles.formLabel}>
+                    <FontAwesomeIcon icon={faUserEdit} className={styles.inputIcon} />
+                    Apellido:
+                  </label>
+                  <input
+                    type="text"
+                    id="apellido"
+                    placeholder="Tu apellido"
+                    className={styles.formInput}
+                    value={formData.apellido}
+                    onChange={handleChange}
                   />
                 </div>
 
@@ -128,8 +280,9 @@ const ConfiguracionPerfil = () => {
                     id="email"
                     placeholder="tu@email.com"
                     className={styles.formInput}
-                    value={email}
-                    onChange={handleEmailChange}
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
                   />
                 </div>
 
@@ -143,6 +296,8 @@ const ConfiguracionPerfil = () => {
                     id="telefono"
                     placeholder="Tu número de teléfono"
                     className={styles.formInput}
+                    value={formData.telefono}
+                    onChange={handleChange}
                   />
                 </div>
 
@@ -156,21 +311,80 @@ const ConfiguracionPerfil = () => {
                     id="direccion"
                     placeholder="Tu dirección"
                     className={styles.formInput}
+                    value={formData.direccion}
+                    onChange={handleChange}
+                  />
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label htmlFor="tipo_documento" className={styles.formLabel}>
+                    <FontAwesomeIcon icon={faUserEdit} className={styles.inputIcon} />
+                    Tipo de Documento:
+                  </label>
+                  <select
+                    id="tipo_documento"
+                    className={styles.formInput}
+                    value={formData.tipo_documento}
+                    onChange={handleChange}
+                  >
+                    <option value="">Selecciona</option>
+                    <option value="CC">Cédula de Ciudadanía</option>
+                    <option value="TI">Tarjeta de Identidad</option>
+                    <option value="CE">Cédula de Extranjería</option>
+                    <option value="PAS">Pasaporte</option>
+                  </select>
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label htmlFor="numero_documento" className={styles.formLabel}>
+                    <FontAwesomeIcon icon={faUserEdit} className={styles.inputIcon} />
+                    Número de Documento:
+                  </label>
+                  <input
+                    type="text"
+                    id="numero_documento"
+                    placeholder="Número de documento"
+                    className={styles.formInput}
+                    value={formData.numero_documento}
+                    onChange={handleChange}
+                  />
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label htmlFor="fecha_nacimiento" className={styles.formLabel}>
+                    <FontAwesomeIcon icon={faCalendarAlt} className={styles.inputIcon} />
+                    Fecha de Nacimiento:
+                  </label>
+                  <input
+                    type="date"
+                    id="fecha_nacimiento"
+                    className={styles.formInput}
+                    value={formData.fecha_nacimiento}
+                    onChange={handleChange}
                   />
                 </div>
               </div>
 
               <div className={styles.formActions}>
-                <button type="submit" className={styles.guardarBtn} disabled={!nombre || !email}>
-                  <FontAwesomeIcon icon={faCheckCircle} /> Guardar Cambios
-                </button>
+                <motion.button
+                  type="submit"
+                  className={styles.guardarBtn}
+                  disabled={isSubmitting || !formData.nombre || !formData.email}
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <FontAwesomeIcon icon={faSpinner} spin />
+                      <span>Guardando...</span>
+                    </>
+                  ) : (
+                    <>
+                      <FontAwesomeIcon icon={faCheckCircle} /> Guardar Cambios
+                    </>
+                  )}
+                </motion.button>
               </div>
-
-              {mensaje && (
-                <div className={mensaje.includes('éxito') ? styles.mensajeExito : styles.mensajeError}>
-                  {mensaje}
-                </div>
-              )}
             </form>
           )}
 
@@ -179,30 +393,21 @@ const ConfiguracionPerfil = () => {
               <h4 className={styles.sectionTitle}>
                 <FontAwesomeIcon icon={faShieldAlt} /> Seguridad
               </h4>
-              
-              <div className={styles.securityCard}>
-                <div className={styles.formGroup}>
-                  <label htmlFor="password" className={styles.formLabel}>
-                    <FontAwesomeIcon icon={faLock} className={styles.inputIcon} />
-                    Contraseña Actual:
-                  </label>
-                  <input
-                    type="password"
-                    id="password"
-                    placeholder="••••••••"
-                    className={styles.formInput}
-                    value={password}
-                    onChange={handlePasswordChange}
-                  />
-                </div>
 
+              <div className={styles.securityCard}>
                 <div className={styles.securityActions}>
-                  <Link to="/usuario/perfil/cambiar-contrasena" className={styles.securityBtn}>
+                  <Link to="/usuario/perfil/editar" className={styles.securityBtn}> {/* CORREGIDO */}
                     <FontAwesomeIcon icon={faLock} /> Cambiar Contraseña
                   </Link>
-                  <button className={styles.securityBtnDanger}>
+                  <motion.button
+                    className={styles.securityBtnDanger}
+                    onClick={() => setShowDeleteConfirm(true)}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    disabled={isSubmitting}
+                  >
                     <FontAwesomeIcon icon={faExclamationTriangle} /> Eliminar Cuenta
-                  </button>
+                  </motion.button>
                 </div>
               </div>
             </div>
@@ -213,7 +418,7 @@ const ConfiguracionPerfil = () => {
               <h4 className={styles.sectionTitle}>
                 <FontAwesomeIcon icon={faBell} /> Configuración de Notificaciones
               </h4>
-              
+
               <div className={styles.notificationSettings}>
                 <div className={styles.notificationItem}>
                   <div className={styles.notificationInfo}>
@@ -256,7 +461,7 @@ const ConfiguracionPerfil = () => {
               <h4 className={styles.sectionTitle}>
                 <FontAwesomeIcon icon={faCog} /> Preferencias
               </h4>
-              
+
               <div className={styles.preferencesGrid}>
                 <div className={styles.preferenceItem}>
                   <h5>Tema de la aplicación</h5>
@@ -294,6 +499,50 @@ const ConfiguracionPerfil = () => {
           )}
         </div>
       </div>
+
+      <AnimatePresence>
+        {showDeleteConfirm && (
+          <motion.div
+            className={styles.modalOverlay}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowDeleteConfirm(false)}
+          >
+            <motion.div
+              className={styles.modalContent}
+              initial={{ y: "-100vh", opacity: 0 }}
+              animate={{ y: "0", opacity: 1 }}
+              exit={{ y: "100vh", opacity: 0 }}
+              transition={{ type: "spring", stiffness: 100, damping: 15 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3>Confirmar Eliminación de Cuenta</h3>
+              <p>¿Estás seguro de que deseas eliminar tu cuenta? Esta acción es irreversible y se eliminarán todos tus datos asociados.</p>
+              <div className={styles.modalActions}>
+                <motion.button
+                  className={styles.submitBtn}
+                  onClick={handleDeleteAccount}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? <><FontAwesomeIcon icon={faSpinner} spin /> Eliminando...</> : 'Sí, Eliminar Mi Cuenta'}
+                </motion.button>
+                <motion.button
+                  className={styles.cancelBtn}
+                  onClick={() => setShowDeleteConfirm(false)}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  disabled={isSubmitting}
+                >
+                  Cancelar
+                </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

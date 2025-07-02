@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './Style/RegistrarMascotaStyles.module.css'; // Importa el CSS Module
-import { motion } from 'framer-motion'; // Para animaciones
+import { motion, AnimatePresence } from 'framer-motion'; // Para animaciones
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faPaw, faSpinner, faCheckCircle, faExclamationTriangle, faWeightHanging, faSearch, faCalendarAlt } from '@fortawesome/free-solid-svg-icons';
+import { authFetch } from './api'; // Asegúrate de que la ruta sea correcta
 
 // --- Framer Motion Variants ---
 const containerVariants = {
@@ -47,42 +48,57 @@ const buttonVariants = {
   },
 };
 
-const RegistrarMascota = () => {
+const RegistrarMascotaVeterinario = () => { // Renombrado para claridad
   const navigate = useNavigate();
 
   // Estados para los campos de la mascota
   const [nombre, setNombre] = useState('');
   const [especie, setEspecie] = useState('');
   const [raza, setRaza] = useState('');
-  const [genero, setGenero] = useState('');
-  const [edadAnios, setEdadAnios] = useState('');
+  const [sexo, setSexo] = useState(''); // Cambiado de 'genero' a 'sexo' para coincidir con BD
+  const [fechaNacimiento, setFechaNacimiento] = useState(''); // Nuevo campo fecha_nacimiento
   const [peso, setPeso] = useState('');
   const [color, setColor] = useState('');
+  const [microchip, setMicrochip] = useState(''); // Nuevo campo microchip
   const [caracteristicasEspeciales, setCaracteristicasEspeciales] = useState('');
-  const [propietarioId, setPropietarioId] = useState(''); // Almacena el ID del propietario seleccionado
+  const [idPropietario, setIdPropietario] = useState(''); // Cambiado de 'propietarioId' a 'idPropietario'
 
   // Estados para la UI y validación
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [mensaje, setMensaje] = useState({ texto: '', tipo: '' });
 
-  // Simulación de una lista de propietarios (en un proyecto real, se obtendría de una API)
+  // Lista de propietarios
   const [allPropietarios, setAllPropietarios] = useState([]);
   const [searchTerm, setSearchTerm] = useState(''); // Estado para el input de búsqueda de propietarios
+  const [loadingPropietarios, setLoadingPropietarios] = useState(true);
+  const [errorPropietarios, setErrorPropietarios] = useState(null);
 
-  // Simula la obtención de propietarios al montar el componente
-  useEffect(() => {
-    const fetchPropietarios = async () => {
-      // Simula un retraso de llamada a la API
-      await new Promise(resolve => setTimeout(resolve, 500));
-      const dummyPropietarios = Array.from({ length: 150 }, (_, i) => ({
-        id: `${i + 1}`,
-        nombreCompleto: `PROPIETARIO EJEMPLO ${String(i + 1).padStart(3, '0')}`
-      }));
-      setAllPropietarios(dummyPropietarios);
-    };
-    fetchPropietarios();
+  // Obtener propietarios al montar el componente
+  const fetchPropietarios = useCallback(async () => {
+    setLoadingPropietarios(true);
+    setErrorPropietarios(null);
+    try {
+      const response = await authFetch('/usuarios?role=usuario'); // Obtener solo usuarios con rol 'usuario'
+      if (response.success) {
+        setAllPropietarios(response.data.map(p => ({
+          id: p.id,
+          nombreCompleto: `${p.nombre} ${p.apellido} (Tel: ${p.telefono || 'N/A'})`
+        })));
+      } else {
+        setErrorPropietarios(response.message || 'Error al cargar la lista de propietarios.');
+      }
+    } catch (err) {
+      console.error("Error fetching propietarios:", err);
+      setErrorPropietarios('Error de conexión al servidor al cargar propietarios.');
+    } finally {
+      setLoadingPropietarios(false);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchPropietarios();
+  }, [fetchPropietarios]);
 
   // Filtra propietarios basado en el término de búsqueda (memoizado para rendimiento)
   const filteredPropietarios = useMemo(() => {
@@ -107,8 +123,8 @@ const RegistrarMascota = () => {
           error = 'El nombre es obligatorio';
         } else if (value.length < 2) {
           error = 'Mínimo 2 caracteres';
-        } else if (value.length > 50) {
-          error = 'Máximo 50 caracteres';
+        } else if (value.length > 100) { // Ajustado a 100 según BD
+          error = 'Máximo 100 caracteres';
         } else if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(value)) {
           error = 'Solo letras y espacios';
         }
@@ -117,39 +133,36 @@ const RegistrarMascota = () => {
       case 'especie':
         if (!value.trim()) {
           error = 'La especie es obligatoria';
-        } else if (value.length < 3 || value.length > 30) {
-          error = 'Mínimo 3, máximo 30 caracteres';
+        } else if (value.length < 3 || value.length > 50) { // Ajustado a 50 según BD
+          error = 'Mínimo 3, máximo 50 caracteres';
         } else if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(value)) {
           error = 'Solo letras y espacios';
         }
         break;
 
       case 'raza':
-        if (value.trim() && (value.length < 2 || value.length > 50)) {
+        if (value.trim() && (value.length < 2 || value.length > 50)) { // Ajustado a 50 según BD
           error = 'Mínimo 2, máximo 50 caracteres';
         } else if (value.trim() && !/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s-]+$/.test(value)) {
           error = 'Solo letras, espacios y guiones';
         }
-        if ((allFormData.especie.toUpperCase() === 'PERRO' || allFormData.especie.toUpperCase() === 'GATO') && !value.trim()) {
-          error = `La raza es obligatoria para ${allFormData.especie.toLowerCase()}s`;
-        }
+        // No se requiere raza si la especie no es perro/gato, pero se puede validar si es obligatoria para ciertas especies
         break;
 
-      case 'genero':
+      case 'sexo': // Validar sexo
         if (!value) {
-          error = 'El género es obligatorio';
+          error = 'El sexo es obligatorio';
         }
         break;
 
-      case 'edadAnios':
-        if (!value.trim()) {
-          error = 'La edad es obligatoria';
+      case 'fechaNacimiento': // Validar fecha de nacimiento
+        if (!value) {
+          error = 'La fecha de nacimiento es obligatoria';
         } else {
-          const edad = parseInt(value, 10);
-          if (isNaN(edad)) {
-            error = 'La edad debe ser un número';
-          } else if (edad < 0 || edad > 30) {
-            error = 'La edad debe estar entre 0 y 30 años';
+          const birthDate = new Date(value);
+          const today = new Date();
+          if (birthDate > today) {
+            error = 'La fecha de nacimiento no puede ser en el futuro';
           }
         }
         break;
@@ -163,7 +176,7 @@ const RegistrarMascota = () => {
             error = 'El peso debe ser un número';
           } else if (parsedPeso <= 0) {
             error = 'El peso debe ser un número positivo';
-          } else if (parsedPeso > 200) {
+          } else if (parsedPeso > 200) { // Límite de peso
             error = 'Peso máximo 200 kg';
           }
         }
@@ -172,10 +185,16 @@ const RegistrarMascota = () => {
       case 'color':
         if (!value.trim()) {
           error = 'El color es obligatorio';
-        } else if (value.length < 3 || value.length > 50) {
+        } else if (value.length < 3 || value.length > 50) { // Ajustado a 50 según BD
           error = 'Mínimo 3, máximo 50 caracteres';
         } else if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s,]+$/.test(value)) {
           error = 'Solo letras, espacios y comas';
+        }
+        break;
+
+      case 'microchip':
+        if (value.trim() && (value.length < 5 || value.length > 50)) { // Ejemplo de validación para microchip
+          error = 'Mínimo 5, máximo 50 caracteres para el microchip';
         }
         break;
 
@@ -185,7 +204,7 @@ const RegistrarMascota = () => {
         }
         break;
 
-      case 'propietarioId':
+      case 'idPropietario':
         if (!value) {
           error = 'Debe seleccionar un propietario';
         }
@@ -207,8 +226,8 @@ const RegistrarMascota = () => {
 
     setErrors(prevErrors => {
       const currentFormData = {
-        nombre, especie, raza, genero, edadAnios, peso, color, caracteristicasEspeciales, propietarioId,
-        [name]: newValue // Usa newValue para el campo actual que se está actualizando
+        nombre, especie, raza, sexo, fechaNacimiento, peso, color, microchip, caracteristicasEspeciales, idPropietario,
+        [name]: newValue
       };
       const error = validateField(name, newValue, currentFormData);
       return { ...prevErrors, [name]: error };
@@ -218,12 +237,12 @@ const RegistrarMascota = () => {
       case 'nombre': setNombre(newValue); break;
       case 'especie': setEspecie(newValue); break;
       case 'raza': setRaza(newValue); break;
-      case 'genero': setGenero(newValue); break;
-      case 'edadAnios': setEdadAnios(newValue); break;
+      case 'sexo': setSexo(newValue); break;
+      case 'fechaNacimiento': setFechaNacimiento(newValue); break;
       case 'peso': setPeso(newValue); break;
       case 'color': setColor(newValue); break;
+      case 'microchip': setMicrochip(newValue); break;
       case 'caracteristicasEspeciales': setCaracteristicasEspeciales(newValue); break;
-      // propietarioId ahora es manejado directamente por la lógica de selección de búsqueda
       default: break;
     }
   };
@@ -234,7 +253,7 @@ const RegistrarMascota = () => {
     setMensaje({ texto: '', tipo: '' });
 
     const allFormData = {
-      nombre, especie, raza, genero, edadAnios, peso, color, caracteristicasEspeciales, propietarioId
+      nombre, especie, raza, sexo, fechaNacimiento, peso, color, microchip, caracteristicasEspeciales, idPropietario
     };
 
     let newErrors = {};
@@ -247,7 +266,6 @@ const RegistrarMascota = () => {
 
     setErrors(newErrors);
 
-    // Verifica si hay algún error antes de intentar enviar
     const hasErrors = Object.values(newErrors).some(error => error !== '');
 
     if (hasErrors) {
@@ -259,50 +277,73 @@ const RegistrarMascota = () => {
     const mascotaData = {
       nombre: nombre.toUpperCase(),
       especie: especie.toUpperCase(),
-      raza: raza.toUpperCase(),
-      genero: genero,
-      edadAnios: parseInt(edadAnios, 10),
+      raza: raza.toUpperCase() || null,
+      sexo: sexo,
+      fecha_nacimiento: fechaNacimiento, // Usar fecha_nacimiento
       peso: parseFloat(peso),
       color: color.toUpperCase(),
-      caracteristicasEspeciales: caracteristicasEspeciales.trim(),
-      propietarioId: propietarioId
+      microchip: microchip.trim() || null,
+      caracteristicas_especiales: caracteristicasEspeciales.trim() || null,
+      id_propietario: parseInt(idPropietario, 10), // Usar id_propietario
     };
 
     console.log('Datos de la mascota a registrar:', mascotaData);
 
     try {
-      // Simula llamada a la API
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      // En una aplicación real, harías una solicitud API real aquí:
-      // const response = await api.post('/mascotas', mascotaData);
-      // console.log('Mascota registrada:', response.data);
+      const response = await authFetch('/mascotas', {
+        method: 'POST',
+        body: JSON.stringify(mascotaData),
+      });
 
-      setMensaje({ texto: '¡Mascota registrada exitosamente!', tipo: 'exito' });
-      // Limpiar campos del formulario
-      setNombre('');
-      setEspecie('');
-      setRaza('');
-      setGenero('');
-      setEdadAnios('');
-      setPeso('');
-      setColor('');
-      setCaracteristicasEspeciales(''); // <<-- CORRECCIÓN APLICADA AQUÍ
-      setPropietarioId('');
-      setSearchTerm(''); // Limpia el término de búsqueda después de un envío exitoso
-      setErrors({}); // Limpia los errores
+      if (response.success) {
+        setMensaje({ texto: '¡Mascota registrada exitosamente!', tipo: 'exito' });
+        // Limpiar campos del formulario
+        setNombre('');
+        setEspecie('');
+        setRaza('');
+        setSexo('');
+        setFechaNacimiento('');
+        setPeso('');
+        setColor('');
+        setMicrochip('');
+        setCaracteristicasEspeciales('');
+        setIdPropietario('');
+        setSearchTerm('');
+        setErrors({});
 
-      // Navega después de un breve retraso para permitir que se vea el mensaje
-      setTimeout(() => {
-        navigate('/veterinario/mascotas');
-      }, 1500);
+        setTimeout(() => {
+          navigate('/veterinario/mascotas');
+        }, 1500);
 
+      } else {
+        setMensaje({ texto: response.message || 'Error al registrar la mascota. Inténtalo de nuevo.', tipo: 'error' });
+      }
     } catch (error) {
       console.error('Error al registrar mascota:', error);
-      setMensaje({ texto: 'Error al registrar la mascota. Inténtalo de nuevo.', tipo: 'error' });
+      setMensaje({ texto: 'Error de conexión al servidor al registrar la mascota. Inténtalo de nuevo.', tipo: 'error' });
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  if (loadingPropietarios) {
+    return (
+      <div className={styles.loadingContainer}>
+        <FontAwesomeIcon icon={faSpinner} spin size="3x" color="#00acc1" />
+        <p>Cargando propietarios...</p>
+      </div>
+    );
+  }
+
+  if (errorPropietarios) {
+    return (
+      <div className={styles.errorContainer}>
+        <FontAwesomeIcon icon={faExclamationTriangle} size="3x" color="#dc3545" />
+        <p>Error al cargar propietarios: {errorPropietarios}</p>
+        <button onClick={fetchPropietarios} className={styles.volverBtn}>Reintentar</button>
+      </div>
+    );
+  }
 
   return (
     <motion.div
@@ -379,14 +420,14 @@ const RegistrarMascota = () => {
               {errors.raza && <span className={styles.errorMessageField}>{errors.raza}</span>}
             </div>
             <div className={styles.formGroup}>
-              <label htmlFor="genero">Género:</label>
+              <label htmlFor="sexo">Género:</label> {/* Cambiado a Sexo */}
               <motion.select
-                id="genero"
-                name="genero"
-                value={genero}
+                id="sexo"
+                name="sexo"
+                value={sexo}
                 onChange={handleChange}
                 required
-                className={`${styles.selectInput} ${errors.genero ? styles.inputError : ''}`}
+                className={`${styles.selectInput} ${errors.sexo ? styles.inputError : ''}`}
                 variants={inputVariants}
                 whileFocus="focus"
               >
@@ -394,30 +435,28 @@ const RegistrarMascota = () => {
                 <option value="MACHO">Macho</option>
                 <option value="HEMBRA">Hembra</option>
               </motion.select>
-              {errors.genero && <span className={styles.errorMessageField}>{errors.genero}</span>}
+              {errors.sexo && <span className={styles.errorMessageField}>{errors.sexo}</span>}
             </div>
           </div>
 
           <div className={styles.formRow}>
             <div className={styles.formGroup}>
-              <label htmlFor="edadAnios">Edad (años):</label>
+              <label htmlFor="fechaNacimiento">Fecha de Nacimiento:</label> {/* Nuevo campo */}
               <div className={styles.inputWithIcon}>
                 <motion.input
-                  type="number"
-                  id="edadAnios"
-                  name="edadAnios"
-                  value={edadAnios}
+                  type="date"
+                  id="fechaNacimiento"
+                  name="fechaNacimiento"
+                  value={fechaNacimiento}
                   onChange={handleChange}
                   required
-                  min="0"
-                  max="30"
-                  className={errors.edadAnios ? styles.inputError : ''}
+                  className={errors.fechaNacimiento ? styles.inputError : ''}
                   variants={inputVariants}
                   whileFocus="focus"
                 />
                 <FontAwesomeIcon icon={faCalendarAlt} className={styles.inputIcon} />
               </div>
-              {errors.edadAnios && <span className={styles.errorMessageField}>{errors.edadAnios}</span>}
+              {errors.fechaNacimiento && <span className={styles.errorMessageField}>{errors.fechaNacimiento}</span>}
             </div>
             <div className={styles.formGroup}>
               <label htmlFor="peso">Peso (kg):</label>
@@ -442,26 +481,43 @@ const RegistrarMascota = () => {
             </div>
           </div>
 
-          <div className={styles.formGroup}>
-            <label htmlFor="color">Color / Patrón:</label>
-            <motion.input
-              type="text"
-              id="color"
-              name="color"
-              value={color}
-              onChange={handleChange}
-              required
-              className={`${styles.uppercaseInput} ${errors.color ? styles.inputError : ''}`}
-              variants={inputVariants}
-              whileFocus="focus"
-              placeholder="Ej: Negro, Atigrado, Blanco y Negro"
-            />
-            {errors.color && <span className={styles.errorMessageField}>{errors.color}</span>}
+          <div className={styles.formRow}>
+            <div className={styles.formGroup}>
+              <label htmlFor="color">Color / Patrón:</label>
+              <motion.input
+                type="text"
+                id="color"
+                name="color"
+                value={color}
+                onChange={handleChange}
+                required
+                className={`${styles.uppercaseInput} ${errors.color ? styles.inputError : ''}`}
+                variants={inputVariants}
+                whileFocus="focus"
+                placeholder="Ej: Negro, Atigrado, Blanco y Negro"
+              />
+              {errors.color && <span className={styles.errorMessageField}>{errors.color}</span>}
+            </div>
+            <div className={styles.formGroup}>
+              <label htmlFor="microchip">Número de Microchip (Opcional):</label> {/* Nuevo campo */}
+              <motion.input
+                type="text"
+                id="microchip"
+                name="microchip"
+                value={microchip}
+                onChange={handleChange}
+                className={`${styles.uppercaseInput} ${errors.microchip ? styles.inputError : ''}`}
+                variants={inputVariants}
+                whileFocus="focus"
+                placeholder="Ej: 900123456789012"
+              />
+              {errors.microchip && <span className={styles.errorMessageField}>{errors.microchip}</span>}
+            </div>
           </div>
         </div>
 
         <div className={styles.formSection}>
-          <h3>Detalles y Propietario</h3>
+          <h3>Detalles Adicionales y Propietario</h3>
           <div className={styles.formGroup}>
             <label htmlFor="caracteristicasEspeciales">Características Especiales (Alergias, Enfermedades, Comportamiento):</label>
             <motion.textarea
@@ -492,18 +548,18 @@ const RegistrarMascota = () => {
                 className={styles.searchInput}
               />
             </div>
-            
+
             {searchTerm && (
               <div className={styles.searchResults}>
                 {filteredPropietarios.length > 0 ? (
                   filteredPropietarios.map((prop) => (
                     <div
                       key={prop.id}
-                      className={`${styles.searchResultItem} ${prop.id === propietarioId ? styles.selected : ''}`}
+                      className={`${styles.searchResultItem} ${prop.id === idPropietario ? styles.selected : ''}`}
                       onClick={() => {
-                        setPropietarioId(prop.id);
-                        setSearchTerm(''); // Limpia el término de búsqueda después de la selección
-                        setErrors(prev => ({ ...prev, propietarioId: '' })); // Limpia el error si se selecciona
+                        setIdPropietario(prop.id.toString()); // Asegura que sea string para el estado
+                        setSearchTerm('');
+                        setErrors(prev => ({ ...prev, idPropietario: '' }));
                       }}
                     >
                       {prop.nombreCompleto}
@@ -514,40 +570,41 @@ const RegistrarMascota = () => {
                 )}
               </div>
             )}
-            
-            {propietarioId && (
+
+            {idPropietario && (
               <div className={styles.selectedOwner}>
                 <span className={styles.selectedOwnerText}>
-                  Propietario seleccionado: {allPropietarios.find(p => p.id === propietarioId)?.nombreCompleto}
+                  Propietario seleccionado: {allPropietarios.find(p => p.id.toString() === idPropietario)?.nombreCompleto}
                 </span>
-                <span 
+                <span
                   className={styles.clearSelection}
                   onClick={() => {
-                    setPropietarioId(''); // Limpia el propietario seleccionado
-                    setSearchTerm(''); // Limpia el término de búsqueda
+                    setIdPropietario('');
+                    setSearchTerm('');
                   }}
                 >
                   Cambiar
                 </span>
               </div>
             )}
-             {/* Mensaje de validación para propietarioId debajo del área de búsqueda/selección */}
-            {errors.propietarioId && <span className={styles.errorMessageField}>{errors.propietarioId}</span>}
+            {errors.idPropietario && <span className={styles.errorMessageField}>{errors.idPropietario}</span>}
           </div>
         </div>
 
         {mensaje.texto && (
-          <motion.div
-            className={`${styles.message} ${
-              mensaje.tipo === 'exito' ? styles.successMessage : styles.errorMessage
-            }`}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-          >
-            <FontAwesomeIcon icon={mensaje.tipo === 'exito' ? faCheckCircle : faExclamationTriangle} />
-            <span>{mensaje.texto}</span>
-          </motion.div>
+          <AnimatePresence>
+            <motion.div
+              className={`${styles.message} ${
+                mensaje.tipo === 'exito' ? styles.successMessage : styles.errorMessage
+              }`}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+            >
+              <FontAwesomeIcon icon={mensaje.tipo === 'exito' ? faCheckCircle : faExclamationTriangle} />
+              <span>{mensaje.texto}</span>
+            </motion.div>
+          </AnimatePresence>
         )}
 
         <div className={styles.formActions}>
@@ -584,4 +641,4 @@ const RegistrarMascota = () => {
   );
 };
 
-export default RegistrarMascota;
+export default RegistrarMascotaVeterinario;

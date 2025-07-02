@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import veteStyles from './Style/ConfiguracionVeterinarioStyles.module.css';
 import { motion } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -6,7 +6,8 @@ import {
   faCog, faBell, faSave, faTimesCircle, faArrowLeft,
   faClock, faCheckCircle, faExclamationTriangle, faSpinner, faInfoCircle
 } from '@fortawesome/free-solid-svg-icons';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useOutletContext } from 'react-router-dom';
+import { authFetch } from './api'; // Asegúrate de que la ruta sea correcta a tu archivo api.js
 
 const containerVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -43,50 +44,63 @@ const buttonVariants = {
 };
 
 const ConfiguracionVeterinario = () => {
+  const { user, showNotification } = useOutletContext(); // Obtener user del contexto
+  const navigate = useNavigate();
+
   const [config, setConfig] = useState({
-    notificacionesActivas: true,
-    sonidoNotificacion: 'default',
-    recordatoriosCita: true,
-    intervaloRecordatorio: '30 minutos'
+    notificaciones_activas: true, // Coincide con el nombre de la columna en la BD
+    sonido_notificacion: 'default', // Coincide con el nombre de la columna en la BD
+    recordatorios_cita: true, // Coincide con el nombre de la columna en la BD
+    intervalo_recordatorio: '30 minutos' // Coincide con el nombre de la columna en la BD
   });
 
   const [guardando, setGuardando] = useState(false);
   const [cargando, setCargando] = useState(true);
   const [mensaje, setMensaje] = useState({ texto: '', tipo: '' });
   const [originalConfig, setOriginalConfig] = useState(null);
+  const [error, setError] = useState('');
 
-  const navigate = useNavigate();
+  const loadConfig = useCallback(async () => {
+    setCargando(true);
+    setMensaje({ texto: '', tipo: '' });
+    setError(null); // Limpiar errores previos
+
+    if (!user || !user.id) {
+      setError('No se pudo cargar la configuración: ID de usuario no disponible.');
+      setCargando(false);
+      return;
+    }
+
+    try {
+      const response = await authFetch(`/usuarios/${user.id}`);
+      if (response.success) {
+        const userData = response.data;
+        const loadedConfig = {
+          notificaciones_activas: !!userData.notificaciones_activas, // Convertir a booleano
+          sonido_notificacion: userData.sonido_notificacion || 'default',
+          recordatorios_cita: !!userData.recordatorios_cita, // Convertir a booleano
+          intervalo_recordatorio: userData.intervalo_recordatorio || '30 minutos'
+        };
+        setConfig(loadedConfig);
+        setOriginalConfig(loadedConfig);
+        setMensaje({ texto: 'Configuración cargada.', tipo: 'info' });
+      } else {
+        setError(response.message || 'Error al cargar la configuración del servidor.');
+        if (showNotification) showNotification(response.message || 'Error al cargar la configuración.', 'error');
+      }
+    } catch (error) {
+      console.error('Error al cargar la configuración:', error);
+      setError('Error de conexión al servidor al cargar la configuración.');
+      if (showNotification) showNotification('Error de conexión al servidor al cargar la configuración.', 'error');
+    } finally {
+      setCargando(false);
+      setTimeout(() => setMensaje({ texto: '', tipo: '' }), 3000);
+    }
+  }, [user, showNotification]);
 
   useEffect(() => {
-    const loadConfigLocally = () => {
-      setCargando(true);
-      setMensaje({ texto: '', tipo: '' });
-
-      try {
-        const savedConfig = {
-          notificacionesActivas: localStorage.getItem('veteNotificacionesActivas') === 'true' || true,
-          sonidoNotificacion: localStorage.getItem('veteSonidoNotificacion') || 'default',
-          recordatoriosCita: localStorage.getItem('veteRecordatoriosCita') === 'true' || true,
-          intervaloRecordatorio: localStorage.getItem('veteIntervaloRecordatorio') || '30 minutos'
-        };
-
-        setConfig(savedConfig);
-        setOriginalConfig(savedConfig);
-        setMensaje({ texto: 'Configuración cargada.', tipo: 'info' });
-      } catch (error) {
-        console.error('Error al cargar la configuración de localStorage:', error);
-        setMensaje({
-          texto: 'Error al cargar la configuración local.',
-          tipo: 'error'
-        });
-      } finally {
-        setCargando(false);
-        setTimeout(() => setMensaje({ texto: '', tipo: '' }), 3000);
-      }
-    };
-
-    loadConfigLocally();
-  }, []);
+    loadConfig();
+  }, [loadConfig]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -99,26 +113,36 @@ const ConfiguracionVeterinario = () => {
   const handleGuardarConfiguracion = async () => {
     setGuardando(true);
     setMensaje({ texto: '', tipo: '' });
+    setError(null); // Limpiar errores previos
+
+    if (!user || !user.id) {
+      setError('No se pudo guardar la configuración: ID de usuario no disponible.');
+      setGuardando(false);
+      return;
+    }
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 800));
-
-      Object.entries(config).forEach(([key, value]) => {
-        const localStorageKey = `vete${key.charAt(0).toUpperCase() + key.slice(1)}`;
-        localStorage.setItem(localStorageKey, typeof value === 'boolean' ? value.toString() : value);
+      const response = await authFetch(`/usuarios/${user.id}`, {
+        method: 'PUT',
+        body: JSON.stringify(config), // Enviar solo los campos de configuración
       });
 
-      setOriginalConfig(config);
-      setMensaje({
-        texto: '¡Configuración guardada exitosamente!',
-        tipo: 'exito'
-      });
+      if (response.success) {
+        // Actualizar el estado original con la configuración guardada
+        setOriginalConfig(config);
+        setMensaje({
+          texto: '¡Configuración guardada exitosamente!',
+          tipo: 'exito'
+        });
+        if (showNotification) showNotification('Configuración guardada exitosamente.', 'success');
+      } else {
+        setError(response.message || 'Error al guardar la configuración.');
+        if (showNotification) showNotification(response.message || 'Error al guardar la configuración.', 'error');
+      }
     } catch (error) {
-      console.error('Error al guardar la configuración en localStorage:', error);
-      setMensaje({
-        texto: 'Error al guardar la configuración. Inténtalo de nuevo.',
-        tipo: 'error'
-      });
+      console.error('Error al guardar la configuración:', error);
+      setError('Error de conexión al servidor al guardar la configuración. Inténtalo de nuevo.');
+      if (showNotification) showNotification('Error de conexión al servidor al guardar la configuración.', 'error');
     } finally {
       setGuardando(false);
       setTimeout(() => setMensaje({ texto: '', tipo: '' }), 3000);
@@ -170,10 +194,17 @@ const ConfiguracionVeterinario = () => {
         <p className={veteStyles.veteSubtitle}>Personaliza tus preferencias de notificación</p>
       </motion.div>
 
-      <motion.form
-        className={veteStyles.veteConfigForm}
-        variants={itemVariants}
-      >
+      {error && (
+        <motion.div
+          className={veteStyles.veteErrorMessage}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          <FontAwesomeIcon icon={faExclamationTriangle} /> {error}
+        </motion.div>
+      )}
+
+      <form className={veteStyles.veteConfigForm}> {/* No onSubmit aquí, los botones manejan la lógica */}
         {/* Grupo de Notificaciones */}
         <motion.div
           className={veteStyles.veteConfigSection}
@@ -187,8 +218,8 @@ const ConfiguracionVeterinario = () => {
             <label className={veteStyles.veteSwitchLabel}>
               <input
                 type="checkbox"
-                name="notificacionesActivas"
-                checked={config.notificacionesActivas}
+                name="notificaciones_activas" // Usar el nombre de la columna de la BD
+                checked={config.notificaciones_activas}
                 onChange={handleChange}
                 className={veteStyles.veteSwitchInput}
               />
@@ -197,16 +228,16 @@ const ConfiguracionVeterinario = () => {
             </label>
           </div>
 
-          {config.notificacionesActivas && (
+          {config.notificaciones_activas && (
             <>
               <div className={veteStyles.veteFormGroup}>
-                <label htmlFor="sonidoNotificacion" className={veteStyles.veteSelectLabel}>
+                <label htmlFor="sonido_notificacion" className={veteStyles.veteSelectLabel}>
                   Sonido de notificación
                 </label>
                 <select
-                  id="sonidoNotificacion"
-                  name="sonidoNotificacion"
-                  value={config.sonidoNotificacion}
+                  id="sonido_notificacion"
+                  name="sonido_notificacion" // Usar el nombre de la columna de la BD
+                  value={config.sonido_notificacion}
                   onChange={handleChange}
                   className={veteStyles.veteSelectInput}
                 >
@@ -221,8 +252,8 @@ const ConfiguracionVeterinario = () => {
                 <label className={veteStyles.veteSwitchLabel}>
                   <input
                     type="checkbox"
-                    name="recordatoriosCita"
-                    checked={config.recordatoriosCita}
+                    name="recordatorios_cita" // Usar el nombre de la columna de la BD
+                    checked={config.recordatorios_cita}
                     onChange={handleChange}
                     className={veteStyles.veteSwitchInput}
                   />
@@ -231,15 +262,15 @@ const ConfiguracionVeterinario = () => {
                 </label>
               </div>
 
-              {config.recordatoriosCita && (
+              {config.recordatorios_cita && (
                 <div className={veteStyles.veteFormGroup}>
-                  <label htmlFor="intervaloRecordatorio" className={veteStyles.veteSelectLabel}>
+                  <label htmlFor="intervalo_recordatorio" className={veteStyles.veteSelectLabel}>
                     <FontAwesomeIcon icon={faClock} /> Intervalo de recordatorio
                   </label>
                   <select
-                    id="intervaloRecordatorio"
-                    name="intervaloRecordatorio"
-                    value={config.intervaloRecordatorio}
+                    id="intervalo_recordatorio"
+                    name="intervalo_recordatorio" // Usar el nombre de la columna de la BD
+                    value={config.intervalo_recordatorio}
                     onChange={handleChange}
                     className={veteStyles.veteSelectInput}
                   >
@@ -325,7 +356,7 @@ const ConfiguracionVeterinario = () => {
             <span>{mensaje.texto}</span>
           </motion.div>
         )}
-      </motion.form>
+      </form>
     </motion.div>
   );
 };

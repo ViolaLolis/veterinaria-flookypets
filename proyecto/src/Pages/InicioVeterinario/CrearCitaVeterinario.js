@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useSearchParams, useNavigate, Link, useOutletContext } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -10,11 +10,12 @@ import {
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import es from 'date-fns/locale/es';
+import { authFetch } from './api'; // Importa authFetch
 
 // Importa el archivo CSS correctamente
-import './Style/CrearCitaVeterinario.css';
+import './Style/CrearCitaVeterinario.css'; // Asegúrate de que este archivo CSS exista
 
-// Variantes de Framer Motion
+// Variantes de Framer Motion (mantengo las que ya tenías)
 const containerVariants = {
   hidden: { opacity: 0, y: 20 },
   visible: {
@@ -117,11 +118,11 @@ const messageVariants = {
 const CrearCitaVeterinario = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { user, showNotification } = useOutletContext(); // Obtener el usuario logeado y la función de notificación
 
   // Estados del formulario
   const [clientes, setClientes] = useState([]);
   const [servicios, setServicios] = useState([]);
-  const [veterinarios, setVeterinarios] = useState([]);
   const [mascotasCliente, setMascotasCliente] = useState([]);
 
   const [selectedCliente, setSelectedCliente] = useState('');
@@ -134,8 +135,8 @@ const CrearCitaVeterinario = () => {
   const [clientSearchQuery, setClientSearchQuery] = useState('');
   const [filteredClientes, setFilteredClientes] = useState([]);
 
-  // ID del veterinario logeado (mantengo tu simulación)
-  const loggedInVeterinarioId = 2; // Simula el ID del veterinario logeado
+  // ID del veterinario logeado (obtenido del contexto)
+  const loggedInVeterinarioId = user?.id;
 
   // Estados de UI
   const [loading, setLoading] = useState(true);
@@ -148,83 +149,30 @@ const CrearCitaVeterinario = () => {
       setLoading(true);
       setError(null);
       try {
-        const [clientesData, serviciosData, veterinariosData] = await Promise.all([
-          // Datos de clientes (simulados)
-          new Promise(resolve => setTimeout(() => {
-            resolve([
-                { id_cliente: 1, nombre: 'Juan Pérez', telefono: '1234567890', mascotas: [
-                    { id_mascota: 1, nombre: 'Max', especie: 'Perro', raza: 'Labrador' },
-                    { id_mascota: 2, nombre: 'Luna', especie: 'Gato', raza: 'Siamés' },
-                ]},
-                { id_cliente: 2, nombre: 'María Gómez', telefono: '0987654321', mascotas: [
-                    { id_mascota: 3, nombre: 'Rocky', especie: 'Perro', raza: 'Bulldog Francés' },
-                ]},
-                { id_cliente: 3, nombre: 'Carlos López', telefono: '1122334455', mascotas: [
-                    { id_mascota: 4, nombre: 'Milo', especie: 'Gato', raza: 'Mestizo' },
-                ]},
-                { id_cliente: 4, nombre: 'Ana Martínez', telefono: '3101112233', mascotas: [
-                    { id_mascota: 5, nombre: 'Bella', especie: 'Perro', raza: 'Golden Retriever' },
-                ]},
-                { id_cliente: 5, nombre: 'Luis Rodríguez', telefono: '3152223344', mascotas: [
-                    { id_mascota: 6, nombre: 'Simba', especie: 'Gato', raza: 'Persa' },
-                ]},
-                { id_cliente: 6, nombre: 'Sofía García', telefono: '3203334455', mascotas: [
-                    { id_mascota: 7, nombre: 'Coco', especie: 'Perro', raza: 'Chihuahua' },
-                ]},
-                { id_cliente: 7, nombre: 'David Sánchez', telefono: '3001234567', mascotas: [
-                    { id_mascota: 8, nombre: 'Duque', especie: 'Perro', raza: 'Pastor Alemán' },
-                ]},
-                { id_cliente: 8, nombre: 'Elena Vega', telefono: '3019876543', mascotas: [
-                    { id_mascota: 9, nombre: 'Mittens', especie: 'Gato', raza: 'Ragdoll' },
-                ]},
-                { id_cliente: 9, nombre: 'Fernando Ruiz', telefono: '3023456789', mascotas: [
-                    { id_mascota: 10, nombre: 'Goldie', especie: 'Pez', raza: 'Pez de Colores' },
-                ]},
-                { id_cliente: 10, nombre: 'Gabriela Díaz', telefono: '3038765432', mascotas: [
-                    { id_mascota: 11, nombre: 'Pip', especie: 'Hamster', raza: 'Roborovski' },
-                ]},
-                { id_cliente: 11, nombre: 'Héctor Vargas', telefono: '3047654321', mascotas: [
-                    { id_mascota: 12, nombre: 'Snowball', especie: 'Conejo', raza: 'Mini Lop' },
-                ]},
-                { id_cliente: 12, nombre: 'Isabel Castro', telefono: '3056543210', mascotas: [
-                    { id_mascota: 13, nombre: 'Hedwig', especie: 'Búho', raza: 'Nival' },
-                ]},
-            ]);
-          }, 500)),
-
-          // Datos de servicios (simulados)
-          new Promise(resolve => setTimeout(() => {
-            resolve([
-              { id_servicio: 1, nombre: 'Consulta General', descripcion: 'Revisión médica básica para tu mascota.', precio: '$50.000' },
-              { id_servicio: 2, nombre: 'Vacunación', descripcion: 'Programas de vacunación personalizados para proteger a tu compañero.', precio: '$30.000' },
-              { id_servicio: 3, nombre: 'Estética Canina y Felina', descripcion: 'Baño, corte de pelo y otros tratamientos de belleza.', precio: '$40.000' },
-              { id_servicio: 4, nombre: 'Cirugía', descripcion: 'Procedimientos quirúrgicos con equipo moderno y veterinarios especializados.', precio: 'Consultar' },
-              { id_servicio: 5, nombre: 'Diagnóstico por Imagen', descripcion: 'Rayos X, ecografías y otros métodos de diagnóstico avanzado.', precio: 'Consultar' },
-              { id_servicio: 6, nombre: 'Laboratorio Clínico', descripcion: 'Análisis de sangre, orina y otros fluidos corporales.', precio: '$25.000' },
-            ]);
-          }, 500)),
-
-          // Datos de veterinarios (simulados)
-          new Promise(resolve => setTimeout(() => {
-            resolve([
-              { id: 1, nombre: 'Dr.', apellido: 'López' },
-              { id: 2, nombre: 'Carlos', apellido: 'Veterinario' },
-              { id: 4, nombre: 'Laura', apellido: 'Gómez' },
-              { id: 5, nombre: 'Mario', apellido: 'Hernández' },
-              { id: 6, nombre: 'Sandra', apellido: 'Pérez' },
-            ]);
-          }, 500))
+        const [clientesResponse, serviciosResponse] = await Promise.all([
+          authFetch('/usuarios?role=usuario'), // Obtener solo usuarios con rol 'usuario'
+          authFetch('/servicios')
         ]);
 
-        setClientes(clientesData);
-        setFilteredClientes(clientesData);
-        setServicios(serviciosData);
-        setVeterinarios(veterinariosData);
+        if (clientesResponse.success) {
+          setClientes(clientesResponse.data);
+          setFilteredClientes(clientesResponse.data);
+        } else {
+          setError(clientesResponse.message || 'Error al cargar los clientes.');
+          showNotification(clientesResponse.message || 'Error al cargar los clientes.', 'error');
+        }
 
-        // Procesar parámetros de URL
+        if (serviciosResponse.success) {
+          setServicios(serviciosResponse.data);
+        } else {
+          setError(prev => prev || serviciosResponse.message || 'Error al cargar los servicios.'); // Mantener error si ya existe
+          showNotification(serviciosResponse.message || 'Error al cargar los servicios.', 'error');
+        }
+
+        // Procesar parámetros de URL (ej. para agendar servicio desde la lista de servicios)
         const serviceFromUrl = searchParams.get('servicio');
         if (serviceFromUrl) {
-          const foundService = serviciosData.find(s => s.nombre === serviceFromUrl);
+          const foundService = serviciosResponse.data.find(s => s.nombre === serviceFromUrl);
           if (foundService) {
             setSelectedServicio(foundService.id_servicio.toString());
           }
@@ -237,49 +185,65 @@ const CrearCitaVeterinario = () => {
                 if (!isNaN(parsedDate.getTime())) {
                     setSelectedDate(parsedDate);
                 } else {
-                    setSelectedDate(new Date()); // Si la fecha de la URL es inválida, usa la fecha actual
+                    setSelectedDate(new Date());
                 }
             } catch (e) {
                 console.error("Error al parsear la fecha de la URL:", e);
-                setSelectedDate(new Date()); // En caso de error, usa la fecha actual
+                setSelectedDate(new Date());
             }
         } else {
-            setSelectedDate(new Date()); // Si no hay fecha en la URL, usa la fecha actual
+            setSelectedDate(new Date());
         }
 
       } catch (err) {
-        setError('Error al cargar datos iniciales. Por favor, intente de nuevo.');
+        setError('Error de conexión al servidor al cargar datos iniciales. Por favor, intente de nuevo.');
         console.error("Error fetching initial data:", err);
+        showNotification('Error de conexión al servidor al cargar datos iniciales.', 'error');
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, [searchParams]);
+  }, [searchParams, showNotification]);
 
+  // Cargar mascotas del cliente seleccionado
   useEffect(() => {
-    if (selectedCliente) {
-      const cliente = clientes.find(c => c.id_cliente.toString() === selectedCliente);
-      if (cliente && cliente.mascotas) {
-        setMascotasCliente(cliente.mascotas);
-        setSelectedMascota(''); // Resetea la mascota seleccionada al cambiar de cliente
+    const fetchMascotas = async () => {
+      if (selectedCliente) {
+        try {
+          const response = await authFetch(`/mascotas?id_propietario=${selectedCliente}`);
+          if (response.success) {
+            setMascotasCliente(response.data);
+            setSelectedMascota(''); // Resetea la mascota seleccionada al cambiar de cliente
+          } else {
+            setMascotasCliente([]);
+            setSelectedMascota('');
+            showNotification(response.message || 'Error al cargar las mascotas del cliente.', 'error');
+          }
+        } catch (err) {
+          console.error("Error fetching mascotas:", err);
+          setMascotasCliente([]);
+          setSelectedMascota('');
+          showNotification('Error de conexión al servidor al cargar mascotas.', 'error');
+        }
       } else {
         setMascotasCliente([]);
+        setSelectedMascota('');
       }
-    } else {
-      setMascotasCliente([]);
-      setSelectedMascota('');
-    }
-  }, [selectedCliente, clientes]);
+    };
+    fetchMascotas();
+  }, [selectedCliente, showNotification]);
 
+  // Filtrar clientes por búsqueda
   useEffect(() => {
     const query = clientSearchQuery.toLowerCase();
     setFilteredClientes(
       query
         ? clientes.filter(cliente =>
-            cliente.nombre.toLowerCase().includes(query) ||
-            cliente.telefono.includes(query)
+            (cliente.nombre && cliente.nombre.toLowerCase().includes(query)) ||
+            (cliente.apellido && cliente.apellido.toLowerCase().includes(query)) ||
+            (cliente.telefono && cliente.telefono.includes(query))
           )
         : clientes
     );
@@ -297,6 +261,13 @@ const CrearCitaVeterinario = () => {
       return;
     }
 
+    if (!loggedInVeterinarioId) {
+      setError('No se pudo obtener el ID del veterinario logeado. Por favor, intente recargar la página.');
+      showNotification('No se pudo obtener el ID del veterinario logeado.', 'error');
+      setSubmitting(false);
+      return;
+    }
+
     const fullDateTime = new Date(selectedDate);
     fullDateTime.setHours(selectedTime.getHours());
     fullDateTime.setMinutes(selectedTime.getMinutes());
@@ -308,34 +279,45 @@ const CrearCitaVeterinario = () => {
       id_mascota: parseInt(selectedMascota),
       id_servicio: parseInt(selectedServicio),
       id_veterinario: loggedInVeterinarioId,
-      fecha: fullDateTime.toISOString().slice(0, 19).replace('T', ' '), // Formato YYYY-MM-DD HH:MM:SS
+      fecha_cita: fullDateTime.toISOString().slice(0, 19).replace('T', ' '), // Formato YYYY-MM-DD HH:MM:SS
       estado: 'pendiente' // Estado inicial
     };
 
     console.log("Intentando agendar cita:", newCita);
 
     try {
-      // Simulación de una llamada API
-      await new Promise(resolve => setTimeout(resolve, 1500)); // Simula un retraso de red
-      
-      setSuccessMessage('¡Cita agendada exitosamente!');
-      
-      // Limpiar formulario después de éxito
-      setSelectedCliente('');
-      setSelectedMascota('');
-      setSelectedServicio('');
-      setSelectedTime(null);
-      setClientSearchQuery(''); // Limpiar la búsqueda del cliente
+      const response = await authFetch('/citas/agendar', {
+        method: 'POST',
+        body: JSON.stringify(newCita),
+      });
 
+      if (response.success) {
+        setSuccessMessage('¡Cita agendada exitosamente!');
+        showNotification('Cita agendada exitosamente.', 'success');
+
+        // Limpiar formulario después de éxito
+        setSelectedCliente('');
+        setSelectedMascota('');
+        setSelectedServicio('');
+        setSelectedTime(null);
+        setClientSearchQuery('');
+        setMascotasCliente([]); // Limpiar mascotas del cliente
+        // Opcional: Redirigir al listado de citas después de un tiempo
+        setTimeout(() => navigate('/veterinario/citas'), 1500);
+
+      } else {
+        setError(response.message || 'Hubo un problema al agendar la cita. Por favor, intente de nuevo.');
+        showNotification(response.message || 'Hubo un problema al agendar la cita.', 'error');
+      }
     } catch (err) {
-      setError(err.message || 'Hubo un problema al agendar la cita. Por favor, intente de nuevo.');
+      setError(err.message || 'Error de conexión al servidor al agendar la cita. Por favor, intente de nuevo.');
       console.error("Error submitting cita:", err);
+      showNotification('Error de conexión al servidor al agendar la cita.', 'error');
     } finally {
       setSubmitting(false);
     }
   };
 
-  // Renderizado condicional para el estado de carga
   if (loading) {
     return (
       <motion.div
@@ -350,8 +332,7 @@ const CrearCitaVeterinario = () => {
     );
   }
 
-  // Renderizado condicional para errores iniciales que impiden cargar el formulario
-  if (!loading && error && !successMessage) { // Si hay un error y no hay un mensaje de éxito previo
+  if (!loading && error && !successMessage) {
       return (
           <motion.div
               className="error-container"
@@ -363,7 +344,7 @@ const CrearCitaVeterinario = () => {
               <p>{error}</p>
               <motion.button
                   onClick={() => navigate('/veterinario/citas')}
-                  className="secondary-button" // Usamos la clase del botón secundario para volver
+                  className="secondary-button"
                   variants={buttonVariants}
                   whileHover="hover"
                   whileTap="tap"
@@ -393,9 +374,9 @@ const CrearCitaVeterinario = () => {
         <p className="help-text">
             Fecha de la cita: <strong>{selectedDate ? selectedDate.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : 'No definida'}</strong>
         </p>
-        {loggedInVeterinarioId && (
+        {user && (
           <p className="help-text">
-              Asignado a: <strong>{veterinarios.find(v => v.id === loggedInVeterinarioId)?.nombre || 'Veterinario actual'}</strong>
+              Asignado a: <strong>{user.nombre} {user.apellido}</strong>
           </p>
         )}
       </motion.div>
@@ -440,8 +421,8 @@ const CrearCitaVeterinario = () => {
                 <option value="">Seleccione un cliente</option>
                 {filteredClientes.length > 0 ? (
                   filteredClientes.map(cliente => (
-                    <option key={cliente.id_cliente} value={cliente.id_cliente}>
-                      {cliente.nombre} (Tel: {cliente.telefono})
+                    <option key={cliente.id} value={cliente.id}>
+                      {cliente.nombre} {cliente.apellido} (Tel: {cliente.telefono})
                     </option>
                   ))
                 ) : (
@@ -534,7 +515,7 @@ const CrearCitaVeterinario = () => {
                 locale={es}
                 className="time-picker-input"
                 placeholderText="Seleccione la hora"
-                required // Añadir required para asegurar que se seleccione la hora
+                required
               />
               <FontAwesomeIcon icon={faClock} className="time-icon" />
             </div>

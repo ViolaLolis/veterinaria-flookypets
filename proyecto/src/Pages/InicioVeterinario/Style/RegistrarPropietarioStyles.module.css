@@ -1,305 +1,428 @@
 /* Style/RegistrarPropietarioStyles.module.css */
 
-/* Fondo de la página */
-body {
-  background-color: var(--color-light) !important;
-  min-height: 100vh;
-  padding: 20px;
+:root {
+    --primary-color: #00acc1; /* Azul turquesa vibrante */
+    --secondary-color: #00798c; /* Azul turquesa más oscuro */
+    --accent-color: #ffd700; /* Amarillo dorado para acentos */
+    --text-dark: #333333;
+    --text-medium: #555555;
+    --text-light: #777777;
+    --bg-light: #f5f5f0; /* Blanco hueso para el fondo general */
+    --bg-card: #ffffff;
+    --border-color: #e0e0e0;
+    --shadow-light: rgba(0, 0, 0, 0.08);
+    --shadow-medium: rgba(0, 0, 0, 0.15);
+    --shadow-primary: rgba(0, 172, 193, 0.3);
+    --shadow-primary-hover: rgba(0, 172, 193, 0.45);
+    --success-color: #388e3c;
+    --success-bg: #e8f5e9;
+    --error-color: #d32f2f;
+    --error-bg: #ffebee;
+    --info-color: #00acc1;
+    --info-bg: #e0f7fa;
+    --border-radius-sm: 8px;
+    --border-radius-md: 12px;
+    --border-radius-lg: 15px;
 }
 
-/* Contenedor principal */
 .registrarPropietarioContainer {
-  max-width: 900px;
-  margin: 2rem auto;
-  padding: 2rem;
-  background-color: var(--color-white);
-  border-radius: 15px;
-  box-shadow: 0 8px 24px rgba(0, 188, 212, 0.15);
-  font-family: 'Segoe UI', sans-serif;
-  border: 1px solid var(--color-border);
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 2.5rem;
+    background-color: var(--bg-card);
+    border-radius: var(--border-radius-lg);
+    box-shadow: 0 10px 30px var(--shadow-medium);
+    font-family: 'Inter', sans-serif;
+    color: var(--text-dark);
+    border-top: 5px solid var(--primary-color);
 }
 
-/* Encabezado */
 .header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 2rem;
-  padding-bottom: 1.5rem;
-  border-bottom: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .header h2 {
-  flex: 1;
-  color: var(--color-secondary);
-  font-size: 1.8rem;
-  margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  background: linear-gradient(to right, var(--color-primary), var(--color-secondary));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+    color: var(--primary-color);
+    font-size: 2rem;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-weight: 700;
 }
 
-/* Botones */
 .volverBtn {
-  background-color: var(--color-white);
-  color: var(--color-secondary);
-  border: 2px solid var(--color-border);
-  padding: 0.6rem 1.2rem;
-  border-radius: 8px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 6px rgba(0, 188, 212, 0.1);
+    background: none;
+    border: none;
+    color: var(--text-medium);
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1rem;
+    border-radius: var(--border-radius-sm);
+    transition: all 0.3s ease;
 }
 
 .volverBtn:hover {
-  background-color: var(--color-light);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 172, 193, 0.2);
+    background-color: var(--info-bg);
+    color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0, 172, 193, 0.1);
+}
+
+/* Sección de Imagen de Perfil */
+.profileImageSection {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px dashed var(--border-color);
+}
+
+.profileImagePreview {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid var(--primary-color);
+    box-shadow: 0 4px 15px var(--shadow-primary);
+    margin-bottom: 1.5rem;
+    transition: transform 0.3s ease;
+}
+
+.profileImagePreview:hover {
+    transform: scale(1.03);
+}
+
+.uploadButton {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 0.8rem 1.5rem;
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 10px var(--shadow-primary);
+}
+
+.uploadButton:hover {
+    background-color: var(--secondary-color);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px var(--shadow-primary-hover);
+}
+
+.fileInput {
+    display: none;
+}
+
+.fileName {
+    margin-top: 0.75rem;
+    font-size: 0.9em;
+    color: var(--text-light);
 }
 
 /* Formulario */
 .formulario {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
 }
 
 .formSection {
-  background-color: rgba(255, 255, 255, 0.9);
-  padding: 1.5rem;
-  border-radius: 12px;
-  border: 1px solid var(--color-border);
-  box-shadow: 0 4px 12px rgba(0, 188, 212, 0.1);
+    background-color: var(--bg-card-light);
+    padding: 1.5rem;
+    border-radius: var(--border-radius-md);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--border-color);
 }
 
 .formSection h3 {
-  color: var(--color-secondary);
-  font-size: 1.3rem;
-  margin-top: 0;
-  margin-bottom: 1.5rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 2px solid var(--color-primary);
+    color: var(--secondary-color);
+    font-size: 1.4rem;
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px dashed var(--border-color);
 }
 
 .formRow {
-  display: flex;
-  gap: 1.5rem;
-  margin-bottom: 1rem;
-}
-
-.formRow .formGroup {
-  flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
 }
 
 .formGroup {
-  margin-bottom: 1.5rem;
-  position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 }
 
 .formGroup label {
-  display: block;
-  margin-bottom: 0.5rem;
-  color: var(--color-secondary);
-  font-weight: 600;
-  font-size: 0.95rem;
+    color: var(--text-medium);
+    font-weight: 600;
+    font-size: 0.95rem;
 }
 
 .formGroup input,
 .formGroup select {
-  width: 100%;
-  padding: 0.75rem 1rem;
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  font-size: 1rem;
-  transition: all 0.3s ease;
-  background-color: var(--color-white);
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background-color: var(--bg-card);
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .formGroup input:focus,
 .formGroup select:focus {
-  outline: none;
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(0, 188, 212, 0.15);
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0, 172, 193, 0.15);
 }
 
-/* Estilos para errores */
+.formGroup input:disabled,
+.formGroup select:disabled {
+    background-color: #f0f0f0;
+    cursor: not-allowed;
+    color: var(--text-light);
+}
+
+.uppercaseInput {
+    text-transform: uppercase;
+}
+
 .inputError {
-  border-color: #ff4757 !important;
-  background-color: rgba(255, 71, 87, 0.05) !important;
-}
-
-.inputError:focus {
-  box-shadow: 0 0 0 3px rgba(255, 71, 87, 0.15) !important;
+    border-color: var(--error-color) !important;
+    box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.15) !important;
 }
 
 .errorMessageField {
-  display: block;
-  color: #ff4757;
-  font-size: 0.85rem;
-  margin-top: 0.5rem;
-  font-weight: 500;
-  animation: shake 0.5s ease;
+    color: var(--error-color);
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
 }
 
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  20%, 60% { transform: translateX(-3px); }
-  40%, 80% { transform: translateX(3px); }
-}
-
-/* Inputs especiales */
-.uppercaseInput {
-  text-transform: uppercase;
-}
-
-.selectInput {
-  appearance: none;
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2300acc1'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
-  background-repeat: no-repeat;
-  background-position: right 1rem center;
-  background-size: 1rem;
-}
-
-.dateInput::-webkit-calendar-picker-indicator {
-  filter: invert(0.5) sepia(1) saturate(5) hue-rotate(165deg);
-}
-
-/* Contenedor de contraseña */
 .passwordInputContainer {
-  position: relative;
+    position: relative;
+    width: 100%;
 }
 
 .passwordToggleIcon {
-  position: absolute;
-  right: 1rem;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--color-muted);
-  cursor: pointer;
-  transition: all 0.2s ease;
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: var(--text-light);
+    transition: color 0.2s ease;
 }
 
 .passwordToggleIcon:hover {
-  color: var(--color-primary);
+    color: var(--text-dark);
 }
 
-/* Botones de acción */
-.formActions {
-  display: flex;
-  gap: 1rem;
-  justify-content: flex-end;
-  margin-top: 1.5rem;
-}
-
-.registrarBtn {
-  background: linear-gradient(to right, var(--color-primary), var(--color-secondary));
-  color: white;
-  border: none;
-  padding: 0.8rem 1.5rem;
-  border-radius: 8px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(0, 172, 193, 0.25);
-}
-
-.registrarBtn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 172, 193, 0.35);
-}
-
-.registrarBtn:disabled {
-  background: var(--color-border);
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-}
-
-.cancelarBtn {
-  background-color: var(--color-white);
-  color: var(--color-muted);
-  border: 2px solid #e0e0e0;
-  padding: 0.8rem 1.5rem;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.cancelarBtn:hover {
-  background-color: #f5f5f5;
-  transform: translateY(-2px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-/* Mensajes */
+/* Mensajes de estado */
 .message {
-  padding: 1rem;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  font-size: 1rem;
-  font-weight: 500;
-  border-left: 4px solid;
-  background-color: rgba(255, 255, 255, 0.9);
-  margin: 1rem 0;
+    padding: 1rem;
+    border-radius: var(--border-radius-sm);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 1rem;
+    font-weight: 500;
+    border-left: 4px solid;
+    background-color: rgba(255, 255, 255, 0.9);
+    margin: 1rem 0;
 }
 
 .successMessage {
-  color: var(--color-secondary);
-  border-left-color: var(--color-primary);
+    color: var(--success-color);
+    border-left-color: var(--success-color);
+    background-color: var(--success-bg);
 }
 
 .errorMessage {
-  color: #ff4757;
-  border-left-color: #ff4757;
-  background-color: rgba(255, 71, 87, 0.05);
+    color: var(--error-color);
+    border-left-color: var(--error-color);
+    background-color: var(--error-bg);
+}
+
+/* Acciones del formulario */
+.formActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.registrarBtn {
+    background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+    color: white;
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: var(--border-radius-md);
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    box-shadow: 0 5px 15px var(--shadow-primary);
+}
+
+.registrarBtn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px var(--shadow-primary-hover);
+}
+
+.registrarBtn:disabled {
+    background: var(--border-color);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.cancelarBtn {
+    background-color: var(--border-color);
+    color: var(--text-dark);
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: var(--border-radius-md);
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+}
+
+.cancelarBtn:hover {
+    background-color: var(--text-light);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.cancelarBtn:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
 }
 
 /* Responsive */
 @media (max-width: 768px) {
-  body {
-    padding: 10px;
-  }
-  
-  .registrarPropietarioContainer {
-    padding: 1.5rem;
-    margin: 1rem auto;
-  }
-  
-  .header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
-  }
-  
-  .header h2 {
-    font-size: 1.5rem;
-  }
-  
-  .formRow {
-    flex-direction: column;
-    gap: 1rem;
-  }
-  
-  .formActions {
-    flex-direction: column;
-  }
-  
-  .registrarBtn,
-  .cancelarBtn {
-    width: 100%;
-    justify-content: center;
-  }
+    .registrarPropietarioContainer {
+        padding: 1.5rem;
+        margin: 1rem auto;
+    }
+
+    .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .header h2 {
+        font-size: 1.6rem;
+    }
+
+    .volverBtn {
+        align-self: flex-end;
+        padding: 0.5rem 0.8rem;
+        font-size: 0.9rem;
+    }
+
+    .formRow {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .formSection {
+        padding: 1rem;
+    }
+
+    .formSection h3 {
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+    }
+
+    .formGroup input,
+    .formGroup select {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.9rem;
+    }
+
+    .formActions {
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+
+    .registrarBtn, .cancelarBtn {
+        width: 100%;
+        font-size: 1rem;
+        padding: 0.8rem 1.5rem;
+    }
+
+    .profileImagePreview {
+        width: 120px;
+        height: 120px;
+    }
+
+    .uploadButton {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .registrarPropietarioContainer {
+        padding: 1rem;
+        margin: 0.5rem;
+    }
+
+    .header h2 {
+        font-size: 1.4rem;
+        gap: 0.5rem;
+    }
+
+    .volverBtn {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.7rem;
+    }
+
+    .formSection h3 {
+        font-size: 1.1rem;
+    }
+
+    .formGroup label {
+        font-size: 0.85rem;
+    }
+
+    .formGroup input,
+    .formGroup select {
+        font-size: 0.85rem;
+    }
+
+    .registrarBtn, .cancelarBtn {
+        font-size: 0.9rem;
+        padding: 0.7rem 1.2rem;
+    }
 }

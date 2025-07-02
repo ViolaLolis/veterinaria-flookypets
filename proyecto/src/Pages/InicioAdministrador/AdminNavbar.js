@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FaUserCog, FaSignOutAlt, FaChevronDown, FaChevronUp } from 'react-icons/fa';
-import './Styles/AdminStyles.css';
+import './Styles/AdminNavbar.css';
 
 function AdminNavbar({ user, handleLogout }) {
   const [isScrolled, setIsScrolled] = useState(false);

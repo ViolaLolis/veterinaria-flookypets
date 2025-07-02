@@ -1,23 +1,25 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import styles from './Styles/AgendarCita.module.css';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link, useOutletContext } from 'react-router-dom'; // Importa useOutletContext
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
-  faArrowLeft, 
-  faPaw, 
-  faUser, 
+import {
+  faArrowLeft,
+  faPaw,
+  faUser,
   faInfoCircle,
   faCalendarAlt,
   faClock,
   faCheckCircle,
-  faSpinner
+  faSpinner,
+  faTimesCircle // Asegúrate de importar faTimesCircle para errores
 } from '@fortawesome/free-solid-svg-icons';
-import axios from 'axios';
+import { authFetch } from './api';
 
 const AgendarCita = () => {
+  const { user, showNotification } = useOutletContext(); // Obtiene user y showNotification del contexto del Outlet
   const [date, setDate] = useState(new Date());
   const [selectedTime, setSelectedTime] = useState('');
   const [citaAgendada, setCitaAgendada] = useState(false);
@@ -28,42 +30,75 @@ const AgendarCita = () => {
   const [selectedVeterinario, setSelectedVeterinario] = useState('');
   const [servicio, setServicio] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   const navigate = useNavigate();
   const location = useLocation();
 
   const horariosDisponibles = [
-    '09:00', '10:00', '11:00', '15:00', '16:00', '17:00'
+    '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'
   ];
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const servicioId = location.state?.servicioId;
-        
-        if (servicioId) {
-          const [servicioRes, mascotasRes, veterinariosRes] = await Promise.all([
-            axios.get(`/api/servicios/${servicioId}`),
-            axios.get('/api/mascotas'),
-            axios.get('/api/veterinarios')
-          ]);
-          
-          setServicio(servicioRes.data);
-          setMascotas(mascotasRes.data);
-          setVeterinarios(veterinariosRes.data);
-        }
-        setLoading(false);
-      } catch (err) {
-        setError('Error al cargar los datos');
-        setLoading(false);
-        console.error(err);
-      }
-    };
+  const fetchInitialData = useCallback(async () => {
+    setLoading(true);
+    setErrorSeleccion(null); // Usamos errorSeleccion para errores de carga también
+    try {
+      const servicioId = location.state?.servicioId; // Obtener el ID del servicio del estado de la ubicación
+      const userId = user?.id;
 
-    fetchData();
-  }, [location.state]);
+      if (!userId) {
+        setErrorSeleccion('No se pudo obtener la información del usuario. Por favor, inicia sesión nuevamente.');
+        setLoading(false);
+        return;
+      }
+
+      let fetchedService = null;
+      if (servicioId) {
+        const serviceRes = await authFetch(`/servicios/${servicioId}`);
+        if (serviceRes.success) {
+          fetchedService = serviceRes.data;
+          setServicio(fetchedService);
+        } else {
+          setErrorSeleccion(serviceRes.message || 'Error al cargar el servicio seleccionado.');
+          setLoading(false);
+          return;
+        }
+      } else {
+        // Si no hay servicioId, se asume que el usuario llegó a esta página sin seleccionar un servicio
+        // Podrías redirigirlo o mostrar un mensaje para que seleccione uno.
+        // Por ahora, lo dejaré para que pueda seleccionar un servicio manualmente si lo deseas.
+        // O podrías hacer que la página de agendar cita sea siempre iniciada desde un servicio.
+      }
+
+      const petsRes = await authFetch(`/mascotas?id_propietario=${userId}`);
+      if (petsRes.success) {
+        setMascotas(petsRes.data);
+      } else {
+        setErrorSeleccion(petsRes.message || 'Error al cargar tus mascotas.');
+        setLoading(false);
+        return;
+      }
+
+      const vetsRes = await authFetch('/usuarios/veterinarios');
+      if (vetsRes.success) {
+        setVeterinarios(vetsRes.data.filter(vet => vet.active));
+      } else {
+        setErrorSeleccion(vetsRes.message || 'Error al cargar los veterinarios.');
+        setLoading(false);
+        return;
+      }
+
+      setLoading(false);
+    } catch (err) {
+      console.error("Error fetching initial data for AgendarCita:", err);
+      setErrorSeleccion('Error de conexión al servidor al cargar los datos iniciales.');
+      setLoading(false);
+    }
+  }, [location.state, user, authFetch]);
+
+  useEffect(() => {
+    fetchInitialData();
+  }, [fetchInitialData]);
 
   const handleDateChange = (newDate) => {
     setDate(newDate);
@@ -78,37 +113,48 @@ const AgendarCita = () => {
   };
 
   const handleSubmit = async () => {
-    if (!selectedMascota || !selectedTime) {
-      setErrorSeleccion('Por favor, completa todos los campos.');
+    if (!selectedMascota || !selectedTime || !servicio || !user?.id) {
+      setErrorSeleccion('Por favor, selecciona una mascota, un servicio, una fecha y una hora.');
       return;
     }
 
     setIsSubmitting(true);
+    setErrorSeleccion('');
     try {
       const fechaHora = new Date(date);
       const [hours, minutes] = selectedTime.split(':');
       fechaHora.setHours(parseInt(hours, 10));
       fechaHora.setMinutes(parseInt(minutes, 10));
-      
+      fechaHora.setSeconds(0);
+
       const nuevaCita = {
-        id_cliente: 1,
+        id_cliente: user.id,
         id_servicio: servicio.id_servicio,
         id_veterinario: selectedVeterinario || null,
-        id_mascota: selectedMascota,
-        fecha: fechaHora.toISOString(),
-        ubicacion: 'Clínica Veterinaria Principal',
+        fecha: fechaHora.toISOString().slice(0, 19).replace('T', ' '),
+        servicios: servicio.nombre,
         estado: 'pendiente'
       };
 
-      await axios.post('/api/citas', nuevaCita);
-      
-      setCitaAgendada(true);
-      setTimeout(() => {
-        navigate('/mis-citas');
-      }, 3000);
+      const response = await authFetch('/citas', {
+        method: 'POST',
+        body: JSON.stringify(nuevaCita),
+      });
+
+      if (response.success) {
+        setCitaAgendada(true);
+        showNotification('¡Cita agendada con éxito!', 'success');
+        setTimeout(() => {
+          navigate('/usuario/citas');
+        }, 3000);
+      } else {
+        showNotification(response.message || 'Error al agendar la cita. Por favor, intenta nuevamente.', 'error');
+        setErrorSeleccion(response.message || 'Error al agendar la cita.');
+      }
     } catch (err) {
-      setErrorSeleccion('Error al agendar la cita. Por favor, intenta nuevamente.');
-      console.error(err);
+      console.error("Error submitting appointment:", err);
+      showNotification('Error de conexión al servidor al agendar la cita.', 'error');
+      setErrorSeleccion('Error de conexión al servidor al agendar la cita.');
     } finally {
       setIsSubmitting(false);
     }
@@ -124,10 +170,11 @@ const AgendarCita = () => {
       <p>Cargando información...</p>
     </div>
   );
-  
-  if (error) return (
+
+  if (errorSeleccion && !citaAgendada) return (
     <div className={styles.errorContainer}>
-      <p>{error}</p>
+      <FontAwesomeIcon icon={faTimesCircle} className={styles.errorIcon} />
+      <p>{errorSeleccion}</p>
       <button onClick={handleVolver} className={styles.backButton}>
         <FontAwesomeIcon icon={faArrowLeft} /> Volver
       </button>
@@ -135,13 +182,13 @@ const AgendarCita = () => {
   );
 
   return (
-    <motion.div 
+    <motion.div
       className={styles.container}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
     >
-      <motion.div 
+      <motion.div
         className={styles.header}
         initial={{ y: -20 }}
         animate={{ y: 0 }}
@@ -152,7 +199,7 @@ const AgendarCita = () => {
           <h2>Agendar Nueva Cita</h2>
           <p>Programa una consulta para tu mascota</p>
         </div>
-        <motion.button 
+        <motion.button
           onClick={handleVolver}
           className={styles.backButton}
           whileHover={{ scale: 1.05 }}
@@ -163,7 +210,7 @@ const AgendarCita = () => {
       </motion.div>
 
       {servicio && (
-        <motion.div 
+        <motion.div
           className={styles.serviceCard}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -184,7 +231,7 @@ const AgendarCita = () => {
       )}
 
       <div className={styles.formContainer}>
-        <motion.div 
+        <motion.div
           className={styles.formSection}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -201,12 +248,21 @@ const AgendarCita = () => {
               className={styles.selectInput}
             >
               <option value="">Selecciona una mascota</option>
-              {mascotas.map(mascota => (
-                <option key={mascota.id_mascota} value={mascota.id_mascota}>
-                  {mascota.nombre} ({mascota.especie})
-                </option>
-              ))}
+              {mascotas.length > 0 ? (
+                mascotas.map(mascota => (
+                  <option key={mascota.id_mascota} value={mascota.id_mascota}>
+                    {mascota.nombre} ({mascota.especie})
+                  </option>
+                ))
+              ) : (
+                <option value="" disabled>No tienes mascotas registradas.</option>
+              )}
             </select>
+            {mascotas.length === 0 && (
+              <p className={styles.formHint}>
+                <Link to="/usuario/mascotas/agregar">Agrega una mascota</Link> para agendar una cita.
+              </p>
+            )}
           </div>
 
           <div className={styles.formGroup}>
@@ -220,16 +276,20 @@ const AgendarCita = () => {
               className={styles.selectInput}
             >
               <option value="">Sin preferencia</option>
-              {veterinarios.map(vet => (
-                <option key={vet.id} value={vet.id}>
-                  Dr. {vet.nombre} {vet.apellido} - {vet.especialidad}
-                </option>
-              ))}
+              {veterinarios.length > 0 ? (
+                veterinarios.map(vet => (
+                  <option key={vet.id} value={vet.id}>
+                    Dr. {vet.nombre} {vet.apellido}
+                  </option>
+                ))
+              ) : (
+                <option value="" disabled>No hay veterinarios disponibles.</option>
+              )}
             </select>
           </div>
         </motion.div>
 
-        <motion.div 
+        <motion.div
           className={styles.scheduleSection}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -273,7 +333,7 @@ const AgendarCita = () => {
       </div>
 
       <AnimatePresence>
-        {errorSeleccion && (
+        {errorSeleccion && !citaAgendada && ( // Mostrar error solo si no se ha agendado la cita
           <motion.div
             className={styles.errorMessage}
             initial={{ opacity: 0, y: 20 }}
@@ -299,7 +359,7 @@ const AgendarCita = () => {
         )}
       </AnimatePresence>
 
-      <motion.div 
+      <motion.div
         className={styles.actions}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -307,7 +367,7 @@ const AgendarCita = () => {
       >
         <motion.button
           onClick={handleSubmit}
-          disabled={!selectedMascota || !selectedTime || citaAgendada || isSubmitting}
+          disabled={!selectedMascota || !selectedTime || !servicio || citaAgendada || isSubmitting}
           className={styles.submitButton}
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.97 }}

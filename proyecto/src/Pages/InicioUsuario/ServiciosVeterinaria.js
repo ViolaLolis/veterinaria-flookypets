@@ -1,47 +1,107 @@
-import React from 'react';
-import TarjetaServicio from './TarjetaServicio';
-import styles from './Styles/ServiciosVeterinaria.module.css';
+import React, { useState, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBriefcaseMedical } from '@fortawesome/free-solid-svg-icons';
-import { useNavigate } from 'react-router-dom';
+import { faConciergeBell, faSearch, faInfoCircle, faSpinner } from '@fortawesome/free-solid-svg-icons';
+import TarjetaServicio from './TarjetaServicio'; // Asegúrate de que esta importación sea correcta
+import styles from './Styles/ServiciosVeterinaria.module.css'; // Asegúrate de que este CSS exista
+import { authFetch } from './api'; // Importa la función authFetch
 
-const ServiciosVeterinaria = () => {
-  const navigate = useNavigate();
+function ServiciosVeterinaria() {
+    const [services, setServices] = useState([]);
+    const [filteredServices, setFilteredServices] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState('');
 
-  const servicios = [
-    { id: 1, nombre: 'Consulta General', descripcion: 'Revisión médica básica para tu mascota.', precio: '$50.000' },
-    { id: 2, nombre: 'Vacunación', descripcion: 'Programas de vacunación personalizados para proteger a tu compañero.', precio: '$30.000' },
-    { id: 3, nombre: 'Estética Canina y Felina', descripcion: 'Baño, corte de pelo y otros tratamientos de belleza.', precio: '$40.000' },
-    { id: 4, nombre: 'Cirugía', descripcion: 'Procedimientos quirúrgicos con equipo moderno y veterinarios especializados.', precio: 'Consultar' },
-    { id: 5, nombre: 'Diagnóstico por Imagen', descripcion: 'Rayos X, ecografías y otros métodos de diagnóstico avanzado.', precio: 'Consultar' },
-    { id: 6, nombre: 'Laboratorio Clínico', descripcion: 'Análisis de sangre, orina y otros fluidos corporales.', precio: '25.000' },
-  ];
+    const fetchServices = useCallback(async () => {
+        setIsLoading(true);
+        setError('');
+        try {
+            const response = await authFetch('/servicios'); // Endpoint para obtener servicios
+            if (response.success) {
+                setServices(response.data);
+                setFilteredServices(response.data); // Inicialmente, mostrar todos los servicios
+            } else {
+                setError(response.message || 'Error al cargar los servicios.');
+            }
+        } catch (err) {
+            console.error("Error fetching services:", err);
+            setError('Error de conexión al servidor.');
+        } finally {
+            setIsLoading(false);
+        }
+    }, []);
 
-  const handleAgendar = (servicioId) => {
-    navigate('/usuario/citas/agendar', { 
-      state: { servicioId } // Pasamos el ID del servicio como estado
-    });
-  };
+    useEffect(() => {
+        fetchServices();
+    }, [fetchServices]);
 
-  return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <FontAwesomeIcon icon={faBriefcaseMedical} className={styles.icon} />
-        <h3>Nuestros Servicios</h3>
-        <p className={styles.subtitle}>Cuidamos la salud y el bienestar de tus mascotas.</p>
-      </div>
-      <div className={styles.listaServicios}>
-        {servicios.map(servicio => (
-          <div key={servicio.id} className={styles.servicioItem}>
-            <TarjetaServicio 
-              servicio={servicio} 
-              onAgendar={handleAgendar} // Pasamos la función de agendar
-            />
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
+    useEffect(() => {
+        const results = services.filter(service =>
+            service.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            service.descripcion.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+        setFilteredServices(results);
+    }, [searchTerm, services]);
+
+    if (isLoading) {
+        return (
+            <div className={styles.loadingContainer}>
+                <FontAwesomeIcon icon={faSpinner} spin className={styles.spinnerIcon} />
+                <p>Cargando servicios...</p>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className={styles.errorMessage}>
+                <FontAwesomeIcon icon={faInfoCircle} className={styles.errorIcon} />
+                <p>{error}</p>
+            </div>
+        );
+    }
+
+    return (
+        <motion.div
+            className={styles.servicesDashboard}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+        >
+            <div className={styles.dashboardHeader}>
+                <div className={styles.headerTitle}>
+                    <FontAwesomeIcon icon={faConciergeBell} className={styles.titleIcon} />
+                    <h2>Gestión de Servicios</h2>
+                </div>
+                <div className={styles.searchContainer}>
+                    <input
+                        type="text"
+                        placeholder="Buscar servicios..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className={styles.searchInput}
+                    />
+                    <FontAwesomeIcon icon={faSearch} className={styles.searchIcon} />
+                </div>
+            </div>
+
+            {filteredServices.length > 0 ? (
+                <div className={styles.servicesGrid}>
+                    <AnimatePresence>
+                        {filteredServices.map(service => (
+                            <TarjetaServicio key={service.id_servicio} servicio={service} />
+                        ))}
+                    </AnimatePresence>
+                </div>
+            ) : (
+                <div className={styles.noResults}>
+                    <FontAwesomeIcon icon={faInfoCircle} className={styles.infoIcon} />
+                    <p>{searchTerm ? 'No se encontraron servicios que coincidan con la búsqueda.' : 'No hay servicios registrados.'}</p>
+                </div>
+            )}
+        </motion.div>
+    );
+}
 
 export default ServiciosVeterinaria;

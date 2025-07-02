@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPaw, faDog, faCat, faWeight, faCalendarAlt, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import { faPaw, faDog, faCat, faWeight, faCalendarAlt, faArrowLeft, faSpinner, faCheckCircle, faTimesCircle } from '@fortawesome/free-solid-svg-icons';
+import { authFetch } from './api'; // Importa authFetch
 import './Styles/AgregarMascota.css';
 
-const AgregarMascota = () => {
+const AgregarMascota = ({ user }) => { // Recibe el objeto 'user' como prop
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     nombre: '',
@@ -13,9 +14,27 @@ const AgregarMascota = () => {
     raza: '',
     edad: '',
     peso: '',
-    imagen: null
+    sexo: 'Desconocido', // Añadir campo sexo
+    color: '', // Añadir campo color
+    microchip: '', // Añadir campo microchip
+    fecha_nacimiento: '' // Añadir campo fecha_nacimiento
   });
   const [previewImage, setPreviewImage] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [notification, setNotification] = useState(null); // Para notificaciones
+
+  /**
+   * Muestra una notificación temporal en la UI.
+   * @param {string} message - El mensaje a mostrar.
+   * @param {string} type - El tipo de notificación ('success' o 'error').
+   */
+  const showNotification = (message, type = 'success') => {
+    setNotification({ message, type });
+    const timer = setTimeout(() => {
+      setNotification(null);
+    }, 3000); // La notificación desaparece después de 3 segundos
+    return () => clearTimeout(timer);
+  };
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -30,14 +49,51 @@ const AgregarMascota = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Mascota agregada:', formData);
-    navigate('/usuario/mascotas');
+    setIsSubmitting(true);
+    setNotification(null); // Limpiar notificaciones previas
+
+    if (!user || !user.id) {
+      showNotification('Error: No se pudo obtener el ID del propietario. Por favor, inicia sesión.', 'error');
+      setIsSubmitting(false);
+      return;
+    }
+
+    try {
+      const petData = {
+        ...formData,
+        id_propietario: user.id, // Asocia la mascota al usuario logueado
+        edad: parseInt(formData.edad) || null,
+        peso: parseFloat(formData.peso) || null,
+        // La imagen no se envía directamente en el JSON, se manejaría con FormData si el backend lo soporta
+        // Por ahora, el backend no tiene un campo para imagen, así que la omitimos del envío
+        imagen: undefined // Asegúrate de que no se envíe al backend si no hay un campo para ello
+      };
+
+      const response = await authFetch('/mascotas', {
+        method: 'POST',
+        body: JSON.stringify(petData),
+      });
+
+      if (response.success) {
+        showNotification('¡Mascota registrada con éxito!', 'success');
+        setTimeout(() => {
+          navigate('/usuario/mascotas'); // Redirigir a la lista de mascotas
+        }, 1500);
+      } else {
+        showNotification(response.message || 'Error al registrar la mascota.', 'error');
+      }
+    } catch (err) {
+      console.error("Error registering pet:", err);
+      showNotification('Error de conexión al servidor al registrar la mascota.', 'error');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
-    <motion.div 
+    <motion.div
       className="agregar-mascota-container"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -58,7 +114,20 @@ const AgregarMascota = () => {
         </h2>
       </div>
 
-      <motion.div 
+      <AnimatePresence>
+        {notification && (
+          <motion.div
+            initial={{ opacity: 0, y: -50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -50 }}
+          >
+            <FontAwesomeIcon icon={notification.type === 'success' ? faCheckCircle : faTimesCircle} />
+            {notification.message}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <motion.div
         className="agregar-mascota-card"
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -138,37 +207,81 @@ const AgregarMascota = () => {
             </div>
 
             <div className="form-group">
-              <label htmlFor="edad">
+              <label htmlFor="fecha_nacimiento">
                 <FontAwesomeIcon icon={faCalendarAlt} className="input-icon" />
-                Edad (años)
+                Fecha de Nacimiento
               </label>
               <input
-                type="number"
-                id="edad"
-                value={formData.edad}
+                type="date"
+                id="fecha_nacimiento"
+                value={formData.fecha_nacimiento}
                 onChange={handleChange}
-                min="0"
-                max="30"
-                placeholder="0"
               />
             </div>
           </div>
 
-          <div className="form-group">
-            <label htmlFor="peso">
-              <FontAwesomeIcon icon={faWeight} className="input-icon" />
-              Peso (kg)
-            </label>
-            <input
-              type="number"
-              id="peso"
-              value={formData.peso}
-              onChange={handleChange}
-              step="0.1"
-              min="0"
-              placeholder="0.0"
-            />
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="peso">
+                <FontAwesomeIcon icon={faWeight} className="input-icon" />
+                Peso (kg)
+              </label>
+              <input
+                type="number"
+                id="peso"
+                value={formData.peso}
+                onChange={handleChange}
+                step="0.1"
+                min="0"
+                placeholder="0.0"
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="sexo">
+                <FontAwesomeIcon icon={faPaw} className="input-icon" />
+                Sexo
+              </label>
+              <select
+                id="sexo"
+                value={formData.sexo}
+                onChange={handleChange}
+              >
+                <option value="Macho">Macho</option>
+                <option value="Hembra">Hembra</option>
+                <option value="Desconocido">Desconocido</option>
+              </select>
+            </div>
           </div>
+
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="color">
+                <FontAwesomeIcon icon={faPaw} className="input-icon" />
+                Color
+              </label>
+              <input
+                type="text"
+                id="color"
+                value={formData.color}
+                onChange={handleChange}
+                placeholder="Ej: Blanco, Negro, Atigrado"
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="microchip">
+                <FontAwesomeIcon icon={faPaw} className="input-icon" />
+                Microchip
+              </label>
+              <input
+                type="text"
+                id="microchip"
+                value={formData.microchip}
+                onChange={handleChange}
+                placeholder="Ej: 1234567890ABCDEF"
+              />
+            </div>
+          </div>
+
 
           <div className="form-actions">
             <motion.button
@@ -176,9 +289,16 @@ const AgregarMascota = () => {
               className="submit-button"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              disabled={!formData.nombre}
+              disabled={!formData.nombre || isSubmitting}
             >
-              Registrar Mascota
+              {isSubmitting ? (
+                <>
+                  <FontAwesomeIcon icon={faSpinner} spin />
+                  <span>Registrando...</span>
+                </>
+              ) : (
+                'Registrar Mascota'
+              )}
             </motion.button>
             <Link to="/usuario/mascotas" className="cancel-button">
               Cancelar

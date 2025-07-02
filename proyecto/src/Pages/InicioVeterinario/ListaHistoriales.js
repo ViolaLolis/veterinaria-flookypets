@@ -1,13 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+// src/Pages/InicioVeterinario/ListaHistoriales.js
+import React, { useState, useEffect, useCallback } from 'react';
+import { Link, useOutletContext } from 'react-router-dom';
 import styles from './Style/ListaHistorialesStyles.module.css';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faEye, faPlus, faNotesMedical, faSearch, 
   faSync, faDog, faCat, faCalendarAlt,
-  faUser, faStethoscope
+  faUser, faStethoscope, faEdit, faTrash, faSpinner, faTimesCircle
 } from '@fortawesome/free-solid-svg-icons';
+import { authFetch } from './api'; // Asegúrate de que la ruta sea correcta
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -47,6 +49,8 @@ const statCardVariants = {
 };
 
 const ListaHistoriales = () => {
+  // Acceso defensivo al contexto del Outlet
+  const { user, showNotification } = useOutletContext() || {}; 
   const [historiales, setHistoriales] = useState([]);
   const [filteredHistoriales, setFilteredHistoriales] = useState([]);
   const [stats, setStats] = useState({
@@ -61,100 +65,65 @@ const ListaHistoriales = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
-  useEffect(() => {
-    fetchHistoriales();
-  }, []);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [historialToDelete, setHistorialToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  const fetchHistoriales = async () => {
+  const fetchHistoriales = useCallback(async () => {
     setLoading(true);
     setRefreshing(true);
+    setError(null);
     try {
-      // Simulación de datos
-      await new Promise(resolve => setTimeout(resolve, 800));
-      const data = [
-        { 
-          id: 1, 
-          mascota: 'Max', 
-          especie: 'Perro', 
-          raza: 'Labrador Retriever',
-          propietario: 'Juan Pérez',
-          fecha: '2024-05-15',
-          diagnostico: 'Chequeo general y vacunación anual',
-          tratamiento: 'Vacuna múltiple, desparasitación',
-          notas: 'Mascota en buen estado de salud. Peso ideal.',
-          foto: 'https://images.unsplash.com/photo-1586671267731-da2cf3ceeb80?w=200'
-        },
-        { 
-          id: 2, 
-          mascota: 'Luna', 
-          especie: 'Gato', 
-          raza: 'Siamés',
-          propietario: 'María García',
-          fecha: '2024-05-10',
-          diagnostico: 'Control de peso y dieta',
-          tratamiento: 'Cambio de dieta a alimento light',
-          notas: 'Necesita bajar 0.5kg. Seguimiento en 1 mes.',
-          foto: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=200'
-        },
-        { 
-          id: 3, 
-          mascota: 'Rocky', 
-          especie: 'Perro', 
-          raza: 'Bulldog Francés',
-          propietario: 'Carlos López',
-          fecha: '2024-04-28',
-          diagnostico: 'Problemas respiratorios',
-          tratamiento: 'Medicación broncodilatadora',
-          notas: 'Evitar ejercicio intenso en días calurosos.',
-          foto: 'https://images.unsplash.com/photo-1544568100-847a948585b9?w=200'
-        },
-        { 
-          id: 4, 
-          mascota: 'Bella', 
-          especie: 'Perro', 
-          raza: 'Golden Retriever',
-          propietario: 'Ana Martínez',
-          fecha: '2024-05-18',
-          diagnostico: 'Desparasitación rutinaria',
-          tratamiento: 'Aplicación de antiparasitario',
-          notas: 'Excelente condición física. Dueña muy comprometida.',
-          foto: 'https://images.unsplash.com/photo-1588943211346-0908a1fb0b01?w=200'
-        }
-      ];
-      
-      setHistoriales(data);
-      setFilteredHistoriales(data);
-      
-      // Calcular estadísticas
-      setStats({
-        totalHistoriales: data.length,
-        perros: data.filter(h => h.especie === 'Perro').length,
-        gatos: data.filter(h => h.especie === 'Gato').length,
-        otros: 0,
-        ultimoMes: data.filter(h => new Date(h.fecha) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)).length
-      });
-      
+      const response = await authFetch('/historial_medico'); // Endpoint para obtener todos los historiales
+      if (response.success) {
+        const data = response.data;
+        setHistoriales(data);
+        setFilteredHistoriales(data); // Inicialmente, los filtrados son todos
+
+        // Calcular estadísticas con datos reales
+        const now = new Date();
+        const lastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+
+        const statsData = {
+          totalHistoriales: data.length,
+          perros: data.filter(h => h.especie?.toLowerCase() === 'perro').length,
+          gatos: data.filter(h => h.especie?.toLowerCase() === 'gato').length,
+          otros: data.filter(h => h.especie?.toLowerCase() !== 'perro' && h.especie?.toLowerCase() !== 'gato').length,
+          ultimoMes: data.filter(h => new Date(h.fecha_consulta) > lastMonthDate).length
+        };
+        setStats(statsData);
+
+      } else {
+        setError(response.message || 'Error al cargar los historiales médicos.');
+        if (showNotification) showNotification(response.message || 'Error al cargar los historiales médicos.', 'error');
+      }
     } catch (err) {
-      setError("Error al cargar los historiales médicos");
-      console.error("Error:", err);
+      console.error("Error fetching historiales:", err);
+      setError(err.message || "Error de conexión al servidor al cargar los historiales médicos.");
+      if (showNotification) showNotification(err.message || 'Error de conexión al servidor.', 'error');
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  };
+  }, [showNotification]);
 
   useEffect(() => {
-    if (searchTerm.trim() === '') {
+    fetchHistoriales();
+  }, [fetchHistoriales]);
+
+  useEffect(() => {
+    const lowercasedSearchTerm = searchTerm.toLowerCase();
+    if (lowercasedSearchTerm.trim() === '') {
       setFilteredHistoriales(historiales);
     } else {
       const filtered = historiales.filter(historial => {
-        const searchLower = searchTerm.toLowerCase();
         return (
-          historial.mascota.toLowerCase().includes(searchLower) ||
-          historial.especie.toLowerCase().includes(searchLower) ||
-          historial.diagnostico.toLowerCase().includes(searchLower) ||
-          historial.propietario.toLowerCase().includes(searchLower) ||
-          historial.tratamiento?.toLowerCase().includes(searchLower)
+          historial.mascota_nombre?.toLowerCase().includes(lowercasedSearchTerm) ||
+          historial.especie?.toLowerCase().includes(lowercasedSearchTerm) ||
+          historial.diagnostico?.toLowerCase().includes(lowercasedSearchTerm) ||
+          historial.propietario_nombre?.toLowerCase().includes(lowercasedSearchTerm) ||
+          historial.tratamiento?.toLowerCase().includes(lowercasedSearchTerm) ||
+          historial.veterinario_nombre?.toLowerCase().includes(lowercasedSearchTerm)
         );
       });
       setFilteredHistoriales(filtered);
@@ -165,6 +134,38 @@ const ListaHistoriales = () => {
     setRefreshing(true);
     fetchHistoriales();
   };
+
+  const handleDeleteClick = (historial) => {
+    setHistorialToDelete(historial);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeleteHistorial = async () => {
+    if (!historialToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      const response = await authFetch(`/historial_medico/${historialToDelete.id_historial}`, {
+        method: 'DELETE',
+      });
+      if (response.success) {
+        if (showNotification) showNotification('Historial médico eliminado exitosamente.', 'success');
+        fetchHistoriales(); // Recargar la lista
+      } else {
+        if (showNotification) showNotification(response.message || 'Error al eliminar historial médico.', 'error');
+      }
+    } catch (err) {
+      console.error("Error deleting medical record:", err);
+      if (showNotification) showNotification(err.message || 'Error de conexión al servidor.', 'error');
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteModal(false);
+      setHistorialToDelete(null);
+    }
+  };
+
+  // Determinar si el usuario actual tiene rol de admin para mostrar el botón de eliminar
+  const canDelete = user && user.role === 'admin';
 
   if (loading) {
     return (
@@ -211,7 +212,7 @@ const ListaHistoriales = () => {
           animate={{ scale: [1, 1.05, 1] }}
           transition={{ repeat: Infinity, duration: 2 }}
         >
-          <FontAwesomeIcon icon={faNotesMedical} size="2x" color="#FFD700" />
+          <FontAwesomeIcon icon={faTimesCircle} size="2x" color="#FF0000" />
         </motion.div>
         <p className={styles.vetErrorMessage}>Error: {error}</p>
         <motion.button 
@@ -223,7 +224,7 @@ const ListaHistoriales = () => {
         >
           {refreshing ? (
             <>
-              <FontAwesomeIcon icon={faSync} spin /> Cargando...
+              <FontAwesomeIcon icon={faSpinner} spin /> Cargando...
             </>
           ) : (
             'Reintentar'
@@ -269,7 +270,16 @@ const ListaHistoriales = () => {
             {refreshing ? ' Actualizando...' : ' Actualizar'}
           </motion.button>
 
-           
+          <motion.button 
+            className={styles.vetAddButton}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Link to="/veterinario/historiales/registrar" className={styles.vetAddButtonLink}>
+              <FontAwesomeIcon icon={faPlus} />
+              <span>Crear nuevo historial</span>
+            </Link>
+          </motion.button>
         </div>
       </div>
 
@@ -288,7 +298,7 @@ const ListaHistoriales = () => {
               label: "Historiales totales",
               color: "#FFD700",
               bgColor: "rgba(255, 215, 0, 0.1)",
-              trend: "up"
+              trend: "up" // Esto es un placeholder, la lógica de trend es más compleja
             },
             { 
               icon: faDog, 
@@ -330,17 +340,18 @@ const ListaHistoriales = () => {
               <div className={styles.vetStatContent}>
                 <h3>{stat.value}</h3>
                 <p>{stat.label}</p>
+                {/* Lógica de trend simple, puedes expandirla */}
                 {stat.trend === "up" && (
                   <motion.span 
                     className={styles.vetTrendUp}
                     animate={{ scale: [1, 1.1, 1] }}
                     transition={{ repeat: Infinity, duration: 1.5 }}
                   >
-                    ↑ 12%
+                    ↑
                   </motion.span>
                 )}
                 {stat.trend === "steady" && (
-                  <span className={styles.vetTrendSteady}>→ 0%</span>
+                  <span className={styles.vetTrendSteady}>→</span>
                 )}
               </div>
             </motion.div>
@@ -379,7 +390,7 @@ const ListaHistoriales = () => {
             >
               {filteredHistoriales.map((historial) => (
                 <motion.div
-                  key={historial.id}
+                  key={historial.id_historial} // Usar id_historial de la DB
                   className={styles.vetHistorialCard}
                   variants={cardVariants}
                   whileHover="hover"
@@ -387,10 +398,14 @@ const ListaHistoriales = () => {
                 >
                   <div className={styles.vetHistorialHeader}>
                     <div className={styles.vetHistorialImage}>
-                      <img src={historial.foto} alt={historial.mascota} />
+                      {/* Aquí podrías usar historial.mascota_imagen_url si la tuvieras en la DB */}
+                      <img 
+                        src={`https://placehold.co/100x100/FFD700/FFFFFF?text=${historial.mascota_nombre?.charAt(0) || 'M'}`} 
+                        alt={historial.mascota_nombre} 
+                      />
                     </div>
                     <div className={styles.vetHistorialTitle}>
-                      <h3>{historial.mascota}</h3>
+                      <h3>{historial.mascota_nombre}</h3>
                       <p>{historial.especie} - {historial.raza}</p>
                     </div>
                   </div>
@@ -399,11 +414,11 @@ const ListaHistoriales = () => {
                     <div className={styles.vetHistorialDetails}>
                       <div className={styles.vetDetailItem}>
                         <FontAwesomeIcon icon={faUser} />
-                        <span>{historial.propietario}</span>
+                        <span>{historial.propietario_nombre}</span>
                       </div>
                       <div className={styles.vetDetailItem}>
                         <FontAwesomeIcon icon={faCalendarAlt} />
-                        <span>{new Date(historial.fecha).toLocaleDateString()}</span>
+                        <span>{new Date(historial.fecha_consulta).toLocaleDateString()}</span>
                       </div>
                       <div className={styles.vetDetailItem}>
                         <FontAwesomeIcon icon={faStethoscope} />
@@ -415,6 +430,12 @@ const ListaHistoriales = () => {
                           <span className={styles.vetNotes}>{historial.tratamiento}</span>
                         </div>
                       )}
+                      {historial.veterinario_nombre && (
+                        <div className={styles.vetDetailItem}>
+                          <FontAwesomeIcon icon={faUser} /> {/* O un icono de veterinario si lo tienes */}
+                          <span>{historial.veterinario_nombre}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -424,7 +445,7 @@ const ListaHistoriales = () => {
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                     >
-                      <Link to={`/veterinario/historiales/${historial.id}`}>
+                      <Link to={`/veterinario/historiales/${historial.id_historial}`}>
                         <FontAwesomeIcon icon={faEye} />
                         <span>Ver Detalles</span>
                       </Link>
@@ -432,14 +453,30 @@ const ListaHistoriales = () => {
                     
                     <motion.button
                       className={`${styles.vetActionButton} ${styles.vetEditButton}`}
+                      onClick={() => { /* Lógica para editar, navega al formulario de edición */ }}
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                     >
-                      <Link to={`/veterinario/historiales/editar/${historial.id}`}>
-                        <FontAwesomeIcon icon={faPlus} />
-                        <span>Agregar Notas</span>
+                      <Link to={`/veterinario/historiales/editar/${historial.id_historial}`}>
+                        <FontAwesomeIcon icon={faEdit} />
+                        <span>Editar</span>
                       </Link>
                     </motion.button>
+
+                    {canDelete && ( // Mostrar botón de eliminar solo si es admin
+                      <motion.button
+                        className={`${styles.vetActionButton} ${styles.vetDeleteButton}`}
+                        onClick={() => handleDeleteClick(historial)}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        disabled={isDeleting}
+                      >
+                        {isDeleting && historialToDelete?.id_historial === historial.id_historial ? 
+                          <FontAwesomeIcon icon={faSpinner} spin /> : <FontAwesomeIcon icon={faTrash} />
+                        }
+                        <span>Eliminar</span>
+                      </motion.button>
+                    )}
                   </div>
                 </motion.div>
               ))}
@@ -468,7 +505,7 @@ const ListaHistoriales = () => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <Link to="/veterinario/nuevo-historial" className={styles.vetAddButtonLink}>
+                <Link to="/veterinario/historiales/registrar" className={styles.vetAddButtonLink}>
                   <FontAwesomeIcon icon={faPlus} />
                   <span>Crear nuevo historial</span>
                 </Link>
@@ -477,6 +514,51 @@ const ListaHistoriales = () => {
           )}
         </div>
       </div>
+
+      {/* Modal de Confirmación de Eliminación */}
+      <AnimatePresence>
+        {showDeleteModal && (
+          <motion.div
+            className={styles.modalOverlay}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowDeleteModal(false)}
+          >
+            <motion.div
+              className={styles.modalContent}
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3>Confirmar Eliminación</h3>
+              <p>¿Estás seguro de que deseas eliminar el historial médico de <br/> <strong>{historialToDelete?.mascota_nombre}</strong> del <strong>{new Date(historialToDelete?.fecha_consulta).toLocaleDateString()}</strong>?</p>
+              <p className={styles.warningText}>Esta acción es irreversible.</p>
+              <div className={styles.modalActions}>
+                <motion.button
+                  className={styles.vetDeleteButton}
+                  onClick={confirmDeleteHistorial}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? <><FontAwesomeIcon icon={faSpinner} spin /> Eliminando...</> : 'Sí, Eliminar'}
+                </motion.button>
+                <motion.button
+                  className={styles.vetCancelButton}
+                  onClick={() => setShowDeleteModal(false)}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  disabled={isDeleting}
+                >
+                  No, Cancelar
+                </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 };
