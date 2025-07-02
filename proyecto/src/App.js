@@ -45,6 +45,9 @@ import MainVeterinario from "./Pages/InicioVeterinario/MainVeterinario";
 import NavegacionVeterinario from "./Pages/InicioVeterinario/NavegacionVeterinario";
 import ConfiguracionVeterinario from "./Pages/InicioVeterinario/ConfiguracionVeterinario";
 import CrearCitaVeterinario from "./Pages/InicioVeterinario/CrearCitaVeterinario";
+import RegistrarHistorialMedico from "./Pages/InicioVeterinario/RegistrarHistorialMedico"; // Importar nuevo componente
+import EditarHistorialMedico from "./Pages/InicioVeterinario/EditarHistorialMedico"; // Importar nuevo componente
+
 
 // Componentes de Administrador
 import AdminDashboard from "./Pages/InicioAdministrador/AdminDashboard";
@@ -96,13 +99,14 @@ function App() {
 
         {/* Rutas de veterinario */}
         <Route element={<Protegida user={user} allowedRoles={['veterinario', 'admin']} />}>
-          <Route path="/veterinario" element={<MainVeterinario />}>
+          {/* MainVeterinario ahora recibe user y setUser */}
+          <Route path="/veterinario" element={<MainVeterinario user={user} setUser={setUser} />}>
             <Route index element={<NavegacionVeterinario />} />
             <Route path="navegacion" element={<NavegacionVeterinario />} />
             <Route path="propietarios" element={<ListaPropietarios />} />
-            <Route path="propietarios/:id" element={<DetallePropietario />} />
             <Route path="propietarios/registrar" element={<RegistrarPropietario />} />
-            <Route path="propietarios/editar/:id" element={<EditarPropietario />} />
+            <Route path="propietarios/:id" element={<DetallePropietario />} />
+            <Route path="propietarios/editar/:id" element={<EditarPropietario />} /> {/* NUEVA RUTA */}
             <Route path="mascotas" element={<ListaMascotasVeterinario />} />
             <Route path="mascotas/:id" element={<DetalleMascotaVeterinario />} />
             <Route path="mascotas/registrar" element={<RegistrarMascotaVeterinario />} />
@@ -111,7 +115,9 @@ function App() {
             <Route path="citas/agendar" element={<CrearCitaVeterinario />} />
             <Route path="citas/:id" element={<DetalleCitaVeterinario />} />
             <Route path="historiales" element={<ListaHistorialesVeterinario />} />
+            <Route path="historiales/registrar" element={<RegistrarHistorialMedico />} /> {/* Nueva ruta */}
             <Route path="historiales/:id" element={<DetalleHistorialVeterinario />} />
+            <Route path="historiales/editar/:id" element={<EditarHistorialMedico />} /> {/* Nueva ruta */}
             <Route path="perfil" element={<VerPerfilVeterinario setUser={setUser} />} />
             <Route path="perfil/editar" element={<EditarPerfilVeterinario />} />
             <Route path="configuracion" element={<ConfiguracionVeterinario />} />
@@ -150,6 +156,24 @@ function App() {
             <Route path="ayuda/chat" element={<ChatSoporte />} />
             <Route path="historial/:mascotaId" element={<HistorialMedico user={user} />} />
             <Route path="historial/:mascotaId/:historialId" element={<DetalleHistorial user={user} />} />
+
+            {/* Rutas de Perfil (ahora como rutas directas, ya que no se anidan en el Outlet de InicioUsuario) */}
+            {/* NOTA: Estas rutas están fuera del <Route path="/usuario" element={<InicioUsuario />}> */}
+            {/* Si quieres que PerfilUsuario, ConfiguracionPerfil, etc. tengan el mismo layout que InicioUsuario,
+                deberías anidarlas aquí, pero necesitarías que InicioUsuario gestione el renderizado de esas secciones
+                internamente o que sean componentes que se rendericen en el Outlet.
+                Por la estructura actual de tu App.js, las mantendré como rutas hermanas de /usuario.
+                Si quieres que tengan el mismo layout, tendrías que moverlas DENTRO de la ruta /usuario
+                y hacer que InicioUsuario las muestre en su Outlet, o que InicioUsuario sea un layout
+                más general que englobe todas las rutas de usuario.
+            */}
+            <Route path="/usuario/perfil" element={<PerfilUsuario user={user} setUser={setUser} />} />
+            <Route path="/usuario/perfil/editar" element={<EditarPerfil user={user} setUser={setUser} />} />
+            <Route path="/usuario/perfil/configuracion" element={<ConfiguracionPerfil user={user} setUser={setUser} />} />
+            <Route path="/usuario/ayuda" element={<AyudaSoporte />} />
+            <Route path="/usuario/ayuda/chat" element={<ChatSoporte />} />
+            <Route path="/usuario/historial/:mascotaId" element={<HistorialMedico user={user} />} />
+            <Route path="/usuario/historial/:mascotaId/:historialId" element={<DetalleHistorial user={user} />} />
 
             {/* Rutas para agregar/editar historial (sugeridas, si tienes los componentes) */}
             {/* <Route path="historial/:mascotaId/agregar" element={<AgregarHistorialMedico user={user} />} /> */}

@@ -1,9 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import veteStyles from './Style/DetallePropietarioStyles.module.css';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate, useParams, useOutletContext } from 'react-router-dom';
+import veteStyles from './Style/DetallePropietarioStyles.module.css'; // Asegúrate de que este CSS exista
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { motion } from 'framer-motion';
-import { faArrowLeft, faUser, faPhone, faEnvelope, faMapMarkerAlt, faPaw } from '@fortawesome/free-solid-svg-icons'; // Added faSpinner
+import {
+  faArrowLeft, faUser, faPhone, faEnvelope, faMapMarkerAlt, faPaw,
+  faSpinner, faExclamationTriangle
+} from '@fortawesome/free-solid-svg-icons';
+import { authFetch } from './api'; // Asegúrate de que la ruta sea correcta a tu archivo api.js
 
 const containerVariants = {
   hidden: { opacity: 0, x: '-100vw' },
@@ -36,7 +40,7 @@ const itemVariants = {
 const mascotaVariants = {
   hover: {
     y: -5,
-    backgroundColor: '#00acc1', // Use the primary color directly
+    backgroundColor: '#00acc1', // Usar el color primario directamente
     color: 'white',
     boxShadow: '0 5px 15px rgba(0, 172, 193, 0.3)'
   },
@@ -45,36 +49,48 @@ const mascotaVariants = {
 
 const DetallePropietario = () => {
   const navigate = useNavigate();
-  const { id } = useParams();
+  const { id } = useParams(); // Obtener el ID del propietario de la URL
+  const { showNotification } = useOutletContext(); // Para mostrar notificaciones
+
   const [propietario, setPropietario] = useState(null);
+  const [mascotas, setMascotas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    // Simulate API call to fetch owner details
-    setTimeout(() => {
-      try {
-        const propietarioData = {
-          id: parseInt(id),
-          nombre: 'Ana Pérez',
-          telefono: '3101234567',
-          email: 'ana.perez@example.com',
-          direccion: 'Calle Falsa 123, Bogotá D.C.', // Updated address
-          mascotas: ['Max (Labrador)', 'Lola (Siamesa)', 'Rocky (Pastor Alemán)'], // Added another pet
-          registro: 'Registrado desde: 15/03/2020'
-        };
-        if (propietarioData.id === parseInt(id)) {
-          setPropietario(propietarioData);
-          setLoading(false);
+  const fetchPropietarioDetails = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      // Obtener detalles del propietario
+      const propietarioResponse = await authFetch(`/usuarios/${id}`);
+      if (propietarioResponse.success) {
+        setPropietario(propietarioResponse.data);
+
+        // Obtener mascotas del propietario
+        const mascotasResponse = await authFetch(`/mascotas?id_propietario=${id}`);
+        if (mascotasResponse.success) {
+          setMascotas(mascotasResponse.data);
         } else {
-          throw new Error('Propietario no encontrado');
+          console.warn("No se pudieron cargar las mascotas para este propietario:", mascotasResponse.message);
+          setMascotas([]); // Asegurarse de que el estado de mascotas esté vacío si hay un error
+          showNotification(mascotasResponse.message || "Error al cargar mascotas del propietario.", 'warning');
         }
-      } catch (err) {
-        setError(err.message);
-        setLoading(false);
+      } else {
+        setError(propietarioResponse.message || 'Propietario no encontrado.');
+        showNotification(propietarioResponse.message || 'Propietario no encontrado.', 'error');
       }
-    }, 800);
-  }, [id]);
+    } catch (err) {
+      console.error("Error fetching propietario details or pets:", err);
+      setError('Error de conexión al servidor al cargar los detalles del propietario.');
+      showNotification('Error de conexión al servidor al cargar los detalles del propietario.', 'error');
+    } finally {
+      setLoading(false);
+    }
+  }, [id, showNotification]);
+
+  useEffect(() => {
+    fetchPropietarioDetails();
+  }, [fetchPropietarioDetails]);
 
   const handleVolver = () => {
     navigate(-1);
@@ -82,8 +98,8 @@ const DetallePropietario = () => {
 
   if (loading) {
     return (
-      <div className={veteStyles.veteLoadingContainer}> {/* Using veteStyles */}
-        <div className={veteStyles.veteLoadingSpinner}></div> {/* Using veteStyles */}
+      <div className={veteStyles.veteLoadingContainer}>
+        <FontAwesomeIcon icon={faSpinner} spin size="3x" className={veteStyles.veteLoadingSpinner} />
         <p>Cargando detalles del propietario...</p>
       </div>
     );
@@ -91,12 +107,12 @@ const DetallePropietario = () => {
 
   if (error) {
     return (
-      <div className={veteStyles.veteErrorContainer}> {/* Using veteStyles */}
-        <h3>Error</h3>
+      <div className={veteStyles.veteErrorContainer}>
+        <h3><FontAwesomeIcon icon={faExclamationTriangle} /> Error</h3>
         <p>{error}</p>
         <motion.button
           onClick={handleVolver}
-          className={veteStyles.veteVolverBtn} /* Using veteStyles */
+          className={veteStyles.veteVolverBtn}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
@@ -108,11 +124,11 @@ const DetallePropietario = () => {
 
   if (!propietario) {
     return (
-      <div className={veteStyles.veteErrorContainer}> {/* Using veteStyles */}
+      <div className={veteStyles.veteErrorContainer}>
         <p>Propietario no encontrado.</p>
         <motion.button
           onClick={handleVolver}
-          className={veteStyles.veteVolverBtn} /* Using veteStyles */
+          className={veteStyles.veteVolverBtn}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
@@ -122,18 +138,21 @@ const DetallePropietario = () => {
     );
   }
 
+  // Fallback para la imagen de perfil si no hay URL o si falla la carga
+  const profileImageUrl = propietario.imagen_url || `https://placehold.co/150x150/00acc1/ffffff?text=${propietario.nombre?.charAt(0) || 'P'}`;
+
   return (
     <motion.div
-      className={veteStyles.veteDetalleContainer} /* Using veteStyles */
+      className={veteStyles.veteDetalleContainer}
       variants={containerVariants}
       initial="hidden"
       animate="visible"
       exit="exit"
     >
-      <div className={veteStyles.veteHeader}> {/* Using veteStyles */}
+      <div className={veteStyles.veteHeader}>
         <motion.button
           onClick={handleVolver}
-          className={veteStyles.veteVolverBtn} /* Using veteStyles */
+          className={veteStyles.veteVolverBtn}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
@@ -142,48 +161,69 @@ const DetallePropietario = () => {
         <h2><FontAwesomeIcon icon={faUser} /> Detalle del Propietario</h2>
       </div>
 
-      <div className={veteStyles.veteDetalleInfo}> {/* Using veteStyles */}
+      <div className={veteStyles.veteProfileImageSection}>
+        <img
+          src={profileImageUrl}
+          alt="Imagen de Perfil"
+          className={veteStyles.veteProfileImage}
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src = `https://placehold.co/150x150/00acc1/ffffff?text=${propietario.nombre?.charAt(0) || 'P'}`;
+          }}
+        />
+      </div>
+
+      <div className={veteStyles.veteDetalleInfo}>
         <motion.p variants={itemVariants}>
-          <strong><FontAwesomeIcon icon={faUser} /> Nombre:</strong> {propietario.nombre}
+          <strong><FontAwesomeIcon icon={faUser} /> Nombre:</strong> {propietario.nombre} {propietario.apellido}
         </motion.p>
 
         <motion.p variants={itemVariants}>
-          <strong><FontAwesomeIcon icon={faPhone} /> Teléfono:</strong> <a href={`tel:${propietario.telefono}`}>{propietario.telefono}</a> {/* Made clickable */}
+          <strong><FontAwesomeIcon icon={faPhone} /> Teléfono:</strong> <a href={`tel:${propietario.telefono}`}>{propietario.telefono}</a>
         </motion.p>
 
         <motion.p variants={itemVariants}>
-          <strong><FontAwesomeIcon icon={faEnvelope} /> Email:</strong> <a href={`mailto:${propietario.email}`}>{propietario.email}</a> {/* Made clickable */}
+          <strong><FontAwesomeIcon icon={faEnvelope} /> Email:</strong> <a href={`mailto:${propietario.email}`}>{propietario.email}</a>
         </motion.p>
 
         <motion.p variants={itemVariants}>
           <strong><FontAwesomeIcon icon={faMapMarkerAlt} /> Dirección:</strong> {propietario.direccion}
         </motion.p>
 
-        {propietario.registro && (
-          <motion.p variants={itemVariants}>
-            <strong>Registro:</strong> {propietario.registro}
-          </motion.p>
-        )}
+        <motion.p variants={itemVariants}>
+          <strong>Tipo Documento:</strong> {propietario.tipo_documento || 'N/A'}
+        </motion.p>
+        <motion.p variants={itemVariants}>
+          <strong>Número Documento:</strong> {propietario.numero_documento || 'N/A'}
+        </motion.p>
+        <motion.p variants={itemVariants}>
+          <strong>Fecha Nacimiento:</strong> {propietario.fecha_nacimiento ? new Date(propietario.fecha_nacimiento).toLocaleDateString() : 'N/A'}
+        </motion.p>
 
-        {propietario.mascotas && propietario.mascotas.length > 0 && (
+        {mascotas.length > 0 && (
           <motion.div
-            className={veteStyles.veteMascotasSection} /* Using veteStyles */
+            className={veteStyles.veteMascotasSection}
             variants={itemVariants}
           >
             <h3><FontAwesomeIcon icon={faPaw} /> Mascotas:</h3>
-            <div className={veteStyles.veteMascotasList}> {/* Using veteStyles */}
-              {propietario.mascotas.map((mascota, index) => (
+            <div className={veteStyles.veteMascotasList}>
+              {mascotas.map((mascota) => (
                 <motion.span
-                  key={index}
-                  className={veteStyles.veteMascotaItem} /* Using veteStyles */
+                  key={mascota.id_mascota}
+                  className={veteStyles.veteMascotaItem}
                   variants={mascotaVariants}
                   whileHover="hover"
                   whileTap="tap"
                 >
-                  {mascota}
+                  {mascota.nombre} ({mascota.especie})
                 </motion.span>
               ))}
             </div>
+          </motion.div>
+        )}
+        {mascotas.length === 0 && (
+          <motion.div className={veteStyles.veteMascotasSection} variants={itemVariants}>
+            <p className={veteStyles.noMascotasMessage}>Este propietario aún no tiene mascotas registradas.</p>
           </motion.div>
         )}
       </div>
