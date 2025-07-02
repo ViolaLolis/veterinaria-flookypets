@@ -1,166 +1,116 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Link, useNavigate, useOutletContext } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import styles from './Styles/CitasUsuario.module.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faCalendarAlt, faPlusCircle, faClock, faMapMarkerAlt, faUserCog, faPaw, faShoppingCart, faInfoCircle, faTimesCircle, faCheckCircle
-} from '@fortawesome/free-solid-svg-icons'; // Estos son de Font Awesome
-import { FaSpinner } from 'react-icons/fa'; // FaSpinner de react-icons/fa
-
-import { authFetch } from './api';
+  faCalendarAlt, faPlusCircle, faShoppingCart,
+  faPaw, faUserCog
+} from '@fortawesome/free-solid-svg-icons';
+import { FaSpinner } from 'react-icons/fa';
 
 const CitasUsuario = () => {
-  const { user, showNotification } = useOutletContext();
   const navigate = useNavigate();
+
   const [userAppointments, setUserAppointments] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
   const [isManagingAppointment, setIsManagingAppointment] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [modalAction, setModalAction] = useState(null);
+  const [appointmentToManage, setAppointmentToManage] = useState(null);
 
-  const [showConfirmAcceptModal, setShowConfirmAcceptModal] = useState(false);
-  const [showConfirmRejectModal, setShowConfirmRejectModal] = useState(false);
-  const [showConfirmCancelModal, setShowConfirmCancelModal] = useState(false);
-  const [appointmentToConfirm, setAppointmentToConfirm] = useState(null);
+  // Simulación local de usuario logueado
+  const user = {
+    id: 'user123',
+    role: 'usuario'
+  };
 
-
-  const fetchUserAppointments = useCallback(async () => {
-    if (!user || !user.id) {
-      setError('No se pudo obtener la información del usuario. Por favor, inicia sesión.');
-      setIsLoading(false);
-      return;
+  // Simulación local de datos de citas
+  const localAppointments = [
+    {
+      id_cita: '1',
+      fecha: '2025-07-10 10:00:00',
+      servicio_nombre: 'Consulta General',
+      mascota_nombre: 'Firulais',
+      mascota_especie: 'Perro',
+      veterinario_nombre: 'Dr. López',
+      estado: 'pendiente'
+    },
+    {
+      id_cita: '2',
+      fecha: '2025-07-15 14:00:00',
+      servicio_nombre: 'Vacunación',
+      mascota_nombre: 'Mishi',
+      mascota_especie: 'Gato',
+      veterinario_nombre: 'Dra. García',
+      estado: 'aceptada'
+    },
+    {
+      id_cita: '3',
+      fecha: '2025-07-05 09:00:00',
+      servicio_nombre: 'Urgencia',
+      mascota_nombre: 'Rocky',
+      mascota_especie: 'Perro',
+      veterinario_nombre: 'Dr. Smith',
+      estado: 'completa'
     }
-    try {
-      const response = await authFetch(`/citas?id_cliente=${user.id}`);
-      if (response.success) {
-        const sortedAppointments = response.data.sort((a, b) => {
-          const dateA = new Date(a.fecha);
-          const dateB = new Date(b.fecha);
-          const now = new Date();
-
-          const isFutureA = dateA > now;
-          const isFutureB = dateB > now;
-
-          if (isFutureA && !isFutureB) return -1;
-          if (!isFutureA && isFutureB) return 1;
-
-          return dateA - dateB;
-        });
-        setUserAppointments(sortedAppointments);
-      } else {
-        setError(response.message || 'Error al obtener citas.');
-      }
-    } catch (err) {
-      console.error("Error en authFetch para /citas:", err);
-      setError('Error de conexión al servidor.');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [user, authFetch]);
+  ];
 
   useEffect(() => {
-    fetchUserAppointments();
-  }, [fetchUserAppointments]);
+    setTimeout(() => {
+      // Solo mostrar citas del usuario (en simulación, todas)
+      setUserAppointments(localAppointments);
+      setIsLoading(false);
+    }, 1000);
+  }, []);
 
-  const openConfirmAcceptModal = (appointment) => {
-    setAppointmentToConfirm(appointment);
-    setShowConfirmAcceptModal(true);
+  const openConfirmModal = (action, appointment) => {
+    setModalAction(action);
+    setAppointmentToManage(appointment);
+    setShowConfirmModal(true);
   };
 
-  const openConfirmRejectModal = (appointment) => {
-    setAppointmentToConfirm(appointment);
-    setShowConfirmRejectModal(true);
+  const closeModal = () => {
+    setShowConfirmModal(false);
+    setModalAction(null);
+    setAppointmentToManage(null);
   };
 
-  const openConfirmCancelModal = (appointment) => {
-    setAppointmentToConfirm(appointment);
-    setShowConfirmCancelModal(true);
-  };
-
-  const handleAcceptAppointment = async () => {
+  const handleAppointmentAction = () => {
     setIsManagingAppointment(true);
-    try {
-      const response = await authFetch(`/citas/${appointmentToConfirm.id_cita}`, {
-        method: 'PUT',
-        body: JSON.stringify({ estado: 'aceptada' }),
-      });
-      if (response.success) {
-        showNotification('Cita aceptada correctamente.', 'success');
-        fetchUserAppointments();
-      } else {
-        showNotification(response.message || 'Error al aceptar la cita.', 'error');
+
+    setTimeout(() => {
+      if (appointmentToManage) {
+        setUserAppointments(prev =>
+          prev.map(cita =>
+            cita.id_cita === appointmentToManage.id_cita
+              ? { ...cita, estado: modalAction === 'accept' ? 'aceptada' : modalAction === 'reject' ? 'rechazada' : 'cancelada' }
+              : cita
+          )
+        );
       }
-    } catch (err) {
-      console.error("Error accepting appointment:", err);
-      showNotification('Error de conexión al servidor al aceptar la cita.', 'error');
-    } finally {
       setIsManagingAppointment(false);
-      setShowConfirmAcceptModal(false);
-      setAppointmentToConfirm(null);
+      closeModal();
+    }, 800);
+  };
+
+  const formatDateTime = (dateTimeString) => {
+    try {
+      const date = new Date(dateTimeString);
+      return date.toLocaleDateString('es-ES', {
+        year: 'numeric', month: 'long', day: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+      });
+    } catch {
+      return 'Fecha inválida';
     }
   };
-
-  const handleRejectAppointment = async () => {
-    setIsManagingAppointment(true);
-    try {
-      const response = await authFetch(`/citas/${appointmentToConfirm.id_cita}`, {
-        method: 'PUT',
-        body: JSON.stringify({ estado: 'rechazada' }),
-      });
-      if (response.success) {
-        showNotification('Cita rechazada correctamente.', 'success');
-        fetchUserAppointments();
-      } else {
-        showNotification(response.message || 'Error al rechazar la cita.', 'error');
-      }
-    } catch (err) {
-      console.error("Error rejecting appointment:", err);
-      showNotification('Error de conexión al servidor al rechazar la cita.', 'error');
-    } finally {
-      setIsManagingAppointment(false);
-      setShowConfirmRejectModal(false);
-      setAppointmentToConfirm(null);
-    }
-  };
-
-  const handleCancelAppointment = async () => {
-    setIsManagingAppointment(true);
-    try {
-      const response = await authFetch(`/citas/${appointmentToConfirm.id_cita}`, {
-        method: 'PUT',
-        body: JSON.stringify({ estado: 'cancelada' }),
-      });
-      if (response.success) {
-        showNotification('Cita cancelada correctamente.', 'success');
-        fetchUserAppointments();
-      } else {
-        showNotification(response.message || 'Error al cancelar la cita.', 'error');
-      }
-    } catch (err) {
-      console.error("Error canceling appointment:", err);
-      showNotification('Error de conexión al servidor al cancelar la cita.', 'error');
-    } finally {
-      setIsManagingAppointment(false);
-      setShowConfirmCancelModal(false);
-      setAppointmentToConfirm(null);
-    }
-  };
-
 
   if (isLoading) {
     return (
       <div className={styles.loadingContainer}>
-        <FaSpinner className={styles.spinnerIcon} /> {/* FaSpinner de react-icons/fa */}
+        <FaSpinner className={styles.spinnerIcon} />
         <p>Cargando tus citas...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className={styles.errorMessage}>
-        <FontAwesomeIcon icon={faInfoCircle} className={styles.errorIcon} /> {/* faInfoCircle de Font Awesome */}
-        <p>{error}</p>
       </div>
     );
   }
@@ -192,33 +142,16 @@ const CitasUsuario = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
-              whileHover={{ scale: 1.02, boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)' }}
+              whileHover={{ scale: 1.02 }}
             >
               <div className={styles.citaInfo}>
-                <div className={styles.citaFecha}>
-                  <FontAwesomeIcon icon={faCalendarAlt} className={styles.citaIcon} />
-                  <span>{cita.fecha.split(' ')[0]}</span>
-                </div>
-                <div className={styles.citaHora}>
-                  <FontAwesomeIcon icon={faClock} className={styles.citaIcon} />
-                  <span>{cita.fecha.split(' ')[1].substring(0, 5)}</span>
-                </div>
-                <div className={styles.citaServicio}>
-                  <FontAwesomeIcon icon={faShoppingCart} className={styles.citaIcon} />
-                  <span>{cita.servicio_nombre}</span>
-                </div>
-                <div className={styles.citaMascota}>
-                  <FontAwesomeIcon icon={faPaw} className={styles.citaIcon} />
-                  <span>{cita.mascota_nombre} ({cita.mascota_especie})</span>
-                </div>
-                <div className={styles.citaVeterinario}>
-                  <FontAwesomeIcon icon={faUserCog} className={styles.citaIcon} />
-                  <span>{cita.veterinario_nombre || 'No asignado'}</span>
-                </div>
-                <div className={`${styles.statusBadge} ${styles[cita.estado]}`}>
-                  {cita.estado}
-                </div>
+                <div><FontAwesomeIcon icon={faCalendarAlt} /> {formatDateTime(cita.fecha)}</div>
+                <div><FontAwesomeIcon icon={faShoppingCart} /> {cita.servicio_nombre}</div>
+                <div><FontAwesomeIcon icon={faPaw} /> {cita.mascota_nombre} ({cita.mascota_especie})</div>
+                <div><FontAwesomeIcon icon={faUserCog} /> {cita.veterinario_nombre}</div>
+                <div className={`${styles.statusBadge} ${styles[cita.estado]}`}>{cita.estado}</div>
               </div>
+
               <div className={styles.citaActions}>
                 <motion.button
                   className={styles.accionBtn}
@@ -229,40 +162,38 @@ const CitasUsuario = () => {
                   Ver Detalles
                 </motion.button>
 
-                {(cita.estado === 'pendiente' || cita.estado === 'aceptada') && (
+                {cita.estado === 'pendiente' && (
                   <>
-                    {cita.estado === 'pendiente' && (
-                      <>
-                        <motion.button
-                          className={styles.accionBtnPrimary}
-                          onClick={() => openConfirmAcceptModal(cita)}
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          disabled={isManagingAppointment}
-                        >
-                          {isManagingAppointment ? <FaSpinner className={styles.spinnerIconSmall} /> : <FontAwesomeIcon icon={faCheckCircle} />} Aceptar
-                        </motion.button>
-                        <motion.button
-                          className={styles.accionBtnDanger}
-                          onClick={() => openConfirmRejectModal(cita)}
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          disabled={isManagingAppointment}
-                        >
-                          {isManagingAppointment ? <FaSpinner className={styles.spinnerIconSmall} /> : <FontAwesomeIcon icon={faTimesCircle} />} Rechazar
-                        </motion.button>
-                      </>
-                    )}
                     <motion.button
-                      className={styles.accionBtn}
-                      onClick={() => openConfirmCancelModal(cita)}
+                      className={styles.accionBtnPrimary}
+                      onClick={() => openConfirmModal('accept', cita)}
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       disabled={isManagingAppointment}
                     >
-                      {isManagingAppointment ? <FaSpinner className={styles.spinnerIconSmall} /> : null} Cancelar
+                      Aceptar
+                    </motion.button>
+                    <motion.button
+                      className={styles.accionBtnDanger}
+                      onClick={() => openConfirmModal('reject', cita)}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      disabled={isManagingAppointment}
+                    >
+                      Rechazar
                     </motion.button>
                   </>
+                )}
+                {(cita.estado === 'pendiente' || cita.estado === 'aceptada') && (
+                  <motion.button
+                    className={styles.accionBtnSecondary}
+                    onClick={() => openConfirmModal('cancel', cita)}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    disabled={isManagingAppointment}
+                  >
+                    Cancelar
+                  </motion.button>
                 )}
               </div>
             </motion.li>
@@ -270,20 +201,22 @@ const CitasUsuario = () => {
         </ul>
       ) : (
         <div className={styles.noCitas}>
-          <FontAwesomeIcon icon={faCalendarAlt} className={styles.noCitasIcon} />
+          <FontAwesomeIcon icon={faCalendarAlt} />
           <p>No tienes citas programadas. ¡Programa una ahora!</p>
+          <Link to="/usuario/citas/agendar" className={styles.agendarCitaButton}>
+            <FontAwesomeIcon icon={faPlusCircle} /> Agendar Nueva Cita
+          </Link>
         </div>
       )}
 
-      {/* Modales de confirmación */}
       <AnimatePresence>
-        {showConfirmAcceptModal && (
+        {showConfirmModal && appointmentToManage && (
           <motion.div
             className={styles.modalOverlay}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={() => setShowConfirmAcceptModal(false)}
+            onClick={closeModal}
           >
             <motion.div
               className={styles.modalContent}
@@ -292,96 +225,24 @@ const CitasUsuario = () => {
               exit={{ scale: 0.8, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
             >
-              <h3>Confirmar Cita</h3>
-              <p>¿Estás seguro de que quieres ACEPTAR la cita para el {appointmentToConfirm?.fecha.split(' ')[0]} a las {appointmentToConfirm?.fecha.split(' ')[1].substring(0, 5)}?</p>
+              <h3>Confirmar {modalAction}</h3>
+              <p>¿Seguro que quieres {modalAction} la cita para {appointmentToManage.mascota_nombre} el {formatDateTime(appointmentToManage.fecha)}?</p>
               <div className={styles.modalActions}>
                 <motion.button
-                  className={styles.modalPrimaryButton}
-                  onClick={handleAcceptAppointment}
+                  onClick={handleAppointmentAction}
                   disabled={isManagingAppointment}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                 >
-                  {isManagingAppointment ? <><FaSpinner className={styles.spinnerIconSmall} /> Confirmando...</> : 'Sí, Aceptar'}
+                  {isManagingAppointment ? <FaSpinner /> : `Sí, ${modalAction}`}
                 </motion.button>
                 <motion.button
-                  className={styles.modalSecondaryButton}
-                  onClick={() => setShowConfirmAcceptModal(false)}
+                  onClick={closeModal}
                   disabled={isManagingAppointment}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                 >
-                  Cancelar
-                </motion.button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-
-        {showConfirmRejectModal && (
-          <motion.div
-            className={styles.modalOverlay}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setShowConfirmRejectModal(false)}
-          >
-            <motion.div
-              className={styles.modalContent}
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.8, opacity: 0 }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <h3>Rechazar Cita</h3>
-              <p>¿Estás seguro de que quieres RECHAZAR la cita para el {appointmentToConfirm?.fecha.split(' ')[0]} a las {appointmentToConfirm?.fecha.split(' ')[1].substring(0, 5)}?</p>
-              <div className={styles.modalActions}>
-                <motion.button
-                  className={styles.modalPrimaryButton}
-                  onClick={handleRejectAppointment}
-                  disabled={isManagingAppointment}
-                >
-                  {isManagingAppointment ? <><FaSpinner className={styles.spinnerIconSmall} /> Rechazando...</> : 'Sí, Rechazar'}
-                </motion.button>
-                <motion.button
-                  className={styles.modalSecondaryButton}
-                  onClick={() => setShowConfirmRejectModal(false)}
-                  disabled={isManagingAppointment}
-                >
-                  Cancelar
-                </motion.button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-
-        {showConfirmCancelModal && (
-          <motion.div
-            className={styles.modalOverlay}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setShowConfirmCancelModal(false)}
-          >
-            <motion.div
-              className={styles.modalContent}
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.8, opacity: 0 }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <h3>Cancelar Cita</h3>
-              <p>¿Estás seguro de que quieres CANCELAR la cita para el {appointmentToConfirm?.fecha.split(' ')[0]} a las {appointmentToConfirm?.fecha.split(' ')[1].substring(0, 5)}?</p>
-              <div className={styles.modalActions}>
-                <motion.button
-                  className={styles.modalPrimaryButton}
-                  onClick={handleCancelAppointment}
-                  disabled={isManagingAppointment}
-                >
-                  {isManagingAppointment ? <><FaSpinner className={styles.spinnerIconSmall} /> Cancelando...</> : 'Sí, Cancelar'}
-                </motion.button>
-                <motion.button
-                  className={styles.modalSecondaryButton}
-                  onClick={() => setShowConfirmCancelModal(false)}
-                  disabled={isManagingAppointment}
-                >
-                  No, Mantener
+                  No, volver
                 </motion.button>
               </div>
             </motion.div>

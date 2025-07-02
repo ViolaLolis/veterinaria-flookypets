@@ -1,132 +1,460 @@
-.container {
-  font-family: 'Comfortaa', cursive; /* Fuente más amigable y redondeada */
-  background-color: #ffffffa9; /* Fondo muy claro */
-  padding: 40px;
-  border-radius: 15px; /* Bordes más redondeados */
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.06); /* Sombra suave */
-  width: 95%;
-  max-width: 700px; /* Ancho máximo ligeramente mayor */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 30px;
-  margin: 30px auto;
-  position: relative; /* Para el botón de volver */
+/* src/Pages/InicioUsuario/Styles/MisMascotas.module.css */
+
+/* --- Variables de Color --- */
+:root {
+    --primary-blue: #2196F3;
+    --primary-blue-dark: #1976D2;
+    --accent-green: #4CAF50;
+    --title-cyan: #00BCD4;
+    --info-box-bg: #E0F7FA;
+    --info-box-border: #B2EBF2;
+    --info-box-text: #00838F;
+
+    --text-dark: #333333;
+    --text-medium: #555555;
+    --text-light: #777777;
+
+    --background-light: #F4F6F8;
+    --card-background: #FFFFFF;
+    --border-color: #E0E0E0;
+
+    --error-color: #EF5350;
+    --warning-color: #FFB300;
+
+    /* Sombras */
+    --shadow-light: rgba(0, 0, 0, 0.05);
+    --shadow-medium: rgba(0, 0, 0, 0.1);
+    --shadow-strong: rgba(0, 0, 0, 0.15);
+
+    /* Altura mínima de la tarjeta del carrusel (ajustado para que quepa todo) */
+    --carousel-card-min-height: 480px;
 }
 
-.header {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  margin-bottom: 30px;
-  justify-content: center;
-  width: 100%;
+/* --- Sección General --- */
+.section {
+    padding: 1.5rem 2.5rem;
+    max-width: 900px;
+    margin: 20px auto;
+    background-color: var(--background-light);
+    border-radius: 15px;
+    box-shadow: 0 10px 30px var(--shadow-medium);
+    font-family: 'Roboto', sans-serif;
+    color: var(--text-dark);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
 }
 
-.icon {
-  font-size: 2.2em; /* Icono ligeramente más grande */
-  color: #f39c12; /* Amarillo dorado */
+.sectionTitle {
+    font-size: 2.2em;
+    color: var(--title-cyan);
+    text-align: center;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    font-weight: 700;
 }
 
-h3 {
-  color: #34495e; /* Gris azulado oscuro */
-  font-size: 2.6em;
-  margin: 0;
+.sectionIcon {
+    font-size: 1.1em;
+    color: var(--title-cyan);
 }
 
-.listaMascotas {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Ajusta el ancho mínimo */
-  gap: 25px;
-  width: 100%;
-  padding-bottom: 20px; /* Espacio para el botón "Añadir" */
+/* --- Estado de Carga y Error / No Content --- */
+.loadingContainer, .errorMessage, .noContent {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+    text-align: center;
+    padding: 2rem;
+    border-radius: 12px;
+    background-color: var(--card-background);
+    box-shadow: 0 3px 15px var(--shadow-light);
+    margin-top: 1.5rem;
+    width: 100%;
+    max-width: 600px;
 }
 
-.agregarMascota {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 12px 20px;
-  text-decoration: none;
-  background-color: #5b615b9d; /* Amarillo dorado */
-  color: white;
-  border-radius: 10px; /* Bordes más redondeados */
-  font-weight: 500;
-  box-shadow: 0 2px 5px rgba(243, 156, 18, 0.3);
-  width: fit-content; /* Ajusta el ancho al contenido */
-  margin-top: 15px; /* Espacio desde las tarjetas */
- 
+.spinnerIcon {
+    font-size: 2.5rem;
+    color: var(--primary-blue);
+    animation: spin 1.5s linear infinite;
+    margin-bottom: 1rem;
 }
 
-.agregarMascota:hover {
-  background-color: #e68a00;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(243, 156, 18, 0.4);
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }
 
-.plusIcon {
-  font-size: 1.2em;
+.errorMessage {
+    color: var(--error-color);
 }
 
-.noMascotas {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 20px;
-  padding: 30px;
-  background-color: #fff;
-  border-radius: 10px;
-  color: #777;
-  text-align: center;
-  border: 1px solid #e0e6ed;
-  width: 80%;
+.errorIcon {
+    font-size: 2.5rem;
+    color: var(--error-color);
+    margin-bottom: 1rem;
 }
 
-.agregarMascotaBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 20px;
-  text-decoration: none;
-  background-color: #f39c12; /* Amarillo dorado */
-  color: white;
-  border-radius: 10px;
-  transition: background-color 0.3s ease, transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-  font-weight: 500;
-  box-shadow: 0 2px 5px rgba(243, 156, 18, 0.3);
+.loadingContainer p, .errorMessage p, .noContent p {
+    font-size: 1.05rem;
+    color: var(--text-medium);
+    margin-bottom: 1.2rem;
 }
 
-.agregarMascotaBtn:hover {
-  background-color: #e68a00;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(243, 156, 18, 0.4);
+.errorMessage p {
+    color: var(--error-color);
 }
 
-/* Estilos para el Botón de Volver */
-.volverBtn {
-  position: absolute;
-  top: 15px;
-  left: 15px;
-  background: none;
-  border: none;
-  color: #555;
-  cursor: pointer;
-  font-size: 1em;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: color 0.3s ease, transform 0.2s ease-in-out;
-  padding: 10px 15px;
-  border-radius: 8px;
+.noContent .infoIcon {
+    font-size: 3rem;
+    color: var(--warning-color);
+    margin-bottom: 1.5rem;
 }
 
-.volverBtn:hover {
-  color: #333;
-  transform: translateX(-2px);
-  background-color: #f0f0f0;
+.noContent p {
+    font-weight: 500;
+    color: var(--text-light);
 }
 
-.volverIcon {
-  font-size: 1.1em;
+/* --- Info Box / Consejo --- */
+.infoBox {
+    background-color: var(--info-box-bg);
+    border-radius: 10px;
+    padding: 1rem 1.2rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.8rem;
+    box-shadow: 0 2px 8px var(--shadow-light);
+    max-width: 800px;
+    width: 100%;
+    margin-bottom: 1.5rem;
+    border-left: 5px solid var(--info-box-border);
+    color: var(--text-medium);
+}
+
+.infoBoxIcon {
+    font-size: 1.5rem;
+    color: var(--primary-blue);
+    flex-shrink: 0;
+    margin-top: 0.2rem;
+}
+
+.infoBox p {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--text-dark);
+}
+
+.infoBoxTitle {
+    font-weight: 600;
+    color: var(--info-box-text);
+    margin-right: 0.3rem;
+}
+
+/* --- Search Bar / Filtro de Búsqueda --- */
+.searchBarContainer {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    max-width: 300px;
+    background-color: var(--card-background);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 0.6rem 1rem;
+    box-shadow: 0 1px 6px var(--shadow-light);
+    /* Ajuste clave para separar de la tarjeta */
+    margin-bottom: 2rem; /* Aumentado para dar más espacio por debajo */
+    transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.searchBarContainer:focus-within {
+    border-color: var(--primary-blue);
+    box-shadow: 0 3px 8px var(--shadow-medium);
+}
+
+.searchIcon {
+    font-size: 1rem;
+    color: var(--text-light);
+    margin-right: 0.8rem;
+}
+
+.searchInput {
+    flex-grow: 1;
+    border: none;
+    outline: none;
+    padding: 0;
+    font-size: 0.95rem;
+    color: var(--text-dark);
+    background-color: transparent;
+}
+
+.searchInput::placeholder {
+    color: var(--text-light);
+    opacity: 0.8;
+}
+
+/* --- Carrusel de Mascotas --- */
+.petCarouselContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 950px;
+    position: relative;
+    gap: 1rem;
+    /* Ajuste clave para separar de la barra de búsqueda */
+    margin-top: 0; /* Aseguramos que no tenga un margen superior que lo empuje hacia abajo */
+}
+
+.petCarousel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    width: 100%;
+}
+
+.carouselContentWrapper {
+    position: relative;
+    width: 300px;
+    height: auto;
+    min-height: var(--carousel-card-min-height);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* Ya no necesitamos overflow: visible si la tarjeta cabe */
+    overflow: hidden; /* Volvemos a hidden para asegurar que nada se desborde sin querer */
+}
+
+/* Nueva clase para el envoltorio de la tarjeta sin animación */
+.staticCardWrapper {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* No hay transiciones aquí para que el cambio sea instantáneo */
+}
+
+
+.carouselButton {
+    background-color: var(--primary-blue);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4em;
+    cursor: pointer;
+    box-shadow: 0 3px 10px var(--shadow-medium);
+    transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    flex-shrink: 0;
+    z-index: 5;
+}
+
+.carouselButton:hover:not(:disabled) {
+    background-color: var(--primary-blue-dark);
+    transform: scale(1.02);
+    box-shadow: 0 5px 12px var(--shadow-strong);
+}
+
+.carouselButton:active:not(:disabled) {
+    transform: scale(0.97);
+    box-shadow: 0 2px 5px var(--shadow-light);
+}
+
+.carouselButton:disabled {
+    background-color: #CCCCCC;
+    cursor: not-allowed;
+    box-shadow: none;
+    opacity: 0.7;
+}
+
+/* --- Indicadores del Carrusel --- */
+.carouselIndicators {
+    display: flex;
+    gap: 0.6rem;
+    margin-top: 2rem; /* Sigue dando un buen espacio */
+}
+
+.indicatorDot {
+    width: 8px;
+    height: 8px;
+    background-color: #DDDDDD;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+    border: 1px solid #CCC;
+}
+
+.indicatorDot.activeDot {
+    background-color: var(--primary-blue);
+    transform: scale(1.2);
+    border-color: var(--primary-blue);
+}
+
+.indicatorDot:hover {
+    background-color: var(--primary-blue-dark);
+}
+
+/* --- Botones principales de acción --- */
+.primaryButton {
+    background-color: var(--primary-blue);
+    color: white;
+    border: none;
+    padding: 0.7rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+    box-shadow: 0 2px 8px var(--shadow-light);
+}
+
+.primaryButton:hover {
+    background-color: var(--primary-blue-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px var(--shadow-medium);
+}
+
+.primaryButton:active {
+    transform: scale(0.98);
+}
+
+/* --- Media Queries para Responsividad --- */
+@media (max-width: 1024px) {
+    .section {
+        padding: 1rem 2rem;
+    }
+    .sectionTitle {
+        font-size: 2em;
+    }
+    .sectionIcon {
+        font-size: 1.8em;
+    }
+    .infoBox {
+        padding: 0.8rem 1rem;
+        font-size: 0.9rem;
+    }
+    .infoBoxIcon {
+        font-size: 1.3rem;
+    }
+    .searchBarContainer {
+        padding: 0.5rem 0.8rem;
+    }
+    .searchInput {
+        font-size: 0.9rem;
+    }
+    .carouselButton {
+        width: 45px;
+        height: 45px;
+        font-size: 1.3em;
+    }
+    .carouselContentWrapper {
+        min-height: calc(var(--carousel-card-min-height) - 20px);
+    }
+    .primaryButton {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .section {
+        padding: 0.8rem 1.5rem;
+        gap: 1rem;
+        margin: 15px auto;
+    }
+    .sectionTitle {
+        font-size: 1.8em;
+        flex-direction: row;
+        gap: 0.6rem;
+    }
+    .sectionIcon {
+        font-size: 1em;
+    }
+    .infoBox {
+        flex-direction: column;
+        text-align: center;
+        align-items: center;
+    }
+    .searchBarContainer {
+        max-width: 100%;
+        padding: 0.5rem 0.8rem;
+        margin-bottom: 1rem; /* Ajustado para tablets */
+    }
+    .carouselButton {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2em;
+        margin: 0 10px;
+    }
+    .carouselContentWrapper {
+        max-width: 300px;
+        min-height: calc(var(--carousel-card-min-height) - 40px);
+    }
+    .carouselIndicators {
+        margin-top: 1.5rem;
+    }
+    .noContent {
+        padding: 1.5rem;
+    }
+    .noContent .infoIcon {
+        font-size: 3em;
+    }
+    .noContent p {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .section {
+        padding: 0.5rem 1rem;
+        margin: 10px auto;
+    }
+    .sectionTitle {
+        font-size: 1.5em;
+    }
+    .sectionIcon {
+        font-size: 0.9em;
+    }
+    .carouselButton {
+        width: 35px;
+        height: 35px;
+        font-size: 1em;
+    }
+    .petCarousel {
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+    .carouselButton:first-child {
+        order: -1;
+    }
+    .carouselButton:last-child {
+        order: 1;
+    }
+    .carouselContentWrapper {
+        order: 0;
+        width: 95%;
+        min-height: calc(var(--carousel-card-min-height) - 60px);
+    }
+    .carouselIndicators {
+        margin-top: 1rem;
+    }
+    .noContent p {
+        font-size: 0.9rem;
+    }
 }
