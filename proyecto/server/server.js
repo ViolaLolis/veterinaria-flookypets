@@ -5,23 +5,39 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const cloudinary = require('cloudinary').v2;
 const fileUpload = require('express-fileupload');
-require('dotenv').config();
+require('dotenv').config(); // Asegúrate de que esta línea esté al principio para cargar .env
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Configuración de Cloudinary
+const CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME || 'dnemd9wp0'; // Corregido a dnemd8wp0
+const API_KEY = process.env.CLOUDINARY_API_KEY || '418626316652541';
+const API_SECRET = process.env.CLOUDINARY_API_SECRET || 'NKTrcFgCXc-SUX_HNu61chc-f4M'; // Asegúrate de que este sea el valor completo
+
 cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'dnemd8wp0',
-    api_key: process.env.CLOUDINARY_API_KEY || '418626316652541',
-    api_secret: process.env.CLOUDINARY_API_SECRET || 'NKTrcFgCXc-SUX_HNu61chc-f4M'
+    cloud_name: CLOUD_NAME,
+    api_key: API_KEY,
+    api_secret: API_SECRET
 });
+
+// --- DEBUGGING CLOUDINARY CONFIG ---
+console.log("Cloudinary Configured With:");
+console.log("  Cloud Name:", CLOUD_NAME);
+console.log("  API Key:", API_KEY);
+console.log("  API Secret (first 5 chars):", API_SECRET ? API_SECRET.substring(0, 5) + '...' : 'N/A');
+// ------------------------------------
+
 
 // Middleware
 app.use(cors({
     origin: process.env.FRONTEND_URL || 'http://localhost:3000',
     credentials: true
 }));
+
+// Importante: express.json() debe ir antes de fileUpload para que el body JSON sea parseado
+// antes de que fileUpload intente procesar la solicitud.
+app.use(express.json()); // Habilita el parsing de JSON en el cuerpo de las peticiones
 
 app.use(fileUpload({
     limits: { fileSize: 5 * 1024 * 1024 }, // Límite de 5MB
@@ -33,7 +49,7 @@ app.use(fileUpload({
 const pool = mysql.createPool({
     host: process.env.DB_HOST || "127.0.0.1",
     user: process.env.DB_USER || "root",
-    password: process.env.DB_PASSWORD || "",
+    password: process.env.DB_PASSWORD || "", // Asegúrate de que tu contraseña de MySQL sea correcta aquí o en .env
     database: process.env.DB_NAME || "veterinaria",
     waitForConnections: true,
     connectionLimit: 10,
@@ -117,7 +133,9 @@ const isOwnerOrAdmin = async (req, res, next) => {
         if (req.originalUrl.startsWith('/mascotas')) {
             if (req.method === 'GET') {
                 const requestedOwnerId = parseInt(req.query.id_propietario);
-                if (isNaN(requestedOwnerId) || requestedOwnerId !== userIdFromToken) {
+                // Si el usuario es un cliente y solicita mascotas de otro propietario, denegar.
+                // Si no se especifica id_propietario, se asume que quiere las suyas.
+                if (userRole === 'usuario' && (isNaN(requestedOwnerId) || requestedOwnerId !== userIdFromToken)) {
                     console.log(`[isOwnerOrAdmin - /mascotas GET] Denegado: Usuario ${userIdFromToken} intentó acceder a mascotas de ${requestedOwnerId || 'propietario no especificado/diferente'}.`);
                     return res.status(403).json({ success: false, message: "Acceso denegado. Solo puedes ver tus propias mascotas." });
                 }
@@ -261,7 +279,7 @@ app.get("/", (req, res) => {
 // =============================================
 
 // Aplicar express.json solo a las rutas que lo necesitan
-app.post("/login", express.json(), async (req, res) => {
+app.post("/login", async (req, res) => { // express.json() ya es global
     const { email, password } = req.body;
 
     try {
@@ -303,7 +321,7 @@ app.post("/login", express.json(), async (req, res) => {
 });
 
 // Ruta de registro para usuarios normales (rol 'usuario')
-app.post("/register", express.json(), async (req, res) => {
+app.post("/register", async (req, res) => { // express.json() ya es global
     const { nombre, apellido, email, password, telefono, direccion, tipo_documento, numero_documento, fecha_nacimiento } = req.body;
 
     // Validación básica de campos requeridos
@@ -344,7 +362,7 @@ app.post("/register", express.json(), async (req, res) => {
 });
 
 // Ruta para recuperación de contraseña (generación de token)
-app.post("/forgot-password", express.json(), async (req, res) => {
+app.post("/forgot-password", async (req, res) => { // express.json() ya es global
     const { email } = req.body;
 
     try {
@@ -382,7 +400,7 @@ app.post("/forgot-password", express.json(), async (req, res) => {
 });
 
 // Ruta para verificar el código de recuperación
-app.post("/verify-reset-code", express.json(), async (req, res) => {
+app.post("/verify-reset-code", async (req, res) => { // express.json() ya es global
     const { email, token } = req.body;
 
     if (!email || !token) {
@@ -439,7 +457,7 @@ app.post("/verify-reset-code", express.json(), async (req, res) => {
 });
 
 // Ruta para resetear contraseña
-app.post("/reset-password", express.json(), async (req, res) => {
+app.post("/reset-password", async (req, res) => { // express.json() ya es global
     const { email, token, newPassword } = req.body;
 
     if (!email || !token || !newPassword) {
@@ -662,7 +680,7 @@ app.get("/api/admin/administrators", authenticateToken, isAdmin, async (req, res
 });
 
 // Crear nuevo administrador
-app.post("/api/admin/administrators", authenticateToken, express.json(), isAdmin, async (req, res) => {
+app.post("/api/admin/administrators", authenticateToken, isAdmin, async (req, res) => { // express.json() ya es global
     const { nombre, apellido, email, telefono, direccion, password, imagen_url } = req.body;
 
     // Validación mejorada
@@ -730,7 +748,7 @@ app.post("/api/admin/administrators", authenticateToken, express.json(), isAdmin
 });
 
 // Actualizar administrador
-app.put("/api/admin/administrators/:id", authenticateToken, express.json(), isAdmin, async (req, res) => {
+app.put("/api/admin/administrators/:id", authenticateToken, isAdmin, async (req, res) => { // express.json() ya es global
     const { id } = req.params;
     const { nombre, apellido, telefono, direccion, imagen_url } = req.body;
 
@@ -898,7 +916,7 @@ app.get("/usuarios/veterinarios", authenticateToken, isVetOrAdmin, async (req, r
 });
 
 // Crear nuevo veterinario
-app.post("/usuarios/veterinarios", authenticateToken, express.json(), isAdmin, async (req, res) => {
+app.post("/usuarios/veterinarios", authenticateToken, isAdmin, async (req, res) => { // express.json() ya es global
     const { nombre, apellido, email, telefono, direccion, password, experiencia, universidad, horario, imagen_url } = req.body;
 
     // Validación de campos requeridos
@@ -946,7 +964,7 @@ app.post("/usuarios/veterinarios", authenticateToken, express.json(), isAdmin, a
 });
 
 // Actualizar veterinario
-app.put("/usuarios/veterinarios/:id", authenticateToken, express.json(), isAdmin, async (req, res) => {
+app.put("/usuarios/veterinarios/:id", authenticateToken, isAdmin, async (req, res) => { // express.json() ya es global
     const { id } = req.params;
     const { nombre, apellido, telefono, direccion, active, experiencia, universidad, horario, imagen_url } = req.body;
 
@@ -1072,7 +1090,7 @@ app.get("/servicios", authenticateToken, async (req, res) => {
 });
 
 // Crear nuevo servicio
-app.post("/servicios", authenticateToken, express.json(), isAdmin, async (req, res) => {
+app.post("/servicios", authenticateToken, isAdmin, async (req, res) => { // express.json() ya es global
     const { nombre, descripcion, precio } = req.body;
 
     if (!nombre || !descripcion || !precio) {
@@ -1098,7 +1116,7 @@ app.post("/servicios", authenticateToken, express.json(), isAdmin, async (req, r
 });
 
 // Actualizar servicio
-app.put("/servicios/:id", authenticateToken, express.json(), isAdmin, async (req, res) => {
+app.put("/servicios/:id", authenticateToken, isAdmin, async (req, res) => { // express.json() ya es global
     const { id } = req.params;
     const { nombre, descripcion, precio } = req.body;
 
@@ -1207,7 +1225,7 @@ app.get("/usuarios/:id", authenticateToken, isOwnerOrAdmin, async (req, res) => 
 });
 
 // Actualizar usuario (general, para clientes, veterinarios, admins)
-app.put("/usuarios/:id", authenticateToken, express.json(), isOwnerOrAdmin, async (req, res) => {
+app.put("/usuarios/:id", authenticateToken, isOwnerOrAdmin, async (req, res) => { // express.json() ya es global
     const { id } = req.params;
     const {
         nombre, apellido, email, telefono, direccion, tipo_documento, numero_documento,
@@ -1380,7 +1398,7 @@ app.get("/mascotas/:id", authenticateToken, isOwnerOrAdmin, async (req, res) => 
 });
 
 // Registrar nueva mascota
-app.post("/mascotas", authenticateToken, express.json(), isVetOrAdmin, async (req, res) => {
+app.post("/mascotas", authenticateToken, isVetOrAdmin, async (req, res) => { // express.json() ya es global
     const { nombre, especie, raza, edad, peso, sexo, color, microchip, id_propietario, imagen_url } = req.body;
 
     if (!nombre || !especie || !id_propietario) {
@@ -1410,7 +1428,7 @@ app.post("/mascotas", authenticateToken, express.json(), isVetOrAdmin, async (re
 });
 
 // Actualizar mascota
-app.put("/mascotas/:id", authenticateToken, express.json(), isOwnerOrAdmin, async (req, res) => {
+app.put("/mascotas/:id", authenticateToken, isOwnerOrAdmin, async (req, res) => { // express.json() ya es global
     const { id } = req.params;
     const { nombre, especie, raza, edad, peso, sexo, color, microchip, id_propietario, imagen_url } = req.body;
 
@@ -1525,7 +1543,7 @@ app.get("/historial_medico/:id", authenticateToken, isOwnerOrAdmin, async (req, 
 });
 
 // Registrar nuevo historial médico (solo para veterinarios o admins)
-app.post("/historial_medico", authenticateToken, express.json(), isVetOrAdmin, async (req, res) => {
+app.post("/historial_medico", authenticateToken, isVetOrAdmin, async (req, res) => { // express.json() ya es global
     const { id_mascota, fecha_consulta, diagnostico, tratamiento, observaciones, veterinario, peso_actual, temperatura, proxima_cita } = req.body;
 
     if (!id_mascota || !fecha_consulta || !diagnostico || !tratamiento || !veterinario) {
@@ -1561,7 +1579,7 @@ app.post("/historial_medico", authenticateToken, express.json(), isVetOrAdmin, a
 });
 
 // Actualizar historial médico (solo para veterinarios o admins)
-app.put("/historial_medico/:id", authenticateToken, express.json(), isVetOrAdmin, async (req, res) => {
+app.put("/historial_medico/:id", authenticateToken, isVetOrAdmin, async (req, res) => { // express.json() ya es global
     const { id } = req.params;
     const { fecha_consulta, diagnostico, tratamiento, observaciones, veterinario, peso_actual, temperatura, proxima_cita } = req.body;
 
@@ -1644,7 +1662,8 @@ app.get("/veterinario/citas/ultimas", authenticateToken, isVetOrAdmin, async (re
                     s.nombre as servicio_nombre,
                     CONCAT(u_cli.nombre, ' ', u_cli.apellido) as propietario_nombre,
                     u_cli.apellido as propietario_apellido,
-                    m.nombre as mascota_nombre, m.especie as mascota_especie
+                    m.nombre as mascota_nombre, m.especie as mascota_especie,
+                    m.imagen_url as mascota_imagen_url -- Asegúrate de que esta columna exista en tu tabla de mascotas
              FROM citas c
              JOIN servicios s ON c.id_servicio = s.id_servicio
              JOIN usuarios u_cli ON c.id_cliente = u_cli.id
@@ -1693,7 +1712,8 @@ app.get("/citas", authenticateToken, async (req, res) => {
                             u_vet.email as veterinario_email,
                             u_vet.direccion as veterinario_direccion,
                             s.id_servicio, u_cli.id as id_cliente, u_vet.id as id_veterinario,
-                            m.nombre as mascota_nombre, m.especie as mascota_especie, m.raza as mascota_raza
+                            m.nombre as mascota_nombre, m.especie as mascota_especie, m.raza as mascota_raza,
+                            m.imagen_url as mascota_imagen_url  -- AÑADIDO ESTO
                      FROM citas c
                      JOIN servicios s ON c.id_servicio = s.id_servicio
                      JOIN usuarios u_cli ON c.id_cliente = u_cli.id
@@ -1742,7 +1762,8 @@ app.get("/citas/:id", authenticateToken, isOwnerOrAdmin, async (req, res) => {
                     u_cli.id as id_cliente, CONCAT(u_cli.nombre, ' ', u_cli.apellido) as propietario_nombre, u_cli.telefono as propietario_telefono, u_cli.email as propietario_email, u_cli.direccion as propietario_direccion,
                     u_vet.id as id_veterinario, CONCAT(u_vet.nombre, ' ', u_vet.apellido) as veterinario_nombre, u_vet.email as veterinario_email,
                     u_vet.direccion as veterinario_direccion,
-                    m.nombre as mascota_nombre, m.especie as mascota_especie, m.raza as mascota_raza
+                    m.nombre as mascota_nombre, m.especie as mascota_especie, m.raza as mascota_raza,
+                    m.imagen_url as mascota_imagen_url -- AÑADIDO ESTO
              FROM citas c
              JOIN servicios s ON c.id_servicio = s.id_servicio
              JOIN usuarios u_cli ON c.id_cliente = u_cli.id
@@ -1762,7 +1783,7 @@ app.get("/citas/:id", authenticateToken, isOwnerOrAdmin, async (req, res) => {
 });
 
 // Registrar nueva cita (para usuarios y admins/vets)
-app.post("/citas/agendar", authenticateToken, express.json(), async (req, res) => { // Cambiado a /citas/agendar para mayor claridad
+app.post("/citas/agendar", authenticateToken, async (req, res) => { // express.json() ya es global. Cambiado a /citas/agendar para mayor claridad
     const { fecha_cita, notas_adicionales, id_servicio, id_cliente, id_veterinario, id_mascota } = req.body;
     let estado = req.body.estado || 'pendiente';
 
@@ -1869,7 +1890,7 @@ app.post("/citas/agendar", authenticateToken, express.json(), async (req, res) =
 });
 
 // Actualizar cita (admin/vet/owner for cancel)
-app.put("/citas/:id", authenticateToken, express.json(), async (req, res) => {
+app.put("/citas/:id", authenticateToken, async (req, res) => { // express.json() ya es global
     const { id } = req.params;
     let { fecha_cita, estado, notas_adicionales, id_servicio, id_cliente, id_veterinario, id_mascota } = req.body;
 
@@ -1889,13 +1910,16 @@ app.put("/citas/:id", authenticateToken, express.json(), async (req, res) => {
         if (userRole === 'admin') {
             isAuthorized = true;
         } else if (userRole === 'usuario') {
+            // Un usuario solo puede cancelar su propia cita si es el cliente y el estado es 'cancelada'
             if (userIdFromToken === existingCita.id_cliente && estado === 'cancelada') {
                 isAuthorized = true;
             }
-            if (userIdFromToken === existingCita.id_cliente && existingCita.estado === 'pendiente' && (estado === 'aceptada' || estado === 'rechazada')) {
-                isAuthorized = true;
-            }
+            // Un usuario NO puede cambiar el estado de pendiente a aceptada/rechazada. Esto es para veterinarios/admins.
+            // if (userIdFromToken === existingCita.id_cliente && existingCita.estado === 'pendiente' && (estado === 'aceptada' || estado === 'rechazada')) {
+            //     isAuthorized = true;
+            // }
         } else if (userRole === 'veterinario') {
+            // Un veterinario puede cambiar el estado de sus citas
             if (userIdFromToken === existingCita.id_veterinario) {
                 isAuthorized = true;
             }
@@ -1928,6 +1952,7 @@ app.put("/citas/:id", authenticateToken, express.json(), async (req, res) => {
             fields.push('id_mascota = ?'); values.push(id_mascota);
         }
 
+        // Solo el admin puede cambiar cliente o veterinario de una cita
         if (userRole === 'admin') {
             if (id_cliente !== undefined) {
                 const [cliente] = await pool.query("SELECT id FROM usuarios WHERE id = ? AND role = 'usuario'", [id_cliente]);
@@ -1957,13 +1982,15 @@ app.put("/citas/:id", authenticateToken, express.json(), async (req, res) => {
             return res.status(404).json({ success: false, message: "Cita no encontrada o sin cambios." });
         }
 
+        // Obtener la cita actualizada para enviar notificaciones
         const [updatedCitaRows] = await pool.query(
             `SELECT c.id_cita, DATE_FORMAT(c.fecha, '%Y-%m-%d %H:%i') as fecha_cita, c.estado, c.servicios as observaciones,
                     s.nombre as servicio_nombre, s.precio, s.id_servicio,
                     u_cli.id as id_cliente, CONCAT(u_cli.nombre, ' ', u_cli.apellido) as propietario_nombre, u_cli.telefono as propietario_telefono, u_cli.email as propietario_email, u_cli.direccion as propietario_direccion,
                     u_vet.id as id_veterinario, CONCAT(u_vet.nombre, ' ', u_vet.apellido) as veterinario_nombre, u_vet.email as veterinario_email,
                     u_vet.direccion as veterinario_direccion,
-                    m.nombre as mascota_nombre, m.especie as mascota_especie, m.raza as mascota_raza
+                    m.nombre as mascota_nombre, m.especie as mascota_especie, m.raza as mascota_raza,
+                    m.imagen_url as mascota_imagen_url
              FROM citas c
              JOIN servicios s ON c.id_servicio = s.id_servicio
              JOIN usuarios u_cli ON c.id_cliente = u_cli.id
@@ -1974,11 +2001,12 @@ app.put("/citas/:id", authenticateToken, express.json(), async (req, res) => {
         );
         const updatedCita = updatedCitaRows[0];
 
+        // Lógica de notificaciones solo si el estado ha cambiado
         if (estado !== oldEstado) {
-            const clienteEmail = updatedCita.propietario_email; // Usar propietario_email
+            const clienteEmail = updatedCita.propietario_email;
             const clienteId = updatedCita.id_cliente;
             const servicioNombre = updatedCita.servicio_nombre;
-            const citaFecha = updatedCita.fecha_cita; // Usar fecha_cita
+            const citaFecha = updatedCita.fecha_cita;
             const veterinarioNombre = updatedCita.veterinario_nombre;
             const veterinarioEmail = updatedCita.veterinario_email;
             const veterinarioId = updatedCita.id_veterinario;

@@ -72,7 +72,7 @@ const MainVeterinario = ({ user, setUser }) => { // Recibe user y setUser como p
   useEffect(() => {
     console.log("MainVeterinario rendering. User:", user);
     console.log("Context passed to Outlet:", { user, showNotification });
-  }, [user, showNotification]); // Log when user or showNotification changes
+  }, [user, showNotification]);
 
 
   const navigateTo = useCallback((path) => {
@@ -89,19 +89,6 @@ const MainVeterinario = ({ user, setUser }) => { // Recibe user y setUser como p
   const isDashboard = location.pathname === '/veterinario' ||
     location.pathname === '/veterinario/' ||
     location.pathname === '/veterinario/navegacion';
-
-  // No necesitamos estados de carga y error aquí, ya que los componentes hijos los manejarán
-  // y usarán showNotification para comunicar mensajes.
-
-  // NOTE: The original code had a loading state and error state here.
-  // If you intend to have a global loading/error for the MainVeterinario component itself,
-  // you would need to re-implement that logic. For now, I'm assuming child components
-  // will handle their own loading/error and use the showNotification.
-
-  // Removed direct loading/error states from MainVeterinario to avoid conflicts
-  // with child components' loading/error states and simplify the main layout.
-  // If you need a global loading overlay for the entire veterinary section,
-  // consider adding it here, but ensure it doesn't block child component rendering.
 
   return (
     <motion.div
@@ -137,7 +124,19 @@ const MainVeterinario = ({ user, setUser }) => { // Recibe user y setUser como p
               whileHover={{ rotate: 5, scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
             >
-              {user?.nombre?.charAt(0).toUpperCase() || 'DR'}
+              {user?.imagen_url ? (
+                <img
+                  src={user.imagen_url}
+                  alt="Avatar Veterinario"
+                  className={styles.vetAvatarImage}
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = `https://placehold.co/150x150/00acc1/ffffff?text=${user?.nombre?.charAt(0) || 'DR'}`;
+                  }}
+                />
+              ) : (
+                user?.nombre?.charAt(0).toUpperCase() || 'DR'
+              )}
             </motion.div>
             <div className={styles.vetUserInfo}>
               <h3>{user?.nombre || 'Dr. Veterinario'}</h3>
