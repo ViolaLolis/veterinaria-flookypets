@@ -73,6 +73,8 @@ npm install react-scripts@5.0.1 --legacy-peer-deps
 npm install react-day-picker date-fns@latest --legacy-peer-deps
 npm install @mui/x-date-pickers @mui/material --legacy-peer-deps
 npm install @types/react-day-picker @types/date-fns --save-dev
+npm install react-loading-skeleton react-toastify
+
 
 Comando para permisos sin perfil
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser

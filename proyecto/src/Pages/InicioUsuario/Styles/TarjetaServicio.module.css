@@ -1,128 +1,314 @@
-.tarjeta {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+/* --- Variables de Color (deben coincidir con tu archivo principal) --- */
+:root {
+  --primary-color: #00acc1; /* Azul cian vibrante (principal) */
+  --primary-light: #4dd0e1; /* Azul cian más claro para acentos y hover */
+  --primary-dark: #007c91; /* Azul cian más oscuro para sombras profundas y texto principal */
+  --primary-gradient-start: #00bcd4; /* Azul brillante para gradientes */
+  --primary-gradient-end: #00acc1; /* Cian más oscuro para gradientes */
+  --primary-glow: rgba(0, 172, 193, 0.4); /* Efecto de brillo para enfoque y sombras */
+  --primary-border-subtle: rgba(0, 188, 212, 0.15); /* Borde sutil para elementos primarios */
+
+  /* Colores de soporte/complementarios */
+  --text-dark: #333333;
+  --text-light: #666666;
+  --background-light: #f8f9fa; /* Fondo general del dashboard, debería ser el color del mainContent */
+  --background-medium: #e9ecef; /* Fondo para elementos interactivos o secciones */
+  --border-color: #dee2e6; /* Borde general */
+  --success-color: #4CAF50;
+  --error-color: #f44336;
+  --warning-color: #ff9800;
+  --info-color: #2196f3;
+
+  /* Variables de sombra para consistencia */
+  --shadow-light: rgba(0, 0, 0, 0.04);
+  --shadow-medium: rgba(0, 0, 0, 0.1);
+  --shadow-strong: rgba(0, 0, 0, 0.15); /* Para hover */
+}
+
+/* --- Estilos Generales de la Tarjeta de Servicio --- */
+.serviceCard {
+  background-color: white;
+  border-radius: 15px;
+  box-shadow: 0 8px 20px var(--shadow-medium);
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
   position: relative;
-  border: 1px solid #ecf0f1;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  max-width: 320px;
-  margin: 0 auto;
+  cursor: default; /* Cambia a default ya que el hover es solo estético */
+  height: 100%; /* Asegura que todas las tarjetas tengan la misma altura en un grid */
+  box-sizing: border-box; /* Incluye padding y border en el ancho/alto total */
 }
 
-.tarjeta:hover {
+.serviceCard:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(0, 225, 255, 0.15);
+  box-shadow: 0 15px 35px var(--shadow-strong);
 }
 
-.badge {
+/* --- Insignia de Categoría --- */
+.categoryBadge {
   position: absolute;
   top: 15px;
-  right: 15px;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background-color: #00acc1;
+  left: 15px;
+  background-color: var(--primary-light);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  z-index: 10;
   display: flex;
   align-items: center;
-  justify-content: center;
-  color: white;
+  gap: 8px;
+  box-shadow: 0 2px 8px var(--shadow-light);
 }
 
-.badgeIcon {
-  font-size: 1rem;
+.categoryIcon {
+  font-size: 0.9rem;
 }
 
+/* --- Contenido de la Tarjeta --- */
 .content {
-  padding: 1.5rem 1.5rem 0;
+  padding: 20px 25px;
+  flex-grow: 1; /* Permite que el contenido ocupe el espacio disponible */
+  display: flex;
+  flex-direction: column;
 }
 
 .title {
-  color: #2c3e50;
-  margin: 0 0 1rem 0;
-  font-size: 1.2rem;
-  font-weight: 600;
-  padding-right: 30px;
+  font-size: 1.8rem;
+  color: var(--primary-dark);
+  margin-bottom: 10px;
+  font-weight: 700;
+  line-height: 1.3;
 }
 
 .description {
-  color: #7f8c8d;
-  font-size: 0.95rem;
-  line-height: 1.5;
-  margin-bottom: 1.5rem;
+  font-size: 1rem;
+  color: var(--text-light);
+  margin-bottom: 15px;
+  line-height: 1.6;
+  flex-grow: 1; /* Permite que la descripción se expanda */
 }
 
+.readMore {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 600;
+  margin-left: 5px;
+  transition: color 0.3s ease;
+}
+
+.readMore:hover {
+  color: var(--primary-dark);
+  text-decoration: underline;
+}
+
+/* --- Detalles del Servicio (Duración, Especialista) --- */
 .detailsGrid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+  grid-template-columns: 1fr; /* Una columna por defecto */
+  gap: 10px;
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px dashed var(--border-color); /* Línea divisoria sutil */
 }
 
 .detailItem {
   display: flex;
   align-items: center;
-  font-size: 0.85rem;
-  color: #34495e;
+  gap: 10px;
+  font-size: 0.95rem;
+  color: var(--text-dark);
 }
 
 .detailIcon {
-  color: #00acc1;
-  margin-right: 0.5rem;
-  font-size: 0.9rem;
+  color: var(--primary-color);
+  font-size: 1.1rem;
+  flex-shrink: 0; /* Evita que el icono se encoja */
 }
 
-.includes {
-  margin-bottom: 1.5rem;
-}
-
-.includes h4 {
-  color: #2c3e50;
-  font-size: 0.95rem;
-  margin: 0 0 0.5rem 0;
-}
-
-.includes ul {
-  margin: 0;
-  padding-left: 1.2rem;
-  color: #7f8c8d;
-  font-size: 0.85rem;
-  line-height: 1.6;
-}
-
-.includes li {
-  margin-bottom: 0.3rem;
-}
-
+/* --- Footer de la Tarjeta (Precio y Botón) --- */
 .footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 1.5rem;
-  background-color: #f8fafb;
-  border-top: 1px solid #ecf0f1;
+  padding: 15px 25px 20px; /* Más padding en la parte inferior */
+  border-top: 1px solid var(--background-medium); /* Separador más fuerte */
+  background-color: var(--background-light); /* Un ligero fondo para el footer */
 }
 
 .price {
-  color: #00acc1;
-  font-weight: bold;
-  font-size: 1.1rem;
+  font-size: 1.6rem;
+  color: var(--primary-dark);
+  font-weight: 700;
+  display: flex;
+  align-items: baseline;
+}
+
+.price small {
+  font-size: 0.9em; /* Reduce ligeramente el tamaño del símbolo de moneda */
+  opacity: 0.8;
 }
 
 .bookButton {
-  background-color: #00acc1;
+  background-color: var(--primary-color);
   color: white;
   border: none;
-  border-radius: 6px;
-  padding: 0.5rem 1rem;
-  font-size: 0.9rem;
+  padding: 12px 25px;
+  border-radius: 50px;
   cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  transition: all 0.3s ease;
+  gap: 10px;
+  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 .bookButton:hover {
-  background-color: #0097b2;
+  background-color: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+}
+
+.bookButton:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* --- Estilos para el Esqueleto de Carga (Skeleton) --- */
+.skeletonCard {
+  /* Mantiene las propiedades base de serviceCard */
+  box-shadow: 0 4px 15px var(--shadow-light); /* Sombra más ligera para el esqueleto */
+  background-color: #f0f0f0; /* Fondo ligeramente gris para el esqueleto */
+}
+
+.skeletonCard .categoryBadge {
+  background-color: rgba(200, 200, 200, 0.7);
+  color: transparent; /* Oculta el texto real */
+  border-radius: 20px;
+}
+
+.skeletonCard .content {
+  /* Ajustes específicos para el contenido del esqueleto */
+}
+
+.skeletonCard .title,
+.skeletonCard .description,
+.skeletonCard .detailItem span,
+.skeletonCard .price,
+.skeletonCard .bookButton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+  border-radius: 5px;
+  color: transparent; /* Oculta el texto real */
+}
+
+.skeletonCard .bookButton {
+  height: 40px; /* Altura fija para el botón esqueleto */
+  width: 100px; /* Ancho fijo para el botón esqueleto */
+}
+
+.skeletonCard .detailIcon {
+  background-color: rgba(200, 200, 200, 0.7);
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+}
+
+@keyframes loading {
+  0% {
+      background-position: 200% 0;
+  }
+  100% {
+      background-position: -200% 0;
+  }
+}
+
+/* --- Media Queries para Responsividad --- */
+@media (min-width: 768px) {
+  .detailsGrid {
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); /* 2 columnas en pantallas medianas */
+  }
+}
+
+@media (max-width: 600px) {
+  .serviceCard {
+      margin: 0 auto; /* Centra la tarjeta en pantallas pequeñas si no está en un grid */
+      max-width: 350px; /* Limita el ancho en pantallas pequeñas */
+  }
+
+  .categoryBadge {
+      font-size: 0.8rem;
+      padding: 5px 10px;
+      top: 10px;
+      left: 10px;
+  }
+
+  .content {
+      padding: 15px 20px;
+  }
+
+  .title {
+      font-size: 1.5rem;
+  }
+
+  .description {
+      font-size: 0.9rem;
+  }
+
+  .detailsGrid {
+      grid-template-columns: 1fr; /* Una columna en pantallas pequeñas */
+      gap: 8px;
+      margin-top: 10px;
+      padding-top: 10px;
+  }
+
+  .detailItem {
+      font-size: 0.85rem;
+      gap: 8px;
+  }
+
+  .detailIcon {
+      font-size: 1rem;
+  }
+
+  .footer {
+      flex-direction: column;
+      align-items: stretch; /* Estira los elementos para ocupar el ancho */
+      padding: 15px 20px;
+      gap: 15px; /* Espacio entre precio y botón */
+  }
+
+  .price {
+      font-size: 1.4rem;
+      text-align: center;
+      justify-content: center; /* Centra el precio */
+  }
+
+  .bookButton {
+      width: 100%; /* Ocupa todo el ancho disponible */
+      padding: 10px 20px;
+      font-size: 0.95rem;
+      justify-content: center; /* Centra el texto y el icono del botón */
+  }
+}
+
+@media (max-width: 380px) {
+  .title {
+      font-size: 1.3rem;
+  }
+  .description {
+      font-size: 0.85rem;
+  }
+  .price {
+      font-size: 1.2rem;
+  }
+  .bookButton {
+      font-size: 0.9rem;
+      padding: 8px 15px;
+  }
 }

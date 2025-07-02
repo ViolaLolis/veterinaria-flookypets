@@ -1,69 +1,54 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react'; 
 import { useParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import styles from './Styles/HistorialMedico.module.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faStethoscope, faFileMedicalAlt, faPrint, faDownload, faSearch, faChevronDown, faChevronUp, faCalendarAlt, faSpinner, faInfoCircle } from '@fortawesome/free-solid-svg-icons';
-import { authFetch } from './api';
+import { 
+  faStethoscope, faFileMedicalAlt, faPrint, faDownload, faSearch, 
+  faChevronDown, faChevronUp, faCalendarAlt 
+} from '@fortawesome/free-solid-svg-icons';
 
-const HistorialMedico = ({ user }) => {
+const historialLocal = [
+  {
+    id_historial: 1,
+    fecha_consulta: '2024-06-01',
+    diagnostico: 'Gastroenteritis',
+    tratamiento: 'Antibióticos y dieta blanda',
+    observaciones: 'Recuperación lenta pero estable',
+    peso_actual: 10.5,
+    temperatura: 38.5,
+    proxima_cita: '2024-06-15',
+    veterinario_nombre: 'Dr. Pérez'
+  },
+  {
+    id_historial: 2,
+    fecha_consulta: '2024-03-20',
+    diagnostico: 'Vacunación anual',
+    tratamiento: 'Vacuna antirrábica',
+    observaciones: '',
+    peso_actual: 10.2,
+    temperatura: 38.3,
+    proxima_cita: '2025-03-20',
+    veterinario_nombre: 'Dra. Gómez'
+  },
+  // Puedes agregar más datos aquí
+];
+
+const HistorialMedico = () => {
   const { mascotaId } = useParams();
-  const [historial, setHistorial] = useState([]);
   const [expandedRow, setExpandedRow] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
-
-  const fetchHistorial = useCallback(async () => {
-    setIsLoading(true);
-    setError('');
-    try {
-      const response = await authFetch(`/historial_medico?id_mascota=${mascotaId}`);
-      if (response.success) {
-        setHistorial(response.data);
-      } else {
-        setError(response.message || 'Error al cargar el historial médico.');
-      }
-    } catch (err) {
-      console.error("Error fetching historial:", err);
-      setError('Error de conexión al servidor.');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [mascotaId]);
-
-  useEffect(() => {
-    fetchHistorial();
-  }, [fetchHistorial]);
 
   const toggleRow = (id) => {
     setExpandedRow(expandedRow === id ? null : id);
   };
 
-  const filteredHistorial = historial.filter(item =>
+  const filteredHistorial = historialLocal.filter(item =>
     item.diagnostico.toLowerCase().includes(searchTerm.toLowerCase()) ||
     item.tratamiento.toLowerCase().includes(searchTerm.toLowerCase()) ||
     item.observaciones.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (item.veterinario_nombre && item.veterinario_nombre.toLowerCase().includes(searchTerm.toLowerCase()))
   );
-
-  if (isLoading) {
-    return (
-      <div className={styles.loadingContainer}>
-        <FontAwesomeIcon icon={faSpinner} spin className={styles.spinnerIcon} />
-        <p>Cargando historial médico...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className={styles.errorMessage}>
-        <FontAwesomeIcon icon={faInfoCircle} className={styles.infoIcon} />
-        <p>{error}</p>
-      </div>
-    );
-  }
 
   return (
     <motion.div
@@ -175,7 +160,7 @@ const HistorialMedico = ({ user }) => {
                       </div>
                     )}
                     <div className={styles.cardActions}>
-                      <Link to={`/usuario/historial/${mascotaId}/${item.id_historial}`} className={styles.smallActionButton}> {/* CORREGIDO */}
+                      <Link to={`/usuario/historial/${mascotaId}/${item.id_historial}`} className={styles.smallActionButton}>
                         Ver Detalles
                       </Link>
                     </div>

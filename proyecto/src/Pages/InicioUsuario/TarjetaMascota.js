@@ -187,15 +187,7 @@ const TarjetaMascota = ({ mascota: propMascota }) => { // Cambiado el nombre de 
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
-          <FontAwesomeIcon icon={faEye} /> Ver Perfil
-        </motion.button>
-        {/* Botón "Editar" */}
-        <motion.button
-          onClick={handleEditPet}
-          className={styles.petCardButton}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-        >
+
           <FontAwesomeIcon icon={faEdit} /> Editar
         </motion.button>
         {/* Botón "Historial" */}

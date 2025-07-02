@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import styles from './Styles/AgendarCita.module.css';
-import { useNavigate, useLocation, Link, useOutletContext } from 'react-router-dom'; // Importa useOutletContext
+import { useNavigate, useLocation, Link, useOutletContext } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faArrowLeft,
@@ -14,12 +14,11 @@ import {
   faClock,
   faCheckCircle,
   faSpinner,
-  faTimesCircle // Asegúrate de importar faTimesCircle para errores
+  faTimesCircle
 } from '@fortawesome/free-solid-svg-icons';
-import { authFetch } from './api';
 
 const AgendarCita = () => {
-  const { user, showNotification } = useOutletContext(); // Obtiene user y showNotification del contexto del Outlet
+  const { user, showNotification } = useOutletContext();
   const [date, setDate] = useState(new Date());
   const [selectedTime, setSelectedTime] = useState('');
   const [citaAgendada, setCitaAgendada] = useState(false);
@@ -36,65 +35,50 @@ const AgendarCita = () => {
   const location = useLocation();
 
   const horariosDisponibles = [
-    '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'
+    '09:00', '10:00', '11:00', '12:00', '13:00',
+    '14:00', '15:00', '16:00', '17:00'
   ];
 
   const fetchInitialData = useCallback(async () => {
     setLoading(true);
-    setErrorSeleccion(null); // Usamos errorSeleccion para errores de carga también
+    setErrorSeleccion(null);
+
     try {
-      const servicioId = location.state?.servicioId; // Obtener el ID del servicio del estado de la ubicación
-      const userId = user?.id;
+      const servicioId = location.state?.servicioId || 1;
 
-      if (!userId) {
-        setErrorSeleccion('No se pudo obtener la información del usuario. Por favor, inicia sesión nuevamente.');
+      const mockServicio = {
+        id_servicio: servicioId,
+        nombre: "Consulta General",
+        descripcion: "Consulta médica general para mascotas.",
+        precio: 500
+      };
+
+      const mockMascotas = [
+        { id_mascota: 1, nombre: 'Firulais', especie: 'Perro' },
+        { id_mascota: 2, nombre: 'Michi', especie: 'Gato' }
+      ];
+
+      const mockVeterinarios = [
+        { id: 101, nombre: 'Laura', apellido: 'Martínez', active: true },
+        { id: 102, nombre: 'Carlos', apellido: 'Ramírez', active: true }
+      ];
+
+      if (!user?.id) {
+        setErrorSeleccion('No se pudo obtener la información del usuario.');
         setLoading(false);
         return;
       }
 
-      let fetchedService = null;
-      if (servicioId) {
-        const serviceRes = await authFetch(`/servicios/${servicioId}`);
-        if (serviceRes.success) {
-          fetchedService = serviceRes.data;
-          setServicio(fetchedService);
-        } else {
-          setErrorSeleccion(serviceRes.message || 'Error al cargar el servicio seleccionado.');
-          setLoading(false);
-          return;
-        }
-      } else {
-        // Si no hay servicioId, se asume que el usuario llegó a esta página sin seleccionar un servicio
-        // Podrías redirigirlo o mostrar un mensaje para que seleccione uno.
-        // Por ahora, lo dejaré para que pueda seleccionar un servicio manualmente si lo deseas.
-        // O podrías hacer que la página de agendar cita sea siempre iniciada desde un servicio.
-      }
-
-      const petsRes = await authFetch(`/mascotas?id_propietario=${userId}`);
-      if (petsRes.success) {
-        setMascotas(petsRes.data);
-      } else {
-        setErrorSeleccion(petsRes.message || 'Error al cargar tus mascotas.');
-        setLoading(false);
-        return;
-      }
-
-      const vetsRes = await authFetch('/usuarios/veterinarios');
-      if (vetsRes.success) {
-        setVeterinarios(vetsRes.data.filter(vet => vet.active));
-      } else {
-        setErrorSeleccion(vetsRes.message || 'Error al cargar los veterinarios.');
-        setLoading(false);
-        return;
-      }
-
+      setServicio(mockServicio);
+      setMascotas(mockMascotas);
+      setVeterinarios(mockVeterinarios.filter(vet => vet.active));
       setLoading(false);
     } catch (err) {
-      console.error("Error fetching initial data for AgendarCita:", err);
-      setErrorSeleccion('Error de conexión al servidor al cargar los datos iniciales.');
+      console.error("Error de datos locales:", err);
+      setErrorSeleccion('Error al cargar los datos locales.');
       setLoading(false);
     }
-  }, [location.state, user, authFetch]);
+  }, [location.state, user]);
 
   useEffect(() => {
     fetchInitialData();
@@ -120,6 +104,7 @@ const AgendarCita = () => {
 
     setIsSubmitting(true);
     setErrorSeleccion('');
+
     try {
       const fechaHora = new Date(date);
       const [hours, minutes] = selectedTime.split(':');
@@ -136,25 +121,18 @@ const AgendarCita = () => {
         estado: 'pendiente'
       };
 
-      const response = await authFetch('/citas', {
-        method: 'POST',
-        body: JSON.stringify(nuevaCita),
-      });
+      console.log('Cita simulada:', nuevaCita);
 
-      if (response.success) {
-        setCitaAgendada(true);
-        showNotification('¡Cita agendada con éxito!', 'success');
-        setTimeout(() => {
-          navigate('/usuario/citas');
-        }, 3000);
-      } else {
-        showNotification(response.message || 'Error al agendar la cita. Por favor, intenta nuevamente.', 'error');
-        setErrorSeleccion(response.message || 'Error al agendar la cita.');
-      }
+      setCitaAgendada(true);
+      showNotification('¡Cita agendada con éxito! (Simulada)', 'success');
+
+      setTimeout(() => {
+        navigate('/usuario/citas');
+      }, 3000);
     } catch (err) {
-      console.error("Error submitting appointment:", err);
-      showNotification('Error de conexión al servidor al agendar la cita.', 'error');
-      setErrorSeleccion('Error de conexión al servidor al agendar la cita.');
+      console.error("Error simulado al crear cita:", err);
+      showNotification('Error al procesar la cita.', 'error');
+      setErrorSeleccion('Error al procesar la cita.');
     } finally {
       setIsSubmitting(false);
     }
@@ -188,12 +166,7 @@ const AgendarCita = () => {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
     >
-      <motion.div
-        className={styles.header}
-        initial={{ y: -20 }}
-        animate={{ y: 0 }}
-        transition={{ type: 'spring', stiffness: 120 }}
-      >
+      <motion.div className={styles.header} initial={{ y: -20 }} animate={{ y: 0 }} transition={{ type: 'spring', stiffness: 120 }}>
         <div className={styles.headerContent}>
           <FontAwesomeIcon icon={faCalendarAlt} className={styles.headerIcon} />
           <h2>Agendar Nueva Cita</h2>
@@ -276,15 +249,11 @@ const AgendarCita = () => {
               className={styles.selectInput}
             >
               <option value="">Sin preferencia</option>
-              {veterinarios.length > 0 ? (
-                veterinarios.map(vet => (
-                  <option key={vet.id} value={vet.id}>
-                    Dr. {vet.nombre} {vet.apellido}
-                  </option>
-                ))
-              ) : (
-                <option value="" disabled>No hay veterinarios disponibles.</option>
-              )}
+              {veterinarios.map(vet => (
+                <option key={vet.id} value={vet.id}>
+                  Dr. {vet.nombre} {vet.apellido}
+                </option>
+              ))}
             </select>
           </div>
         </motion.div>
@@ -333,7 +302,7 @@ const AgendarCita = () => {
       </div>
 
       <AnimatePresence>
-        {errorSeleccion && !citaAgendada && ( // Mostrar error solo si no se ha agendado la cita
+        {errorSeleccion && !citaAgendada && (
           <motion.div
             className={styles.errorMessage}
             initial={{ opacity: 0, y: 20 }}

@@ -1,16 +1,73 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useParams, Link, useNavigate, useOutletContext } from 'react-router-dom'; // Importa useOutletContext
+import React, { useState, useEffect } from 'react';
+import { useParams, Link, useNavigate, useOutletContext } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  FaPaw, FaWeight, FaCalendarAlt, FaArrowLeft, FaSpinner, FaInfoCircle, FaEdit, FaTrash
+  FaPaw,
+  FaWeight,
+  FaCalendarAlt,
+  FaArrowLeft,
+  FaSpinner,
+  FaInfoCircle,
+  FaEdit,
+  FaTrash,
+  FaDog,
+  FaCat
 } from 'react-icons/fa';
-import { faDog, faCat } from '@fortawesome/free-solid-svg-icons';
-import { authFetch } from './api';
 import './Styles/DetalleMascota.css';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-const DetalleMascota = () => { // Ya no recibe user directamente, lo obtiene del contexto
-  const { user, showNotification } = useOutletContext(); // Obtiene user y showNotification del contexto del Outlet
+const mascotasLocales = [
+  {
+    id: '1',
+    nombre: 'Firulais',
+    especie: 'Perro',
+    raza: 'Labrador',
+    edad: 5,
+    peso: 25,
+    sexo: 'Macho',
+    color: 'Negro',
+    microchip: '123456789',
+    propietario_nombre: 'Juan Pérez',
+    id_propietario: '100',
+  },
+  {
+    id: '2',
+    nombre: 'Misu',
+    especie: 'Gato',
+    raza: 'Siames',
+    edad: 3,
+    peso: 4,
+    sexo: 'Hembra',
+    color: 'Blanco',
+    microchip: '',
+    propietario_nombre: 'Ana López',
+    id_propietario: '101',
+  },
+];
+
+const historialLocales = {
+  '1': [
+    {
+      id_historial: '1001',
+      fecha_consulta: '2024-01-15',
+      diagnostico: 'Vacunación anual',
+    },
+    {
+      id_historial: '1002',
+      fecha_consulta: '2023-12-10',
+      diagnostico: 'Chequeo general',
+    },
+  ],
+  '2': [
+    {
+      id_historial: '2001',
+      fecha_consulta: '2024-02-20',
+      diagnostico: 'Desparasitación',
+    },
+  ],
+};
+
+const DetalleMascota = () => {
+  const { user, showNotification } = useOutletContext();
   const { id } = useParams();
   const navigate = useNavigate();
   const [mascota, setMascota] = useState(null);
@@ -20,56 +77,29 @@ const DetalleMascota = () => { // Ya no recibe user directamente, lo obtiene del
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const fetchMascotaDetails = useCallback(async () => {
+  useEffect(() => {
     setIsLoading(true);
     setError(null);
-    try {
-      const mascotaRes = await authFetch(`/mascotas/${id}`);
-      if (mascotaRes.success) {
-        setMascota(mascotaRes.data);
-        const historialRes = await authFetch(`/historial_medico?id_mascota=${id}`);
-        if (historialRes.success) {
-          setHistorial(historialRes.data);
-        } else {
-          setError(historialRes.message || 'Error al cargar el historial médico de la mascota.');
-        }
-      } else {
-        setError(mascotaRes.message || 'Error al cargar los detalles de la mascota.');
-      }
-    } catch (err) {
-      console.error("Error fetching mascota details or historial:", err);
-      setError('Error de conexión al servidor.');
-    } finally {
+
+    const mascotaEncontrada = mascotasLocales.find(m => m.id === id);
+    if (!mascotaEncontrada) {
+      setError('No se encontró la mascota.');
       setIsLoading(false);
+      return;
     }
-  }, [id, authFetch]);
+    setMascota(mascotaEncontrada);
+    setHistorial(historialLocales[id] || []);
+    setIsLoading(false);
+  }, [id]);
 
-  useEffect(() => {
-    fetchMascotaDetails();
-  }, [fetchMascotaDetails]);
-
-  const handleDeleteMascota = async () => {
+  const handleDeleteMascota = () => {
     setIsDeleting(true);
-    setError(null);
-    try {
-      const response = await authFetch(`/mascotas/${id}`, {
-        method: 'DELETE',
-      });
-      if (response.success) {
-        showNotification('Mascota eliminada correctamente.', 'success'); // Usar showNotification
-        navigate('/usuario/mascotas');
-      } else {
-        showNotification(response.message || 'Error al eliminar la mascota.', 'error'); // Usar showNotification
-        setError(response.message || 'Error al eliminar la mascota.');
-      }
-    } catch (err) {
-      console.error("Error deleting mascota:", err);
-      showNotification('Error de conexión al servidor al intentar eliminar la mascota.', 'error'); // Usar showNotification
-      setError('Error de conexión al servidor al intentar eliminar la mascota.');
-    } finally {
+    setTimeout(() => {
+      showNotification('Mascota eliminada correctamente.', 'success');
+      navigate('/usuario/mascotas');
       setIsDeleting(false);
       setShowConfirmDelete(false);
-    }
+    }, 1000);
   };
 
   if (isLoading) {
@@ -93,18 +123,6 @@ const DetalleMascota = () => { // Ya no recibe user directamente, lo obtiene del
     );
   }
 
-  if (!mascota) {
-    return (
-      <div className="no-data-message">
-        <FaInfoCircle className="info-icon" />
-        <p>No se encontró la mascota.</p>
-        <button onClick={() => navigate(-1)} className="detalle-mascota-back">
-          <FaArrowLeft /> Volver
-        </button>
-      </div>
-    );
-  }
-
   const isOwnerOrAdmin = user && (user.id === mascota.id_propietario || user.role === 'admin');
 
   return (
@@ -115,6 +133,7 @@ const DetalleMascota = () => { // Ya no recibe user directamente, lo obtiene del
       transition={{ duration: 0.3 }}
     >
       <h2 className="detalle-mascota-title">Detalles de {mascota.nombre}</h2>
+
       <motion.div
         className="detalle-mascota-info"
         initial={{ y: 20, opacity: 0 }}
@@ -126,7 +145,11 @@ const DetalleMascota = () => { // Ya no recibe user directamente, lo obtiene del
           <p><strong>Nombre:</strong> {mascota.nombre}</p>
         </div>
         <div className="info-item">
-          <FontAwesomeIcon icon={mascota.especie === 'Perro' ? faDog : faCat} className="info-icon" />
+          {mascota.especie === 'Perro' ? (
+            <FaDog className="info-icon" />
+          ) : (
+            <FaCat className="info-icon" />
+          )}
           <p><strong>Especie:</strong> {mascota.especie}</p>
         </div>
         <div className="info-item">

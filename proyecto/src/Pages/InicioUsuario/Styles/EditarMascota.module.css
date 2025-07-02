@@ -1,0 +1,413 @@
+/* --- Variables de Color (Tomadas de InicioDashboard.css para consistencia) --- */
+:root {
+  --primary-color: #00acc1; /* Azul cian vibrante (principal) */
+  --primary-light: #4dd0e1; /* Azul cian más claro para acentos y hover */
+  --primary-dark: #007c91; /* Azul cian más oscuro para sombras profundas y texto principal */
+  --primary-gradient-start: #00bcd4; /* Azul brillante para gradientes */
+  --primary-gradient-end: #00acc1; /* Cian más oscuro para gradientes */
+
+  --text-dark: #333333;
+  --text-light: #666666;
+  --background-light: #f8f9fa; /* Fondo general del dashboard */
+  --background-medium: #e9ecef; /* Fondo para elementos interactivos o secciones */
+  --border-color: #dee2e6; /* Borde general */
+  --success-color: #4CAF50; /* Verde */
+  --error-color: #f44336; /* Rojo */
+  --warning-color: #ff9800; /* Naranja */
+  --info-color: #2196f3; /* Azul para información */
+
+  /* Variables de sombra para consistencia */
+  --shadow-light: rgba(0, 0, 0, 0.04);
+  --shadow-medium: rgba(0, 0, 0, 0.1);
+  --shadow-strong: rgba(0, 0, 0, 0.15); /* Para hover */
+
+  --primary-glow: rgba(0, 172, 193, 0.2); /* Efecto de resplandor para focus */
+}
+
+.editMascota-container {
+  padding: 2.5rem;
+  background-color: var(--background-light);
+  min-height: calc(100vh - var(--header-height, 0px));
+  font-family: 'Roboto', sans-serif;
+  color: var(--text-dark);
+  max-width: 900px; /* Ancho máximo para el formulario */
+  margin: 0 auto; /* Centrar el contenedor */
+  border-radius: 15px;
+  box-shadow: 0 8px 25px var(--shadow-medium); /* Sombra elegante */
+}
+
+.editMascota-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+  position: relative;
+}
+
+.editMascota-backButton {
+  background: none;
+  border: none;
+  color: var(--text-light);
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.editMascota-backButton:hover {
+  color: var(--primary-color);
+  background-color: var(--background-medium);
+  box-shadow: 0 2px 5px var(--shadow-light);
+}
+
+.editMascota-header .icon { /* Mantén .icon para FontAwesome */
+  font-size: 2.5rem;
+  color: var(--primary-color);
+  margin-right: 1rem;
+  margin-left: 3rem;
+}
+
+.editMascota-header h3 {
+  font-size: 2rem;
+  color: var(--primary-dark);
+  margin: 0;
+  font-weight: 700;
+  flex-grow: 1;
+  text-align: center;
+}
+
+.editMascota-infoMessage {
+  background-color: #e0f7fa; /* Un azul claro suave */
+  border: 1px solid #b2ebf2; /* Borde un poco más oscuro */
+  color: #00838f; /* Texto azul oscuro */
+  padding: 1rem 1.5rem;
+  border-radius: 10px;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-size: 0.95rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.editMascota-infoMessage .fa-icon { /* Mantén .fa-icon para FontAwesome */
+  font-size: 1.2rem;
+  color: #00acc1; /* Icono del color primario */
+}
+
+.editMascota-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.editMascota-formGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.editMascota-formGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.editMascota-formGroup label {
+  font-weight: 600;
+  margin-bottom: 0.6rem;
+  color: var(--primary-dark);
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 1rem;
+}
+
+.editMascota-formGroup label .fa-icon { /* Mantén .fa-icon para FontAwesome */
+  color: var(--primary-color);
+  font-size: 1.2rem;
+}
+
+.editMascota-formGroup input[type="text"],
+.editMascota-formGroup input[type="number"],
+.editMascota-formGroup input[type="date"],
+.editMascota-formGroup select {
+  padding: 0.9rem 1.2rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 1rem;
+  color: var(--text-dark);
+  background-color: white;
+  transition: all 0.3s ease;
+  box-shadow: inset 0 1px 3px var(--shadow-light);
+}
+
+.editMascota-formGroup input[type="text"]:focus,
+.editMascota-formGroup input[type="number"]:focus,
+.editMascota-formGroup input[type="date"]:focus,
+.editMascota-formGroup select:focus {
+  outline: none;
+  border-color: var(--primary-light);
+  box-shadow: 0 0 0 3px var(--primary-glow);
+}
+
+/* --- Estilos para Carga de Imagen --- */
+.editMascota-imageUploadGroup {
+  grid-column: 1 / -1; /* Ocupa todo el ancho en el grid */
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Centrar elementos verticalmente */
+  text-align: center;
+  padding: 1.5rem;
+  border: 2px dashed var(--border-color); /* Borde punteado */
+  border-radius: 12px;
+  background-color: white;
+  transition: all 0.3s ease;
+}
+
+.editMascota-imageUploadGroup:hover {
+  border-color: var(--primary-light);
+  background-color: var(--background-medium);
+  box-shadow: 0 4px 10px var(--shadow-light);
+}
+
+.editMascota-hiddenFileInput {
+  display: none; /* Oculta el input de archivo nativo */
+}
+
+.editMascota-uploadButton {
+  background-color: var(--primary-color);
+  /* The color is now explicitly set by .editMascota-whiteText */
+  padding: 0.8rem 1.5rem;
+  border-radius: 50px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 1rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.editMascota-uploadButton:hover {
+  background-color: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+}
+
+/* New class for white text, ensures it overrides other styles */
+.editMascota-whiteText {
+    color: white !important;
+}
+
+
+.editMascota-imagePreviewContainer {
+  position: relative;
+  width: 150px;
+  height: 150px;
+  margin-top: 1.5rem;
+  border-radius: 50%; /* Hacer la previsualización circular */
+  overflow: hidden;
+  border: 3px solid var(--primary-color);
+  box-shadow: 0 4px 15px var(--shadow-medium);
+  transition: all 0.3s ease;
+}
+
+.editMascota-imagePreviewContainer img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Asegura que la imagen cubra el contenedor */
+  display: block;
+}
+
+.editMascota-removeImageButton {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background-color: var(--error-color);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.9rem;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.editMascota-removeImageButton:hover {
+  background-color: #d32f2f; /* darken(var(--error-color), 10%) */
+  transform: scale(1.1);
+}
+
+
+.editMascota-saveButton {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 50px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  font-weight: 600;
+  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+  margin-top: 2rem;
+  align-self: center;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  justify-content: center;
+  box-shadow: 0 6px 15px var(--shadow-medium);
+}
+
+.editMascota-saveButton:hover {
+  background-color: var(--primary-dark);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px var(--shadow-strong);
+}
+
+.editMascota-saveButton:disabled {
+  background-color: var(--background-medium);
+  color: var(--text-light);
+  cursor: not-allowed;
+  opacity: 0.7;
+  box-shadow: none;
+  transform: none;
+}
+
+.editMascota-spinner { /* Renamed spinner for clarity */
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* --- Estados de Carga y Error --- */
+.editMascota-loadingContainer, .editMascota-errorContainer { /* Renamed */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  font-size: 1.2rem;
+  color: var(--text-light);
+}
+
+.editMascota-loadingContainer .spinnerIcon { /* Retain .spinnerIcon for FaSpinner */
+  font-size: 3rem;
+  color: var(--primary-color);
+  animation: spin 1.5s linear infinite;
+  margin-bottom: 1rem;
+}
+
+.editMascota-errorContainer .errorIcon { /* Retain .errorIcon */
+  font-size: 3rem;
+  color: var(--error-color);
+  margin-bottom: 1rem;
+}
+
+.editMascota-errorContainer p {
+  color: var(--error-color);
+  font-weight: 500;
+}
+
+
+/* --- Media Queries para Responsividad --- */
+@media (max-width: 1024px) {
+  .editMascota-container {
+      padding: 2rem;
+  }
+  .editMascota-header h3 {
+      font-size: 1.8rem;
+  }
+  .editMascota-formGrid {
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .editMascota-container {
+      padding: 1.5rem;
+      margin: 1rem;
+  }
+  .editMascota-header {
+      flex-direction: column;
+      align-items: flex-start;
+      text-align: left;
+      padding-bottom: 0.8rem;
+  }
+  .editMascota-backButton {
+      position: static;
+      margin-bottom: 0.5rem;
+      transform: none;
+      align-self: flex-start;
+  }
+  .editMascota-header .icon {
+      margin-left: 0;
+      margin-right: 0.8rem;
+  }
+  .editMascota-header h3 {
+      font-size: 1.6rem;
+      text-align: left;
+  }
+  .editMascota-formGrid {
+      grid-template-columns: 1fr;
+  }
+  .editMascota-formGroup input, .editMascota-formGroup select {
+      padding: 0.8rem 1rem;
+      font-size: 0.95rem;
+  }
+  .editMascota-saveButton {
+      padding: 0.8rem 1.5rem;
+      font-size: 1rem;
+      width: 100%;
+  }
+  .editMascota-imagePreviewContainer {
+      width: 120px;
+      height: 120px;
+  }
+}
+
+@media (max-width: 480px) {
+  .editMascota-container {
+      padding: 1rem;
+      margin: 0.5rem;
+  }
+  .editMascota-header .icon {
+      font-size: 2rem;
+  }
+  .editMascota-header h3 {
+      font-size: 1.4rem;
+  }
+  .editMascota-formGroup label {
+      font-size: 0.9rem;
+  }
+  .editMascota-formGroup label .fa-icon {
+      font-size: 1rem;
+  }
+  .editMascota-formGroup input, .editMascota-formGroup select {
+      padding: 0.7rem 0.9rem;
+      font-size: 0.9rem;
+  }
+  .editMascota-saveButton {
+      padding: 0.7rem 1.2rem;
+      font-size: 0.9rem;
+  }
+  .editMascota-imagePreviewContainer {
+      width: 100px;
+      height: 100px;
+  }
+}
