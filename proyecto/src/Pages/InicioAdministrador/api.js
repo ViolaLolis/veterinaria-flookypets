@@ -1,70 +1,68 @@
 // src/utils/api.js
+// Esta función centraliza las llamadas a la API con autenticación JWT.
+
+// URL base de tu backend (asegúrate de que sea la correcta para tu entorno)
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 /**
- * Función centralizada para realizar peticiones fetch con autenticación JWT.
- * Agrega automáticamente el token de autorización y maneja errores de respuesta HTTP.
- * @param {string} endpoint - El endpoint de la API (ej: '/servicios', '/usuarios/veterinarios').
- * Se asume que es una ruta relativa a 'http://localhost:5000'.
- * @param {object} options - Opciones para la petición fetch (método, cuerpo, encabezados adicionales).
- * @returns {Promise<object>} Los datos de la respuesta JSON.
- * @throws {Error} Si no se encuentra el token o si la respuesta de la red no es OK.
+ * Realiza una solicitud HTTP autenticada a la API.
+ * @param {string} endpoint La ruta de la API (ej. '/usuarios', '/citas/123').
+ * @param {object} options Opciones de la solicitud (method, body, headers, etc.).
+ * @returns {Promise<object>} La respuesta parseada del servidor.
  */
 export const authFetch = async (endpoint, options = {}) => {
-    const token = localStorage.getItem('token');
-    
-    // Si no hay token, lanza un error que será capturado por el componente que llama
-    if (!token) {
-        console.error('Auth Error: No se encontró token de autenticación.');
-        throw new Error('No se encontró token de autenticación. Por favor, inicie sesión nuevamente.');
+  const user = JSON.parse(localStorage.getItem('user'));
+  const token = user ? user.token : null;
+
+  const headers = {
+    'Content-Type': 'application/json',
+    ...options.headers, // Permite sobrescribir headers si es necesario
+  };
+
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  // Si el método es GET o HEAD, el body no debe enviarse.
+  // Si el body es un objeto, lo stringify. Si es FormData, no lo stringify.
+  let body = options.body;
+  if (body && typeof body === 'object' && !(body instanceof FormData)) {
+    body = JSON.stringify(body);
+  } else if (options.method === 'GET' || options.method === 'HEAD') {
+    body = undefined; // Asegura que no se envíe body con GET/HEAD
+  }
+
+  try {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      ...options,
+      headers,
+      body: body,
+    });
+
+    // Si la respuesta es 204 No Content, no intentes parsear JSON
+    if (response.status === 204) {
+      return { success: true, message: "Operación completada sin contenido de respuesta." };
     }
 
-    // Encabezados predeterminados para todas las peticiones autenticadas
-    const defaultHeaders = {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}` // Incluye el token JWT
-    };
+    const data = await response.json();
 
-    // Combina las opciones predeterminadas con las opciones proporcionadas por la llamada
-    const config = {
-        ...options,
-        headers: {
-            ...defaultHeaders,
-            ...options.headers // Permite sobrescribir o añadir encabezados adicionales
-        }
-    };
-
-    // Si hay un cuerpo en la petición y no es una cadena (ya stringificada)
-    if (options.body && typeof options.body !== 'string') {
-        config.body = JSON.stringify(options.body);
+    if (!response.ok) {
+      // Manejo de errores específicos de la API (ej. 401, 403)
+      if (response.status === 401 || response.status === 403) {
+        // Aquí podrías añadir lógica para cerrar sesión automáticamente
+        // si el token es inválido o ha expirado.
+        // Por ahora, solo logueamos el error.
+        console.error("Error de autenticación/autorización:", data.message);
+        // Podrías disparar un evento o usar un contexto de autenticación para un logout global
+        // Por ejemplo: if (typeof window !== 'undefined' && localStorage.getItem('user')) { /* logout logic */ }
+      }
+      return { success: false, message: data.message || `Error: ${response.statusText}` };
     }
 
-    try {
-        const response = await fetch(`http://localhost:5000${endpoint}`, config);
+    return { success: true, data: data.data, message: data.message };
 
-        // Si la respuesta no es exitosa (ej. 401, 403, 404, 500), lanza un error
-        if (!response.ok) {
-            let errorData = {};
-            try {
-                // Intenta parsear el cuerpo del error como JSON
-                errorData = await response.json(); 
-            } catch (jsonError) {
-                // Si no se puede parsear JSON, usa el texto de la respuesta o un mensaje genérico
-                const textError = await response.text();
-                errorData = { message: textError || response.statusText };
-            }
-            
-            // Si el backend envía un 'error' (stack trace en development) o un 'message', úsalo.
-            // Si no, usa el mensaje de estado HTTP.
-            const errorMessage = errorData.error || errorData.message || `Error ${response.status}: ${response.statusText}`;
-            
-            console.error(`API Error for ${endpoint}:`, errorMessage, errorData);
-            throw new Error(errorMessage);
-        }
-
-        // Retorna la respuesta JSON si la petición fue exitosa
-        return response.json();
-    } catch (networkError) {
-        console.error(`Network or unexpected error for ${endpoint}:`, networkError);
-        throw new Error(`Error de red o conexión: ${networkError.message}`);
-    }
+  } catch (error) {
+    console.error(`Error en authFetch para ${endpoint}:`, error);
+    return { success: false, message: `Error de conexión: ${error.message}` };
+  }
 };

@@ -61,98 +61,118 @@ import UserProfile from "./Pages/InicioAdministrador/UserProfile";
 // Componente para proteger rutas
 import { Protegida } from "./Seguridad/Protegidos.js";
 
+// Importar el proveedor de notificaciones
+import { NotificationProvider } from "./Notifications/NotificationContext.js";
+// Importar el componente para mostrar las notificaciones
+import NotificationDisplay from "./Notifications/NotificationDisplay.js";
+
+
 function App() {
   const [user, setUser] = React.useState(() => {
     const savedUser = localStorage.getItem('user');
     return savedUser ? JSON.parse(savedUser) : null;
   });
 
+  // Función para cerrar sesión de forma segura
+  const handleLogout = () => {
+    setUser(null); // Limpia el estado del usuario en la aplicación
+    localStorage.removeItem('user'); // Elimina el usuario de localStorage
+    // Opcional: Redirigir a la página de inicio de sesión o a la página principal
+    // navigate('/login'); // Si usas useNavigate hook, pero aquí estamos en App.js
+  };
+
   return (
     <Router>
-      <Routes>
-        {/* Rutas públicas */}
-        <Route path="/" element={<Main />} />
-        <Route path="/login" element={<Login setUser={setUser} />} />
-        <Route path="/olvide-contraseña" element={<ForgotPassword />} />
-        <Route path="/register" element={<Registro />} />
+      {/* Envuelve toda la aplicación con el proveedor de notificaciones */}
+      <NotificationProvider>
+        {/* Componente para mostrar las notificaciones globalmente */}
+        <NotificationDisplay />
 
-        {/* Rutas de administrador */}
-        <Route element={<Protegida user={user} allowedRoles={['admin']} />}>
-          <Route path="/admin" element={<AdminDashboard user={user} setUser={setUser} />}>
-            <Route index element={<AdminStats user={user} />} />
-            <Route path="dashboard" element={<AdminStats user={user} />} />
-            <Route path="services" element={<ServicesManagement user={user} />} />
-            <Route path="veterinarians" element={<VetsManagement user={user} />} />
-            <Route path="administrators" element={<AdminsManagement user={user} />} />
-            <Route path="users" element={<AdminUsers user={user} />} />
-            <Route path="users/:userId" element={<AdminUserDetail user={user} />} />
-            <Route path="appointments" element={<AdminAppointments user={user} />} />
-            <Route path="medical-records" element={<AdminMedicalRecords user={user} />} />
-            <Route path="settings" element={<AdminSettings user={user} />} />
-            <Route path="profile" element={<UserProfile user={user} setUser={setUser} />} />
+        <Routes>
+          {/* Rutas públicas */}
+          {/* Pasamos handleLogout a Login para que pueda cerrar sesión si es necesario (ej. token inválido) */}
+          <Route path="/" element={<Main />} />
+          <Route path="/login" element={<Login setUser={setUser} handleLogout={handleLogout} />} />
+          <Route path="/olvide-contraseña" element={<ForgotPassword />} />
+          <Route path="/register" element={<Registro />} />
+
+          {/* Rutas de administrador */}
+          <Route element={<Protegida user={user} allowedRoles={['admin']} />}>
+            <Route path="/admin" element={<AdminDashboard user={user} setUser={setUser} handleLogout={handleLogout} />}>
+              <Route index element={<AdminStats user={user} />} />
+              <Route path="dashboard" element={<AdminStats user={user} />} />
+              <Route path="services" element={<ServicesManagement user={user} />} />
+              <Route path="veterinarians" element={<VetsManagement user={user} />} />
+              <Route path="administrators" element={<AdminsManagement user={user} />} />
+              <Route path="users" element={<AdminUsers user={user} />} />
+              <Route path="users/:userId" element={<AdminUserDetail user={user} />} />
+              <Route path="appointments" element={<AdminAppointments user={user} />} />
+              <Route path="medical-records" element={<AdminMedicalRecords user={user} />} />
+              <Route path="settings" element={<AdminSettings user={user} />} />
+              <Route path="profile" element={<UserProfile user={user} setUser={setUser} />} />
+            </Route>
           </Route>
-        </Route>
 
-        {/* Rutas de veterinario */}
-        <Route element={<Protegida user={user} allowedRoles={['veterinario', 'admin']} />}>
-          {/* MainVeterinario ahora recibe user y setUser */}
-          <Route path="/veterinario" element={<MainVeterinario user={user} setUser={setUser} />}>
-            <Route index element={<NavegacionVeterinario />} />
-            <Route path="navegacion" element={<NavegacionVeterinario />} />
-            <Route path="propietarios" element={<ListaPropietarios />} />
-            <Route path="propietarios/registrar" element={<RegistrarPropietario />} />
-            <Route path="propietarios/:id" element={<DetallePropietario />} />
-            <Route path="propietarios/editar/:id" element={<EditarPropietario />} />
-            <Route path="mascotas" element={<ListaMascotasVeterinario />} />
-            <Route path="mascotas/:id" element={<DetalleMascotaVeterinario />} />
-            <Route path="mascotas/registrar" element={<RegistrarMascotaVeterinario />} />
-            <Route path="mascotas/editar/:id" element={<EditarMascotaVeterinario />} />
-            <Route path="citas" element={<ListaCitasVeterinario />} />
-            <Route path="citas/agendar" element={<CrearCitaVeterinario />} />
-            <Route path="citas/:id" element={<DetalleCitaVeterinario />} />
-            <Route path="historiales" element={<ListaHistorialesVeterinario />} />
-            <Route path="historiales/registrar" element={<RegistrarHistorialMedico />} />
-            <Route path="historiales/:id" element={<DetalleHistorialVeterinario />} />
-            <Route path="historiales/editar/:id" element={<EditarHistorialMedico />} />
-            <Route path="perfil" element={<VerPerfilVeterinario setUser={setUser} />} />
-            <Route path="perfil/editar" element={<EditarPerfilVeterinario />} />
-            <Route path="configuracion" element={<ConfiguracionVeterinario />} />
+          {/* Rutas de veterinario */}
+          <Route element={<Protegida user={user} allowedRoles={['veterinario', 'admin']} />}>
+            <Route path="/veterinario" element={<MainVeterinario user={user} setUser={setUser} handleLogout={handleLogout} />}>
+              <Route index element={<NavegacionVeterinario />} />
+              <Route path="navegacion" element={<NavegacionVeterinario />} />
+              <Route path="propietarios" element={<ListaPropietarios />} />
+              <Route path="propietarios/registrar" element={<RegistrarPropietario />} />
+              <Route path="propietarios/:id" element={<DetallePropietario />} />
+              <Route path="propietarios/editar/:id" element={<EditarPropietario />} />
+              <Route path="mascotas" element={<ListaMascotasVeterinario />} />
+              <Route path="mascotas/:id" element={<DetalleMascotaVeterinario />} />
+              <Route path="mascotas/registrar" element={<RegistrarMascotaVeterinario />} />
+              <Route path="mascotas/editar/:id" element={<EditarMascotaVeterinario />} />
+              <Route path="citas" element={<ListaCitasVeterinario />} />
+              <Route path="citas/agendar" element={<CrearCitaVeterinario />} />
+              <Route path="citas/:id" element={<DetalleCitaVeterinario />} />
+              <Route path="historiales" element={<ListaHistorialesVeterinario />} />
+              <Route path="historiales/registrar" element={<RegistrarHistorialMedico />} />
+              <Route path="historiales/:id" element={<DetalleHistorialVeterinario />} />
+              <Route path="historiales/editar/:id" element={<EditarHistorialMedico />} />
+              <Route path="perfil" element={<VerPerfilVeterinario setUser={setUser} />} />
+              <Route path="perfil/editar" element={<EditarPerfilVeterinario />} />
+              <Route path="configuracion" element={<ConfiguracionVeterinario />} />
+            </Route>
           </Route>
-        </Route>
 
-        {/* Rutas de usuario (InicioUsuario como layout principal) */}
-        <Route element={<Protegida user={user} allowedRoles={['usuario']} />}>
-          <Route path="/usuario" element={<InicioUsuario user={user} setUser={setUser} />}>
-            {/* Rutas anidadas que se renderizarán dentro del <Outlet /> de InicioUsuario */}
-            <Route index element={<HomeDashboard />} />
+          {/* Rutas de usuario (InicioUsuario como layout principal) */}
+          <Route element={<Protegida user={user} allowedRoles={['usuario']} />}>
+            <Route path="/usuario" element={<InicioUsuario user={user} setUser={setUser} handleLogout={handleLogout} />}>
+              {/* Rutas anidadas que se renderizarán dentro del <Outlet /> de InicioUsuario */}
+              <Route index element={<HomeDashboard />} />
 
-            {/* Rutas de Mascotas */}
-            <Route path="mascotas" element={<ListaMascotasUsuario user={user} />} />
-            <Route path="mascotas/:id" element={<DetalleMascota user={user} />} />
-            <Route path="mascotas/editar/:id" element={<EditarMascota user={user} />} />
+              {/* Rutas de Mascotas */}
+              <Route path="mascotas" element={<ListaMascotasUsuario user={user} />} />
+              <Route path="mascotas/:id" element={<DetalleMascota user={user} />} />
+              <Route path="mascotas/editar/:id" element={<EditarMascota user={user} />} />
 
-            {/* Rutas de Citas */}
-            <Route path="citas" element={<CitasUsuario user={user} />} />
-            <Route path="citas/agendar" element={<AgendarCita user={user} />} />
-            <Route path="citas/:id" element={<DetalleCita user={user} />} /> {/* RUTA PARA DETALLE CITA */}
+              {/* Rutas de Citas */}
+              <Route path="citas" element={<CitasUsuario user={user} />} />
+              <Route path="citas/agendar" element={<AgendarCita user={user} />} />
+              <Route path="citas/:id" element={<DetalleCita user={user} />} />
 
-            {/* Rutas de Servicios */}
-            <Route path="servicios" element={<ServiciosVeterinaria user={user} />} />
-            <Route path="servicios/:id" element={<DetalleServicio user={user} />} />
+              {/* Rutas de Servicios */}
+              <Route path="servicios" element={<ServiciosVeterinaria user={user} />} />
+              <Route path="servicios/:id" element={<DetalleServicio user={user} />} />
 
-            {/* Rutas de Perfil y Historial Médico - ANIDADAS DENTRO DE /usuario para usar el mismo layout */}
-            <Route path="perfil" element={<PerfilUsuario user={user} setUser={setUser} />} />
-            <Route path="perfil/editar" element={<EditarPerfil user={user} setUser={setUser} />} />
-            <Route path="perfil/configuracion" element={<ConfiguracionPerfil user={user} setUser={setUser} />} />
-            <Route path="historial/:mascotaId" element={<HistorialMedico user={user} />} />
-            <Route path="historial/:mascotaId/:historialId" element={<DetalleHistorial user={user} />} />
+              {/* Rutas de Perfil y Historial Médico - ANIDADAS DENTRO DE /usuario para usar el mismo layout */}
+              <Route path="perfil" element={<PerfilUsuario user={user} setUser={setUser} />} />
+              <Route path="perfil/editar" element={<EditarPerfil user={user} setUser={setUser} />} />
+              <Route path="perfil/configuracion" element={<ConfiguracionPerfil user={user} setUser={setUser} />} />
+              <Route path="historial/:mascotaId" element={<HistorialMedico user={user} />} />
+              <Route path="historial/:mascotaId/:historialId" element={<DetalleHistorial user={user} />} />
 
+            </Route>
           </Route>
-        </Route>
 
-        {/* Ruta de fallback */}
-        <Route path="*" element={<Main />} />
-      </Routes>
+          {/* Ruta de fallback */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </NotificationProvider>
     </Router>
   );
 }

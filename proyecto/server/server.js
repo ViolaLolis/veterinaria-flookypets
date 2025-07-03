@@ -49,7 +49,7 @@ app.use(fileUpload({
 const pool = mysql.createPool({
     host: process.env.DB_HOST || "127.0.0.1",
     user: process.env.DB_USER || "root",
-    password: process.env.DB_PASSWORD || "", // Asegúrate de que tu contraseña de MySQL sea correcta aquí o en .env
+    password: process.env.DB_PASSWORD || "12345678", // Asegúrate de que tu contraseña de MySQL sea correcta aquí o en .env
     database: process.env.DB_NAME || "veterinaria",
     waitForConnections: true,
     connectionLimit: 10,
@@ -812,7 +812,7 @@ app.put("/api/admin/administrators/:id", authenticateToken, isAdmin, async (req,
         res.json({
             success: true,
             message: "Administrador actualizado correctamente",
-            data: updatedAdmin[0]
+            data: newAdmin[0]
         });
     } catch (error) {
         console.error("Error al actualizar administrador:", error);
@@ -1328,6 +1328,9 @@ app.delete("/usuarios/:id", authenticateToken, isAdmin, async (req, res) => {
 
         // Eliminar mascotas del usuario
         await pool.query("DELETE FROM mascotas WHERE id_propietario = ?", [id]);
+
+        // Eliminar notificaciones asociadas al usuario
+        await pool.query("DELETE FROM notificaciones WHERE id_usuario = ?", [id]); // *** NUEVA LÍNEA AÑADIDA ***
 
         // Finalmente, eliminar el usuario
         const [result] = await pool.query("DELETE FROM usuarios WHERE id = ?", [id]);
@@ -2092,7 +2095,9 @@ app.get("/notifications/user/:id", authenticateToken, async (req, res) => {
     }
     try {
         const [notifications] = await pool.query(
-            `SELECT id_notificacion, id_usuario, tipo, mensaje, leida, fecha_creacion, referencia_id
+            `SELECT id_notificacion, id_usuario, tipo, mensaje, leida,
+                    DATE_FORMAT(fecha_creacion, '%Y-%m-%d %H:%i:%s') as fecha_creacion,
+                    referencia_id
              FROM notificaciones
              WHERE id_usuario = ?
              ORDER BY fecha_creacion DESC`,

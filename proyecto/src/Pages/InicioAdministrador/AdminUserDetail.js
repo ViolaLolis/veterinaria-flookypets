@@ -1,284 +1,297 @@
+// src/Pages/InicioAdministrador/AdminUserDetail.js
 import React, { useState, useEffect, useCallback } from 'react';
-import { FaTimes, FaSpinner, FaInfoCircle, FaUser, FaPaw, FaCalendarAlt, FaWeight, FaRulerCombined, FaPalette, FaMicrochip, FaVenusMars, FaBirthdayCake, FaPhone, FaMapMarkerAlt, FaIdCard, FaEnvelope } from 'react-icons/fa'; // Agregué FaEnvelope para el email
-import { motion } from 'framer-motion';
-import { authFetch } from './api'; // Asegúrate de que la ruta sea correcta a tu api.js
-import './Styles/AdminStyles.css'; // Estilos generales de administración
-/**
- * Componente AdminUserDetail
- * Muestra los detalles completos de un usuario y sus mascotas asociadas en un modal.
- * @param {object} props - Propiedades del componente.
- * @param {number} props.userId - ID del usuario a mostrar.
- * @param {object} props.user - Objeto del usuario logueado (para authFetch).
- * @param {function} props.onClose - Función para cerrar el modal.
- */
-function AdminUserDetail({ userId, user, onClose }) {
-    // Estados para almacenar la información del usuario, sus mascotas, carga y errores
-    const [userDetails, setUserDetails] = useState(null);
-    const [userPets, setUserPets] = useState([]);
+import { useParams, useNavigate } from 'react-router-dom';
+import { FaUser, FaEdit, FaSpinner, FaInfoCircle, FaSave, FaTimes, FaCamera } from 'react-icons/fa';
+import { authFetch } from './api'; // Asegúrate de que la ruta sea correcta
+import './Styles/AdminUser.css'; // Asegúrate de que este CSS exista
+import { useNotifications } from '../../Notifications/NotificationContext'; // Importa el hook de notificaciones
+
+function AdminUserDetail({ user }) {
+    const { userId } = useParams();
+    const navigate = useNavigate();
+    const [userData, setUserData] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
+    const [isEditing, setIsEditing] = useState(false);
+    const [formData, setFormData] = useState({});
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [selectedImage, setSelectedImage] = useState(null); // Para la nueva imagen
+    const { addNotification } = useNotifications(); // Usa el hook de notificaciones
 
-    /**
-     * Función para formatear la fecha de YYYY-MM-DD a DD/MM/YYYY.
-     * Si la fecha incluye información de tiempo, también la formatea.
-     * @param {string} dateString - La fecha en formato 'YYYY-MM-DD' o 'YYYY-MM-DD HH:MM:SS'.
-     * @returns {string} La fecha en formato 'DD/MM/YYYY' o 'N/A' si es inválida.
-     */
-    const formatDate = (dateString) => {
-        if (!dateString) return 'N/A';
-        try {
-            // Intenta parsear como fecha ISO para manejar diferentes formatos de backend
-            const date = new Date(dateString);
-
-            // Verifica si la fecha es válida. Si Date() recibe una cadena inválida, retorna "Invalid Date"
-            if (isNaN(date.getTime())) {
-                // Si falla, intenta un parseo manual para el formato YYYY-MM-DD
-                const parts = dateString.split(' ')[0].split('-'); // Toma solo la parte de la fecha
-                if (parts.length === 3) {
-                    const [year, month, day] = parts;
-                    return `${day}/${month}/${year}`;
-                }
-                return 'Formato de fecha inválido'; // No se pudo formatear
-            }
-
-            const day = String(date.getUTCDate()).padStart(2, '0');
-            const month = String(date.getUTCMonth() + 1).padStart(2, '0'); // Meses son 0-index
-            const year = date.getUTCFullYear();
-            return `${day}/${month}/${year}`;
-        } catch (e) {
-            console.error("Error formatting date:", e);
-            return 'Error de formato';
-        }
-    };
-
-
-    /**
-     * useCallback para la carga de datos del usuario y sus mascotas.
-     * Se ejecuta cuando userId o el token del usuario cambian.
-     */
     const fetchUserData = useCallback(async () => {
-        if (!userId || !user?.token) {
-            setError('No se pudo cargar la información del usuario. ID o token no proporcionados.');
-            setIsLoading(false);
-            return;
-        }
-
         setIsLoading(true);
         setError('');
         try {
-            // 1. Obtener detalles del usuario
-            const userResponse = await authFetch(`/usuarios/${userId}`);
-            if (userResponse.success && userResponse.data) {
-                setUserDetails(userResponse.data);
+            const responseData = await authFetch(`/usuarios/${userId}`); // Endpoint para detalles de usuario
+            if (responseData.success && responseData.data) {
+                setUserData(responseData.data);
+                setFormData(responseData.data); // Inicializa formData con los datos del usuario
             } else {
-                setError(userResponse.message || 'Error al cargar detalles del usuario.');
-                setIsLoading(false);
-                return; // Detener si no se puede cargar el usuario
+                addNotification('error', responseData.message || 'Error al cargar los detalles del usuario.', 5000);
+                setError(responseData.message || 'Usuario no encontrado.');
             }
-
-            // 2. Obtener mascotas del usuario
-            // Asegúrate de que tu backend soporta el filtro por id_propietario
-            const petsResponse = await authFetch(`/mascotas?id_propietario=${userId}`);
-            if (petsResponse.success && Array.isArray(petsResponse.data)) {
-                setUserPets(petsResponse.data);
-            } else {
-                console.warn('No se pudieron cargar las mascotas del usuario o no hay mascotas.');
-                setUserPets([]); // Asegurarse de que sea un array vacío si falla
-            }
-
         } catch (err) {
-            console.error('Error fetching user and pet details:', err);
-            setError(`Error al cargar datos: ${err.message}`);
+            setError(`Error de conexión al cargar usuario: ${err.message}`);
+            addNotification('error', `Error de conexión: ${err.message}`, 5000);
+            console.error('Error fetching user details:', err);
         } finally {
             setIsLoading(false);
         }
-    }, [userId, user, authFetch]);
+    }, [userId, authFetch, addNotification]);
 
-    // Efecto para llamar a la función de carga de datos al montar o cambiar dependencias
     useEffect(() => {
-        fetchUserData();
-    }, [fetchUserData]);
+        if (user && user.token) {
+            fetchUserData();
+        } else {
+            setError('No autorizado. Por favor, inicie sesión.');
+            setIsLoading(false);
+        }
+    }, [user, fetchUserData]);
 
-    // Renderizado del componente
+    const handleFormChange = useCallback((e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    }, []);
+
+    const handleImageChange = useCallback((e) => {
+        if (e.target.files && e.target.files[0]) {
+            setSelectedImage(e.target.files[0]);
+        }
+    }, []);
+
+    const handleSave = useCallback(async (e) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+        setError('');
+
+        let imageUrlToSave = formData.imagen_url;
+
+        try {
+            if (selectedImage) {
+                const uploadFormData = new FormData();
+                uploadFormData.append('image', selectedImage);
+                const uploadResponse = await authFetch('/upload-image', {
+                    method: 'POST',
+                    body: uploadFormData,
+                    headers: {
+                        // No Content-Type aquí, el navegador lo establecerá automáticamente para FormData
+                        'Content-Type': undefined // Importante para que fetch no lo ponga como application/json
+                    }
+                });
+
+                if (uploadResponse.success) {
+                    imageUrlToSave = uploadResponse.imageUrl;
+                    addNotification('success', 'Imagen de perfil actualizada correctamente.', 3000);
+                } else {
+                    addNotification('error', uploadResponse.message || 'Error al subir la imagen.', 5000);
+                    setIsSubmitting(false);
+                    return; // Detener el proceso si la subida de imagen falla
+                }
+            }
+
+            const payload = { ...formData, imagen_url: imageUrlToSave };
+            // Eliminar campos que no se deben enviar o que el backend no espera
+            delete payload.id; // El ID va en la URL
+            delete payload.created_at;
+            delete payload.role; // El rol no debe ser editable desde aquí
+            delete payload.password; // La contraseña se maneja por separado si se actualiza
+
+            const response = await authFetch(`/usuarios/${userId}`, {
+                method: 'PUT',
+                body: payload
+            });
+
+            if (response.success) {
+                addNotification('success', response.message || 'Perfil de usuario actualizado correctamente.', 5000);
+                setIsEditing(false);
+                fetchUserData(); // Re-fetch para mostrar los datos actualizados
+            } else {
+                addNotification('error', response.message || 'Error al actualizar el perfil del usuario.', 5000);
+            }
+        } catch (err) {
+            addNotification('error', `Error de conexión: ${err.message}`, 5000);
+            console.error("Error saving user details:", err);
+        } finally {
+            setIsSubmitting(false);
+            setSelectedImage(null); // Limpiar la imagen seleccionada
+        }
+    }, [userId, formData, selectedImage, authFetch, addNotification, fetchUserData]);
+
+
     if (isLoading) {
         return (
-            <motion.div
-                className="modal-overlay" // Usa overlay para que el spinner esté centrado en la pantalla
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-            >
-                <motion.div
-                    className="modal-content modal-detail-content"
-                    initial={{ y: "-100vh", opacity: 0 }}
-                    animate={{ y: "0", opacity: 1 }}
-                    exit={{ y: "100vh", opacity: 0 }}
-                    transition={{ type: "spring", stiffness: 120, damping: 20 }}
-                >
-                    <div className="loading-container">
-                        <FaSpinner className="spinner-icon" />
-                        <p>Cargando detalles del usuario...</p>
-                    </div>
-                </motion.div>
-            </motion.div>
+            <div className="admin-loading">
+                <div className="loading-spinner">
+                    <FaSpinner className="spinner-icon" />
+                </div>
+                <p>Cargando detalles del cliente...</p>
+            </div>
         );
     }
 
     if (error) {
         return (
-            <motion.div
-                className="modal-overlay"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-            >
-                <motion.div
-                    className="modal-content modal-detail-content"
-                    initial={{ y: "-100vh", opacity: 0 }}
-                    animate={{ y: "0", opacity: 1 }}
-                    exit={{ y: "100vh", opacity: 0 }}
-                    transition={{ type: "spring", stiffness: 120, damping: 20 }}
-                >
-                    <button className="close-modal-btn" onClick={onClose}>
-                        <FaTimes />
-                    </button>
-                    <div className="error-message">
-                        <FaInfoCircle className="icon" />
-                        <p>{error}</p>
-                    </div>
-                    <div className="modal-footer">
-                        <button onClick={onClose} className="cancel-btn">
-                            <FaTimes /> Cerrar
-                        </button>
-                    </div>
-                </motion.div>
-            </motion.div>
+            <div className="error-message">
+                <FaInfoCircle className="info-icon" />
+                {error}
+                <p>Asegúrate de que el backend esté corriendo y los endpoints de API estén accesibles y funcionando correctamente.</p>
+            </div>
         );
     }
 
-    if (!userDetails) {
+    if (!userData) {
         return (
-            <motion.div
-                className="modal-overlay"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-            >
-                <motion.div
-                    className="modal-content modal-detail-content"
-                    initial={{ y: "-100vh", opacity: 0 }}
-                    animate={{ y: "0", opacity: 1 }}
-                    exit={{ y: "100vh", opacity: 0 }}
-                    transition={{ type: "spring", stiffness: 120, damping: 20 }}
-                >
-                    <button className="close-modal-btn" onClick={onClose}>
-                        <FaTimes />
-                    </button>
-                    <div className="no-results">
-                        <FaInfoCircle className="info-icon" />
-                        <p>No se encontraron detalles para este usuario.</p>
-                    </div>
-                    <div className="modal-footer">
-                        <button onClick={onClose} className="cancel-btn">
-                            <FaTimes /> Cerrar
-                        </button>
-                    </div>
-                </motion.div>
-            </motion.div>
+            <div className="no-results">
+                <FaInfoCircle className="info-icon" />
+                No se encontraron datos para este cliente.
+            </div>
         );
     }
 
-    // Renderizado de los detalles del usuario
     return (
-        <motion.div
-            className="modal-content modal-detail-content"
-            initial={{ y: "-100vh", opacity: 0 }}
-            animate={{ y: "0", opacity: 1 }}
-            exit={{ y: "100vh", opacity: 0 }}
-            transition={{ type: "spring", stiffness: 120, damping: 20 }}
-        >
-            <button className="close-modal-btn" onClick={onClose}>
-                <FaTimes />
-            </button>
-            <div className="user-detail-header">
-                <h3><FaUser /> Detalles del Propietario: {userDetails.nombre} {userDetails.apellido}</h3>
-            </div>
-
-            <div className="user-detail-info">
-                <div className="info-item">
-                    <strong>ID:</strong> <span>{userDetails.id}</span>
-                </div>
-                <div className="info-item">
-                    <strong>Email:</strong> <FaEnvelope className="icon" /> <span>{userDetails.email}</span>
-                </div>
-                <div className="info-item">
-                    <strong>Teléfono:</strong> <FaPhone className="icon" /> <span>{userDetails.telefono}</span>
-                </div>
-                <div className="info-item">
-                    <strong>Rol:</strong> <FaUser className="icon" /> <span className="capitalize">{userDetails.role}</span>
-                </div>
-                <div className="info-item">
-                    <strong>Estado:</strong>
-                    <span className={`status-badge ${userDetails.active ? 'active' : 'inactive'}`}>
-                        {userDetails.active ? 'Activo' : 'Inactivo'}
-                    </span>
-                </div>
-                <div className="info-item">
-                    <strong>Dirección:</strong> <FaMapMarkerAlt className="icon" /> <span>{userDetails.direccion || 'N/A'}</span>
-                </div>
-                <div className="info-item">
-                    <strong>Tipo Documento:</strong> <FaIdCard className="icon" /> <span>{userDetails.tipo_documento || 'N/A'}</span>
-                </div>
-                <div className="info-item">
-                    <strong>Número Documento:</strong> <FaIdCard className="icon" /> <span>{userDetails.numero_documento || 'N/A'}</span>
-                </div>
-                <div className="info-item">
-                    <strong>Fecha Nacimiento:</strong> <FaBirthdayCake className="icon" /> <span>{formatDate(userDetails.fecha_nacimiento)}</span>
-                </div>
-                <div className="info-item">
-                    <strong>Registrado:</strong> <FaCalendarAlt className="icon" /> <span>{formatDate(userDetails.created_at)}</span>
+        <div className="admin-content-container admin-user-detail">
+            <div className="admin-content-header">
+                <h2>
+                    <FaUser className="header-icon" />
+                    Detalles del Cliente: {userData.nombre} {userData.apellido}
+                </h2>
+                <div className="header-actions">
+                    {!isEditing ? (
+                        <button className="edit-btn" onClick={() => setIsEditing(true)}>
+                            <FaEdit /> Editar Perfil
+                        </button>
+                    ) : (
+                        <>
+                            <button className="save-btn" onClick={handleSave} disabled={isSubmitting}>
+                                {isSubmitting ? <FaSpinner className="spinner-icon" /> : <FaSave />} Guardar Cambios
+                            </button>
+                            <button className="cancel-btn" onClick={() => setIsEditing(false)} disabled={isSubmitting}>
+                                <FaTimes /> Cancelar
+                            </button>
+                        </>
+                    )}
                 </div>
             </div>
 
-            {/* Sección de Mascotas */}
-            <div className="user-detail-pets">
-                <h4><FaPaw /> Mascotas de {userDetails.nombre}</h4>
-                {userPets.length > 0 ? (
-                    <div className="pets-grid">
-                        {userPets.map(pet => (
-                            <div key={pet.id_mascota} className="pet-card">
-                                <div className="card-header">
-                                    <h3>{pet.nombre}</h3>
-                                    <span className="vet-id">ID: {pet.id_mascota}</span>
-                                </div>
-                                <div className="card-body">
-                                    <div className="info-item"><FaPaw className="icon" /> <strong>Especie:</strong> <span>{pet.especie}</span></div>
-                                    <div className="info-item"><FaVenusMars className="icon" /> <strong>Sexo:</strong> <span>{pet.sexo || 'Desconocido'}</span></div>
-                                    <div className="info-item"><i className="fas fa-dog"></i> <strong>Raza:</strong> <span>{pet.raza || 'N/A'}</span></div>
-                                    <div className="info-item"><FaBirthdayCake className="icon" /> <strong>Edad:</strong> <span>{pet.edad ? `${pet.edad} años` : 'N/A'}</span></div>
-                                    <div className="info-item"><FaWeight className="icon" /> <strong>Peso:</strong> <span>{pet.peso ? `${pet.peso} kg` : 'N/A'}</span></div>
-                                    <div className="info-item"><FaCalendarAlt className="icon" /> <strong>Fecha Nac:</strong> <span>{formatDate(pet.fecha_nacimiento)}</span></div>
-                                    <div className="info-item"><FaPalette className="icon" /> <strong>Color:</strong> <span>{pet.color || 'N/A'}</span></div>
-                                    <div className="info-item"><FaMicrochip className="icon" /> <strong>Microchip:</strong> <span>{pet.microchip || 'N/A'}</span></div>
-                                    <div className="info-item"><FaCalendarAlt className="icon" /> <strong>Registrado:</strong> <span>{formatDate(pet.fecha_registro)}</span></div>
-                                </div>
-                            </div>
-                        ))}
+            <div className="user-detail-card">
+                <div className="profile-image-section">
+                    <img
+                        src={selectedImage ? URL.createObjectURL(selectedImage) : (userData.imagen_url || 'https://placehold.co/150x150/aabbcc/ffffff?text=No+Image')}
+                        alt="Foto de Perfil"
+                        className="profile-image"
+                    />
+                    {isEditing && (
+                        <div className="image-upload-overlay">
+                            <label htmlFor="image-upload" className="upload-icon">
+                                <FaCamera />
+                                <input
+                                    id="image-upload"
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleImageChange}
+                                    style={{ display: 'none' }}
+                                    disabled={isSubmitting}
+                                />
+                            </label>
+                        </div>
+                    )}
+                </div>
+
+                <form className="user-detail-form" onSubmit={handleSave}>
+                    <div className="form-group">
+                        <label>Nombre:</label>
+                        {isEditing ? (
+                            <input type="text" name="nombre" value={formData.nombre || ''} onChange={handleFormChange} disabled={isSubmitting} />
+                        ) : (
+                            <p>{userData.nombre}</p>
+                        )}
                     </div>
-                ) : (
-                    <div className="no-results small">
-                        <FaInfoCircle className="info-icon" />
-                        <p>Este propietario no tiene mascotas registradas.</p>
+                    <div className="form-group">
+                        <label>Apellido:</label>
+                        {isEditing ? (
+                            <input type="text" name="apellido" value={formData.apellido || ''} onChange={handleFormChange} disabled={isSubmitting} />
+                        ) : (
+                            <p>{userData.apellido}</p>
+                        )}
                     </div>
-                )}
-            </div>
+                    <div className="form-group">
+                        <label>Email:</label>
+                        {isEditing ? (
+                            <input type="email" name="email" value={formData.email || ''} onChange={handleFormChange} disabled={isSubmitting} />
+                        ) : (
+                            <p>{userData.email}</p>
+                        )}
+                    </div>
+                    <div className="form-group">
+                        <label>Teléfono:</label>
+                        {isEditing ? (
+                            <input type="text" name="telefono" value={formData.telefono || ''} onChange={handleFormChange} disabled={isSubmitting} />
+                        ) : (
+                            <p>{userData.telefono}</p>
+                        )}
+                    </div>
+                    <div className="form-group">
+                        <label>Dirección:</label>
+                        {isEditing ? (
+                            <input type="text" name="direccion" value={formData.direccion || ''} onChange={handleFormChange} disabled={isSubmitting} />
+                        ) : (
+                            <p>{userData.direccion || 'N/A'}</p>
+                        )}
+                    </div>
+                    <div className="form-group">
+                        <label>Tipo de Documento:</label>
+                        {isEditing ? (
+                            <input type="text" name="tipo_documento" value={formData.tipo_documento || ''} onChange={handleFormChange} disabled={isSubmitting} />
+                        ) : (
+                            <p>{userData.tipo_documento || 'N/A'}</p>
+                        )}
+                    </div>
+                    <div className="form-group">
+                        <label>Número de Documento:</label>
+                        {isEditing ? (
+                            <input type="text" name="numero_documento" value={formData.numero_documento || ''} onChange={handleFormChange} disabled={isSubmitting} />
+                        ) : (
+                            <p>{userData.numero_documento || 'N/A'}</p>
+                        )}
+                    </div>
+                    <div className="form-group">
+                        <label>Fecha de Nacimiento:</label>
+                        {isEditing ? (
+                            <input type="date" name="fecha_nacimiento" value={formData.fecha_nacimiento ? formData.fecha_nacimiento.split('T')[0] : ''} onChange={handleFormChange} disabled={isSubmitting} />
+                        ) : (
+                            <p>{userData.fecha_nacimiento || 'N/A'}</p>
+                        )}
+                    </div>
+                    <div className="form-group">
+                        <label>Rol:</label>
+                        <p>{userData.role}</p>
+                    </div>
+                    <div className="form-group">
+                        <label>Activo:</label>
+                        {isEditing ? (
+                            <input type="checkbox" name="active" checked={formData.active || false} onChange={(e) => setFormData(prev => ({ ...prev, active: e.target.checked }))} disabled={isSubmitting} />
+                        ) : (
+                            <p>{userData.active ? 'Sí' : 'No'}</p>
+                        )}
+                    </div>
+                    <div className="form-group">
+                        <label>Fecha de Registro:</label>
+                        <p>{new Date(userData.created_at).toLocaleString()}</p>
+                    </div>
 
-            <div className="modal-footer">
-                <button onClick={onClose} className="cancel-btn">
-                    <FaTimes /> Cerrar
-                </button>
+                    {isEditing && (
+                        <div className="form-actions">
+                            <button type="submit" className="submit-btn" disabled={isSubmitting}>
+                                {isSubmitting ? <FaSpinner className="spinner-icon" /> : 'Guardar Cambios'}
+                            </button>
+                            <button type="button" className="cancel-btn" onClick={() => setIsEditing(false)} disabled={isSubmitting}>
+                                Cancelar
+                            </button>
+                        </div>
+                    )}
+                </form>
             </div>
-        </motion.div>
+        </div>
     );
 }
 
