@@ -1,39 +1,12 @@
 /* src/Pages/InicioUsuario/Styles/MisMascotas.module.css */
 
-/* --- Variables de Color --- */
-:root {
-    --primary-blue: #2196F3;
-    --primary-blue-dark: #1976D2;
-    --accent-green: #4CAF50;
-    --title-cyan: #00BCD4;
-    --info-box-bg: #E0F7FA;
-    --info-box-border: #B2EBF2;
-    --info-box-text: #00838F;
+/* --- Importar las variables de color globales para consistencia --- */
+@import './InicioDashboard.css';
 
-    --text-dark: #333333;
-    --text-medium: #555555;
-    --text-light: #777777;
-
-    --background-light: #F4F6F8;
-    --card-background: #FFFFFF;
-    --border-color: #E0E0E0;
-
-    --error-color: #EF5350;
-    --warning-color: #FFB300;
-
-    /* Sombras */
-    --shadow-light: rgba(0, 0, 0, 0.05);
-    --shadow-medium: rgba(0, 0, 0, 0.1);
-    --shadow-strong: rgba(0, 0, 0, 0.15);
-
-    /* Altura mínima de la tarjeta del carrusel (ajustado para que quepa todo) */
-    --carousel-card-min-height: 480px;
-}
-
-/* --- Sección General --- */
+/* --- Sección General Contenedora de la Vista --- */
 .section {
     padding: 1.5rem 2.5rem;
-    max-width: 900px;
+    max-width: 1200px;
     margin: 20px auto;
     background-color: var(--background-light);
     border-radius: 15px;
@@ -43,14 +16,14 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1.5rem;
+    gap: 2rem; /* Espacio entre los principales bloques de la sección */
 }
 
 .sectionTitle {
     font-size: 2.2em;
-    color: var(--title-cyan);
+    color: var(--primary-dark);
     text-align: center;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
     display: flex;
     align-items: center;
     gap: 0.8rem;
@@ -59,7 +32,7 @@
 
 .sectionIcon {
     font-size: 1.1em;
-    color: var(--title-cyan);
+    color: var(--primary-color);
 }
 
 /* --- Estado de Carga y Error / No Content --- */
@@ -68,20 +41,20 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-height: 300px;
+    min-height: 250px; /* Un poco más compacto */
     text-align: center;
     padding: 2rem;
     border-radius: 12px;
     background-color: var(--card-background);
     box-shadow: 0 3px 15px var(--shadow-light);
-    margin-top: 1.5rem;
+    margin-top: 1rem; /* Menos margen superior */
     width: 100%;
     max-width: 600px;
 }
 
 .spinnerIcon {
     font-size: 2.5rem;
-    color: var(--primary-blue);
+    color: var(--primary-color);
     animation: spin 1.5s linear infinite;
     margin-bottom: 1rem;
 }
@@ -124,65 +97,75 @@
 
 /* --- Info Box / Consejo --- */
 .infoBox {
-    background-color: var(--info-box-bg);
+    background-color: var(--background-medium);
     border-radius: 10px;
-    padding: 1rem 1.2rem;
+    padding: 1.2rem 1.5rem;
     display: flex;
     align-items: flex-start;
     gap: 0.8rem;
     box-shadow: 0 2px 8px var(--shadow-light);
     max-width: 800px;
     width: 100%;
-    margin-bottom: 1.5rem;
-    border-left: 5px solid var(--info-box-border);
+    border-left: 5px solid var(--primary-color);
     color: var(--text-medium);
 }
 
 .infoBoxIcon {
-    font-size: 1.5rem;
-    color: var(--primary-blue);
+    font-size: 1.8rem;
+    color: var(--info-color);
     flex-shrink: 0;
     margin-top: 0.2rem;
 }
 
 .infoBox p {
     margin: 0;
-    font-size: 0.95rem;
-    line-height: 1.5;
+    font-size: 0.98rem;
+    line-height: 1.6;
     color: var(--text-dark);
 }
 
 .infoBoxTitle {
     font-weight: 600;
-    color: var(--info-box-text);
+    color: var(--primary-dark);
     margin-right: 0.3rem;
 }
 
-/* --- Search Bar / Filtro de Búsqueda --- */
-.searchBarContainer {
+/* --- Search Bar / Filtro de Búsqueda MEJORADO --- */
+.searchFilterContainer {
+    display: flex;
+    /* Usar gap para espacio, y flex-wrap para responsividad */
+    flex-wrap: wrap; /* Permite que los elementos salten de línea */
+    align-items: center; /* Centra verticalmente */
+    justify-content: center; /* Centra horizontalmente si hay espacio */
+    width: 100%;
+    max-width: 900px; /* Aumenta el ancho máximo para acomodar el botón */
+    gap: 1.5rem; /* Espacio entre la barra de búsqueda y el botón */
+    margin-bottom: 2rem;
+    padding: 0 1rem; /* Añade un poco de padding horizontal */
+}
+
+.searchInputWrapper {
+    flex-grow: 1; /* Permite que la barra de búsqueda crezca para ocupar espacio */
+    min-width: 280px; /* Ancho mínimo para que no se comprima demasiado */
     display: flex;
     align-items: center;
-    width: 100%;
-    max-width: 300px;
     background-color: var(--card-background);
     border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 0.6rem 1rem;
-    box-shadow: 0 1px 6px var(--shadow-light);
-    /* Ajuste clave para separar de la tarjeta */
-    margin-bottom: 2rem; /* Aumentado para dar más espacio por debajo */
+    border-radius: 10px;
+    padding: 0.8rem 1.5rem;
+    box-shadow: 0 4px 15px var(--shadow-light);
     transition: box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
-.searchBarContainer:focus-within {
-    border-color: var(--primary-blue);
-    box-shadow: 0 3px 8px var(--shadow-medium);
+.searchInputWrapper:focus-within {
+    border-color: var(--primary-color);
+    box-shadow: 0 6px 20px var(--primary-glow);
 }
 
 .searchIcon {
-    font-size: 1rem;
+    font-size: 1.2rem;
     color: var(--text-light);
-    margin-right: 0.8rem;
+    margin-right: 1.2rem;
 }
 
 .searchInput {
@@ -190,9 +173,10 @@
     border: none;
     outline: none;
     padding: 0;
-    font-size: 0.95rem;
+    font-size: 1.05rem;
     color: var(--text-dark);
     background-color: transparent;
+    transition: width 0.3s ease;
 }
 
 .searchInput::placeholder {
@@ -200,261 +184,124 @@
     opacity: 0.8;
 }
 
-/* --- Carrusel de Mascotas --- */
-.petCarouselContainer {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+/* Contenedor de la Cuadrícula de Mascotas */
+.petsGridContainer {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2.5rem;
     width: 100%;
-    max-width: 950px;
-    position: relative;
-    gap: 1rem;
-    /* Ajuste clave para separar de la barra de búsqueda */
-    margin-top: 0; /* Aseguramos que no tenga un margen superior que lo empuje hacia abajo */
+    max-width: 1200px;
+    padding-bottom: 1.5rem; /* Menos padding abajo, el botón ya no está aquí */
+    justify-items: center;
 }
 
-.petCarousel {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 1.5rem;
-    width: 100%;
-}
-
-.carouselContentWrapper {
-    position: relative;
-    width: 300px;
-    height: auto;
-    min-height: var(--carousel-card-min-height);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    /* Ya no necesitamos overflow: visible si la tarjeta cabe */
-    overflow: hidden; /* Volvemos a hidden para asegurar que nada se desborde sin querer */
-}
-
-/* Nueva clase para el envoltorio de la tarjeta sin animación */
-.staticCardWrapper {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    /* No hay transiciones aquí para que el cambio sea instantáneo */
-}
-
-
-.carouselButton {
-    background-color: var(--primary-blue);
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 48px;
-    height: 48px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.4em;
-    cursor: pointer;
-    box-shadow: 0 3px 10px var(--shadow-medium);
-    transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-    flex-shrink: 0;
-    z-index: 5;
-}
-
-.carouselButton:hover:not(:disabled) {
-    background-color: var(--primary-blue-dark);
-    transform: scale(1.02);
-    box-shadow: 0 5px 12px var(--shadow-strong);
-}
-
-.carouselButton:active:not(:disabled) {
-    transform: scale(0.97);
-    box-shadow: 0 2px 5px var(--shadow-light);
-}
-
-.carouselButton:disabled {
-    background-color: #CCCCCC;
-    cursor: not-allowed;
-    box-shadow: none;
-    opacity: 0.7;
-}
-
-/* --- Indicadores del Carrusel --- */
-.carouselIndicators {
-    display: flex;
-    gap: 0.6rem;
-    margin-top: 2rem; /* Sigue dando un buen espacio */
-}
-
-.indicatorDot {
-    width: 8px;
-    height: 8px;
-    background-color: #DDDDDD;
-    border-radius: 50%;
-    cursor: pointer;
-    transition: background-color 0.2s ease, transform 0.2s ease;
-    border: 1px solid #CCC;
-}
-
-.indicatorDot.activeDot {
-    background-color: var(--primary-blue);
-    transform: scale(1.2);
-    border-color: var(--primary-blue);
-}
-
-.indicatorDot:hover {
-    background-color: var(--primary-blue-dark);
-}
-
-/* --- Botones principales de acción --- */
+/* --- Botones principales de acción (e.g., "Añadir Mascota") --- */
 .primaryButton {
-    background-color: var(--primary-blue);
+    background-color: var(--primary-color);
     color: white;
     border: none;
-    padding: 0.7rem 1.5rem;
-    border-radius: 8px;
+    padding: 0.8rem 1.8rem;
+    border-radius: 10px;
     cursor: pointer;
-    font-size: 0.95rem;
-    font-weight: 600;
+    font-size: 1rem;
+    font-weight: 700;
     display: flex;
     align-items: center;
-    gap: 0.6rem;
-    transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
-    box-shadow: 0 2px 8px var(--shadow-light);
+    gap: 0.8rem;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 12px var(--primary-glow);
+    /* margin-top: 2.5rem;  Eliminado este margin-top para el botón que está dentro del searchFilterContainer */
 }
 
 .primaryButton:hover {
-    background-color: var(--primary-blue-dark);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px var(--shadow-medium);
+    background-color: var(--primary-dark);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px var(--primary-glow);
 }
 
 .primaryButton:active {
-    transform: scale(0.98);
+    transform: scale(0.97);
+    box-shadow: 0 2px 5px var(--primary-glow);
 }
 
 /* --- Media Queries para Responsividad --- */
 @media (max-width: 1024px) {
     .section {
-        padding: 1rem 2rem;
+        padding: 1.2rem 2rem;
+        gap: 1.5rem;
     }
     .sectionTitle {
         font-size: 2em;
     }
-    .sectionIcon {
-        font-size: 1.8em;
+    .searchFilterContainer {
+        max-width: 100%; /* Permite que ocupe todo el ancho disponible */
+        justify-content: space-around; /* Distribuye elementos si hay espacio */
+        padding: 0 1rem;
     }
-    .infoBox {
-        padding: 0.8rem 1rem;
-        font-size: 0.9rem;
-    }
-    .infoBoxIcon {
-        font-size: 1.3rem;
-    }
-    .searchBarContainer {
-        padding: 0.5rem 0.8rem;
+    .searchInputWrapper {
+        padding: 0.7rem 1.2rem;
+        min-width: unset; /* Reinicia el min-width para que flex-grow funcione mejor */
     }
     .searchInput {
-        font-size: 0.9rem;
+        font-size: 1rem;
     }
-    .carouselButton {
-        width: 45px;
-        height: 45px;
-        font-size: 1.3em;
-    }
-    .carouselContentWrapper {
-        min-height: calc(var(--carousel-card-min-height) - 20px);
+    .petsGridContainer {
+        gap: 2rem;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     }
     .primaryButton {
-        padding: 0.6rem 1.2rem;
-        font-size: 0.9rem;
+        padding: 0.7rem 1.5rem;
+        font-size: 0.95rem;
     }
 }
 
 @media (max-width: 768px) {
     .section {
-        padding: 0.8rem 1.5rem;
-        gap: 1rem;
+        padding: 1rem 1.5rem;
+        gap: 1.2rem;
         margin: 15px auto;
     }
     .sectionTitle {
         font-size: 1.8em;
-        flex-direction: row;
-        gap: 0.6rem;
     }
-    .sectionIcon {
-        font-size: 1em;
+    .searchFilterContainer {
+        flex-direction: column; /* Apila la barra de búsqueda y el botón */
+        align-items: stretch; /* Estira ambos elementos para ocupar el ancho completo */
+        gap: 1rem; /* Espacio entre ellos */
+        margin-bottom: 1.5rem;
     }
-    .infoBox {
-        flex-direction: column;
-        text-align: center;
-        align-items: center;
+    .searchInputWrapper {
+        padding: 0.6rem 1rem;
     }
-    .searchBarContainer {
-        max-width: 100%;
-        padding: 0.5rem 0.8rem;
-        margin-bottom: 1rem; /* Ajustado para tablets */
+    .searchInput {
+        font-size: 0.95rem;
     }
-    .carouselButton {
-        width: 40px;
-        height: 40px;
-        font-size: 1.2em;
-        margin: 0 10px;
-    }
-    .carouselContentWrapper {
-        max-width: 300px;
-        min-height: calc(var(--carousel-card-min-height) - 40px);
-    }
-    .carouselIndicators {
-        margin-top: 1.5rem;
+    .petsGridContainer {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
     }
     .noContent {
         padding: 1.5rem;
     }
-    .noContent .infoIcon {
-        font-size: 3em;
-    }
-    .noContent p {
-        font-size: 1rem;
+    .primaryButton {
+        width: 100%; /* El botón ocupa todo el ancho */
+        justify-content: center; /* Centra el contenido del botón */
     }
 }
 
 @media (max-width: 480px) {
     .section {
-        padding: 0.5rem 1rem;
+        padding: 0.8rem 1rem;
         margin: 10px auto;
+        gap: 1rem;
     }
     .sectionTitle {
-        font-size: 1.5em;
+        font-size: 1.6em;
     }
-    .sectionIcon {
-        font-size: 0.9em;
-    }
-    .carouselButton {
-        width: 35px;
-        height: 35px;
-        font-size: 1em;
-    }
-    .petCarousel {
-        flex-direction: column;
-        gap: 0.8rem;
-    }
-    .carouselButton:first-child {
-        order: -1;
-    }
-    .carouselButton:last-child {
-        order: 1;
-    }
-    .carouselContentWrapper {
-        order: 0;
-        width: 95%;
-        min-height: calc(var(--carousel-card-min-height) - 60px);
-    }
-    .carouselIndicators {
-        margin-top: 1rem;
-    }
-    .noContent p {
-        font-size: 0.9rem;
+    .primaryButton {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.85rem;
+        gap: 0.5rem;
+        /* margin-top: 2rem;  Este margen ya no es necesario aquí si se apila */
     }
 }

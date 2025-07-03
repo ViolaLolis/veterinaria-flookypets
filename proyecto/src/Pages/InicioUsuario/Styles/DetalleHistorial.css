@@ -1,88 +1,185 @@
+/* src/Pages/DetalleHistorial/Styles/DetalleHistorial.css */
+
+/* --- Variables de Color (Consistente con InicioUsuario y HistorialMedico) --- */
+:root {
+  --primary-color: #4dd0e1; /* Azul principal (claro y vibrante) */
+  --primary-light: #82f7ff; /* Azul aún más claro para acentos y hover sutiles */
+  --primary-dark: #00a0b7; /* Azul oscuro y profundo para fondos principales y texto */
+  --primary-glow: rgba(77, 208, 225, 0.4); /* Efecto de brillo */
+
+  --text-dark: #333333; /* Texto oscuro general */
+  --text-light: #666666; /* Texto ligero, para descripciones secundarias */
+  --text-medium: #888888; /* Texto medio, para notas o metadatos */
+  --background-light: #f8f9fa; /* Fondo general de la página */
+  --background-medium: #e9ecef; /* Fondo para elementos interactivos o secciones */
+  --card-background: #ffffff; /* Fondo para tarjetas y módulos */
+  --border-color: #dee2e6; /* Color general de los bordes */
+
+  --shadow-light: rgba(0, 0, 0, 0.04); /* Sombra muy ligera */
+  --shadow-medium: rgba(0, 0, 0, 0.1); /* Sombra media */
+  --shadow-strong: rgba(0, 0, 0, 0.15); /* Sombra fuerte (para hover) */
+
+  --accent-color: var(--primary-color); /* Color de acento para botones, etc. */
+  --accent-dark: var(--primary-dark); /* Color de acento oscuro para hover */
+}
+
+/* --- Contenedor Principal del Detalle del Historial --- */
 .detalle-historial-container {
-    max-width: 700px;
-    margin: 3rem auto;
-    padding: 2rem;
-    background-color: var(--white);
+  padding: 2.5rem 3.5rem; /* Más padding para una sensación espaciosa */
+  max-width: 900px; /* Ancho máximo moderado */
+  margin: 30px auto; /* Centrar y más margen arriba/abajo */
+  background-color: var(--card-background);
+  border-radius: 18px; /* Bordes más redondeados */
+  box-shadow: 0 12px 30px var(--shadow-medium); /* Sombra más pronunciada */
+  font-family: 'Roboto', sans-serif;
+  color: var(--text-dark);
+  box-sizing: border-box; /* Asegurar que el padding no aumente el ancho total */
+}
+
+/* --- Título de la Página --- */
+.detalle-historial-title {
+  font-size: 2.2rem;
+  color: var(--primary-dark); /* Tono oscuro del azul principal */
+  margin-bottom: 2rem; /* Más espacio debajo del título */
+  text-align: center;
+  font-weight: 700;
+  border-bottom: 2px solid var(--border-color); /* Línea divisoria sutil */
+  padding-bottom: 1rem;
+}
+
+/* --- Sección de Información del Historial --- */
+.detalle-historial-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem; /* Espacio entre los párrafos de información */
+  margin-bottom: 2.5rem;
+  padding: 1.5rem; /* Padding interno para la sección de info */
+  background-color: var(--background-light); /* Fondo ligeramente diferente para esta sección */
+  border-radius: 12px;
+  border: 1px solid var(--border-color); /* Borde sutil */
+  box-shadow: 0 4px 10px var(--shadow-light); /* Sombra ligera */
+}
+
+.detalle-historial-info p {
+  font-size: 1.05rem; /* Texto un poco más grande para mejor legibilidad */
+  color: var(--text-dark);
+  margin: 0; /* Reiniciar márgenes de párrafo */
+  line-height: 1.6;
+}
+
+.detalle-historial-info strong {
+  color: var(--primary-dark); /* Negritas en el azul oscuro para énfasis */
+  font-weight: 600;
+  margin-right: 0.5rem; /* Espacio entre el título del campo y su valor */
+}
+
+/* --- Sección de Acciones (Botones) --- */
+.detalle-historial-actions {
+  display: flex;
+  justify-content: center; /* Centrar el botón */
+  margin-top: 2rem;
+}
+
+/* --- Estilo del Botón de Volver --- */
+.detalle-historial-back {
+  background-color: var(--accent-color); /* Usar el color de acento principal */
+  color: white;
+  border: none;
+  padding: 0.8rem 1.8rem; /* Padding generoso */
+  border-radius: 50px; /* Botón píldora */
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none; /* Eliminar subrayado por defecto de Link */
+  display: inline-flex; /* Para centrar el texto verticalmente */
+  align-items: center;
+  gap: 0.5rem;
+  transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 12px var(--shadow-medium); /* Sombra por defecto */
+}
+
+.detalle-historial-back:hover {
+  background-color: var(--accent-dark); /* Color más oscuro en hover */
+  transform: translateY(-2px); /* Efecto de "levantar" */
+  box-shadow: 0 6px 15px var(--shadow-strong); /* Sombra más fuerte en hover */
+}
+
+.detalle-historial-back:active {
+  transform: translateY(0); /* Resetea la posición al hacer click */
+  box-shadow: 0 2px 8px var(--shadow-light); /* Sombra más suave al hacer click */
+}
+
+
+/* --- Estilos para "Cargando Historial..." --- */
+.detalle-historial-container p {
+  text-align: center;
+  font-size: 1.1rem;
+  color: var(--text-light);
+  margin-top: 2rem;
+}
+
+
+/* --- Media Queries para Responsividad --- */
+@media (max-width: 768px) {
+  .detalle-historial-container {
+    padding: 1.5rem 1.5rem;
+    margin: 20px auto;
     border-radius: 12px;
-    box-shadow: var(--shadow-medium);
-    opacity: 0;
-    transform: translateY(20px);
-    animation: fadeInSlideUp 0.5s ease-out forwards;
+    box-shadow: 0 8px 20px var(--shadow-medium);
   }
-  
+
   .detalle-historial-title {
-    font-size: 2.5rem;
-    color: var(--primary-color);
+    font-size: 1.8rem;
     margin-bottom: 1.5rem;
-    text-align: center;
+    padding-bottom: 0.8rem;
   }
-  
+
   .detalle-historial-info {
-    margin-bottom: 2rem;
-    padding: 1.5rem;
-    border: 1px solid #eee;
-    border-radius: 8px;
-  }
-  
-  .detalle-historial-info p {
-    font-size: 1.1rem;
-    color: var(--text-secondary);
-    line-height: 1.8;
-    margin-bottom: 0.8rem;
-  }
-  
-  .detalle-historial-info strong {
-    color: var(--text-dark);
-    font-weight: 600;
-  }
-  
-  .detalle-historial-actions {
-    display: flex;
+    padding: 1rem;
     gap: 1rem;
-    margin-top: 2rem;
-    justify-content: center;
+    margin-bottom: 1.8rem;
+    border-radius: 10px;
   }
-  
-  .detalle-historial-button,
-  .detalle-historial-back {
-    display: inline-block;
-    padding: 0.8rem 1.5rem;
-    border-radius: 8px;
-    text-decoration: none;
-    color: var(--white);
-    background-color: var(--accent-color);
+
+  .detalle-historial-info p {
     font-size: 1rem;
-    font-weight: 500;
-    transition: background-color 0.3s ease-in-out, transform 0.2s ease-in-out;
   }
-  
-  .detalle-historial-button:hover,
-  .detalle-historial-back:hover {
-    background-color: var(--accent-hover-color);
-    transform: scale(1.03);
-  }
-  
-  .detalle-historial-button.editar {
-    background-color: var(--light-blue);
-  }
-  
-  .detalle-historial-button.editar:hover {
-    background-color: #2979ff;
-  }
-  
-  .detalle-historial-button.eliminar {
-    background-color: #dc3545;
-  }
-  
-  .detalle-historial-button.eliminar:hover {
-    background-color: #c82333;
-  }
-  
+
   .detalle-historial-back {
-    background-color: var(--secondary-color);
+    padding: 0.7rem 1.5rem;
+    font-size: 0.9rem;
+    box-shadow: 0 3px 10px var(--shadow-medium);
   }
-  
-  @keyframes fadeInSlideUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 480px) {
+  .detalle-historial-container {
+    padding: 1rem 1rem;
+    margin: 15px auto;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px var(--shadow-light);
   }
+
+  .detalle-historial-title {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.6rem;
+  }
+
+  .detalle-historial-info {
+    padding: 0.8rem;
+    gap: 0.8rem;
+    margin-bottom: 1.5rem;
+    border-radius: 8px;
+  }
+
+  .detalle-historial-info p {
+    font-size: 0.95rem;
+  }
+
+  .detalle-historial-back {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.85rem;
+    box-shadow: 0 2px 8px var(--shadow-light);
+  }
+}

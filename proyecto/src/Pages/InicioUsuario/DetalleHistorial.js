@@ -2,43 +2,42 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import './Styles/DetalleHistorial.css';
 
-// Función para obtener todos los historiales guardados en localStorage
-const getHistoriales = () => {
-  const stored = localStorage.getItem('historiales');
-  return stored ? JSON.parse(stored) : [];
+// Datos locales de ejemplo
+const historialEjemplo = {
+  id: '1',
+  mascotaId: 'perro123',
+  fecha: '2025-06-15',
+  veterinario: 'Dra. Martínez',
+  diagnostico: 'Otitis',
+  tratamiento: 'Gotas óticas por 7 días',
+  notas: 'Volver en una semana para control'
 };
 
 const DetalleHistorial = () => {
   const { mascotaId, historialId } = useParams();
   const navigate = useNavigate();
-
   const [historial, setHistorial] = useState(null);
 
   useEffect(() => {
-    const historiales = getHistoriales();
-    const foundHistorial = historiales.find(h => h.id === historialId && h.mascotaId === mascotaId);
-    if (foundHistorial) {
-      setHistorial(foundHistorial);
-    } else {
-      setHistorial(null); // No encontrado
-    }
-  }, [mascotaId, historialId]);
+    const stored = localStorage.getItem('historiales');
+    const historiales = stored ? JSON.parse(stored) : [];
 
-  const handleEliminar = () => {
-    if (!historial) return;
-    if (window.confirm('¿Estás seguro que deseas eliminar esta entrada del historial?')) {
-      const historiales = getHistoriales();
-      const filtrados = historiales.filter(h => h.id !== historialId);
-      localStorage.setItem('historiales', JSON.stringify(filtrados));
-      navigate(`/usuario/historial/${mascotaId}`);
-    }
-  };
+    const foundHistorial = historiales.find(
+      h =>
+        String(h.id).toLowerCase() === String(historialId).toLowerCase() &&
+        String(h.mascotaId).toLowerCase() === String(mascotaId).toLowerCase()
+    );
+
+    setHistorial(foundHistorial || historialEjemplo);
+  }, [mascotaId, historialId]);
 
   if (!historial) {
     return (
       <div className="detalle-historial-container">
-        <p>Historial no encontrado.</p>
-        <Link to={`/usuario/historial/${mascotaId}`} className="detalle-historial-back">Volver al Historial</Link>
+        <p>Cargando historial...</p>
+        <Link to={`/usuario/historial/${mascotaId}`} className="detalle-historial-back">
+          Volver al Historial
+        </Link>
       </div>
     );
   }
@@ -54,9 +53,9 @@ const DetalleHistorial = () => {
         {historial.notas && <p><strong>Notas:</strong> {historial.notas}</p>}
       </div>
       <div className="detalle-historial-actions">
-        <Link to={`/usuario/historial/${mascotaId}/editar/${historialId}`} className="detalle-historial-button editar">Editar Entrada</Link>
-        <button onClick={handleEliminar} className="detalle-historial-button eliminar">Eliminar Entrada</button>
-        <Link to={`/usuario/historial/${mascotaId}`} className="detalle-historial-back">Volver al Historial</Link>
+        <Link to={`/usuario/historial/${mascotaId}`} className="detalle-historial-back">
+          Volver al Historial
+        </Link>
       </div>
     </div>
   );
