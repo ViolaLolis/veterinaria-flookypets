@@ -5,38 +5,57 @@ import NotificationBox from './NotificationBox'; // Importa el nuevo componente 
 import { AnimatePresence, motion } from 'framer-motion'; // Importa para animaciones
 
 const NotificationDisplay = () => {
-  const { notifications, removeNotification } = useNotifications();
+  const { notifications, removeNotification, markNotificationAsRead } = useNotifications();
 
   // Define la posición global para todas las notificaciones
   // Puedes hacer que esta posición sea configurable si lo deseas (ej. desde props de App.js)
   const globalPosition = 'top-right'; // O 'top-left'
 
+  // Marcar como leída automáticamente después de un tiempo o al hacer clic
+  const handleNotificationClick = (notifId) => {
+    // Si la notificación es efímera (no tiene id_notificacion de la BD), no la marcamos como leída en el backend
+    if (notifId) { // Solo si el ID es válido (no undefined/null)
+      markNotificationAsRead(notifId);
+    }
+    // Opcional: puedes redirigir al usuario a la página de la cita/historial si notif.referencia_id existe
+    // const navigate = useNavigate();
+    // if (notif.referencia_id && notif.tipo.includes('cita')) {
+    //   navigate(`/usuario/citas/${notif.referencia_id}`);
+    // }
+  };
+
   return (
     // El contenedor principal que define la posición y el espaciado entre notificaciones
+    // Utiliza las clases de posicionamiento y espaciado definidas en NotificationBox.css
     <div className={`notification-container ${globalPosition}`}>
       <AnimatePresence>
         {notifications.map((notif) => (
-          <motion.div
-            key={notif.id_notificacion || notif.id} // Usa el ID de la BD o el ID temporal
-            // Las animaciones de entrada y salida se definen en NotificationBox.css
-            // AnimatePresence maneja la eliminación del DOM después de la animación de salida
-            initial={globalPosition === 'top-right' ? { opacity: 0, x: '100%' } : { opacity: 0, x: '-100%' }}
-            animate={{ opacity: 1, x: '0%' }}
-            exit={globalPosition === 'top-right' ? { opacity: 0, x: '100%' } : { opacity: 0, x: '-100%' }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
-            layout // Para animar los cambios de posición de las notificaciones cuando se añaden/eliminan
-          >
-            <NotificationBox
-              id={notif.id_notificacion || notif.id} // Pasa el ID al componente de la caja
-              type={notif.type}
-              message={notif.message}
-              // No pasamos 'duration' a NotificationBox para auto-cerrado,
-              // ya que NotificationContext ya maneja la lógica de temporización para eliminar del estado.
-              // NotificationBox solo se encarga de la animación de salida cuando es removido del DOM por AnimatePresence.
-              position={globalPosition} // Pasa la posición para que NotificationBox aplique la animación correcta
-              onClose={() => removeNotification(notif.id_notificacion || notif.id)} // Llama a la función del contexto para eliminar
-            />
-          </motion.div>
+          // Solo muestra notificaciones no leídas
+          !notif.leida && (
+            <motion.div
+              key={notif.id_notificacion || notif.id} // Usa el ID de la BD o el ID temporal
+              // Las animaciones de entrada y salida se definen aquí con framer-motion
+              initial={globalPosition === 'top-right' ? { opacity: 0, x: '100%' } : { opacity: 0, x: '-100%' }}
+              animate={{ opacity: 1, x: '0%' }}
+              exit={globalPosition === 'top-right' ? { opacity: 0, x: '100%' } : { opacity: 0, x: '-100%' }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+              layout // Para animar los cambios de posición de las notificaciones cuando se añaden/eliminan
+              // Eliminado: className con estilos de Tailwind y getNotificationStyles
+              // La clase 'notification-box' y sus estilos por tipo se aplican dentro de NotificationBox.js
+            >
+              <NotificationBox
+                id={notif.id_notificacion || notif.id} // Pasa el ID al componente de la caja
+                type={notif.tipo} // Pasa el 'tipo' de la notificación para que NotificationBox aplique el estilo correcto
+                message={notif.mensaje} // Pasa el 'mensaje' de la notificación
+                // No pasamos 'duration' a NotificationBox para auto-cerrado,
+                // ya que NotificationContext ya maneja la lógica de temporización para eliminar del estado.
+                // NotificationBox solo se encarga de la animación de salida cuando es removido del DOM por AnimatePresence.
+                position={globalPosition} // Pasa la posición para que NotificationBox aplique la animación correcta (aunque ya no se usa para CSS animaciones)
+                onClick={() => handleNotificationClick(notif.id_notificacion || notif.id)} // Manejar clic en la notificación
+                onClose={() => removeNotification(notif.id_notificacion || notif.id)} // Llama a la función del contexto para eliminar
+              />
+            </motion.div>
+          )
         ))}
       </AnimatePresence>
     </div>

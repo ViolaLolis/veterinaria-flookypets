@@ -49,9 +49,13 @@
     min-width: 280px;
     max-width: 350px;
     font-family: 'Inter', sans-serif; /* Usar Inter como se sugiere */
-    transition: transform 0.3s ease-out, opacity 0.3s ease-out, box-shadow 0.2s ease-in-out;
+    transition: transform 0.3s ease-out, box-shadow 0.2s ease-in-out; /* Mantener otras transiciones */
     cursor: pointer;
     overflow: hidden; /* Para que el contenido no se salga con animaciones */
+    /* *** AJUSTES CLAVE PARA VISIBILIDAD *** */
+    opacity: 1 !important; /* Asegura que la opacidad sea 1 */
+    background-color: var(--color-info); /* Establece un color de fondo por defecto fuerte */
+    color: var(--color-text-light); /* Asegura el color del texto */
 }
 
 .notification-box:hover {
@@ -59,7 +63,7 @@
     box-shadow: 0 6px 16px var(--color-shadow-light); /* Sombra más pronunciada */
 }
 
-/* Estilos por tipo de notificación */
+/* Estilos por tipo de notificación - ¡Sobrescriben el color por defecto! */
 .notification-box.success {
     background-color: var(--color-success);
     color: var(--color-text-light);
@@ -89,6 +93,14 @@
     margin-right: var(--spacing-md);
 }
 
+/* Icono dentro de la notificación */
+.notification-icon {
+    margin-right: var(--spacing-md);
+    font-size: 1.2rem;
+    display: flex; /* Asegura que el icono se alinee bien */
+    align-items: center;
+}
+
 /* Botón de cerrar */
 .notification-close-btn {
     background: none;
@@ -107,54 +119,6 @@
 .notification-close-btn:hover {
     background-color: rgba(255, 255, 255, 0.2); /* Fondo ligeramente transparente al pasar el ratón */
     transform: scale(1.1);
-}
-
-/* Animaciones de entrada */
-@keyframes fadeInRight {
-    from {
-        opacity: 0;
-        transform: translateX(100%);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-@keyframes fadeInLeft {
-    from {
-        opacity: 0;
-        transform: translateX(-100%);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-/* Animación de salida */
-@keyframes fadeOut {
-    from {
-        opacity: 1;
-        transform: translateX(0);
-    }
-    to {
-        opacity: 0;
-        transform: translateX(100%); /* O -100% si es left */
-    }
-}
-
-/* Aplicar animaciones */
-.notification-enter-right {
-    animation: fadeInRight 0.5s ease-out forwards;
-}
-
-.notification-enter-left {
-    animation: fadeInLeft 0.5s ease-out forwards;
-}
-
-.notification-exit {
-    animation: fadeOut 0.5s ease-in forwards;
 }
 
 /* Responsive adjustments */
