@@ -1,10 +1,12 @@
 import React from 'react';
-import styles from './Styles/TarjetaCita.module.css';
+import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCalendarAlt, faInfoCircle, faTimesCircle, faClock, faClipboardList } from '@fortawesome/free-solid-svg-icons'; // Añadidos faClock y faClipboardList
-import { motion } from 'framer-motion'; // Asegúrate de que framer-motion está instalado
+import { faCalendarAlt, faInfoCircle, faTimesCircle, faClock, faClipboardList, faUserMd, faPaw } from '@fortawesome/free-solid-svg-icons';
+import { motion } from 'framer-motion';
+import styles from './Styles/TarjetaCita.css'; // Importar el CSS sin .module
 
 const TarjetaCita = ({ cita, onVerDetalles, onCancelar }) => {
+  const navigate = useNavigate();
 
   // Función para formatear la fecha y hora
   const formatDateTime = (dateTimeString) => {
@@ -27,49 +29,47 @@ const TarjetaCita = ({ cita, onVerDetalles, onCancelar }) => {
 
   return (
     <motion.div
-      className={styles.tarjeta}
+      className="tarjeta"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, ease: "easeOut" }}
-      whileHover={{ scale: 1.02, boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)' }} // Efecto al pasar el ratón
+      whileHover={{ scale: 1.02, boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)' }}
     >
-      <div className={styles.header}>
-        <FontAwesomeIcon icon={faCalendarAlt} className={styles.headerIcon} />
-        <p className={styles.fecha}>{formatDateTime(cita.fecha)}</p>
+      <div className="header">
+        <FontAwesomeIcon icon={faCalendarAlt} className="header-icon" />
+        <p className="fecha">{formatDateTime(cita.fecha)}</p>
       </div>
 
-      <div className={styles.body}>
-        <div className={styles.detailItem}>
-          <FontAwesomeIcon icon={faClipboardList} className={styles.detailIcon} />
-          <span className={styles.detailLabel}>Servicio:</span>
-          <span className={styles.detailValue}>{cita.servicio_nombre || 'N/A'}</span>
+      <div className="body">
+        <div className="detail-item">
+          <FontAwesomeIcon icon={faClipboardList} className="detail-icon" />
+          <span className="detail-label">Servicio:</span>
+          <span className="detail-value">{cita.servicio_nombre || 'N/A'}</span>
         </div>
-        <div className={styles.detailItem}>
-          <FontAwesomeIcon icon={faClock} className={styles.detailIcon} />
-          <span className={styles.detailLabel}>Estado:</span>
-          <span className={`${styles.badge} ${styles[cita.estado?.toLowerCase()]}`}> {/* Usar toLowerCase() */}
+        <div className="detail-item">
+          <FontAwesomeIcon icon={faClock} className="detail-icon" />
+          <span className="detail-label">Estado:</span>
+          <span className={`badge ${cita.estado?.toLowerCase()}`}>
             {cita.estado || 'Desconocido'}
           </span>
         </div>
-        {/* Aquí podrías añadir más detalles si los tienes en el objeto cita, por ejemplo:
-        <div className={styles.detailItem}>
-          <FontAwesomeIcon icon={faUserMd} className={styles.detailIcon} />
-          <span className={styles.detailLabel}>Veterinario:</span>
-          <span className={styles.detailValue}>{cita.veterinario_nombre || 'N/A'}</span>
+        <div className="detail-item">
+          <FontAwesomeIcon icon={faUserMd} className="detail-icon" />
+          <span className="detail-label">Veterinario:</span>
+          <span className="detail-value">{cita.veterinario_nombre || 'N/A'}</span>
         </div>
-        <div className={styles.detailItem}>
-          <FontAwesomeIcon icon={faPaw} className={styles.detailIcon} />
-          <span className={styles.detailLabel}>Mascota:</span>
-          <span className={styles.detailValue}>{cita.mascota_nombre || 'N/A'}</span>
+        <div className="detail-item">
+          <FontAwesomeIcon icon={faPaw} className="detail-icon" />
+          <span className="detail-label">Mascota:</span>
+          <span className="detail-value">{cita.mascota_nombre || 'N/A'}</span>
         </div>
-        */}
       </div>
 
-      <div className={styles.opcionesCita}>
+      <div className="opciones-cita">
         <motion.button
-          className={styles.verDetallesBtn}
+          className="ver-detalles-btn"
           title="Ver detalles de la cita"
-          onClick={() => onVerDetalles(cita)} // Pasa la cita completa
+          onClick={() => onVerDetalles(cita)}
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
         >
@@ -77,9 +77,9 @@ const TarjetaCita = ({ cita, onVerDetalles, onCancelar }) => {
         </motion.button>
         {cita.estado && cita.estado.toLowerCase() !== 'cancelada' && cita.estado.toLowerCase() !== 'completa' && (
           <motion.button
-            className={styles.cancelarBtn}
+            className="cancelar-btn"
             title="Cancelar cita"
-            onClick={() => onCancelar(cita.id_cita)} // Pasa el ID de la cita
+            onClick={() => onCancelar(cita.id_cita)}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
           >

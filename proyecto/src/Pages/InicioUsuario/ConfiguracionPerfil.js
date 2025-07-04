@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Link, useNavigate, useOutletContext } from 'react-router-dom'; // Importa useOutletContext
+import { Link, useNavigate, useOutletContext } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import styles from './Styles/ConfiguracionPerfil.module.css';
 import {
@@ -8,10 +8,11 @@ import {
   faBell, faShieldAlt, faChevronDown, faChevronUp, faSpinner, faTimesCircle
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { authFetch } from './api';
+import { authFetch } from '../../utils/api'; // Importar la función authFetch
+import { validateField } from '../../utils/validation'; // Importar la función de validación
 
-const ConfiguracionPerfil = () => { // Ya no recibe user y setUser directamente como props, los obtiene del contexto
-  const { user, setUser, showNotification } = useOutletContext(); // Obtiene user, setUser y showNotification del contexto del Outlet
+const ConfiguracionPerfil = () => {
+  const { user, setUser, showNotification } = useOutletContext();
   const [formData, setFormData] = useState({
     nombre: '',
     apellido: '',
@@ -23,17 +24,16 @@ const ConfiguracionPerfil = () => { // Ya no recibe user y setUser directamente 
     fecha_nacimiento: '',
   });
   const [imagenPerfil, setImagenPerfil] = useState(null);
-  // const [notification, setNotification] = useState(null); // Ya se obtiene del contexto
   const [activeSection, setActiveSection] = useState('informacion');
   const [showSubMenu, setShowSubMenu] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [errors, setErrors] = useState({}); // Estado para manejar errores de validación
 
   const navigate = useNavigate();
 
-  // showNotification ya viene del contexto, no es necesario redefinirla aquí
-
+  // Función para obtener los datos del usuario
   const fetchUserData = useCallback(async () => {
     setIsLoading(true);
     if (!user || !user.id) {
@@ -54,7 +54,7 @@ const ConfiguracionPerfil = () => { // Ya no recibe user y setUser directamente 
           numero_documento: response.data.numero_documento || '',
           fecha_nacimiento: response.data.fecha_nacimiento ? response.data.fecha_nacimiento.split('T')[0] : '',
         });
-        // setImagenPerfil(response.data.imagen_perfil_url || null);
+        setImagenPerfil(response.data.imagen_url || null); // Cargar la URL de la imagen de perfil
       } else {
         showNotification(response.message || 'Error al cargar los datos del perfil.', 'error');
       }
@@ -64,7 +64,7 @@ const ConfiguracionPerfil = () => { // Ya no recibe user y setUser directamente 
     } finally {
       setIsLoading(false);
     }
-  }, [user, authFetch, showNotification]);
+  }, [user, showNotification]);
 
   useEffect(() => {
     fetchUserData();
@@ -73,20 +73,77 @@ const ConfiguracionPerfil = () => { // Ya no recibe user y setUser directamente 
   const handleChange = (e) => {
     const { id, value } = e.target;
     setFormData(prev => ({ ...prev, [id]: value }));
+    // Validar el campo inmediatamente al cambiar
+    const error = validateField(id, value, formData, false, formData.email); // isNewEntry=false para edición
+    setErrors(prev => ({ ...prev, [id]: error }));
   };
 
-  const handleImagenPerfilChange = (e) => {
+  const handleImagenPerfilChange = async (e) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      setImagenPerfil(URL.createObjectURL(file));
-      showNotification('Imagen seleccionada. Para guardar, haz clic en "Guardar Cambios". (La carga real de la imagen requiere backend)', 'info');
+      // Validar el tipo de archivo y tamaño si es necesario
+      if (!file.type.startsWith('image/')) {
+        showNotification('Solo se permiten archivos de imagen.', 'error');
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) { // 5MB
+        showNotification('La imagen no debe exceder los 5MB.', 'error');
+        return;
+      }
+
+      setIsSubmitting(true);
+      try {
+        const formDataImage = new FormData();
+        formDataImage.append('image', file);
+
+        const response = await authFetch('/upload-image', {
+          method: 'POST',
+          body: formDataImage,
+          headers: {
+            // No Content-Type header when sending FormData, browser sets it
+          }
+        });
+
+        if (response.success) {
+          setImagenPerfil(response.imageUrl);
+          // Actualizar la URL de la imagen en el perfil del usuario en la base de datos
+          await authFetch(`/usuarios/${user.id}`, {
+            method: 'PUT',
+            body: { imagen_url: response.imageUrl },
+          });
+          showNotification('Imagen de perfil actualizada con éxito.', 'success');
+          setUser(prevUser => ({ ...prevUser, imagen_url: response.imageUrl })); // Actualizar el contexto del usuario
+        } else {
+          showNotification(response.message || 'Error al subir la imagen.', 'error');
+        }
+      } catch (err) {
+        console.error("Error uploading image:", err);
+        showNotification('Error de conexión al subir la imagen.', 'error');
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    // setNotification(null); // Ya se maneja con showNotification
+
+    // Validar todos los campos antes de enviar
+    let newErrors = {};
+    Object.keys(formData).forEach(key => {
+      const error = validateField(key, formData[key], formData, false, user.email);
+      if (error) {
+        newErrors[key] = error;
+      }
+    });
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      showNotification('Por favor, corrige los errores en el formulario.', 'error');
+      setIsSubmitting(false);
+      return;
+    }
 
     try {
       const updatedData = {
@@ -102,12 +159,13 @@ const ConfiguracionPerfil = () => { // Ya no recibe user y setUser directamente 
 
       const response = await authFetch(`/usuarios/${user.id}`, {
         method: 'PUT',
-        body: JSON.stringify(updatedData),
+        body: updatedData,
       });
 
       if (response.success) {
         showNotification('¡Perfil actualizado con éxito!', 'success');
-        setUser(prevUser => ({ ...prevUser, ...updatedData }));
+        // Actualizar el estado global del usuario con los nuevos datos
+        setUser(prevUser => ({ ...prevUser, ...response.data }));
       } else {
         showNotification(response.message || 'Error al actualizar el perfil.', 'error');
       }
@@ -122,7 +180,6 @@ const ConfiguracionPerfil = () => { // Ya no recibe user y setUser directamente 
   const handleDeleteAccount = async () => {
     setIsSubmitting(true);
     setShowDeleteConfirm(false);
-    // setNotification(null); // Ya se maneja con showNotification
 
     try {
       const response = await authFetch(`/usuarios/${user.id}`, {
@@ -133,7 +190,7 @@ const ConfiguracionPerfil = () => { // Ya no recibe user y setUser directamente 
         showNotification('Cuenta eliminada con éxito. Redirigiendo...', 'success');
         localStorage.removeItem('token');
         localStorage.removeItem('user');
-        setUser(null);
+        setUser(null); // Limpiar el estado del usuario globalmente
         setTimeout(() => {
           navigate('/login');
         }, 2000);
@@ -172,20 +229,6 @@ const ConfiguracionPerfil = () => { // Ya no recibe user y setUser directamente 
         </div>
       </div>
 
-      <AnimatePresence>
-        {/* {notification && ( // Notificación ahora se muestra desde el layout principal (InicioUsuario)
-          <motion.div
-            className={`${styles.notification} ${styles[notification.type]}`}
-            initial={{ opacity: 0, y: -50 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -50 }}
-          >
-            <FontAwesomeIcon icon={notification.type === 'success' ? faCheckCircle : faTimesCircle} />
-            {notification.message}
-          </motion.div>
-        )} */}
-      </AnimatePresence>
-
       <div className={styles.mainLayout}>
         <div className={styles.sidePanel}>
           <div
@@ -194,10 +237,10 @@ const ConfiguracionPerfil = () => { // Ya no recibe user y setUser directamente 
           >
             <div className={styles.profileImageContainer}>
               <img
-                src={imagenPerfil || `https://placehold.co/150x150/cccccc/ffffff?text=${formData.nombre.charAt(0)}`}
+                src={imagenPerfil || `https://placehold.co/150x150/cccccc/ffffff?text=${formData.nombre.charAt(0) || 'U'}`}
                 alt="Perfil"
                 className={styles.profileImage}
-                onError={(e) => { e.target.onerror = null; e.target.src = `https://placehold.co/150x150/cccccc/ffffff?text=${formData.nombre.charAt(0)}`; }}
+                onError={(e) => { e.target.onerror = null; e.target.src = `https://placehold.co/150x150/cccccc/ffffff?text=${formData.nombre.charAt(0) || 'U'}`; }}
               />
               <label htmlFor="uploadImagen" className={styles.profileOverlay}>
                 <FontAwesomeIcon icon={faCamera} />
@@ -208,6 +251,7 @@ const ConfiguracionPerfil = () => { // Ya no recibe user y setUser directamente 
                 accept="image/*"
                 onChange={handleImagenPerfilChange}
                 className={styles.uploadInput}
+                disabled={isSubmitting}
               />
             </div>
             <p className={styles.profileName}>{formData.nombre} {formData.apellido}</p>
@@ -253,6 +297,7 @@ const ConfiguracionPerfil = () => { // Ya no recibe user y setUser directamente 
                     onChange={handleChange}
                     required
                   />
+                  {errors.nombre && <p className={styles.errorText}>{errors.nombre}</p>}
                 </div>
 
                 <div className={styles.formGroup}>
@@ -268,6 +313,7 @@ const ConfiguracionPerfil = () => { // Ya no recibe user y setUser directamente 
                     value={formData.apellido}
                     onChange={handleChange}
                   />
+                  {errors.apellido && <p className={styles.errorText}>{errors.apellido}</p>}
                 </div>
 
                 <div className={styles.formGroup}>
@@ -284,6 +330,7 @@ const ConfiguracionPerfil = () => { // Ya no recibe user y setUser directamente 
                     onChange={handleChange}
                     required
                   />
+                  {errors.email && <p className={styles.errorText}>{errors.email}</p>}
                 </div>
 
                 <div className={styles.formGroup}>
@@ -299,6 +346,7 @@ const ConfiguracionPerfil = () => { // Ya no recibe user y setUser directamente 
                     value={formData.telefono}
                     onChange={handleChange}
                   />
+                  {errors.telefono && <p className={styles.errorText}>{errors.telefono}</p>}
                 </div>
 
                 <div className={styles.formGroup}>
@@ -314,6 +362,7 @@ const ConfiguracionPerfil = () => { // Ya no recibe user y setUser directamente 
                     value={formData.direccion}
                     onChange={handleChange}
                   />
+                  {errors.direccion && <p className={styles.errorText}>{errors.direccion}</p>}
                 </div>
 
                 <div className={styles.formGroup}>
@@ -331,8 +380,9 @@ const ConfiguracionPerfil = () => { // Ya no recibe user y setUser directamente 
                     <option value="CC">Cédula de Ciudadanía</option>
                     <option value="TI">Tarjeta de Identidad</option>
                     <option value="CE">Cédula de Extranjería</option>
-                    <option value="PAS">Pasaporte</option>
+                    <option value="PASAPORTE">Pasaporte</option>
                   </select>
+                  {errors.tipo_documento && <p className={styles.errorText}>{errors.tipo_documento}</p>}
                 </div>
 
                 <div className={styles.formGroup}>
@@ -348,6 +398,7 @@ const ConfiguracionPerfil = () => { // Ya no recibe user y setUser directamente 
                     value={formData.numero_documento}
                     onChange={handleChange}
                   />
+                  {errors.numero_documento && <p className={styles.errorText}>{errors.numero_documento}</p>}
                 </div>
 
                 <div className={styles.formGroup}>
@@ -362,6 +413,7 @@ const ConfiguracionPerfil = () => { // Ya no recibe user y setUser directamente 
                     value={formData.fecha_nacimiento}
                     onChange={handleChange}
                   />
+                  {errors.fecha_nacimiento && <p className={styles.errorText}>{errors.fecha_nacimiento}</p>}
                 </div>
               </div>
 
@@ -369,7 +421,7 @@ const ConfiguracionPerfil = () => { // Ya no recibe user y setUser directamente 
                 <motion.button
                   type="submit"
                   className={styles.guardarBtn}
-                  disabled={isSubmitting || !formData.nombre || !formData.email}
+                  disabled={isSubmitting || Object.values(errors).some(error => error !== null)}
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.97 }}
                 >
@@ -396,7 +448,7 @@ const ConfiguracionPerfil = () => { // Ya no recibe user y setUser directamente 
 
               <div className={styles.securityCard}>
                 <div className={styles.securityActions}>
-                  <Link to="/usuario/perfil/editar" className={styles.securityBtn}> {/* CORREGIDO */}
+                  <Link to="/usuario/perfil/cambiar-contrasena" className={styles.securityBtn}> {/* Ruta para cambiar contraseña */}
                     <FontAwesomeIcon icon={faLock} /> Cambiar Contraseña
                   </Link>
                   <motion.button

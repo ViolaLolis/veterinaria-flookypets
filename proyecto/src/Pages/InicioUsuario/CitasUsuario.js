@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useOutletContext } from 'react-router-dom'; // Importa useOutletContext
 import { motion, AnimatePresence } from 'framer-motion';
 import styles from './Styles/CitasUsuario.module.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
     faCalendarAlt, faShoppingCart, faPaw, faUserCog, faClipboardList,
-    faChevronDown, faChevronUp, faTimesCircle // Added faTimesCircle for cancel
+    faChevronDown, faChevronUp, faTimesCircle
 } from '@fortawesome/free-solid-svg-icons';
 import { FaSpinner } from 'react-icons/fa';
+import { authFetch } from '../../utils/api'; // Importar la función authFetch
 import { toast } from 'react-toastify'; // Import toast for user feedback
 
 // Componente de leer más / menos
@@ -50,65 +51,51 @@ const ReadMoreLessText = ({ text, maxLength = 100 }) => {
 
 const CitasUsuario = () => {
     const navigate = useNavigate();
+    const { user, showNotification } = useOutletContext(); // Obtener user y showNotification del contexto
     const [userAppointments, setUserAppointments] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isManagingAppointment, setIsManagingAppointment] = useState(false);
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [appointmentToManage, setAppointmentToManage] = useState(null);
 
-    // Datos de citas de ejemplo. He extendido el 'detalle' de la cita 3
-    // para que supere el maxLength y puedas ver el botón "Leer más".
-    const localAppointments = [
-        {
-            id_cita: '1',
-            fecha: '2025-07-10 10:00:00',
-            servicio_nombre: 'Consulta General',
-            mascota_nombre: 'Firulais',
-            mascota_especie: 'Perro',
-            veterinario_nombre: 'Dr. López',
-            estado: 'pendiente',
-            detalle: 'No hay observaciones adicionales para esta cita en particular.'
-        },
-        {
-            id_cita: '2',
-            fecha: '2025-07-15 14:00:00',
-            servicio_nombre: 'Vacunación',
-            mascota_nombre: 'Mishi',
-            mascota_especie: 'Gato',
-            veterinario_nombre: 'Dra. García',
-            estado: 'aceptada',
-            detalle: 'Cita programada para la tercera dosis de la vacuna antirrábica. Se recomienda que la mascota esté en ayunas 8 horas antes.'
-        },
-        {
-            id_cita: '3',
-            fecha: '2025-07-05 09:00:00',
-            servicio_nombre: 'Urgencia',
-            mascota_nombre: 'Rocky',
-            mascota_especie: 'Perro',
-            veterinario_nombre: 'Dr. Smith',
-            estado: 'completa',
-            // Este es el texto largo para probar el "Leer más"
-            detalle: 'Revisión general y desparasitación completa. Se encontró una pequeña irritación en la pata derecha que fue tratada con pomada antibiótica. Se le recetó un collar isabelino para evitar que se lama la herida y se programó un seguimiento en 5 días. Además, se discutió la dieta.'
-        },
-         {
-            id_cita: '4',
-            fecha: '2025-07-20 11:30:00',
-            servicio_nombre: 'Chequeo Dental',
-            mascota_nombre: 'Pelusa',
-            mascota_especie: 'Conejo',
-            veterinario_nombre: 'Dra. Pérez',
-            estado: 'cancelada',
-            detalle: 'Cita cancelada por parte del usuario. Se dejó nota para reprogramar si es necesario en el futuro.'
+    // Función para obtener las citas del usuario
+    const fetchUserAppointments = async () => {
+        setIsLoading(true);
+        if (!user?.id) {
+            showNotification('No se pudo cargar la información del usuario. Por favor, inicia sesión.', 'error');
+            setIsLoading(false);
+            return;
         }
-    ];
+        try {
+            // Se asume que la API de citas puede filtrar por id_cliente
+            const response = await authFetch(`/citas?id_cliente=${user.id}`);
+            if (response.success) {
+                // Mapear los datos para que coincidan con la estructura esperada por el frontend
+                const mappedAppointments = response.data.map(cita => ({
+                    id_cita: cita.id_cita,
+                    fecha: cita.fecha,
+                    servicio_nombre: cita.servicio_nombre, // Asumiendo que el backend retorna el nombre del servicio
+                    mascota_nombre: cita.mascota_nombre,   // Asumiendo que el backend retorna el nombre de la mascota
+                    mascota_especie: cita.mascota_especie, // Asumiendo que el backend retorna la especie de la mascota
+                    veterinario_nombre: cita.veterinario_nombre || 'Sin asignar', // Asumiendo nombre del veterinario
+                    estado: cita.estado,
+                    detalle: cita.servicios || 'No hay observaciones adicionales para esta cita en particular.'
+                }));
+                setUserAppointments(mappedAppointments);
+            } else {
+                showNotification(response.message || 'Error al cargar tus citas.', 'error');
+            }
+        } catch (err) {
+            console.error("Error fetching user appointments:", err);
+            showNotification('Error de conexión al servidor al cargar las citas.', 'error');
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     useEffect(() => {
-        // Simular carga de datos
-        setTimeout(() => {
-            setUserAppointments(localAppointments);
-            setIsLoading(false);
-        }, 1000);
-    }, []);
+        fetchUserAppointments();
+    }, [user]); // Depende del objeto user para recargar cuando esté disponible
 
     const openConfirmModal = (appointment) => {
         setAppointmentToManage(appointment);
@@ -120,25 +107,37 @@ const CitasUsuario = () => {
         setAppointmentToManage(null);
     };
 
-    const handleAppointmentAction = () => {
+    const handleAppointmentAction = async () => {
         if (!appointmentToManage) return;
 
         setIsManagingAppointment(true);
-        // Simular llamada a API para cancelar
-        setTimeout(() => {
-            setUserAppointments(prev =>
-                prev.map(cita =>
-                    cita.id_cita === appointmentToManage.id_cita
-                        ? { ...cita, estado: 'cancelada' } // Actualiza el estado a 'cancelada'
-                        : cita
-                )
-            );
-            toast.success(`Cita para ${appointmentToManage.mascota_nombre} ha sido cancelada.`, {
-                position: "bottom-right", autoClose: 3000
+        try {
+            // Llamada a la API para cancelar la cita
+            const response = await authFetch(`/citas/${appointmentToManage.id_cita}`, {
+                method: 'PUT',
+                body: { estado: 'cancelada' } // Actualizar el estado a 'cancelada'
             });
+
+            if (response.success) {
+                // Actualizar el estado local de las citas
+                setUserAppointments(prev =>
+                    prev.map(cita =>
+                        cita.id_cita === appointmentToManage.id_cita
+                            ? { ...cita, estado: 'cancelada' }
+                            : cita
+                    )
+                );
+                showNotification(`Cita para ${appointmentToManage.mascota_nombre} ha sido cancelada.`, 'success');
+            } else {
+                showNotification(response.message || 'Error al cancelar la cita.', 'error');
+            }
+        } catch (err) {
+            console.error("Error cancelling appointment:", err);
+            showNotification('Error de conexión al cancelar la cita.', 'error');
+        } finally {
             setIsManagingAppointment(false);
             closeModal();
-        }, 800);
+        }
     };
 
     const formatDateTime = (dateTimeString) => {
@@ -174,14 +173,14 @@ const CitasUsuario = () => {
 
             {userAppointments.length > 0 ? (
                 <ul className={styles.listaCitas}>
-                    <AnimatePresence> {/* Add AnimatePresence here for list items */}
+                    <AnimatePresence>
                         {userAppointments.map(cita => (
                             <motion.li
                                 key={cita.id_cita}
                                 className={styles.citaItem}
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, x: -50 }} // Animation for when item is removed (e.g., cancelled)
+                                exit={{ opacity: 0, x: -50 }}
                                 whileHover={{ scale: 1.02 }}
                             >
                                 <div className={styles.citaInfo}>
@@ -195,8 +194,7 @@ const CitasUsuario = () => {
                                 <div className={styles.citaObservacionContainer}>
                                     <FontAwesomeIcon icon={faClipboardList} className={styles.observacionIcon} />
                                     <strong>Observación:</strong>
-                                    {/* Aquí es donde pasas el detalle a tu componente ReadMoreLessText */}
-                                    <ReadMoreLessText text={cita.detalle} maxLength={100} /> {/* Ajustado maxLength para el ejemplo */}
+                                    <ReadMoreLessText text={cita.detalle} maxLength={100} />
                                 </div>
 
                                 <div className={styles.citaActions}>
@@ -222,7 +220,7 @@ const CitasUsuario = () => {
                     <p>No tienes citas programadas.</p>
                     <motion.button
                         className={styles.accionBtnPrimary}
-                        onClick={() => navigate('/usuario/citas/agendar')} // Ejemplo para agendar
+                        onClick={() => navigate('/usuario/servicios')}
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                     >
@@ -245,7 +243,7 @@ const CitasUsuario = () => {
                             initial={{ scale: 0.8, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             exit={{ scale: 0.8, opacity: 0 }}
-                            onClick={(e) => e.stopPropagation()} // Evita que el clic dentro del modal cierre el overlay
+                            onClick={(e) => e.stopPropagation()}
                         >
                             <h3>¿Cancelar cita?</h3>
                             <p>¿Estás seguro de cancelar la cita para <strong>{appointmentToManage.mascota_nombre}</strong> el <strong>{formatDateTime(appointmentToManage.fecha)}</strong>?</p>
@@ -253,7 +251,7 @@ const CitasUsuario = () => {
 
                             <div className={styles.modalActions}>
                                 <motion.button
-                                    className={styles.confirmButton} // Clase específica para el botón de confirmar
+                                    className={styles.confirmButton}
                                     onClick={handleAppointmentAction}
                                     disabled={isManagingAppointment}
                                     whileHover={{ scale: 1.05 }}
@@ -262,7 +260,7 @@ const CitasUsuario = () => {
                                     {isManagingAppointment ? <FaSpinner className={styles.buttonSpinner} /> : 'Sí, cancelar'}
                                 </motion.button>
                                 <motion.button
-                                    className={styles.cancelButton} // Clase específica para el botón de cancelar
+                                    className={styles.cancelButton}
                                     onClick={closeModal}
                                     disabled={isManagingAppointment}
                                     whileHover={{ scale: 1.05 }}

@@ -1,63 +1,63 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useOutletContext } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FaSpinner, FaInfoCircle, FaCalendarCheck } from 'react-icons/fa';
-import './Styles/DetalleServicio.css';
-
-// Datos locales simulando la "base de datos"
-const serviciosLocales = [
-  {
-    id_servicio: '1',
-    nombre: 'Corte de pelo',
-    precio: '$30',
-    descripcion: 'Corte de pelo profesional para tu mascota con productos especializados.'
-  },
-  {
-    id_servicio: '2',
-    nombre: 'Vacunación',
-    precio: '$50',
-    descripcion: 'Vacunación completa para mantener a tu mascota saludable.'
-  },
-  {
-    id_servicio: '3',
-    nombre: 'Consulta general',
-    precio: '$40',
-    descripcion: 'Consulta veterinaria general para revisión y diagnóstico.'
-  }
-];
+import styles from './Styles/DetalleServicio.css'; // Asegúrate de que el CSS sea un módulo
+import { authFetch } from '../../utils/api'; // Importar la función authFetch
 
 const DetalleServicio = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { showNotification } = useOutletContext(); // Obtener showNotification del contexto
+
   const [servicio, setServicio] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    setIsLoading(true);
-    setError('');
-    // Simular búsqueda local
-    const servicioEncontrado = serviciosLocales.find(s => s.id_servicio === id);
-    if (servicioEncontrado) {
-      setServicio(servicioEncontrado);
-    } else {
-      setError('No se encontró el servicio.');
-    }
-    setIsLoading(false);
-  }, [id]);
+    const fetchServiceDetails = async () => {
+      setIsLoading(true);
+      setError('');
+      try {
+        // Asumiendo una ruta para obtener un servicio específico por ID
+        const response = await authFetch(`/servicios/${id}`);
+        if (response.success) {
+          setServicio(response.data);
+        } else {
+          showNotification(response.message || 'Error al cargar el servicio.', 'error');
+          setError(response.message || 'No se encontró el servicio.');
+          setServicio(null);
+        }
+      } catch (err) {
+        console.error("Error fetching service details:", err);
+        showNotification('Error de conexión al servidor.', 'error');
+        setError('Error de conexión al servidor.');
+        setServicio(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchServiceDetails();
+  }, [id, showNotification]);
 
   const handleAgendar = () => {
     if (servicio) {
+      // Navegar a la página de agendar cita, pasando los detalles del servicio
       navigate('/usuario/citas/agendar', {
-        state: { servicioId: servicio.id_servicio, servicioNombre: servicio.nombre, servicioPrecio: servicio.precio }
+        state: {
+          servicioId: servicio.id_servicio,
+          servicioNombre: servicio.nombre,
+          servicioPrecio: servicio.precio
+        }
       });
     }
   };
 
   if (isLoading) {
     return (
-      <div className="loading-container">
-        <FaSpinner className="spinner-icon" />
+      <div className={styles.loadingContainer}>
+        <FaSpinner className={styles.spinnerIcon} />
         <p>Cargando servicio...</p>
       </div>
     );
@@ -65,41 +65,41 @@ const DetalleServicio = () => {
 
   if (error) {
     return (
-      <div className="error-message">
-        <FaInfoCircle className="info-icon" />
+      <div className={styles.errorMessage}>
+        <FaInfoCircle className={styles.infoIcon} />
         <p>{error}</p>
-        <Link to="/usuario/servicios" className="detalle-servicio-back">Volver a Servicios</Link>
+        <Link to="/usuario/servicios" className={styles.detalleServicioBack}>Volver a Servicios</Link>
       </div>
     );
   }
 
   if (!servicio) {
     return (
-      <div className="no-data-message">
-        <FaInfoCircle className="info-icon" />
+      <div className={styles.noDataMessage}>
+        <FaInfoCircle className={styles.infoIcon} />
         <p>No se encontró el servicio.</p>
-        <Link to="/usuario/servicios" className="detalle-servicio-back">Volver a Servicios</Link>
+        <Link to="/usuario/servicios" className={styles.detalleServicioBack}>Volver a Servicios</Link>
       </div>
     );
   }
 
   return (
-    <div className="detalle-servicio-container">
-      <h2 className="detalle-servicio-title">{servicio.nombre}</h2>
-      <div className="detalle-servicio-content">
+    <div className={styles.detalleServicioContainer}>
+      <h2 className={styles.detalleServicioTitle}>{servicio.nombre}</h2>
+      <div className={styles.detalleServicioContent}>
         <img
-          src={`https://placehold.co/400x250/cccccc/ffffff?text=${servicio.nombre.replace(/\s/g, '+')}`}
+          src={servicio.imagen_url || `https://placehold.co/400x250/cccccc/ffffff?text=${servicio.nombre.replace(/\s/g, '+')}`}
           alt={servicio.nombre}
-          className="detalle-servicio-image"
+          className={styles.detalleServicioImage}
           onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/400x250/cccccc/ffffff?text=Imagen+No+Disponible'; }}
         />
-        <div className="detalle-servicio-info">
-          <p className="detalle-servicio-precio">Precio: <strong>{servicio.precio}</strong></p>
-          <p className="detalle-servicio-descripcion-larga">{servicio.descripcion}</p>
-          <div className="detalle-servicio-actions">
-            <Link to="/usuario/servicios" className="detalle-servicio-back">Volver a Servicios</Link>
+        <div className={styles.detalleServicioInfo}>
+          <p className={styles.detalleServicioPrecio}>Precio: <strong>${typeof servicio.precio === 'number' ? servicio.precio.toLocaleString('es-CO') : servicio.precio}</strong></p>
+          <p className={styles.detalleServicioDescripcionLarga}>{servicio.descripcion}</p>
+          <div className={styles.detalleServicioActions}>
+            <Link to="/usuario/servicios" className={styles.detalleServicioBack}>Volver a Servicios</Link>
             <motion.button
-              className="detalle-servicio-agendar"
+              className={styles.detalleServicioAgendar}
               onClick={handleAgendar}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -109,7 +109,7 @@ const DetalleServicio = () => {
           </div>
         </div>
       </div>
-    </div>
+    </div >
   );
 };
 
