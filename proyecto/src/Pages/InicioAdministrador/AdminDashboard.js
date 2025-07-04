@@ -3,16 +3,9 @@ import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import {
     FaTachometerAlt, FaUsers, FaStethoscope, FaUserShield, FaBriefcaseMedical,
     FaCalendarAlt, FaNotesMedical, FaCog, FaSignOutAlt, FaUserCircle,
-<<<<<<< HEAD
-    FaBars, FaTimes 
-} from 'react-icons/fa';
-import './Styles/AdminDashboard.css';
-
-=======
     FaBars, FaTimes
 } from 'react-icons/fa';
 import './Styles/AdminDashboard.css';
->>>>>>> f6b4bbc7a3019180e9e80510d604f1c1ce8d48db
 
 function AdminDashboard({ user, setUser, handleLogout }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -29,7 +22,7 @@ function AdminDashboard({ user, setUser, handleLogout }) {
         }
     }, [user, navigate]);
 
-    // Maneja clics fuera del sidebar para cerrarlo (modificado para quitar la lógica de notificaciones)
+    // Maneja clics fuera del sidebar para cerrarlo
     useEffect(() => {
         function handleClickOutside(event) {
             // Cierra el sidebar en móvil si se hace clic fuera, pero no en el botón de toggle
@@ -54,9 +47,6 @@ function AdminDashboard({ user, setUser, handleLogout }) {
     const getNavLinkClass = (path) => {
         return location.pathname.startsWith(path) ? 'admin-nav-item active' : 'admin-nav-item';
     };
-
-    // The 'adminNotifications' constant and its filtering logic have been removed
-    // as the notification feature is currently commented out/removed.
 
     return (
         <div className="admin-dashboard-container">
@@ -157,84 +147,6 @@ function AdminDashboard({ user, setUser, handleLogout }) {
                         <FaBars />
                     </button>
                     <h1>Flooky Pets</h1>
-
-                    {/* La sección header-right fue comentada anteriormente, por lo que no se incluye en el código activo. */}
-                    {/* Si necesitas re-habilitar las notificaciones o el perfil en el encabezado, descomenta este bloque
-                        y las variables, estados e imports relacionados que se eliminaron arriba. */}
-                    {/*
-                    <div className="header-right">
-                        <span className="admin-role-text">Admin</span>
-
-                        <div className="notification-container" ref={notificationsRef}>
-                            <button
-                                className="admin-notification-bell-btn"
-                                onClick={toggleNotificationsDropdown}
-                                title="Ver Notificaciones"
-                                aria-expanded={isNotificationsDropdownOpen}
-                                aria-controls="admin-notifications-dropdown"
-                            >
-                                <FaBell className="admin-bell-icon" />
-                                {unreadCount > 0 && (
-                                    <span className="admin-notification-badge">{unreadCount}</span>
-                                )}
-                            </button>
-
-                            {isNotificationsDropdownOpen && (
-                                <div id="admin-notifications-dropdown" className="admin-notifications-dropdown">
-                                    <h3>Notificaciones ({unreadCount} no leídas)</h3>
-                                    {adminNotifications.length > 0 ? (
-                                        <>
-                                            <ul>
-                                                {adminNotifications
-                                                    .sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
-                                                    .map((notif) => (
-                                                        <li key={notif.id} className={notif.leida ? 'read' : 'unread'}>
-                                                            <div className="notification-content">
-                                                                <p className="notification-message">{notif.mensaje}</p>
-                                                                <span className="notification-date">
-                                                                    {new Date(notif.fecha).toLocaleString()}
-                                                                </span>
-                                                            </div>
-                                                            {!notif.leida && (
-                                                                <button
-                                                                    className="admin-mark-as-read-button"
-                                                                    onClick={(e) => {
-                                                                        e.stopPropagation();
-                                                                        markAsRead(notif.id);
-                                                                    }}
-                                                                    title="Marcar como leída"
-                                                                >
-                                                                    <FaCheckCircle />
-                                                                </button>
-                                                            )}
-                                                        </li>
-                                                    ))}
-                                            </ul>
-                                            {unreadCount > 0 && (
-                                                <button onClick={clearNotifications} className="admin-clear-all-notifications-button">
-                                                    Marcar todas como leídas
-                                                </button>
-                                            )}
-                                        </>
-                                    ) : (
-                                        <p className="no-notifications-message">No hay notificaciones para mostrar.</p>
-                                    )}
-                                </div>
-                            )}
-                        </div>
-
-                        <div className="admin-user-profile-header">
-                            <div className="admin-avatar-header">
-                                {user?.profilePicture ? (
-                                    <img src={user.profilePicture} alt="Avatar de usuario" className="admin-avatar-image-header" />
-                                ) : (
-                                    <FaUserCircle className="admin-user-avatar-icon" />
-                                )}
-                            </div>
-                            <span>{user?.nombre}</span>
-                        </div>
-                    </div>
-                    */}
                 </header>
 
                 {/* Área donde se renderizan los componentes de las rutas anidadas */}

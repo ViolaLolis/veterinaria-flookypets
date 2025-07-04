@@ -12,10 +12,10 @@ const AdminMedicalRecords = ({ user }) => {
     const [filteredRecords, setFilteredRecords] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState(''); // Estado para errores de carga o eliminación
+    const [error, setError] = useState('');
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [currentRecord, setCurrentRecord] = useState(null);
-    const [notification, setNotification] = useState(null); // Estado para notificaciones de éxito/info
+    const [notification, setNotification] = useState(null);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [recordToDelete, setRecordToDelete] = useState(null);
 
@@ -43,65 +43,45 @@ const AdminMedicalRecords = ({ user }) => {
             },
         });
 
-        // Manejo de errores de autenticación/autorización
         if (response.status === 401 || response.status === 403) {
-<<<<<<< HEAD
-            // Limpiar token si la sesión ha expirado y redirigir
             localStorage.removeItem('token');
-            setError('Sesión expirada o no autorizado. Por favor, inicia sesión de nuevo.');
-            // Opcional: Redirigir a la página de login
-            // window.location.href = '/login'; 
-            throw new Error('No autorizado');
-        }
-
-        // Mejora: Capturar mensajes de error específicos del backend para otros códigos de estado no exitosos
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || `Error del servidor: ${response.status}`);
-        }
-
-        return response;
-=======
             const errorData = await response.json().catch(() => ({ message: 'Error de autenticación/autorización.' }));
             setError(errorData.message || 'Sesión expirada o no autorizado. Por favor, inicia sesión de nuevo.');
             throw new Error(errorData.message || 'No autorizado');
         }
 
-        // Manejo de errores de respuesta no JSON
-        const contentType = response.headers.get("content-type");
-        if (contentType && contentType.indexOf("application/json") !== -1) {
-            return response; // Si es JSON, retorna la respuesta para que se parsee más adelante
-        } else {
-            const text = await response.text();
-            console.error("Response was not JSON:", text);
-            setError(`Error del servidor: Respuesta inesperada. Estado: ${response.status}`);
-            throw new Error("Respuesta del servidor no es JSON");
+        if (!response.ok) {
+            const contentType = response.headers.get("content-type");
+            if (contentType && contentType.indexOf("application/json") !== -1) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `Error del servidor: ${response.status}`);
+            } else {
+                const text = await response.text();
+                console.error("Response was not JSON:", text);
+                setError(`Error del servidor: Respuesta inesperada. Estado: ${response.status}`);
+                throw new Error("Respuesta del servidor no es JSON");
+            }
         }
->>>>>>> f6b4bbc7a3019180e9e80510d604f1c1ce8d48db
+
+        return response;
     }, []);
 
     const fetchMedicalRecords = useCallback(async () => {
         setIsLoading(true);
-        setError(''); // Limpiar errores anteriores de carga
-        setNotification(null); // Limpiar notificaciones anteriores
+        setError('');
+        setNotification(null);
         try {
-            // CAMBIO CORREGIDO: Se eliminó '/api' de la ruta para que coincida con el backend
             const response = await authFetch(`${API_BASE_URL}/admin/historiales`);
             const data = await response.json();
             if (data.success) {
                 setMedicalRecords(data.data);
-                setFilteredRecords(data.data); // Asegurar que los filtrados se actualicen con los nuevos datos
+                setFilteredRecords(data.data);
             } else {
                 setError(data.message || 'Error al cargar historiales médicos.');
             }
         } catch (err) {
             console.error('Error fetching medical records:', err);
-<<<<<<< HEAD
-            // El error ya se setea en authFetch, pero si hay un error de red, lo capturamos aquí
             setError(prev => prev || `Error al conectar con el servidor: ${err.message || 'Verifica tu conexión.'}`);
-=======
-            setError('Error al conectar con el servidor para cargar historiales médicos. ' + err.message);
->>>>>>> f6b4bbc7a3019180e9e80510d604f1c1ce8d48db
         } finally {
             setIsLoading(false);
         }
@@ -116,9 +96,9 @@ const AdminMedicalRecords = ({ user }) => {
         const filtered = medicalRecords.filter(record =>
             record.mascota.toLowerCase().includes(lowercasedFilter) ||
             record.propietario.toLowerCase().includes(lowercasedFilter) ||
-            (record.veterinario && record.veterinario.toLowerCase().includes(lowercasedFilter)) || // Asegurarse que veterinario exista
+            (record.veterinario && record.veterinario.toLowerCase().includes(lowercasedFilter)) ||
             record.diagnostico.toLowerCase().includes(lowercasedFilter) ||
-            record.id_historial.toString().includes(lowercasedFilter) // Permite buscar por ID
+            record.id_historial.toString().includes(lowercasedFilter)
         );
         setFilteredRecords(filtered);
     }, [searchTerm, medicalRecords]);
@@ -126,28 +106,28 @@ const AdminMedicalRecords = ({ user }) => {
     const handleAddNew = () => {
         setCurrentRecord(null);
         setIsFormOpen(true);
-        setError(''); // Limpiar errores al abrir el formulario
-        setNotification(null); // Limpiar notificaciones al abrir el formulario
+        setError('');
+        setNotification(null);
     };
 
     const handleEdit = (record) => {
         setCurrentRecord(record);
         setIsFormOpen(true);
-        setError(''); // Limpiar errores al abrir el formulario
-        setNotification(null); // Limpiar notificaciones al abrir el formulario
+        setError('');
+        setNotification(null);
     };
 
     const handleDeleteConfirm = (record) => {
         setRecordToDelete(record);
         setShowDeleteConfirm(true);
-        setError(''); // Limpiar errores al abrir la confirmación
-        setNotification(null); // Limpiar notificaciones al abrir la confirmación
+        setError('');
+        setNotification(null);
     };
 
     const handleDelete = async () => {
-        setIsLoading(true); // Bloquear UI durante la eliminación
-        setNotification(null); // Limpiar notificaciones anteriores
-        setError(''); // Limpiar errores anteriores
+        setIsLoading(true);
+        setNotification(null);
+        setError('');
         try {
             const response = await authFetch(`${API_BASE_URL}/historial_medico/${recordToDelete.id_historial}`, {
                 method: 'DELETE',
@@ -156,17 +136,13 @@ const AdminMedicalRecords = ({ user }) => {
 
             if (data.success) {
                 setNotification({ message: data.message, type: 'success' });
-                fetchMedicalRecords(); // Recargar la lista
+                fetchMedicalRecords();
             } else {
                 setError(data.message || 'Error al eliminar el historial médico. Intenta de nuevo.');
             }
         } catch (err) {
             console.error('Error deleting medical record:', err);
-<<<<<<< HEAD
             setError(prev => prev || `Error al conectar con el servidor: ${err.message || 'Verifica tu conexión.'}`);
-=======
-            setError('Error al conectar con el servidor para eliminar el historial médico. ' + err.message);
->>>>>>> f6b4bbc7a3019180e9e80510d604f1c1ce8d48db
         } finally {
             setIsLoading(false);
             setShowDeleteConfirm(false);
@@ -174,23 +150,21 @@ const AdminMedicalRecords = ({ user }) => {
         }
     };
 
-    // Función para formatear la fecha
     const formatDateTime = (isoString) => {
         if (!isoString) return 'N/A';
         try {
             const date = new Date(isoString);
-            // Ajustar para la zona horaria de Bogotá (GMT-5)
             const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'America/Bogota' };
             return date.toLocaleString('es-CO', options);
         } catch (e) {
             console.error("Error formatting date:", e);
-            return isoString; // Retorna el string original si falla el formato
+            return isoString;
         }
     };
 
     return (
         <div className="admin-container">
-            <h1 className="admin-title"><FaFileMedical /> Gestión de Historiales Médicos</h1>
+            <h1 className="admin-title" style={{ color: "var(--primary-dark)" }}><FaFileMedical /> Gestión de Historiales Médicos</h1>
 
             {notification && (
                 <Notification
@@ -199,7 +173,7 @@ const AdminMedicalRecords = ({ user }) => {
                     onClose={() => setNotification(null)}
                 />
             )}
-            {error && <div className="error-message">{error}</div>}
+            {error && <div className="error-message" style={{ backgroundColor: "var(--danger-color)", color: "#fff" }}>{error}</div>}
 
             <div className="admin-actions">
                 <div className="search-bar">
@@ -210,13 +184,13 @@ const AdminMedicalRecords = ({ user }) => {
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="search-input"
-                        disabled={isLoading} // Deshabilitar búsqueda mientras se carga
+                        disabled={isLoading}
                     />
                     {searchTerm && (
                         <FaTimes className="clear-search" onClick={() => setSearchTerm('')} />
                     )}
                 </div>
-                <button className="add-btn" onClick={handleAddNew} disabled={isLoading}>
+                <button className="add-btn" onClick={handleAddNew} disabled={isLoading} style={{ backgroundColor: "var(--primary-color)", color: "#fff" }}>
                     <FaPlus /> Registrar Nuevo Historial
                 </button>
             </div>
@@ -243,7 +217,7 @@ const AdminMedicalRecords = ({ user }) => {
                             {filteredRecords.map((record) => (
                                 <tr key={record.id_historial}>
                                     <td>{record.id_historial}</td>
-                                    <td>{formatDateTime(record.fecha_consulta)}</td> {/* Formatear fecha */}
+                                    <td>{formatDateTime(record.fecha_consulta)}</td>
                                     <td>{record.mascota} ({record.especie})</td>
                                     <td>{record.propietario}</td>
                                     <td>{record.veterinario || 'N/A'}</td>
@@ -254,6 +228,7 @@ const AdminMedicalRecords = ({ user }) => {
                                             className="btn-edit"
                                             disabled={isLoading}
                                             title="Editar Historial"
+                                            style={{ backgroundColor: "var(--secondary-color)", color: "#fff" }}
                                         >
                                             <FaEdit /> Editar
                                         </button>
@@ -262,6 +237,7 @@ const AdminMedicalRecords = ({ user }) => {
                                             className="btn-delete"
                                             disabled={isLoading}
                                             title="Eliminar Historial"
+                                            style={{ backgroundColor: "var(--danger-color)", color: "#fff" }}
                                         >
                                             <FaTrash /> Eliminar
                                         </button>
@@ -273,7 +249,7 @@ const AdminMedicalRecords = ({ user }) => {
                 </div>
             ) : (
                 <div className="no-results">
-                    <FaInfoCircle className="info-icon" />
+                    <FaInfoCircle className="info-icon" style={{ color: "var(--accent-color)" }} />
                     {searchTerm ?
                         'No se encontraron historiales médicos que coincidan con la búsqueda.' :
                         'No hay historiales médicos registrados. ¡Comienza agregando uno nuevo!'}
@@ -281,6 +257,7 @@ const AdminMedicalRecords = ({ user }) => {
                         className="add-btn"
                         onClick={handleAddNew}
                         disabled={isLoading}
+                        style={{ backgroundColor: "var(--primary-color)", color: "#fff" }}
                     >
                         <FaPlus /> Registrar Nuevo Historial
                     </button>
@@ -293,7 +270,7 @@ const AdminMedicalRecords = ({ user }) => {
                 record={currentRecord}
                 onSaveSuccess={() => {
                     fetchMedicalRecords();
-                    setCurrentRecord(null); // Limpiar el estado de edición
+                    setCurrentRecord(null);
                 }}
             />
 
@@ -301,10 +278,10 @@ const AdminMedicalRecords = ({ user }) => {
                 <div className="modal-content-delete">
                     <p>¿Estás seguro de que quieres eliminar el historial médico de <strong>{recordToDelete?.mascota}</strong> ({recordToDelete?.propietario}) con fecha <strong>{formatDateTime(recordToDelete?.fecha_consulta)}</strong>?</p>
                     <div className="form-actions">
-                        <button className="btn-delete" onClick={handleDelete} disabled={isLoading}>
+                        <button className="btn-delete" onClick={handleDelete} disabled={isLoading} style={{ backgroundColor: "var(--danger-dark)", color: "#fff" }}>
                             {isLoading ? <FaSpinner className="spinner" /> : <FaTrash />} Eliminar
                         </button>
-                        <button className="btn-secondary" onClick={() => setShowDeleteConfirm(false)} disabled={isLoading}> {/* Deshabilitar durante carga */}
+                        <button className="btn-secondary" onClick={() => setShowDeleteConfirm(false)} disabled={isLoading} style={{ backgroundColor: "var(--secondary-dark)", color: "#fff" }}>
                             <FaTimes /> Cancelar
                         </button>
                     </div>
