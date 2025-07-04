@@ -44,18 +44,30 @@ const AdminMedicalRecords = ({ user }) => {
             },
         });
 
+        // Manejo de errores de autenticación/autorización
         if (response.status === 401 || response.status === 403) {
-            setError('Sesión expirada o no autorizado. Por favor, inicia sesión de nuevo.');
-            throw new Error('No autorizado');
+            const errorData = await response.json().catch(() => ({ message: 'Error de autenticación/autorización.' }));
+            setError(errorData.message || 'Sesión expirada o no autorizado. Por favor, inicia sesión de nuevo.');
+            throw new Error(errorData.message || 'No autorizado');
         }
 
-        return response;
+        // Manejo de errores de respuesta no JSON
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.indexOf("application/json") !== -1) {
+            return response; // Si es JSON, retorna la respuesta para que se parsee más adelante
+        } else {
+            const text = await response.text();
+            console.error("Response was not JSON:", text);
+            setError(`Error del servidor: Respuesta inesperada. Estado: ${response.status}`);
+            throw new Error("Respuesta del servidor no es JSON");
+        }
     }, []);
 
     const fetchMedicalRecords = useCallback(async () => {
         setIsLoading(true);
         setError('');
         try {
+            // CAMBIO CORREGIDO: Se eliminó '/api' de la ruta para que coincida con el backend
             const response = await authFetch(`${API_BASE_URL}/admin/historiales`);
             const data = await response.json();
             if (data.success) {
@@ -66,7 +78,7 @@ const AdminMedicalRecords = ({ user }) => {
             }
         } catch (err) {
             console.error('Error fetching medical records:', err);
-            setError('Error al conectar con el servidor para cargar historiales médicos.');
+            setError('Error al conectar con el servidor para cargar historiales médicos. ' + err.message);
         } finally {
             setIsLoading(false);
         }
@@ -119,7 +131,7 @@ const AdminMedicalRecords = ({ user }) => {
             }
         } catch (err) {
             console.error('Error deleting medical record:', err);
-            setError('Error al conectar con el servidor para eliminar el historial médico.');
+            setError('Error al conectar con el servidor para eliminar el historial médico. ' + err.message);
         } finally {
             setIsLoading(false);
             setShowDeleteConfirm(false);
@@ -167,7 +179,7 @@ const AdminMedicalRecords = ({ user }) => {
                 <div className="table-responsive">
                     <table className="admin-table">
                         <thead>
-                            <tr>{/* No whitespace here */}
+                            <tr>
                                 <th>ID Historial</th>
                                 <th>Fecha Consulta</th>
                                 <th>Mascota</th>
@@ -175,11 +187,11 @@ const AdminMedicalRecords = ({ user }) => {
                                 <th>Veterinario</th>
                                 <th>Diagnóstico</th>
                                 <th>Acciones</th>
-                            </tr>{/* No whitespace here */}
+                            </tr>
                         </thead>
                         <tbody>
                             {filteredRecords.map((record) => (
-                                <tr key={record.id_historial}>{/* No whitespace here */}
+                                <tr key={record.id_historial}>
                                     <td>{record.id_historial}</td>
                                     <td>{record.fecha_consulta}</td>
                                     <td>{record.mascota} ({record.especie})</td>

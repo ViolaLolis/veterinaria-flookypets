@@ -50,7 +50,7 @@ app.use(express.json()); // Habilita el parsing de JSON en el cuerpo de las peti
 const pool = mysql.createPool({
     host: process.env.DB_HOST || "127.0.0.1",
     user: process.env.DB_USER || "root",
-    password: process.env.DB_PASSWORD || "", // Asegúrate de que tu contraseña de MySQL sea correcta aquí o en .env
+    password: process.env.DB_PASSWORD || "12345678", // Asegúrate de que tu contraseña de MySQL sea correcta aquí o en .env
     database: process.env.DB_NAME || "veterinaria",
     waitForConnections: true,
     connectionLimit: 10,
@@ -1865,12 +1865,12 @@ app.get("/veterinario/citas/ultimas", authenticateToken, isVetOrAdmin, async (re
                     CONCAT(u_cli.nombre, ' ', u_cli.apellido) as propietario_nombre,
                     u_cli.apellido as propietario_apellido,
                     m.nombre as mascota_nombre, m.especie as mascota_especie,
-                    m.imagen_url as mascota_imagen_url -- Asegúrate de que esta columna exista en tu tabla de mascotas
+                    m.imagen_url as mascota_imagen_url /* Asegúrate de que esta columna exista en tu tabla de mascotas */
              FROM citas c
              JOIN servicios s ON c.id_servicio = s.id_servicio
              JOIN usuarios u_cli ON c.id_cliente = u_cli.id
              JOIN mascotas m ON c.id_mascota = m.id_mascota
-             WHERE c.id_veterinario = ? AND c.estado = 'PENDIENTE' -- Solo citas pendientes para el dashboard
+             WHERE c.id_veterinario = ? AND c.estado = 'PENDIENTE' /* Solo citas pendientes para el dashboard */
              ORDER BY c.fecha DESC
              LIMIT 5`, // Últimas 5 citas
             [veterinarioId]
@@ -2532,8 +2532,8 @@ app.get("/admin/historiales", authenticateToken, isAdmin, async (req, res) => {
             m.nombre as mascota, m.especie, m.raza,
             CONCAT(p.nombre, ' ', p.apellido) as propietario,
             CONCAT(v.nombre, ' ', v.apellido) as veterinario,
-            h.veterinario as veterinario_id, // Añadido para el frontend
-            h.id_mascota // Añadido para el frontend
+            h.veterinario as veterinario_id, /* Añadido para el frontend */
+            h.id_mascota /* Añadido para el frontend */
             FROM historial_medico h
             JOIN mascotas m ON h.id_mascota = m.id_mascota
             JOIN usuarios p ON m.id_propietario = p.id
@@ -2561,4 +2561,24 @@ app.use((err, req, res, next) => {
         message: "Ocurrió un error inesperado en el servidor.",
         error: process.env.NODE_ENV === 'development' ? err.stack : err.message
     });
+});
+// Ruta para obtener notificaciones por ID de usuario
+app.get('/api/notifications/user/:id', authenticateToken, async (req, res) => {
+    try {
+        const userId = req.params.id;
+        // Verifica si el usuario autenticado tiene permiso para ver estas notificaciones
+        // Por ejemplo, si es admin, veterinario o el propio usuario
+        if (req.user.role !== 'admin' && req.user.role !== 'veterinario' && req.user.id !== parseInt(userId)) {
+            return res.status(403).json({ success: false, message: "Acceso denegado. No tienes permiso para ver estas notificaciones." });
+        }
+
+        const [notifications] = await pool.query(
+            `SELECT * FROM notificaciones WHERE id_usuario = ? ORDER BY fecha_creacion DESC`,
+            [userId]
+        );
+        res.json({ success: true, data: notifications });
+    } catch (error) {
+        console.error("Error al obtener notificaciones por usuario:", error);
+        res.status(500).json({ success: false, message: "Error al obtener notificaciones", error: process.env.NODE_ENV === 'development' ? error.stack : error.message });
+    }
 });
