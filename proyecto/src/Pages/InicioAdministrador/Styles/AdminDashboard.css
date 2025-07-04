@@ -1,372 +1,436 @@
-/* src/Pages/InicioAdministrador/Styles/AdminDashboard.css */
-
-/* --- Variables CSS para una gestión de colores y espaciado más fácil --- */
+/* --- Variables CSS (basadas en tu MainVeterinario.css y optimizadas) --- */
 :root {
-    --color-primary-cyan: #00BCD4; /* Nuevo azul cian vibrante */
-    --color-dark-cyan: #0097A7;    /* Nuevo azul oscuro */
-    --color-light-cyan: #E0F7FA;   /* Nuevo azul claro */
-    --color-accent-green: #28a745;
-    --color-accent-red: #dc3545;
-    --color-text-dark: #333;
-    --color-text-medium: #555;
-    --color-text-light: #6c757d;
-    --color-background-light: #f0f2f5;
-    --color-background-white: #ffffff;
-    --color-border-light: #e0e0e0;
-    --color-border-medium: #ccc;
+    --primary-color: #00acc1; /* Teal - para acentos, botones, iconos principales */
+    --primary-dark: #0097a7; /* Darker Teal */
+    --secondary-color: #4CAF50; /* Green (para éxito, o botones secundarios) */
+    --accent-color: #ffc107; /* Amarillo (para advertencias o acentos visuales) */
 
-    --spacing-xs: 0.5rem;
-    --spacing-sm: 0.8rem;
-    --spacing-md: 1rem;
-    --spacing-lg: 1.5rem;
-    --spacing-xl: 2rem;
-    --spacing-xxl: 3rem;
+    --background-light: #f5f9fa; /* Fondo general de la página (contenido) */
+    --background-white: #ffffff; /* Fondo para tarjetas, sidebar, header */
+    --sidebar-dark-text: #ecf0f1; /* Texto claro para fondos oscuros (si el sidebar fuera oscuro) */
 
-    --border-radius-sm: 8px;
-    --border-radius-md: 12px;
-    --border-radius-lg: 16px;
+    --text-dark: #2c3e50; /* Texto oscuro principal (para la mayoría de los textos) */
+    --text-medium: #7f8c8d; /* Texto gris para detalles, descripciones */
+    --text-light-contrast: #ffffff; /* Texto blanco para contrastar con fondos de color */
 
-    --shadow-sm: 0 2px 5px rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 4px 15px rgba(0, 0, 0, 0.1);
-    --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.15);
+    --border-light: #e0f7fa; /* Borde muy claro (usado en sidebar) */
+    --border-medium: #e0e0e0; /* Borde más visible (para separadores) */
+    --border-card: #e8e8e8; /* Borde para tarjetas */
 
-    --navbar-height: 60px; /* Altura de la barra de navegación superior */
-    --sidebar-width: 250px;
-    --sidebar-width-mobile: 280px; /* Ancho de la barra lateral en móvil */
+    --shadow-light: rgba(0, 0, 0, 0.05); /* Sombra ligera */
+    --shadow-medium: rgba(0, 0, 0, 0.15); /* Sombra más pronunciada */
+    --shadow-card: rgba(0, 0, 0, 0.08); /* Sombra para tarjetas */
+
+    --red-alert: #ff5252; /* Rojo para alertas y cerrar sesión */
+
+    --font-family: 'Poppins', sans-serif; /* Fuente principal */
 }
 
-/* --- Global Animations (repetidas para auto-contención) --- */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+/* --- Base Styles --- */
+html, body, #root {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: var(--font-family);
+    color: var(--text-dark);
+    background-color: var(--background-light);
 }
 
-@keyframes slideInUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-@keyframes bounceIn {
-    0% { transform: scale(0.3); opacity: 0; }
-    50% { transform: scale(1.05); opacity: 1; }
-    70% { transform: scale(0.9); }
-    100% { transform: scale(1); }
-}
-
-/* Animación específica para el dropdown de notificaciones */
-@keyframes fadeInScale {
-    from {
-        opacity: 0;
-        transform: scale(0.9);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
-}
-
-
-/* --- General Layout del Dashboard --- */
 .admin-dashboard-container {
     display: flex;
     min-height: 100vh;
-    background-color: var(--color-background-light);
-    color: var(--color-text-dark);
+    overflow: hidden; /* Evita barras de desplazamiento no deseadas en el layout principal */
 }
 
-/* --- Sidebar (Barra Lateral) --- */
-.admin-dashboard-container > .admin-sidebar {
-    width: var(--sidebar-width);
-    background-color: var(--color-background-white);
-    box-shadow: var(--shadow-md);
-    border-right: 1px solid var(--color-border-light);
-    height: 100vh; /* Ocupa toda la altura del viewport */
-    position: sticky;
-    top: 0; /* Se pega al borde superior */
-    overflow-y: auto; /* Re-habilitado para permitir el desplazamiento si el contenido es largo */
-    transition: transform 0.3s ease-in-out, width 0.3s ease-in-out;
-    flex-shrink: 0; /* Evita que la barra lateral se encoja */
-    padding: var(--spacing-xl) var(--spacing-md);
-    z-index: 400; /* Asegura que esté debajo de la navbar principal pero sobre el contenido */
-}
-
-.admin-dashboard-container > .admin-sidebar.open {
-    transform: translateX(0); /* Para móvil, se desliza hacia adentro */
-}
-
-.sidebar-header {
+/* --- Sidebar --- */
+.admin-sidebar {
+    width: 280px; /* Ancho fijo */
+    min-width: 280px; /* Asegura que no se encoja */
+    background-color: var(--background-white);
+    box-shadow: 2px 0 10px var(--shadow-light);
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-bottom: var(--spacing-md);
-    margin-bottom: var(--spacing-lg);
-    border-bottom: 1px solid var(--color-border-light);
+    flex-direction: column;
+    padding: 20px 0;
+    position: sticky; /* Se mantiene en la parte superior al hacer scroll */
+    top: 0;
+    height: 100vh; /* Ocupa toda la altura de la vista */
+    overflow-y: auto; /* Permite scroll si el contenido es largo */
+    transition: transform 0.3s ease-in-out; /* Para la animación de abrir/cerrar en móvil */
+    z-index: 1000; /* Asegura que esté por encima del contenido principal */
 }
 
-.sidebar-header h3 {
-    font-size: 1.6rem;
-    color: var(--color-dark-cyan);
-    margin: 0;
+/* Estado abierto para móviles */
+.admin-sidebar.open {
+    transform: translateX(0);
+}
+
+.admin-sidebar-header {
+    text-align: center;
+    padding: 10px 20px 20px;
+    border-bottom: 1px solid var(--border-light);
+    position: relative; /* Para posicionar el botón de cierre */
+}
+
+.admin-logo-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    cursor: pointer;
+    margin-bottom: 5px;
+}
+
+.admin-logo-icon {
+    font-size: 2.2rem;
+    color: var(--primary-color);
+}
+
+.admin-logo-container h2 {
+    font-size: 1.8rem;
+    color: var(--text-dark);
     font-weight: 700;
-    white-space: nowrap; /* Evita que el texto se envuelva */
-    overflow: hidden; /* Oculta el texto si se desborda */
-    text-overflow: ellipsis; /* Añade puntos suspensivos si el texto se desborda */
+    margin: 0;
+}
+
+.admin-clinic-name {
+    font-size: 0.9rem;
+    color: var(--text-medium);
+    margin: 0;
 }
 
 .close-sidebar-btn {
+    display: none; /* Ocultar por defecto, mostrar en móviles */
     background: none;
     border: none;
-    font-size: 1.5rem;
-    color: var(--color-text-light);
+    color: var(--text-medium);
+    font-size: 1.8rem;
     cursor: pointer;
-    transition: color 0.3s ease, transform 0.2s ease;
-    display: none; /* Oculto por defecto, se muestra en móvil */
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    transition: color 0.2s ease;
 }
 
 .close-sidebar-btn:hover {
-    color: var(--color-accent-red);
-    transform: rotate(90deg);
+    color: var(--red-alert);
 }
 
-.sidebar-nav ul {
+/* --- User Profile in Sidebar --- */
+.admin-user-profile {
+    display: flex;
+    flex-direction: column; /* Cambiado a columna para el perfil principal */
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid var(--border-light);
+    margin-bottom: 20px;
+}
+
+.admin-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background-color: var(--primary-color); /* Fondo si no hay imagen */
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2.5rem;
+    font-weight: 700;
+    box-shadow: 0 4px 10px var(--shadow-light);
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+    border: 3px solid #b2ebf2; /* Ligero teal claro */
+}
+
+.admin-avatar-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.admin-user-info {
+    text-align: center;
+    margin-top: 15px;
+}
+
+.admin-user-info h3 {
+    font-size: 1.3rem;
+    color: var(--text-dark);
+    margin: 0 0 5px;
+}
+
+.admin-user-info p {
+    font-size: 0.9rem;
+    color: var(--text-medium);
+    margin: 0 0 10px;
+}
+
+.admin-profile-button {
+    background-color: transparent;
+    border: 1px solid var(--primary-color);
+    color: var(--primary-color);
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.admin-profile-button:hover {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+/* --- Navigation Menu --- */
+.admin-nav-menu {
+    flex-grow: 1; /* Permite que ocupe el espacio disponible */
+}
+
+.admin-nav-menu ul {
     list-style: none;
     padding: 0;
     margin: 0;
 }
 
-.sidebar-nav ul li {
-    margin-bottom: var(--spacing-xs);
+.admin-nav-menu li {
+    position: relative; /* Para el indicador activo */
 }
 
-.sidebar-nav ul li a {
+.admin-nav-menu .admin-nav-item {
     display: flex;
     align-items: center;
-    gap: var(--spacing-sm);
-    padding: var(--spacing-md) var(--spacing-sm);
-    text-decoration: none;
-    color: var(--color-text-dark);
-    font-size: 1rem; /* Tamaño de fuente base */
+    gap: 15px;
+    padding: 12px 20px;
+    margin: 5px 0;
+    color: #555; /* Un gris oscuro para los ítems inactivos */
+    font-size: 1rem;
     font-weight: 500;
-    border-radius: var(--border-radius-sm);
-    transition: all 0.3s ease;
-    white-space: nowrap; /* Evita que el texto se envuelva */
-    overflow: hidden; /* Oculta el texto si se desborda */
-    text-overflow: ellipsis; /* Añade puntos suspensivos si el texto se desborda */
-}
-
-.sidebar-nav ul li a:hover {
-    background-color: var(--color-light-cyan);
-    color: var(--color-primary-cyan);
-    transform: translateX(5px);
-}
-
-.sidebar-nav ul li a.active {
-    background-color: var(--color-primary-cyan);
-    color: var(--color-background-white);
-    font-weight: 600;
-    box-shadow: 0 3px 8px rgba(0, 188, 212, 0.3); /* Sombra con el nuevo cian */
-}
-
-.sidebar-nav .nav-icon {
-    font-size: 1.2rem;
-    color: var(--color-text-medium);
-    transition: color 0.3s ease;
-}
-
-.sidebar-nav ul li a.active .nav-icon {
-    color: var(--color-background-white);
-}
-
-.sidebar-footer {
-    padding-top: var(--spacing-lg);
-    border-top: 1px solid var(--color-border-light);
-    margin-top: var(--spacing-xl);
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-sm);
-}
-
-.sidebar-footer a,
-.sidebar-footer .logout-btn {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-    padding: var(--spacing-md) var(--spacing-sm);
-    text-decoration: none;
-    color: var(--color-text-dark);
-    font-size: 1rem; /* Tamaño de fuente base */
-    font-weight: 500;
-    border-radius: var(--border-radius-sm);
-    transition: all 0.3s ease;
-    background: none;
-    border: none;
-    width: 100%;
-    text-align: left;
     cursor: pointer;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    transition: all 0.3s ease;
+    border-radius: 0 25px 25px 0; /* Bordes redondeados solo a la derecha */
+    text-decoration: none;
 }
 
-.sidebar-footer a:hover,
-.sidebar-footer .logout-btn:hover {
-    background-color: var(--color-light-cyan);
-    color: var(--color-primary-cyan);
-    transform: translateX(5px);
+.admin-nav-menu .admin-nav-item:hover {
+    color: var(--primary-color);
+    background-color: var(--border-light); /* Fondo claro al pasar el ratón */
 }
 
-.sidebar-footer .logout-btn {
-    color: var(--color-accent-red);
+.admin-nav-menu .admin-nav-item.active {
+    background-color: var(--border-light); /* Fondo claro para activo */
+    color: var(--primary-color);
     font-weight: 600;
 }
 
-.sidebar-footer .logout-btn:hover {
-    background-color: rgba(220, 53, 69, 0.1);
-    color: #a71d2a;
+.admin-nav-icon {
+    font-size: 1.2rem;
+    width: 25px; /* Ancho fijo para alinear iconos */
+    text-align: center;
+}
+
+.admin-active-indicator {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 5px;
+    background-color: var(--primary-color);
+    border-radius: 0 5px 5px 0;
+}
+
+/* --- Sidebar Footer (Logout) --- */
+.admin-sidebar-footer {
+    padding: 20px;
+    border-top: 1px solid var(--border-light);
+    text-align: center;
+    margin-top: auto; /* Empuja el footer hacia la parte inferior del sidebar */
+}
+
+.admin-logout-button {
+    background-color: transparent;
+    border: none;
+    color: var(--text-medium);
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+.admin-logout-button:hover {
+    background-color: rgba(255, 82, 82, 0.1); /* Fondo rojo muy claro al pasar el ratón */
+    color: var(--red-alert);
 }
 
 /* --- Main Content Area --- */
 .admin-main-content {
-    flex-grow: 1;
+    flex-grow: 1; /* Ocupa todo el ancho restante */
     display: flex;
     flex-direction: column;
+    background-color: var(--background-light);
+    /* No hay margin-left fijo aquí, se maneja con el flujo de flexbox */
 }
 
+/* --- Header del Contenido Principal (la barra superior) --- */
 .admin-header {
-    background-color: var(--color-background-white);
-    padding: var(--spacing-md) var(--spacing-xl);
-    box-shadow: var(--shadow-sm);
+    background-color: var(--background-white);
+    padding: 20px 30px; /* Ajustado para más espacio */
+    box-shadow: 0 2px 8px var(--shadow-light);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid var(--color-border-light);
-    height: var(--navbar-height); /* Coincide con la altura de la navbar */
-    flex-shrink: 0;
-    z-index: 450; /* Asegura que esté sobre el contenido, debajo de la navbar principal */
+    gap: 20px;
+    position: sticky; /* Se mantiene en la parte superior al hacer scroll */
+    top: 0;
+    z-index: 999;
 }
 
 .admin-header h1 {
-    font-size: 1.8rem;
-    color: var(--color-dark-cyan);
     margin: 0;
-    font-weight: 700;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    font-size: 1.8rem;
+    color: var(--text-dark);
+    font-weight: 600;
+    /* Ajustado para que "Flooky Pets" sea el título principal en el header */
 }
 
 .menu-toggle-btn {
     background: none;
     border: none;
     font-size: 1.8rem;
-    color: var(--color-primary-cyan);
+    color: var(--text-dark);
     cursor: pointer;
-    display: none; /* Oculto por defecto, se muestra en móvil */
-    margin-right: var(--spacing-md);
-    transition: transform 0.3s ease;
+    display: none; /* Ocultar por defecto, mostrar en móviles */
+    transition: color 0.2s ease;
 }
 
 .menu-toggle-btn:hover {
-    transform: scale(1.1);
+    color: var(--primary-color);
 }
 
 .header-right {
     display: flex;
     align-items: center;
-    gap: var(--spacing-lg);
+    gap: 25px; /* Espacio entre los elementos de la derecha */
 }
 
-.header-right .user-info {
+/* Estilo para el texto "Admin" */
+.admin-role-text {
+    font-size: 1.1rem; /* Tamaño de fuente para "Admin" */
+    color: var(--text-dark);
+    font-weight: 500;
+}
+
+
+.admin-user-profile-header {
     display: flex;
     align-items: center;
-    gap: var(--spacing-sm);
-    color: var(--color-text-dark);
-    font-weight: 600;
-    font-size: 1rem;
-    white-space: nowrap;
+    gap: 10px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--text-dark);
 }
 
-.header-right .user-avatar-icon {
-    font-size: 2rem;
-    color: var(--color-primary-cyan);
+.admin-avatar-header {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--primary-color); /* Fondo si no hay imagen */
+    color: var(--text-light-contrast); /* Texto blanco para el icono */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    box-shadow: 0 2px 5px var(--shadow-light);
+    overflow: hidden;
 }
 
-/* --- ESTILOS DE NOTIFICACIONES AÑADIDOS/MODIFICADOS --- */
+.admin-avatar-image-header {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
 
-/* Contenedor de la campana y el dropdown */
+.admin-user-avatar-icon {
+    font-size: 1.8rem;
+    color: var(--text-light-contrast); /* Cambiado a blanco para que coincida con el fondo del círculo */
+}
+
+/* --- Notificaciones --- */
 .notification-container {
     position: relative;
-    display: inline-block; /* Para que el dropdown se posicione correctamente */
 }
 
-.notification-bell-btn {
+.admin-notification-bell-btn {
     background: none;
     border: none;
-    font-size: 1.5rem; /* Tamaño del icono de campana */
-    color: var(--color-text-medium);
+    color: var(--text-dark);
+    font-size: 1.6rem;
     cursor: pointer;
-    position: relative; /* Para el badge */
-    padding: 5px; /* Área de clic */
-    border-radius: 50%;
-    transition: color 0.3s ease, transform 0.2s ease, background-color 0.2s ease;
+    position: relative;
+    padding: 5px;
+    transition: color 0.2s ease;
 }
 
-.notification-bell-btn:hover {
-    color: var(--color-primary-cyan);
-    transform: scale(1.1);
-    background-color: var(--color-background-light); /* Fondo suave al pasar el ratón */
+.admin-notification-bell-btn:hover {
+    color: var(--primary-color);
 }
 
-.notification-badge {
+.admin-notification-badge {
     position: absolute;
-    top: -5px;
-    right: -5px;
-    background-color: var(--color-accent-red); /* Usamos la variable para el rojo */
-    color: var(--color-background-white);
+    top: 0;
+    right: 0;
+    background-color: var(--red-alert);
+    color: white;
     font-size: 0.75rem;
-    font-weight: 700;
+    font-weight: bold;
+    padding: 3px 7px;
     border-radius: 50%;
-    padding: 0.2em 0.5em;
+    transform: translate(50%, -50%);
     min-width: 20px;
     text-align: center;
-    line-height: 1;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    animation: bounceIn 0.6s ease-out; /* Animación al aparecer el badge */
+    box-shadow: 0 0 5px rgba(0,0,0,0.2);
 }
 
-/* Estilos para el menú desplegable de notificaciones del administrador */
 .admin-notifications-dropdown {
     position: absolute;
-    top: calc(100% + var(--spacing-sm)); /* Debajo del botón de la campana con un pequeño espacio */
+    top: calc(100% + 15px); /* Debajo del botón, con un pequeño margen */
     right: 0;
-    background-color: var(--color-background-white);
-    border-radius: var(--border-radius-md);
-    box-shadow: var(--shadow-md); /* Usamos la variable de sombra */
-    width: 380px; /* Ancho ajustable */
-    max-height: 400px; /* Altura máxima para scroll */
+    background-color: var(--background-white);
+    border: 1px solid var(--border-medium);
+    border-radius: 8px;
+    box-shadow: 0 8px 20px var(--shadow-medium);
+    width: 380px;
+    max-height: 400px;
     overflow-y: auto;
-    z-index: 1001; /* Asegura que esté por encima de otros elementos */
-    padding: var(--spacing-md);
-    border: 1px solid var(--color-border-light);
-    transform-origin: top right;
-    animation: fadeInScale 0.2s ease-out; /* Animación de aparición */
+    z-index: 1001;
+    padding: 15px;
+    animation: fadeInScale 0.2s ease-out; /* Animación de entrada */
+}
+
+@keyframes fadeInScale {
+    from { opacity: 0; transform: scale(0.95) translateY(-10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
 .admin-notifications-dropdown h3 {
     font-size: 1.3em;
-    color: var(--color-text-dark);
-    margin-bottom: var(--spacing-md);
-    border-bottom: 1px solid var(--color-border-light);
-    padding-bottom: var(--spacing-sm);
+    color: var(--text-dark);
+    margin-bottom: 15px;
+    border-bottom: 1px solid var(--border-light);
+    padding-bottom: 10px;
     font-weight: 600;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
 }
 
 .admin-notifications-dropdown ul {
@@ -376,12 +440,12 @@
 }
 
 .admin-notifications-dropdown li {
-    padding: var(--spacing-sm) var(--spacing-xs);
-    border-bottom: 1px solid var(--color-border-light);
+    padding: 12px 10px;
+    border-bottom: 1px solid #f5f5f5; /* Un gris muy suave */
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    gap: var(--spacing-sm);
+    gap: 10px;
     cursor: pointer;
     transition: background-color 0.2s ease-in-out;
 }
@@ -391,18 +455,17 @@
 }
 
 .admin-notifications-dropdown li.unread {
-    background-color: var(--color-light-cyan); /* Usamos la variable para no leídas */
+    background-color: var(--border-light); /* Light teal para no leídas */
     font-weight: 600;
-    color: var(--color-text-dark);
 }
 
 .admin-notifications-dropdown li.read {
-    color: var(--color-text-light); /* Más claro para leídas */
+    color: #757575; /* Gris más oscuro para leídas */
     font-weight: 400;
 }
 
 .admin-notifications-dropdown li:hover {
-    background-color: rgba(var(--color-primary-cyan), 0.05); /* Un hover sutil con el color primario */
+    background-color: #f0f8ff; /* Azul muy pálido al pasar el ratón */
 }
 
 .notification-content {
@@ -413,19 +476,23 @@
     margin: 0;
     font-size: 0.95em;
     line-height: 1.4;
-    color: inherit; /* Hereda el color del padre (li.read/unread) */
+    color: var(--text-dark);
+}
+
+.admin-notifications-dropdown li.read .notification-message {
+    color: #757575;
 }
 
 .notification-date {
     font-size: 0.8em;
-    color: var(--color-text-light); /* Usamos la variable */
+    color: #9e9e9e;
     margin-top: 5px;
     display: block;
 }
 
-.mark-as-read-button {
-    background-color: var(--color-primary-cyan); /* Usamos la variable */
-    color: var(--color-background-white);
+.admin-mark-as-read-button {
+    background-color: var(--primary-color);
+    color: var(--text-light-contrast);
     border: none;
     border-radius: 50%;
     width: 28px;
@@ -435,263 +502,197 @@
     justify-content: center;
     font-size: 1em;
     cursor: pointer;
-    transition: background-color 0.2s ease, transform 0.2s ease;
+    transition: background-color 0.2s ease;
     flex-shrink: 0;
 }
 
-.mark-as-read-button:hover {
-    background-color: var(--color-dark-cyan); /* Color oscuro al pasar el ratón */
-    transform: scale(1.05);
+.admin-mark-as-read-button:hover {
+    background-color: var(--primary-dark);
 }
 
-.admin-notifications-dropdown p {
-    text-align: center;
-    color: var(--color-text-light);
-    padding: var(--spacing-md);
-}
-
-.clear-all-notifications-button {
+.admin-clear-all-notifications-button {
     width: 100%;
-    padding: var(--spacing-sm) var(--spacing-md);
-    background-color: var(--color-dark-cyan); /* Usamos la variable para el botón */
-    color: var(--color-background-white);
+    padding: 10px 15px;
+    margin-top: 15px;
+    background-color: var(--primary-color);
+    color: var(--text-light-contrast);
     border: none;
-    border-radius: var(--border-radius-sm);
-    margin-top: var(--spacing-md);
+    border-radius: 6px;
+    cursor: pointer;
     font-size: 0.95rem;
     font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.2s ease;
 }
 
-.clear-all-notifications-button:hover {
-    background-color: var(--color-primary-cyan); /* Cambia al color primario al pasar el ratón */
+.admin-clear-all-notifications-button:hover {
+    background-color: var(--primary-dark);
 }
 
+.no-notifications-message {
+    padding: 20px;
+    text-align: center;
+    color: var(--text-medium);
+    font-style: italic;
+}
+
+/* --- Contenido de la Página (Outlet) --- */
 .admin-content-area {
-    padding: var(--spacing-xl); /* Espaciado para el contenido real renderizado por Outlet */
+    padding: 30px; /* Espacio alrededor del contenido real de la página */
     flex-grow: 1;
-    overflow-y: auto; /* Mantener overflow-y auto aquí para el contenido principal si es necesario */
+    overflow-y: auto; /* Permite scroll solo en esta área si el contenido es muy largo */
 }
 
-/* --- Responsive Adjustments --- */
+/* --- Media Queries (Responsividad) --- */
 
-/* Mobile (hasta 767px) */
-@media (max-width: 767px) {
+/* Tablet y móvil */
+@media (max-width: 768px) {
     .admin-dashboard-container {
-        flex-direction: column; /* Apila la barra lateral y el contenido principal */
+        flex-direction: column; /* Apila el sidebar y el contenido */
     }
 
-    /* Barra lateral fija para móvil */
-    .admin-dashboard-container > .admin-sidebar {
+    .admin-sidebar {
         position: fixed;
+        height: 100%;
+        transform: translateX(-100%); /* Oculto por defecto en móvil */
         top: 0;
         left: 0;
-        height: 100vh;
-        width: var(--sidebar-width-mobile);
-        transform: translateX(-100%); /* Oculta fuera de la pantalla por defecto */
-        z-index: 1001; /* Alto z-index para superponer el contenido */
-        box-shadow: var(--shadow-lg); /* Sombra más fuerte cuando está abierta */
-        padding-top: var(--navbar-height); /* Espacio para el encabezado fijo */
-        border-right: none; /* Sin borde a la derecha cuando está fija */
-        /* Re-habilitar overflow-y para el sidebar en móvil si el contenido es largo */
-        overflow-y: auto;
+        width: 280px;
+        box-shadow: 5px 0 15px rgba(0, 0, 0, 0.2); /* Sombra más fuerte cuando se abre */
     }
 
-    .admin-dashboard-container > .admin-sidebar.open {
-        transform: translateX(0); /* Se desliza hacia adentro */
+    .admin-sidebar.open {
+        transform: translateX(0); /* Muestra el sidebar */
     }
 
-    .sidebar-header {
-        display: flex; /* Asegura que el encabezado sea visible en la barra lateral móvil */
-    }
-
-    .sidebar-header h3 {
-        font-size: 1.4rem; /* Reducir tamaño de fuente para el título del sidebar en móvil */
+    .admin-sidebar-header {
+        position: relative;
     }
 
     .close-sidebar-btn {
-        display: block; /* Muestra el botón de cerrar en la barra lateral móvil */
+        display: block; /* Mostrar botón de cerrar en móvil */
     }
 
-    .menu-toggle-btn {
-        display: block; /* Muestra el botón de menú hamburguesa en el encabezado principal */
+    /* Ocultar el perfil de usuario en el sidebar para ahorrar espacio en móvil */
+    .admin-user-profile {
+        display: none;
+    }
+
+    .admin-nav-menu {
+        padding-top: 0; /* Ajuste de padding */
+    }
+
+    .admin-nav-menu ul {
+        flex-direction: column; /* Menú vertical en móvil */
+        align-items: flex-start;
+    }
+
+    .admin-nav-menu .admin-nav-item {
+        margin: 5px 0; /* Espacio entre los ítems */
+        border-radius: 0 25px 25px 0; /* Mantiene el estilo redondeado */
+    }
+
+    .admin-active-indicator {
+        display: block; /* Asegura que el indicador se muestre */
+    }
+
+    .admin-sidebar-footer {
+        padding: 15px;
+    }
+
+    .admin-main-content {
+        margin-left: 0; /* No hay margen izquierdo cuando el sidebar está cerrado */
+        width: 100%;
     }
 
     .admin-header {
-        padding: var(--spacing-md) var(--spacing-lg);
-        justify-content: flex-start; /* Alinea los elementos al inicio */
-        gap: var(--spacing-md);
-        position: sticky; /* Mantiene el encabezado fijo en móvil */
-        top: 0;
-        z-index: 501; /* Sobre el contenido principal, debajo de la barra lateral fija */
+        padding: 15px 20px;
+        justify-content: space-between;
+    }
+
+    .menu-toggle-btn {
+        display: block; /* Mostrar botón de menú para abrir sidebar */
     }
 
     .admin-header h1 {
         font-size: 1.5rem;
-        flex-grow: 1; /* Permite que el título ocupe el espacio disponible */
+        text-align: center;
+        flex-grow: 1; /* Permite que el título ocupe espacio */
     }
 
-    .header-right .user-info span {
-        display: none; /* Oculta el nombre de usuario en el encabezado pequeño */
+    .header-right {
+        gap: 15px;
+    }
+    
+    .admin-user-profile-header span {
+        display: none; /* Oculta el nombre del usuario para ahorrar espacio en el header móvil */
+    }
+
+    .admin-notifications-dropdown {
+        width: 90%; /* Ancho ajustado para móviles */
+        right: 5%;
+        left: 5%;
+        top: 65px; /* Ajusta la posición para que no choque con el header */
     }
 
     .admin-content-area {
-        padding: var(--spacing-lg);
-    }
-
-    /* Ajuste de tamaño de fuente para elementos de navegación en sidebar móvil */
-    .sidebar-nav ul li a,
-    .sidebar-footer a,
-    .sidebar-footer .logout-btn {
-        font-size: 0.9rem; /* Tamaño de fuente más pequeño para elementos de menú en móvil */
-        padding: var(--spacing-sm) var(--spacing-xs); /* Reducir padding */
-    }
-
-    .sidebar-nav .nav-icon {
-        font-size: 1.1rem; /* Iconos ligeramente más pequeños en móvil */
-    }
-
-    /* Notificaciones móviles */
-    .admin-notifications-dropdown {
-        width: calc(100% - var(--spacing-xl)); /* Ocupa casi todo el ancho con margen a los lados */
-        right: var(--spacing-md);
-        left: var(--spacing-md);
-        top: calc(var(--navbar-height) + var(--spacing-sm)); /* Debajo del encabezado fijo */
-        max-height: 70vh; /* Ajusta la altura máxima para que quepa en la pantalla */
-        padding: var(--spacing-sm);
-    }
-
-    .admin-notifications-dropdown h3 {
-        font-size: 1.1em;
-        padding-bottom: var(--spacing-xs);
-    }
-
-    .admin-notifications-dropdown li {
-        padding: var(--spacing-xs);
-        gap: var(--spacing-xs);
-    }
-
-    .notification-message {
-        font-size: 0.85em;
-    }
-
-    .notification-date {
-        font-size: 0.7em;
-    }
-
-    .mark-as-read-button {
-        width: 24px;
-        height: 24px;
-        font-size: 0.9em;
-    }
-
-    .clear-all-notifications-button {
-        font-size: 0.85rem;
-        padding: var(--spacing-xs) var(--spacing-sm);
+        padding: 20px 15px;
     }
 }
 
-/* Tablets (768px a 1023px) */
-@media (min-width: 768px) and (max-width: 1023px) {
-    .admin-dashboard-container > .admin-sidebar {
-        width: 220px; /* Barra lateral ligeramente más estrecha para tablets */
-        padding: var(--spacing-lg) var(--spacing-sm);
-        /* Re-habilitar overflow-y para el sidebar en tablet si el contenido es largo */
-        overflow-y: auto;
+/* Móvil muy pequeño */
+@media (max-width: 480px) {
+    .admin-sidebar {
+        width: 100%; /* Ocupa todo el ancho en móviles muy pequeños */
     }
 
-    .sidebar-header h3 {
-        font-size: 1.4rem;
+    .admin-logo-container h2 {
+        font-size: 1.5rem;
     }
 
-    .sidebar-nav ul li a {
-        font-size: 0.95rem;
-    }
-
-    .sidebar-nav .nav-icon {
-        font-size: 1.1rem;
+    .admin-clinic-name {
+        font-size: 0.8rem;
     }
 
     .admin-header h1 {
+        font-size: 1.3rem;
+    }
+
+    .admin-notification-bell-btn {
+        font-size: 1.4rem;
+    }
+    
+    .admin-user-avatar-icon {
         font-size: 1.6rem;
     }
 
-    .admin-content-area {
-        padding: var(--spacing-xl);
-    }
-
     .admin-notifications-dropdown {
-        width: 320px; /* Ancho ajustado para tablets */
+        width: calc(100% - 30px); /* Ajusta el ancho para el padding de 15px a cada lado */
+        left: 15px;
+        right: 15px;
     }
 }
 
-/* Pantallas grandes (1440px y más, para monitores de 27 pulgadas y televisores) */
-@media (min-width: 1440px) {
-    .admin-dashboard-container > .admin-sidebar {
-        width: 300px; /* Barra lateral más ancha para pantallas grandes */
-        padding: var(--spacing-xl) var(--spacing-lg);
-        overflow-y: auto; /* Mantener overflow-y auto para el sidebar en pantallas grandes */
-    }
+/* --- Estilos para el Scrollbar (personalizado) --- */
+::-webkit-scrollbar {
+    width: 8px; /* Ancho del scrollbar */
+    height: 8px;
+}
 
-    .sidebar-header h3 {
-        font-size: 2rem;
-    }
+::-webkit-scrollbar-track {
+    background: var(--background-light); /* Fondo del track */
+}
 
-    .sidebar-nav ul li a {
-        font-size: 1.1rem;
-        padding: var(--spacing-lg) var(--spacing-md);
-    }
+::-webkit-scrollbar-thumb {
+    background: var(--text-medium); /* Color del "pulgar" del scrollbar */
+    border-radius: 4px;
+}
 
-    .sidebar-nav .nav-icon {
-        font-size: 1.4rem;
-    }
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-color); /* Color al pasar el ratón */
+}
 
-    .admin-header {
-        padding: var(--spacing-lg) var(--spacing-xxl);
-    }
-
-    .admin-header h1 {
-        font-size: 2.2rem;
-    }
-
-    .header-right .user-avatar-icon {
-        font-size: 2.5rem;
-    }
-
-    .notification-bell-btn {
-        font-size: 1.8rem;
-    }
-
-    .admin-notifications-dropdown {
-        width: 450px; /* Más ancho para pantallas grandes */
-        max-height: 500px;
-        font-size: 1.1rem;
-    }
-
-    .admin-notifications-dropdown h3 {
-        font-size: 1.5em;
-    }
-
-    .notification-message {
-        font-size: 1rem;
-    }
-
-    .notification-date {
-        font-size: 0.9em;
-    }
-
-    .mark-as-read-button {
-        width: 32px;
-        height: 32px;
-        font-size: 1.1em;
-    }
-
-    .clear-all-notifications-button {
-        font-size: 1rem;
-    }
-
-    .admin-content-area {
-        padding: var(--spacing-xxl);
-    }
+/* Para navegadores que no son Webkit */
+body {
+    scrollbar-width: thin;
+    scrollbar-color: var(--text-medium) var(--background-light);
 }
