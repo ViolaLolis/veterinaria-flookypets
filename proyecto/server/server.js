@@ -279,7 +279,7 @@ app.get("/", (req, res) => {
 // RUTAS DE AUTENTICACIÓN
 // =============================================
 
-// Aplicar express.json solo a las rutas que lo necesitan
+// Aplicar express.json() solo a las rutas que lo necesitan
 app.post("/login", async (req, res) => { // express.json() ya es global
     const { email, password } = req.body;
     console.log("Received login request for email:", email); // LOG DE DEPURACIÓN
@@ -334,6 +334,8 @@ app.post("/register", async (req, res) => { // express.json() ya es global
         return res.status(400).json({ message: "Datos incompletos" });
     }
 
+    console.log("[REGISTER] Received data:", req.body); // Debugging log
+
     try {
         // Verificar si el usuario ya existe por email
         const [existingUsers] = await pool.query("SELECT id FROM usuarios WHERE email = ?", [email]);
@@ -348,7 +350,7 @@ app.post("/register", async (req, res) => { // express.json() ya es global
         const [result] = await pool.query(
             `INSERT INTO usuarios
             (email, password, nombre, apellido, telefono, direccion, tipo_documento, numero_documento, fecha_nacimiento, role)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'usuario')`,
+            VALUES (UPPER(TRIM(?)), ?, UPPER(TRIM(?)), UPPER(TRIM(?)), TRIM(?), UPPER(TRIM(?)), UPPER(TRIM(?)), UPPER(TRIM(?)), ?, 'usuario')`,
             [email, hashedPassword, nombre, apellido, telefono, direccion, tipo_documento, numero_documento, fecha_nacimiento]
         );
 
@@ -359,6 +361,7 @@ app.post("/register", async (req, res) => { // express.json() ya es global
             apellido,
             role: 'usuario'
         });
+        console.log("[REGISTER] User registered successfully:", email); // Debugging log
 
     } catch (error) {
         console.error("Error en registro:", error);
@@ -734,6 +737,7 @@ app.post("/api/admin/administrators", authenticateToken, isAdmin, async (req, re
             message: "La contraseña debe tener al menos 6 caracteres"
         });
     }
+    console.log("[ADMIN_REGISTER_ADMIN] Received data:", req.body); // Debugging log
 
     try {
         // Verificar si el email ya existe
@@ -756,7 +760,7 @@ app.post("/api/admin/administrators", authenticateToken, isAdmin, async (req, re
         const [result] = await pool.query(
             `INSERT INTO usuarios
             (nombre, apellido, email, telefono, direccion, password, role)
-            VALUES (?, ?, ?, ?, ?, ?, 'admin')`, // Eliminado imagen_url
+            VALUES (UPPER(TRIM(?)), UPPER(TRIM(?)), UPPER(TRIM(?)), TRIM(?), UPPER(TRIM(?)), ?, 'admin')`, // Aplicar UPPER y TRIM
             [nombre, apellido, email, telefono, direccion, hashedPassword]
         );
 
@@ -773,6 +777,7 @@ app.post("/api/admin/administrators", authenticateToken, isAdmin, async (req, re
             message: "Administrador creado correctamente",
             data: newAdmin[0]
         });
+        console.log("[ADMIN_REGISTER_ADMIN] Admin registered successfully:", email); // Debugging log
 
     } catch (error) {
         console.error("Error al crear administrador:", error);
@@ -796,6 +801,7 @@ app.put("/api/admin/administrators/:id", authenticateToken, isAdmin, async (req,
             message: "Nombre y teléfono son requeridos"
         });
     }
+    console.log("[ADMIN_UPDATE_ADMIN] Received data:", req.body, "for ID:", id); // Debugging log
 
     try {
         // Un administrador no debería poder modificarse a sí mismo desde este panel (usa su perfil)
@@ -822,11 +828,10 @@ app.put("/api/admin/administrators/:id", authenticateToken, isAdmin, async (req,
         // Construir la consulta de actualización dinámicamente
         const fields = [];
         const values = [];
-        if (nombre !== undefined) { fields.push('nombre = ?'); values.push(nombre); }
-        if (apellido !== undefined) { fields.push('apellido = ?'); values.push(apellido); }
-        if (telefono !== undefined) { fields.push('telefono = ?'); values.push(telefono); }
-        if (direccion !== undefined) { fields.push('direccion = ?'); values.push(direccion); }
-        // Eliminado: if (imagen_url !== undefined) { fields.push('imagen_url = ?'); values.push(imagen_url); }
+        if (nombre !== undefined) { fields.push('nombre = UPPER(TRIM(?))'); values.push(nombre); } // Aplicar UPPER y TRIM
+        if (apellido !== undefined) { fields.push('apellido = UPPER(TRIM(?))'); values.push(apellido); } // Aplicar UPPER y TRIM
+        if (telefono !== undefined) { fields.push('telefono = TRIM(?)'); values.push(telefono); } // Aplicar TRIM
+        if (direccion !== undefined) { fields.push('direccion = UPPER(TRIM(?))'); values.push(direccion); } // Aplicar UPPER y TRIM
 
 
         if (fields.length === 0) {
@@ -851,6 +856,8 @@ app.put("/api/admin/administrators/:id", authenticateToken, isAdmin, async (req,
             message: "Administrador actualizado correctamente",
             data: updatedAdmin[0]
         });
+        console.log("[ADMIN_UPDATE_ADMIN] Admin updated successfully:", id); // Debugging log
+
     } catch (error) {
         console.error("Error al actualizar administrador:", error);
         res.status(500).json({
@@ -864,6 +871,7 @@ app.put("/api/admin/administrators/:id", authenticateToken, isAdmin, async (req,
 // Eliminar administrador
 app.delete("/api/admin/administrators/:id", authenticateToken, isAdmin, async (req, res) => {
     const { id } = req.params;
+    console.log("[ADMIN_DELETE_ADMIN] Deleting admin with ID:", id); // Debugging log
 
     try {
         // Evitar que un administrador se elimine a sí mismo
@@ -917,6 +925,8 @@ app.delete("/api/admin/administrators/:id", authenticateToken, isAdmin, async (r
             success: true,
             message: "Administrador eliminado correctamente"
         });
+        console.log("[ADMIN_DELETE_ADMIN] Admin deleted successfully:", id); // Debugging log
+
     } catch (error) {
         console.error("Error al eliminar administrador:", error);
 
@@ -964,6 +974,7 @@ app.post("/usuarios/veterinarios", authenticateToken, isAdmin, async (req, res) 
     if (password.length < 6) {
         return res.status(400).json({ success: false, message: "La contraseña debe tener al menos 6 caracteres" });
     }
+    console.log("[ADMIN_REGISTER_VET] Received data:", req.body); // Debugging log
 
     try {
         // Verificar si el email ya existe
@@ -983,7 +994,7 @@ app.post("/usuarios/veterinarios", authenticateToken, isAdmin, async (req, res) 
         const [result] = await pool.query(
             `INSERT INTO usuarios
             (nombre, apellido, email, telefono, direccion, password, role, experiencia, universidad, horario)
-            VALUES (?, ?, ?, ?, ?, ?, 'veterinario', ?, ?, ?)`, // Eliminado imagen_url
+            VALUES (UPPER(TRIM(?)), UPPER(TRIM(?)), UPPER(TRIM(?)), TRIM(?), UPPER(TRIM(?)), ?, 'veterinario', ?, ?, ?)`, // Aplicar UPPER y TRIM
             [nombre, apellido, email, telefono, direccion, hashedPassword, experiencia, universidad, horario]
         );
 
@@ -994,6 +1005,8 @@ app.post("/usuarios/veterinarios", authenticateToken, isAdmin, async (req, res) 
         );
 
         res.status(201).json({ success: true, message: "Veterinario creado correctamente", data: newVet[0] });
+        console.log("[ADMIN_REGISTER_VET] Vet registered successfully:", email); // Debugging log
+
     } catch (error) {
         console.error("Error al crear veterinario:", error);
         res.status(500).json({ success: false, message: "Error al crear veterinario", error: process.env.NODE_ENV === 'development' ? error.stack : error.message });
@@ -1009,6 +1022,7 @@ app.put("/usuarios/veterinarios/:id", authenticateToken, isAdmin, async (req, re
     if (!nombre || !telefono || !experiencia || !universidad || !horario) {
         return res.status(400).json({ success: false, message: "Nombre, teléfono, experiencia, universidad y horario son requeridos" });
     }
+    console.log("[ADMIN_UPDATE_VET] Received data:", req.body, "for ID:", id); // Debugging log
 
     try {
         // Verificar que el veterinario existe y tiene el rol correcto
@@ -1024,15 +1038,14 @@ app.put("/usuarios/veterinarios/:id", authenticateToken, isAdmin, async (req, re
         // Construir la consulta de actualización dinámicamente
         const fields = [];
         const values = [];
-        if (nombre !== undefined) { fields.push('nombre = ?'); values.push(nombre); }
-        if (apellido !== undefined) { fields.push('apellido = ?'); values.push(apellido); }
-        if (telefono !== undefined) { fields.push('telefono = ?'); values.push(telefono); }
-        if (direccion !== undefined) { fields.push('direccion = ?'); values.push(direccion); }
+        if (nombre !== undefined) { fields.push('nombre = UPPER(TRIM(?))'); values.push(nombre); } // Aplicar UPPER y TRIM
+        if (apellido !== undefined) { fields.push('apellido = UPPER(TRIM(?))'); values.push(apellido); } // Aplicar UPPER y TRIM
+        if (telefono !== undefined) { fields.push('telefono = TRIM(?)'); values.push(telefono); } // Aplicar TRIM
+        if (direccion !== undefined) { fields.push('direccion = UPPER(TRIM(?))'); values.push(direccion); } // Aplicar UPPER y TRIM
         if (active !== undefined) { fields.push('active = ?'); values.push(active ? 1 : 0); }
         if (experiencia !== undefined) { fields.push('experiencia = ?'); values.push(experiencia); }
         if (universidad !== undefined) { fields.push('universidad = ?'); values.push(universidad); }
         if (horario !== undefined) { fields.push('horario = ?'); values.push(horario); }
-        // Eliminado: if (imagen_url !== undefined) { fields.push('imagen_url = ?'); values.push(imagen_url); }
 
 
         if (fields.length === 0) {
@@ -1051,6 +1064,8 @@ app.put("/usuarios/veterinarios/:id", authenticateToken, isAdmin, async (req, re
         );
 
         res.json({ success: true, message: "Veterinario actualizado correctamente", data: updatedVet[0] });
+        console.log("[ADMIN_UPDATE_VET] Vet updated successfully:", id); // Debugging log
+
     } catch (error) {
         console.error("Error al actualizar veterinario:", error);
         res.status(500).json({ success: false, message: "Error al actualizar veterinario", error: process.env.NODE_ENV === 'development' ? error.stack : error.message });
@@ -1060,6 +1075,7 @@ app.put("/usuarios/veterinarios/:id", authenticateToken, isAdmin, async (req, re
 // Eliminar veterinario
 app.delete("/usuarios/veterinarios/:id", authenticateToken, isAdmin, async (req, res) => {
     const { id } = req.params;
+    console.log("[ADMIN_DELETE_VET] Deleting vet with ID:", id); // Debugging log
 
     try {
         // Verificar si el veterinario tiene citas asignadas
@@ -1099,6 +1115,8 @@ app.delete("/usuarios/veterinarios/:id", authenticateToken, isAdmin, async (req,
         }
 
         res.json({ success: true, message: "Veterinario eliminado correctamente" });
+        console.log("[ADMIN_DELETE_VET] Vet deleted successfully:", id); // Debugging log
+
     } catch (error) {
         console.error("Error al eliminar veterinario:", error);
 
@@ -1133,10 +1151,11 @@ app.post("/servicios", authenticateToken, isAdmin, async (req, res) => { // expr
     if (!nombre || !descripcion || !precio) {
         return res.status(400).json({ success: false, message: "Todos los campos son requeridos" });
     }
+    console.log("[ADMIN_CREATE_SERVICE] Received data:", req.body); // Debugging log
 
     try {
         const [result] = await pool.query(
-            "INSERT INTO servicios (nombre, descripcion, precio) VALUES (?, ?, ?)",
+            "INSERT INTO servicios (nombre, descripcion, precio) VALUES (UPPER(TRIM(?)), ?, ?)", // Aplicar UPPER y TRIM
             [nombre, descripcion, precio]
         );
 
@@ -1146,6 +1165,8 @@ app.post("/servicios", authenticateToken, isAdmin, async (req, res) => { // expr
         );
 
         res.status(201).json({ success: true, message: "Servicio creado correctamente", data: newService[0] });
+        console.log("[ADMIN_CREATE_SERVICE] Service created successfully:", nombre); // Debugging log
+
     } catch (error) {
         console.error("Error al crear servicio:", error);
         res.status(500).json({ success: false, message: "Error al crear servicio", error: process.env.NODE_ENV === 'development' ? error.stack : error.message });
@@ -1156,10 +1177,11 @@ app.post("/servicios", authenticateToken, isAdmin, async (req, res) => { // expr
 app.put("/servicios/:id", authenticateToken, isAdmin, async (req, res) => { // express.json() ya es global
     const { id } = req.params;
     const { nombre, descripcion, precio } = req.body;
+    console.log("[ADMIN_UPDATE_SERVICE] Received data:", req.body, "for ID:", id); // Debugging log
 
     try {
         await pool.query(
-            "UPDATE servicios SET nombre = ?, descripcion = ?, precio = ? WHERE id_servicio = ?",
+            "UPDATE servicios SET nombre = UPPER(TRIM(?)), descripcion = ?, precio = ? WHERE id_servicio = ?", // Aplicar UPPER y TRIM
             [nombre, descripcion, precio, id]
         );
 
@@ -1169,6 +1191,8 @@ app.put("/servicios/:id", authenticateToken, isAdmin, async (req, res) => { // e
         );
 
         res.json({ success: true, message: "Servicio actualizado correctamente", data: updatedService[0] });
+        console.log("[ADMIN_UPDATE_SERVICE] Service updated successfully:", id); // Debugging log
+
     } catch (error) {
         console.error("Error al actualizar servicio:", error);
         res.status(500).json({ success: false, message: "Error al actualizar servicio", error: process.env.NODE_ENV === 'development' ? error.stack : error.message });
@@ -1178,10 +1202,13 @@ app.put("/servicios/:id", authenticateToken, isAdmin, async (req, res) => { // e
 // Eliminar servicio
 app.delete("/servicios/:id", authenticateToken, isAdmin, async (req, res) => {
     const { id } = req.params;
+    console.log("[ADMIN_DELETE_SERVICE] Deleting service with ID:", id); // Debugging log
 
     try {
         await pool.query("DELETE FROM servicios WHERE id_servicio = ?", [id]);
         res.json({ success: true, message: "Servicio eliminado correctamente" });
+        console.log("[ADMIN_DELETE_SERVICE] Service deleted successfully:", id); // Debugging log
+
     } catch (error) {
         console.error("Error al eliminar servicio:", error);
 
@@ -1269,13 +1296,14 @@ app.put("/usuarios/:id", authenticateToken, isOwnerOrAdmin, async (req, res) => 
         fecha_nacimiento, active, password, experiencia, universidad, horario, imagen_url,
         notificaciones_activas, sonido_notificacion, recordatorios_cita, intervalo_recordatorio
     } = req.body;
+    console.log("[UPDATE_USER] Received data:", req.body, "for ID:", id); // Debugging log
 
     try {
         const fields = [];
         const values = [];
 
-        if (nombre !== undefined) { fields.push('nombre = ?'); values.push(nombre); }
-        if (apellido !== undefined) { fields.push('apellido = ?'); values.push(apellido); }
+        if (nombre !== undefined) { fields.push('nombre = UPPER(TRIM(?))'); values.push(nombre); } // Aplicar UPPER y TRIM
+        if (apellido !== undefined) { fields.push('apellido = UPPER(TRIM(?))'); values.push(apellido); } // Aplicar UPPER y TRIM
 
         if (email !== undefined) {
             const [existing] = await pool.query(
@@ -1285,13 +1313,13 @@ app.put("/usuarios/:id", authenticateToken, isOwnerOrAdmin, async (req, res) => 
             if (existing.length > 0) {
                 return res.status(400).json({ success: false, message: "El email ya está en uso por otro usuario." });
             }
-            fields.push('email = ?'); values.push(email);
+            fields.push('email = UPPER(TRIM(?))'); values.push(email); // Aplicar UPPER y TRIM
         }
 
-        if (telefono !== undefined) { fields.push('telefono = ?'); values.push(telefono); }
-        if (direccion !== undefined) { fields.push('direccion = ?'); values.push(direccion); }
-        if (tipo_documento !== undefined) { fields.push('tipo_documento = ?'); values.push(tipo_documento); }
-        if (numero_documento !== undefined) { fields.push('numero_documento = ?'); values.push(numero_documento); }
+        if (telefono !== undefined) { fields.push('telefono = TRIM(?)'); values.push(telefono); } // Aplicar TRIM
+        if (direccion !== undefined) { fields.push('direccion = UPPER(TRIM(?))'); values.push(direccion); } // Aplicar UPPER y TRIM
+        if (tipo_documento !== undefined) { fields.push('tipo_documento = UPPER(TRIM(?))'); values.push(tipo_documento); } // Aplicar UPPER y TRIM
+        if (numero_documento !== undefined) { fields.push('numero_documento = UPPER(TRIM(?))'); values.push(numero_documento); } // Aplicar UPPER y TRIM
         if (fecha_nacimiento !== undefined) { fields.push('fecha_nacimiento = ?'); values.push(fecha_nacimiento); }
 
         if (active !== undefined && (req.user.role === 'admin' || (req.user.id === parseInt(id)))) {
@@ -1307,6 +1335,10 @@ app.put("/usuarios/:id", authenticateToken, isOwnerOrAdmin, async (req, res) => 
             if (experiencia !== undefined) { fields.push('experiencia = ?'); values.push(experiencia); }
             if (universidad !== undefined) { fields.push('universidad = ?'); values.push(universidad); }
             if (horario !== undefined) { fields.push('horario = ?'); values.push(horario); }
+        } else { // Si no es admin o el propio veterinario, asegurar que estos campos sean null
+            if (experiencia !== undefined) { fields.push('experiencia = NULL'); }
+            if (universidad !== undefined) { fields.push('universidad = NULL'); }
+            if (horario !== undefined) { fields.push('horario = NULL'); }
         }
 
         // La imagen_url puede venir en el body si no se cambió el archivo, o se actualizó con la URL de Cloudinary
@@ -1340,6 +1372,7 @@ app.put("/usuarios/:id", authenticateToken, isOwnerOrAdmin, async (req, res) => 
         );
 
         res.json({ success: true, message: "Usuario actualizado correctamente.", data: updatedUser[0] });
+        console.log("[UPDATE_USER] User updated successfully:", id); // Debugging log
 
     } catch (error) {
         console.error("Error al actualizar usuario:", error);
@@ -1351,6 +1384,7 @@ app.put("/usuarios/:id", authenticateToken, isOwnerOrAdmin, async (req, res) => 
 // Eliminar usuario y datos relacionados
 app.delete("/usuarios/:id", authenticateToken, isAdmin, async (req, res) => {
     const { id } = req.params;
+    console.log("[DELETE_USER] Deleting user with ID:", id); // Debugging log
 
     try {
         // Eliminar registros de historial médico asociados a las mascotas del usuario
@@ -1374,6 +1408,7 @@ app.delete("/usuarios/:id", authenticateToken, isAdmin, async (req, res) => {
         }
 
         res.json({ success: true, message: "Usuario y sus datos asociados eliminados correctamente." });
+        console.log("[DELETE_USER] User deleted successfully:", id); // Debugging log
 
     } catch (error) {
         console.error("Error al eliminar usuario:", error);
@@ -1442,6 +1477,7 @@ app.post("/mascotas", authenticateToken, isVetOrAdmin, async (req, res) => { // 
     if (!nombre || !especie || !id_propietario) {
         return res.status(400).json({ success: false, message: "Nombre, especie y ID de propietario son requeridos." });
     }
+    console.log("[CREATE_PET] Received data:", req.body); // Debugging log
 
     try {
         // Verificar que el propietario exista y sea un usuario regular
@@ -1452,13 +1488,15 @@ app.post("/mascotas", authenticateToken, isVetOrAdmin, async (req, res) => { // 
 
         const [result] = await pool.query(
             `INSERT INTO mascotas (nombre, especie, raza, edad, peso, sexo, color, microchip, id_propietario, imagen_url)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+             VALUES (UPPER(TRIM(?)), UPPER(TRIM(?)), UPPER(TRIM(?)), ?, ?, UPPER(TRIM(?)), UPPER(TRIM(?)), UPPER(TRIM(?)), ?, ?)`, // Aplicar UPPER y TRIM
             [nombre, especie, raza, edad, peso, sexo, color, microchip, id_propietario, imagen_url || null]
         );
 
         const [newMascota] = await pool.query("SELECT * FROM mascotas WHERE id_mascota = ?", [result.insertId]);
 
         res.status(201).json({ success: true, message: "Mascota registrada correctamente.", data: newMascota[0] });
+        console.log("[CREATE_PET] Pet registered successfully:", nombre); // Debugging log
+
     } catch (error) {
         console.error("Error al registrar mascota:", error);
         res.status(500).json({ success: false, message: "Error al registrar mascota.", error: process.env.NODE_ENV === 'development' ? error.stack : error.message });
@@ -1469,6 +1507,7 @@ app.post("/mascotas", authenticateToken, isVetOrAdmin, async (req, res) => { // 
 app.put("/mascotas/:id", authenticateToken, isOwnerOrAdmin, async (req, res) => { // express.json() ya es global
     const { id } = req.params;
     const { nombre, especie, raza, edad, peso, sexo, color, microchip, id_propietario, imagen_url } = req.body;
+    console.log("[UPDATE_PET] Received data:", req.body, "for ID:", id); // Debugging log
 
     try {
         if (id_propietario !== undefined) {
@@ -1480,14 +1519,14 @@ app.put("/mascotas/:id", authenticateToken, isOwnerOrAdmin, async (req, res) => 
 
         const fields = [];
         const values = [];
-        if (nombre !== undefined) { fields.push('nombre = ?'); values.push(nombre); }
-        if (especie !== undefined) { fields.push('especie = ?'); values.push(especie); }
-        if (raza !== undefined) { fields.push('raza = ?'); values.push(raza); }
+        if (nombre !== undefined) { fields.push('nombre = UPPER(TRIM(?))'); values.push(nombre); } // Aplicar UPPER y TRIM
+        if (especie !== undefined) { fields.push('especie = UPPER(TRIM(?))'); values.push(especie); } // Aplicar UPPER y TRIM
+        if (raza !== undefined) { fields.push('raza = UPPER(TRIM(?))'); values.push(raza); } // Aplicar UPPER y TRIM
         if (edad !== undefined) { fields.push('edad = ?'); values.push(edad); }
         if (peso !== undefined) { fields.push('peso = ?'); values.push(peso); }
-        if (sexo !== undefined) { fields.push('sexo = ?'); values.push(sexo); }
-        if (color !== undefined) { fields.push('color = ?'); values.push(color); }
-        if (microchip !== undefined) { fields.push('microchip = ?'); values.push(microchip); }
+        if (sexo !== undefined) { fields.push('sexo = UPPER(TRIM(?))'); values.push(sexo); } // Aplicar UPPER y TRIM
+        if (color !== undefined) { fields.push('color = UPPER(TRIM(?))'); values.push(color); } // Aplicar UPPER y TRIM
+        if (microchip !== undefined) { fields.push('microchip = UPPER(TRIM(?))'); values.push(microchip); } // Aplicar UPPER y TRIM
         if (id_propietario !== undefined) { fields.push('id_propietario = ?'); values.push(id_propietario); }
         if (imagen_url !== undefined) { fields.push('imagen_url = ?'); values.push(imagen_url); }
 
@@ -1506,6 +1545,7 @@ app.put("/mascotas/:id", authenticateToken, isOwnerOrAdmin, async (req, res) => 
 
         const [updatedMascota] = await pool.query("SELECT * FROM mascotas WHERE id_mascota = ?", [id]);
         res.json({ success: true, message: "Mascota actualizada correctamente.", data: updatedMascota[0] });
+        console.log("[UPDATE_PET] Pet updated successfully:", id); // Debugging log
 
     } catch (error) {
         console.error("Error al actualizar mascota:", error);
@@ -1515,10 +1555,12 @@ app.put("/mascotas/:id", authenticateToken, isOwnerOrAdmin, async (req, res) => 
 
 app.delete("/mascotas/:id", authenticateToken, isVetOrAdmin, async (req, res) => {
     const { id } = req.params;
+    console.log("[DELETE_PET] Deleting pet with ID:", id); // Debugging log
+
     try {
         await pool.query("DELETE FROM historial_medico WHERE id_mascota = ?", [id]);
 
-        const [result] = await pool.query("DELETE FROM citas WHERE id_mascota = ?", [id]); // Asegurar eliminación de citas
+        const [result] = await pool.query("DELETE FROM citas WHERE id_mascota = ?", [id]);
         
         const [result2] = await pool.query("DELETE FROM mascotas WHERE id_mascota = ?", [id]);
 
@@ -1526,6 +1568,8 @@ app.delete("/mascotas/:id", authenticateToken, isVetOrAdmin, async (req, res) =>
             return res.status(404).json({ success: false, message: "Mascota no encontrada." });
         }
         res.json({ success: true, message: "Mascota y sus historiales/citas asociados eliminados correctamente." });
+        console.log("[DELETE_PET] Pet deleted successfully:", id); // Debugging log
+
     } catch (error) {
         console.error("Error al eliminar mascota:", error);
         res.status(500).json({ success: false, message: "Error al eliminar mascota.", error: process.env.NODE_ENV === 'development' ? error.stack : error.message });
@@ -1591,6 +1635,7 @@ app.post("/historial_medico", authenticateToken, isVetOrAdmin, async (req, res) 
     if (!id_mascota || !fecha_consulta || !diagnostico || !tratamiento || !veterinario) {
         return res.status(400).json({ success: false, message: "Campos requeridos incompletos para el historial médico." });
     }
+    console.log("[CREATE_MEDICAL_RECORD] Received data:", req.body); // Debugging log
 
     try {
         // Verificar que la mascota exista
@@ -1614,6 +1659,8 @@ app.post("/historial_medico", authenticateToken, isVetOrAdmin, async (req, res) 
         const [newRecord] = await pool.query("SELECT * FROM historial_medico WHERE id_historial = ?", [result.insertId]);
 
         res.status(201).json({ success: true, message: "Historial médico registrado correctamente.", data: newRecord[0] });
+        console.log("[CREATE_MEDICAL_RECORD] Medical record created successfully for mascota:", id_mascota); // Debugging log
+
     } catch (error) {
         console.error("Error al registrar historial médico:", error);
         res.status(500).json({ success: false, message: "Error al registrar historial médico.", error: process.env.NODE_ENV === 'development' ? error.stack : error.message });
@@ -1624,6 +1671,7 @@ app.post("/historial_medico", authenticateToken, isVetOrAdmin, async (req, res) 
 app.put("/historial_medico/:id", authenticateToken, isVetOrAdmin, async (req, res) => { // express.json() ya es global
     const { id } = req.params;
     const { fecha_consulta, diagnostico, tratamiento, observaciones, veterinario, peso_actual, temperatura, proxima_cita } = req.body;
+    console.log("[UPDATE_MEDICAL_RECORD] Received data:", req.body, "for ID:", id); // Debugging log
 
     try {
         // Verificar que el historial exista
@@ -1667,6 +1715,7 @@ app.put("/historial_medico/:id", authenticateToken, isVetOrAdmin, async (req, re
 
         const [updatedRecord] = await pool.query("SELECT * FROM historial_medico WHERE id_historial = ?", [id]);
         res.json({ success: true, message: "Historial médico actualizado correctamente.", data: updatedRecord[0] });
+        console.log("[UPDATE_MEDICAL_RECORD] Medical record updated successfully:", id); // Debugging log
 
     } catch (error) {
         console.error("Error al actualizar historial médico:", error);
@@ -1677,6 +1726,8 @@ app.put("/historial_medico/:id", authenticateToken, isVetOrAdmin, async (req, re
 // Eliminar historial médico (solo para admins)
 app.delete("/historial_medico/:id", authenticateToken, isAdmin, async (req, res) => {
     const { id } = req.params;
+    console.log("[DELETE_MEDICAL_RECORD] Deleting medical record with ID:", id); // Debugging log
+
     try {
         const [result] = await pool.query("DELETE FROM historial_medico WHERE id_historial = ?", [id]);
 
@@ -1684,6 +1735,8 @@ app.delete("/historial_medico/:id", authenticateToken, isAdmin, async (req, res)
             return res.status(404).json({ success: false, message: "Historial médico no encontrado." });
         }
         res.json({ success: true, message: "Historial médico eliminado correctamente." });
+        console.log("[DELETE_MEDICAL_RECORD] Medical record deleted successfully:", id); // Debugging log
+
     } catch (error) {
         console.error("Error al eliminar historial médico:", error);
         res.status(500).json({ success: false, message: "Error al eliminar historial médico.", error: process.env.NODE_ENV === 'development' ? error.stack : error.message });
@@ -1755,7 +1808,7 @@ app.get("/citas", authenticateToken, async (req, res) => {
                             u_vet.direccion as veterinario_direccion,
                             s.id_servicio, u_cli.id as id_cliente, u_vet.id as id_veterinario,
                             m.nombre as mascota_nombre, m.especie as mascota_especie, m.raza as mascota_raza,
-                            m.imagen_url as mascota_imagen_url  -- AÑADIDO ESTO
+                            m.imagen_url as mascota_imagen_url
                      FROM citas c
                      JOIN servicios s ON c.id_servicio = s.id_servicio
                      JOIN usuarios u_cli ON c.id_cliente = u_cli.id
@@ -1805,7 +1858,7 @@ app.get("/citas/:id", authenticateToken, isOwnerOrAdmin, async (req, res) => {
                     u_vet.id as id_veterinario, CONCAT(u_vet.nombre, ' ', u_vet.apellido) as veterinario_nombre, u_vet.email as veterinario_email,
                     u_vet.direccion as veterinario_direccion,
                     m.nombre as mascota_nombre, m.especie as mascota_especie, m.raza as mascota_raza,
-                    m.imagen_url as mascota_imagen_url -- AÑADIDO ESTO
+                    m.imagen_url as mascota_imagen_url
              FROM citas c
              JOIN servicios s ON c.id_servicio = s.id_servicio
              JOIN usuarios u_cli ON c.id_cliente = u_cli.id
@@ -1827,7 +1880,7 @@ app.get("/citas/:id", authenticateToken, isOwnerOrAdmin, async (req, res) => {
 // Registrar nueva cita (para usuarios y admins/vets)
 app.post("/citas/agendar", authenticateToken, async (req, res) => { // express.json() ya es global. Cambiado a /citas/agendar para mayor claridad
     const { fecha_cita, notas_adicionales, id_servicio, id_cliente, id_veterinario, id_mascota } = req.body;
-    let estado = req.body.estado || 'PENDIENTE'; // Asegurar que el estado inicial sea PENDIENTE en mayúsculas
+    let estado = req.body.estado ? req.body.estado.toUpperCase() : 'PENDIENTE'; // Asegurar que el estado inicial sea PENDIENTE en mayúsculas
 
     if (!fecha_cita || !id_servicio || !id_cliente || !id_mascota) {
         return res.status(400).json({ success: false, message: "Fecha, servicio, cliente y mascota son requeridos para la cita." });
@@ -1836,6 +1889,8 @@ app.post("/citas/agendar", authenticateToken, async (req, res) => { // express.j
     if (req.user.role === 'usuario' && req.user.id !== id_cliente) {
         return res.status(403).json({ success: false, message: "Acceso denegado. No puedes crear citas para otros usuarios." });
     }
+    console.log("[CREATE_APPOINTMENT] Received data:", req.body); // Debugging log
+
 
     let assignedVetId = id_veterinario;
 
@@ -1925,6 +1980,8 @@ app.post("/citas/agendar", authenticateToken, async (req, res) => { // express.j
         }
 
         res.status(201).json({ success: true, message: "Cita registrada correctamente.", data: newCita[0] });
+        console.log("[CREATE_APPOINTMENT] Appointment created successfully:", newCitaId); // Debugging log
+
     } catch (error) {
         console.error("Error al registrar cita:", error);
         res.status(500).json({ success: false, message: "Error al registrar cita.", error: process.env.NODE_ENV === 'development' ? error.stack : error.message });
@@ -1935,6 +1992,7 @@ app.post("/citas/agendar", authenticateToken, async (req, res) => { // express.j
 app.put("/citas/:id", authenticateToken, async (req, res) => { // express.json() ya es global
     const { id } = req.params;
     let { fecha_cita, estado, notas_adicionales, id_servicio, id_cliente, id_veterinario, id_mascota } = req.body;
+    console.log("[UPDATE_APPOINTMENT] Received data:", req.body, "for ID:", id); // Debugging log
 
     try {
         const userIdFromToken = req.user.id;
@@ -1988,13 +2046,20 @@ app.put("/citas/:id", authenticateToken, async (req, res) => { // express.json()
             fields.push('id_servicio = ?'); values.push(id_servicio);
         }
 
+        // IMPORTANT: Re-validate id_mascota against id_cliente when updating
         if (id_mascota !== undefined) {
-            const [mascota] = await pool.query("SELECT id_mascota FROM mascotas WHERE id_mascota = ? AND id_propietario = ?", [id_mascota, existingCita.id_cliente]);
-            if (mascota.length === 0) return res.status(400).json({ success: false, message: "ID de mascota no válido o la mascota no pertenece a este cliente." });
+            // Ensure the provided id_mascota belongs to the *current* id_cliente of the appointment
+            // or the *new* id_cliente if it's also being changed in this request (only by admin)
+            const targetClientId = (userRole === 'admin' && id_cliente !== undefined) ? id_cliente : existingCita.id_cliente;
+
+            const [mascota] = await pool.query("SELECT id_mascota FROM mascotas WHERE id_mascota = ? AND id_propietario = ?", [id_mascota, targetClientId]);
+            if (mascota.length === 0) {
+                return res.status(400).json({ success: false, message: "ID de mascota no válido o la mascota no pertenece al cliente de esta cita." });
+            }
             fields.push('id_mascota = ?'); values.push(id_mascota);
         }
 
-        // Solo el admin puede cambiar cliente o veterinario de una cita
+        // Only admin can change client or vet of an appointment
         if (userRole === 'admin') {
             if (id_cliente !== undefined) {
                 const [cliente] = await pool.query("SELECT id FROM usuarios WHERE id = ? AND role = 'usuario'", [id_cliente]);
@@ -2099,6 +2164,7 @@ app.put("/citas/:id", authenticateToken, async (req, res) => { // express.json()
         }
 
         res.json({ success: true, message: "Cita actualizada correctamente.", data: updatedCita });
+        console.log("[UPDATE_APPOINTMENT] Appointment updated successfully:", id); // Debugging log
 
     } catch (error) {
         console.error("Error al actualizar cita:", error);
@@ -2109,6 +2175,8 @@ app.put("/citas/:id", authenticateToken, async (req, res) => { // express.json()
 // Eliminar cita (admin)
 app.delete("/citas/:id", authenticateToken, isAdmin, async (req, res) => {
     const { id } = req.params;
+    console.log("[DELETE_APPOINTMENT] Deleting appointment with ID:", id); // Debugging log
+
     try {
         const [result] = await pool.query("DELETE FROM citas WHERE id_cita = ?", [id]);
 
@@ -2116,6 +2184,8 @@ app.delete("/citas/:id", authenticateToken, isAdmin, async (req, res) => {
             return res.status(404).json({ success: false, message: "Cita no encontrada." });
         }
         res.json({ success: true, message: "Cita eliminada correctamente." });
+        console.log("[DELETE_APPOINTMENT] Appointment deleted successfully:", id); // Debugging log
+
     } catch (error) {
         console.error("Error al eliminar cita:", error);
         res.status(500).json({ success: false, message: "Error al eliminar cita.", error: process.env.NODE_ENV === 'development' ? error.stack : error.message });
@@ -2217,11 +2287,16 @@ app.get("/admin/citas", authenticateToken, isAdmin, async (req, res) => {
             LEFT JOIN mascotas m ON c.id_mascota = m.id_mascota
             `;
         const queryParams = [];
+        const conditions = [];
         const { status } = req.query;
 
         if (status && status !== 'all') {
-            query += ` WHERE c.estado = ?`;
-            queryParams.push(status);
+            conditions.push(`c.estado = ?`);
+            queryParams.push(status.toUpperCase()); // Asegurar que el estado se filtre en mayúsculas
+        }
+
+        if (conditions.length > 0) {
+            query += ` WHERE ` + conditions.join(' AND ');
         }
 
         query += ` ORDER BY c.fecha DESC`;

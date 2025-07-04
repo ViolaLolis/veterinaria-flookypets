@@ -1,125 +1,116 @@
 // src/Pages/InicioAdministrador/AdminAppointments.js
 import React, { useState, useEffect, useCallback } from 'react';
-// Importa los íconos necesarios
 import {
     FaCalendarAlt, FaSearch, FaUser, FaNotesMedical,
-    FaSpinner, FaPlus, FaEdit, FaTrash, FaTimes, FaInfoCircle
-    , FaEye, FaRegCheckCircle, FaRegTimesCircle, FaCalendarCheck, FaTimesCircle
+    FaSpinner, FaPlus, FaEdit, FaTrash, FaTimes, FaInfoCircle,
+    FaEye, FaRegCheckCircle, FaRegTimesCircle, FaCalendarCheck, FaTimesCircle
 } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 import { authFetch } from '../../utils/api'; // Ruta ajustada
-import { validateField } from '../../utils/validation'; // Importa la función de validación
-import './Styles/AdminAppointments.css'; // Ruta relativa al CSS
+// Importamos el componente AdminAppointmentForm
+import AdminAppointmentForm from './AdminAppointmentForm';
+import Modal from '../../Components/Modal'; // Para el modal de confirmación de eliminación
+import { useNotifications } from '../../Notifications/NotificationContext';
 
-// Importar el hook useNotifications
-import { useNotifications } from '../../Notifications/NotificationContext'; // Ruta ajustada
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
-function AdminAppointments({ user }) { // Recibe el objeto 'user' como prop
+function AdminAppointments({ user }) {
     const [appointments, setAppointments] = useState([]);
     const [filteredAppointments, setFilteredAppointments] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
-    const [isLoading, setIsLoading] = useState(true); // Para la carga inicial de la tabla
+    const [filterStatus, setFilterStatus] = useState('all');
+    const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
-    // Estados del filtro actualizados para coincidir con la DB
-    const [filter, setFilter] = useState('all'); // 'all', 'PENDIENTE', 'ACEPTADA', 'RECHAZADA', 'COMPLETA', 'CANCELADA'
 
-    // *** CAMBIO CLAVE: Usa el hook useNotifications en lugar del estado local de notificación ***
     const { addNotification } = useNotifications();
 
-    const [isModalOpen, setIsModalOpen] = useState(false); // Modal para Añadir/Editar
-    const [editingAppointment, setEditingAppointment] = useState(null); // null o el objeto de la cita a editar
-    const [isSubmitting, setIsSubmitting] = useState(false); // Para el envío del formulario modal
-    const [formErrors, setFormErrors] = useState({}); // Estado para errores de formulario
+    const [isFormModalOpen, setIsFormModalOpen] = useState(false); // Controla el modal del formulario
+    const [currentAppointmentToEdit, setCurrentAppointmentToEdit] = useState(null); // Objeto de la cita a editar
 
-    const [isViewModalOpen, setIsViewModalOpen] = useState(false); // Nuevo modal para Ver Detalles
+    const [isViewModalOpen, setIsViewModalOpen] = useState(false); // Modal para Ver Detalles
     const [viewingAppointment, setViewingAppointment] = useState(null); // Objeto de la cita para ver detalles
 
-    // formData ahora refleja que 'ubicacion' en el frontend se mapea a 'servicios' en el backend
-    const [formData, setFormData] = useState({
-        fecha: '',
-        estado: 'PENDIENTE', // Valores en mayúsculas para consistencia con ENUM
-        ubicacion: '', // Este campo en el frontend se mapea a 'servicios' en la DB
-        id_servicio: '',
-        id_cliente: '',
-        id_veterinario: '',
-        id_mascota: '' // Nuevo campo para la mascota
-    });
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [appointmentToDelete, setAppointmentToDelete] = useState(null);
 
-    const [services, setServices] = useState([]);
-    const [clients, setClients] = useState([]);
-    const [vets, setVets] = useState([]);
-    const [pets, setPets] = useState([]); // Nuevo estado para mascotas
 
-    // Calcular la fecha y hora mínima para el input (actual)
-    const getMinDateTime = () => {
-        const now = new Date();
-        now.setMinutes(now.getMinutes() + 1); // Un minuto más que la hora actual para evitar conflictos de segundos
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const day = String(now.getDate()).padStart(2, '0');
-        const hours = String(now.getHours()).padStart(2, '0');
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-        return `${year}-${month}-${day}T${hours}:${minutes}`;
+    // Enhanced fetch function with authentication (moved from api.js to here for direct use)
+    const getAuthToken = () => {
+        return localStorage.getItem('token');
     };
 
-    // Función para cargar los servicios, clientes, veterinarios y mascotas
-    const fetchDropdownData = useCallback(async () => {
+    const authFetchInternal = useCallback(async (endpoint, options = {}) => {
+        const token = getAuthToken();
+
+        if (!token && endpoint !== '/login' && endpoint !== '/register' && !endpoint.startsWith('/forgot-password') && !endpoint.startsWith('/reset-password') && !endpoint.startsWith('/verify-reset-code')) {
+            addNotification('error', 'No autorizado. Por favor, inicie sesión.', 5000);
+            throw new Error('No autorizado. No se encontró token de autenticación.');
+        }
+
+        const defaultHeaders = {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        };
+
+        const config = {
+            ...options,
+            headers: {
+                ...defaultHeaders,
+                ...options.headers // Allows overriding default headers
+            }
+        };
+
+        // If the body is not FormData, stringify it.
+        if (options.body && !(options.body instanceof FormData)) {
+            config.body = JSON.stringify(options.body);
+        }
+
+        const url = `${API_BASE_URL}${endpoint}`;
+        console.log(`AuthFetchInternal: Realizando solicitud a: ${url} con método: ${config.method || 'GET'}`);
+
         try {
-            const [servicesRes, clientsRes, vetsRes, petsRes] = await Promise.all([
-                authFetch('/servicios'),
-                authFetch('/admin/usuarios'), // Devuelve usuarios con role 'usuario'
-                authFetch('/usuarios/veterinarios'),
-                authFetch('/mascotas') // Endpoint para todas las mascotas
-            ]);
+            const response = await fetch(url, config);
 
-            if (servicesRes.success) setServices(servicesRes.data);
-            else console.error('Error al cargar servicios:', servicesRes.message);
+            let responseData;
+            try {
+                responseData = await response.json();
+            } catch (jsonError) {
+                console.error(`AuthFetchInternal: No se pudo parsear la respuesta como JSON para ${endpoint}.`, jsonError);
+                throw new Error(`Error de red o respuesta no JSON del servidor (${response.status}): ${response.statusText}`);
+            }
 
-            if (clientsRes.success) setClients(clientsRes.data);
-            else console.error('Error al cargar clientes:', clientsRes.message);
+            if (!response.ok) {
+                const errorMessage = responseData.message || `Error del servidor: ${response.status} ${response.statusText}`;
+                console.error(`AuthFetchInternal: Error en la respuesta para ${endpoint}:`, responseData);
+                throw new Error(errorMessage);
+            }
 
-            if (vetsRes.success) setVets(vetsRes.data);
-            else console.error('Error al cargar veterinarios:', vetsRes.message);
-
-            if (petsRes.success) setPets(petsRes.data);
-            else console.error('Error al cargar mascotas:', petsRes.message);
+            return responseData;
 
         } catch (err) {
-            console.error("Error al cargar datos para dropdowns:", err);
-            // *** CAMBIO CLAVE: Usa addNotification del contexto ***
-            addNotification('error', 'Error al cargar opciones para el formulario.', 5000);
+            console.error(`AuthFetchInternal: Error en la solicitud a ${endpoint}:`, err);
+            throw err;
         }
-    }, [addNotification]); // Dependencia actualizada
+    }, [addNotification]);
 
-    // Función para cargar las citas desde la API, AHORA CON FILTRO DE ESTADO
+
+    // Función para cargar las citas desde la API
     const fetchAppointments = useCallback(async () => {
         setIsLoading(true);
         setError('');
         try {
-            // Construir la URL con el parámetro de estado si no es 'all'
-            const apiUrl = filter && filter !== 'all' ? `/admin/citas?status=${filter}` : '/admin/citas';
-            const responseData = await authFetch(apiUrl); // Endpoint para citas de admin
+            const queryParams = new URLSearchParams();
+            if (filterStatus !== 'all') {
+                queryParams.append('status', filterStatus);
+            }
+            const url = `/admin/citas?${queryParams.toString()}`;
+            console.log("Fetching appointments from:", url);
+            const responseData = await authFetchInternal(url);
 
             if (responseData.success && Array.isArray(responseData.data)) {
-                const formattedAppointments = responseData.data.map(app => ({
-                    id: app.id_cita,
-                    date: app.fecha,
-                    owner: app.cliente, // Nombre completo del cliente
-                    service: app.servicio, // Nombre del servicio desde la tabla 'servicios'
-                    status: app.estado,
-                    ubicacion: app.notas_adicionales || 'N/A', // OJO: 'ubicacion' en frontend viene de 'servicios' en DB
-                    id_servicio: app.id_servicio,
-                    id_cliente: app.id_cliente,
-                    id_veterinario: app.id_veterinario,
-                    id_mascota: app.id_mascota, // Asegúrate de que este campo venga del backend
-                    cliente_telefono: app.cliente_telefono,
-                    veterinario_nombre: app.veterinario, // Nombre completo del veterinario
-                    mascota_nombre: app.mascota_nombre, // Añadido para mostrar en tabla
-                    mascota_especie: app.mascota_especie // Añadido para mostrar en tabla
-                }));
-                setAppointments(formattedAppointments);
+                // El backend ya debería devolver los nombres completos de mascota y propietario
+                setAppointments(responseData.data);
             } else {
-                // *** CAMBIO CLAVE: Usa addNotification del contexto ***
                 addNotification('error', responseData.message || 'Formato de datos de citas incorrecto.', 5000);
                 setAppointments([]);
             }
@@ -130,245 +121,118 @@ function AdminAppointments({ user }) { // Recibe el objeto 'user' como prop
         } finally {
             setIsLoading(false);
         }
-    }, [authFetch, addNotification, filter]); // Dependencia actualizada
+    }, [authFetchInternal, filterStatus, addNotification]);
 
-    // Efecto para cargar citas y datos de dropdowns al inicio y cuando cambia el filtro
     useEffect(() => {
         if (user && user.token) {
             fetchAppointments();
-            fetchDropdownData();
         } else {
             setError('No autorizado. Por favor, inicie sesión.');
             setIsLoading(false);
         }
-    }, [user, fetchAppointments, fetchDropdownData]);
+    }, [user, fetchAppointments]);
 
-    // Efecto para filtrar citas cuando cambia searchTerm (el filtro de estado ya viene del backend)
+    // Apply search term filter
     useEffect(() => {
-        const results = appointments.filter(app =>
-            app.owner.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            app.service.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            app.ubicacion.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            app.mascota_nombre.toLowerCase().includes(searchTerm.toLowerCase()) // Buscar por nombre de mascota
-        );
-        setFilteredAppointments(results);
+        const lowercasedSearchTerm = searchTerm.toLowerCase();
+        const filtered = appointments.filter(appointment => {
+            const matchesSearch =
+                (appointment.mascota_nombre && appointment.mascota_nombre.toLowerCase().includes(lowercasedSearchTerm)) ||
+                (appointment.cliente && appointment.cliente.toLowerCase().includes(lowercasedSearchTerm)) ||
+                (appointment.veterinario && appointment.veterinario.toLowerCase().includes(lowercasedSearchTerm)) ||
+                (appointment.servicio && appointment.servicio.toLowerCase().includes(lowercasedSearchTerm));
+
+            return matchesSearch;
+        });
+        setFilteredAppointments(filtered);
     }, [searchTerm, appointments]);
 
-    // Abre el modal para añadir una nueva cita
-    const handleAdd = useCallback(() => {
-        setEditingAppointment(null);
-        setFormData({ // Restablecer el formulario
-            fecha: '',
-            estado: 'PENDIENTE',
-            ubicacion: '',
-            id_servicio: '',
-            id_cliente: '',
-            id_veterinario: '',
-            id_mascota: ''
-        });
-        setFormErrors({}); // Limpiar errores al abrir el modal
-        setIsModalOpen(true);
-    }, []);
+    const handleAddNew = () => {
+        setCurrentAppointmentToEdit(null); // Para indicar que es una nueva cita
+        setIsFormModalOpen(true);
+    };
 
-    // Abre el modal para editar una cita existente
-    const handleEdit = useCallback((appointment) => {
-        setEditingAppointment(appointment);
-        setFormData({
-            fecha: appointment.date,
-            estado: appointment.status.toUpperCase(), // Asegurar mayúsculas
-            ubicacion: appointment.ubicacion || '', // Carga el valor desde 'app.ubicacion'
-            id_servicio: appointment.id_servicio,
-            id_cliente: appointment.id_cliente,
-            id_veterinario: appointment.id_veterinario || '',
-            id_mascota: appointment.id_mascota || ''
-        });
-        setFormErrors({}); // Limpiar errores al abrir el modal
-        setIsModalOpen(true);
-    }, []);
+    const handleEdit = (appointment) => {
+        setCurrentAppointmentToEdit(appointment); // Pasa la cita completa para edición
+        setIsFormModalOpen(true);
+    };
 
-    // Nuevo: Abre el modal para ver detalles de una cita
+    const handleSaveSuccess = () => {
+        fetchAppointments(); // Recargar la lista de citas después de guardar
+        setIsFormModalOpen(false); // Cerrar el modal
+        setCurrentAppointmentToEdit(null); // Limpiar la cita en edición
+    };
+
+    const handleDeleteConfirm = (appointment) => {
+        setAppointmentToDelete(appointment);
+        setShowDeleteConfirm(true);
+    };
+
+    const handleDelete = useCallback(async () => {
+        setIsLoading(true);
+        setShowDeleteConfirm(false); // Close the confirmation modal
+        try {
+            const response = await authFetchInternal(`/citas/${appointmentToDelete.id_cita}`, { method: 'DELETE' });
+            if (response.success) {
+                addNotification('success', response.message || 'Cita eliminada correctamente.', 5000);
+                fetchAppointments();
+            } else {
+                addNotification('error', response.message || 'Error al eliminar la cita.', 5000);
+            }
+        } catch (err) {
+            addNotification('error', `Error de conexión: ${err.message}`, 5000);
+            console.error("Error deleting appointment:", err);
+        } finally {
+            setIsLoading(false);
+            setAppointmentToDelete(null);
+        }
+    }, [authFetchInternal, addNotification, fetchAppointments, appointmentToDelete]);
+
     const handleViewDetails = useCallback(async (appointmentId) => {
         setIsLoading(true);
         try {
-            const responseData = await authFetch(`/citas/${appointmentId}`);
+            const responseData = await authFetchInternal(`/citas/${appointmentId}`);
             if (responseData.success && responseData.data) {
-                // Mapear el campo 'observaciones' del backend a 'ubicacion' para mostrarlo
-                const detailedAppointment = {
-                    ...responseData.data,
-                    ubicacion: responseData.data.observaciones || 'N/A' // Asegura que se muestre el valor correcto
-                };
-                setViewingAppointment(detailedAppointment);
+                setViewingAppointment(responseData.data);
                 setIsViewModalOpen(true);
             } else {
-                // *** CAMBIO CLAVE: Usa addNotification del contexto ***
                 addNotification('error', responseData.message || 'Error al cargar los detalles de la cita.', 5000);
             }
         } catch (err) {
-            // *** CAMBIO CLAVE: Usa addNotification del contexto ***
             addNotification('error', `Error de conexión al cargar detalles: ${err.message}`, 5000);
             console.error("Error fetching appointment details:", err);
         } finally {
             setIsLoading(false);
         }
-    }, [authFetch, addNotification]); // Dependencia actualizada
+    }, [authFetchInternal, addNotification]);
 
 
-    // Maneja el cambio en el formulario del modal
-    const handleFormChange = useCallback((e) => {
-        const { name, value } = e.target;
-        let newValue = value;
-
-        // Convertir a mayúsculas para campos específicos
-        if (['ubicacion'].includes(name)) { // Añadir más campos si es necesario
-            newValue = value.toUpperCase();
-        }
-
-        setFormData(prev => ({ ...prev, [name]: newValue }));
-
-        // Validar el campo individualmente al cambiar
-        const errorMessage = validateField(name, newValue, { ...formData, [name]: newValue }, !editingAppointment);
-        setFormErrors(prev => ({ ...prev, [name]: errorMessage }));
-    }, [formData, editingAppointment]); // Depende de formData y editingAppointment para validaciones cruzadas
-
-    // Envía el formulario del modal (añadir/editar)
-    const handleSubmit = useCallback(async (e) => {
-        e.preventDefault();
-        setIsSubmitting(true);
-        setError('');
-
-        // Validar todos los campos antes de enviar
-        let errors = {};
-        Object.keys(formData).forEach(key => {
-            const errorMessage = validateField(key, formData[key], formData, !editingAppointment);
-            if (errorMessage) {
-                errors[key] = errorMessage;
-            }
-        });
-
-        if (Object.keys(errors).length > 0) {
-            setFormErrors(errors);
-            addNotification('error', 'Por favor, corrige los errores en el formulario.', 5000);
-            setIsSubmitting(false);
-            return;
-        }
-
-        try {
-            let response;
-            const payload = {
-                ...formData,
-                fecha_cita: new Date(formData.fecha).toISOString().slice(0, 19).replace('T', ' '), // Formato MySQL DATETIME
-                notas_adicionales: formData.ubicacion // OJO: Mapea 'ubicacion' de frontend a 'servicios' en DB
-            };
-
-            // Elimina la propiedad 'ubicacion' del payload si no la necesitas en el backend con ese nombre
-            delete payload.ubicacion;
-            delete payload.fecha; // 'fecha' del formData es 'fecha_cita' para el backend
-
-            payload.id_servicio = payload.id_servicio ? parseInt(payload.id_servicio, 10) : null;
-            payload.id_cliente = payload.id_cliente ? parseInt(payload.id_cliente, 10) : null;
-            payload.id_veterinario = payload.id_veterinario ? parseInt(payload.id_veterinario, 10) : null;
-            payload.id_mascota = payload.id_mascota ? parseInt(payload.id_mascota, 10) : null;
-
-            if (payload.id_veterinario === 0) payload.id_veterinario = null;
-
-
-            if (editingAppointment) {
-                response = await authFetch(`/citas/${editingAppointment.id}`, {
-                    method: 'PUT',
-                    body: payload
-                });
-            } else {
-                response = await authFetch('/citas/agendar', { // Endpoint para agendar citas
-                    method: 'POST',
-                    body: payload
-                });
-            }
-
-            if (response.success) {
-                // *** CAMBIO CLAVE: Usa addNotification del contexto ***
-                addNotification('success', response.message || `Cita ${editingAppointment ? 'actualizada' : 'registrada'} correctamente.`, 5000);
-                setIsModalOpen(false);
-                fetchAppointments(); // Re-fetch all appointments (con filtro actual)
-            } else {
-                // *** CAMBIO CLAVE: Usa addNotification del contexto ***
-                addNotification('error', response.message || `Error al ${editingAppointment ? 'actualizar' : 'registrar'} la cita.`, 5000);
-            }
-        } catch (err) {
-            // *** CAMBIO CLAVE: Usa addNotification del contexto ***
-            addNotification('error', `Error de conexión: ${err.message}`, 5000);
-            console.error("Error submitting appointment form:", err);
-        } finally {
-            setIsSubmitting(false);
-        }
-    }, [editingAppointment, formData, authFetch, addNotification, fetchAppointments]); // Dependencias actualizadas
-
-    // Eliminar cita
-    const handleDelete = useCallback(async (id) => {
-        // *** REEMPLAZO DE window.confirm ***
-        // Aquí deberías integrar un modal de confirmación personalizado.
-        // Ejemplo conceptual:
-        // const confirmed = await showCustomConfirmModal('¿Estás seguro de eliminar esta cita? Esta acción es irreversible.');
-        // if (!confirmed) return;
-        if (!window.confirm('¿Estás seguro de eliminar esta cita? Esta acción es irreversible.')) {
-            return;
-        }
-
-        setIsLoading(true);
-        try {
-            const response = await authFetch(`/citas/${id}`, { method: 'DELETE' });
-            if (response.success) {
-                // *** CAMBIO CLAVE: Usa addNotification del contexto ***
-                addNotification('success', response.message || 'Cita eliminada correctamente.', 5000);
-                fetchAppointments(); // Re-fetch all appointments (con filtro actual)
-            } else {
-                // *** CAMBIO CLAVE: Usa addNotification del contexto ***
-                addNotification('error', response.message || 'Error al eliminar la cita.', 5000);
-            }
-        } catch (err) {
-            // *** CAMBIO CLAVE: Usa addNotification del contexto ***
-            addNotification('error', `Error de conexión: ${err.message}`, 5000);
-            console.error("Error deleting appointment:", err);
-        } finally {
-            setIsLoading(false);
-        }
-    }, [authFetch, addNotification, fetchAppointments]); // Dependencias actualizadas
-
-    // Función para cambiar el estado de la cita
     const handleChangeStatus = useCallback(async (id, currentStatus, targetStatus) => {
-        // *** REEMPLAZO DE window.confirm ***
-        // Aquí deberías integrar un modal de confirmación personalizado.
-        // Ejemplo conceptual:
-        // const confirmed = await showCustomConfirmModal(`¿Estás seguro de cambiar el estado de la cita a "${targetStatus}"?`);
-        // if (!confirmed) return;
         if (!window.confirm(`¿Estás seguro de cambiar el estado de la cita a "${targetStatus}"?`)) {
             return;
         }
         setIsLoading(true);
         try {
-            const response = await authFetch(`/citas/${id}`, {
+            const response = await authFetchInternal(`/citas/${id}`, {
                 method: 'PUT',
-                body: { estado: targetStatus.toUpperCase() } // Asegurar que el estado se envíe en mayúsculas
+                body: { estado: targetStatus.toUpperCase() }
             });
             if (response.success) {
-                // *** CAMBIO CLAVE: Usa addNotification del contexto ***
                 addNotification('success', response.message || `Estado de cita actualizado a "${targetStatus}".`, 5000);
-                fetchAppointments(); // Re-fetch all appointments (con filtro actual)
+                fetchAppointments();
             } else {
-                // *** CAMBIO CLAVE: Usa addNotification del contexto ***
                 addNotification('error', response.message || `Error al actualizar el estado de la cita.`, 5000);
             }
         } catch (err) {
-            // *** CAMBIO CLAVE: Usa addNotification del contexto ***
             addNotification('error', `Error de conexión: ${err.message}`, 5000);
             console.error("Error changing appointment status:", err);
         } finally {
             setIsLoading(false);
         }
-    }, [authFetch, addNotification, fetchAppointments]); // Dependencias actualizadas
+    }, [authFetchInternal, addNotification, fetchAppointments]);
 
-    // Función para obtener la clase del badge de estado
     const getStatusBadge = (status) => {
-        switch (status.toLowerCase()) { // Convertir a minúsculas para la comparación
+        switch (status.toLowerCase()) {
             case 'completa': return 'badge-success';
             case 'pendiente': return 'badge-warning';
             case 'aceptada': return 'badge-info';
@@ -378,7 +242,6 @@ function AdminAppointments({ user }) { // Recibe el objeto 'user' como prop
         }
     };
 
-    // Función para obtener el texto del estado
     const getStatusText = (status) => {
         switch (status.toLowerCase()) {
             case 'completa': return 'COMPLETADA';
@@ -389,7 +252,6 @@ function AdminAppointments({ user }) { // Recibe el objeto 'user' como prop
             default: return status.toUpperCase();
         }
     };
-
 
     if (isLoading && appointments.length === 0) {
         return (
@@ -408,16 +270,12 @@ function AdminAppointments({ user }) { // Recibe el objeto 'user' como prop
                 <FaInfoCircle className="info-icon" />
                 {error}
                 <p>Asegúrate de que el backend esté corriendo y los endpoints de API estén accesibles y funcionando correctamente.</p>
-                <p>Nota: Para ver citas completas y rechazadas, asegúrate de que existan registros con esos estados en tu base de datos y que tu tabla `citas` tenga el ENUM `('pendiente', 'aceptada', 'rechazada', 'completa', 'cancelada')`.</p>
             </div>
         );
     }
 
     return (
         <div className="admin-content-container">
-            {/* *** CAMBIO CLAVE: Elimina el bloque AnimatePresence y la notificación local *** */}
-            {/* Las notificaciones ahora serán mostradas por NotificationDisplay globalmente */}
-
             <div className="admin-content-header">
                 <h2>
                     <FaCalendarAlt className="header-icon" />
@@ -428,7 +286,7 @@ function AdminAppointments({ user }) { // Recibe el objeto 'user' como prop
                         <FaSearch className="search-icon" />
                         <input
                             type="text"
-                            placeholder="Buscar citas por dueño, servicio o detalle..."
+                            placeholder="Buscar citas por dueño, mascota, veterinario o servicio..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             disabled={isLoading}
@@ -436,43 +294,43 @@ function AdminAppointments({ user }) { // Recibe el objeto 'user' como prop
                     </div>
                     <div className="filter-buttons">
                         <button
-                            className={`filter-btn ${filter === 'all' ? 'active' : ''}`}
-                            onClick={() => setFilter('all')}
+                            className={`filter-btn ${filterStatus === 'all' ? 'active' : ''}`}
+                            onClick={() => setFilterStatus('all')}
                             disabled={isLoading}
                         >
                             Todas
                         </button>
                         <button
-                            className={`filter-btn ${filter === 'PENDIENTE' ? 'active' : ''}`}
-                            onClick={() => setFilter('PENDIENTE')}
+                            className={`filter-btn ${filterStatus === 'PENDIENTE' ? 'active' : ''}`}
+                            onClick={() => setFilterStatus('PENDIENTE')}
                             disabled={isLoading}
                         >
                             Pendientes
                         </button>
                         <button
-                            className={`filter-btn ${filter === 'ACEPTADA' ? 'active' : ''}`}
-                            onClick={() => setFilter('ACEPTADA')}
+                            className={`filter-btn ${filterStatus === 'ACEPTADA' ? 'active' : ''}`}
+                            onClick={() => setFilterStatus('ACEPTADA')}
                             disabled={isLoading}
                         >
                             Aceptadas
                         </button>
                         <button
-                            className={`filter-btn ${filter === 'COMPLETA' ? 'active' : ''}`}
-                            onClick={() => setFilter('COMPLETA')}
+                            className={`filter-btn ${filterStatus === 'COMPLETA' ? 'active' : ''}`}
+                            onClick={() => setFilterStatus('COMPLETA')}
                             disabled={isLoading}
                         >
                             Completadas
                         </button>
                         <button
-                            className={`filter-btn ${filter === 'RECHAZADA' ? 'active' : ''}`}
-                            onClick={() => setFilter('RECHAZADA')}
+                            className={`filter-btn ${filterStatus === 'RECHAZADA' ? 'active' : ''}`}
+                            onClick={() => setFilterStatus('RECHAZADA')}
                             disabled={isLoading}
                         >
                             Rechazadas
                         </button>
                         <button
-                            className={`filter-btn ${filter === 'CANCELADA' ? 'active' : ''}`}
-                            onClick={() => setFilter('CANCELADA')}
+                            className={`filter-btn ${filterStatus === 'CANCELADA' ? 'active' : ''}`}
+                            onClick={() => setFilterStatus('CANCELADA')}
                             disabled={isLoading}
                         >
                             Canceladas
@@ -480,7 +338,7 @@ function AdminAppointments({ user }) { // Recibe el objeto 'user' como prop
                     </div>
                     <button
                         className="add-new-btn"
-                        onClick={handleAdd}
+                        onClick={handleAddNew}
                         disabled={isLoading}
                     >
                         <FaPlus /> Nueva Cita
@@ -495,8 +353,9 @@ function AdminAppointments({ user }) { // Recibe el objeto 'user' como prop
                             <th>ID</th>
                             <th>Fecha y Hora</th>
                             <th>Dueño</th>
-                            <th>Mascota</th> {/* Nueva columna */}
-                            <th>Detalle de Ubicación/Servicio {/* Nuevo nombre de columna */}</th>
+                            <th>Mascota</th>
+                            <th>Servicio</th>
+                            <th>Veterinario</th>
                             <th>Estado</th>
                             <th>Acciones</th>
                         </tr>
@@ -504,29 +363,30 @@ function AdminAppointments({ user }) { // Recibe el objeto 'user' como prop
                     <tbody>
                         {filteredAppointments.length > 0 ? (
                             filteredAppointments.map(app => (
-                                <tr key={app.id}>
-                                    <td>{app.id}</td>
-                                    <td>{app.date}</td>
+                                <tr key={app.id_cita}>
+                                    <td>{app.id_cita}</td>
+                                    <td>{app.fecha}</td>
                                     <td>
-                                        <FaUser className="icon" /> {app.owner}
+                                        <FaUser className="icon" /> {app.cliente}
                                     </td>
                                     <td>
-                                        {/* Muestra el nombre de la mascota */}
-                                        {app.mascota_nombre} ({app.mascota_especie})
+                                        {app.mascota_nombre} {/* Muestra solo el nombre de la mascota */}
                                     </td>
                                     <td>
-                                        {/* Muestra el detalle de ubicación/servicio (c.servicios en DB) */}
-                                        <FaNotesMedical className="icon" /> {app.ubicacion}
+                                        <FaNotesMedical className="icon" /> {app.servicio}
                                     </td>
                                     <td>
-                                        <span className={`status-badge ${getStatusBadge(app.status)}`}>
-                                            {getStatusText(app.status)}
+                                        {app.veterinario || 'N/A'}
+                                    </td>
+                                    <td>
+                                        <span className={`status-badge ${getStatusBadge(app.estado)}`}>
+                                            {getStatusText(app.estado)}
                                         </span>
                                     </td>
                                     <td className="actions-cell">
                                         <button
                                             className="btn-icon"
-                                            onClick={() => handleViewDetails(app.id)}
+                                            onClick={() => handleViewDetails(app.id_cita)}
                                             disabled={isLoading}
                                             title="Ver Detalles"
                                         >
@@ -540,60 +400,59 @@ function AdminAppointments({ user }) { // Recibe el objeto 'user' como prop
                                         >
                                             <FaEdit />
                                         </button>
-                                        {/* Botones de cambio de estado con íconos y tooltips */}
-                                        {app.status === 'PENDIENTE' && (
+                                        {app.estado.toUpperCase() === 'PENDIENTE' && (
                                             <button
                                                 className="btn-icon btn-accept"
-                                                onClick={() => handleChangeStatus(app.id, app.status, 'ACEPTADA')}
+                                                onClick={() => handleChangeStatus(app.id_cita, app.estado, 'ACEPTADA')}
                                                 disabled={isLoading}
                                                 title="Aceptar Cita"
                                             >
                                                 <FaRegCheckCircle />
                                             </button>
                                         )}
-                                        {app.status === 'RECHAZADA' && (
+                                        {app.estado.toUpperCase() === 'RECHAZADA' && (
                                             <button
                                                 className="btn-icon btn-accept"
-                                                onClick={() => handleChangeStatus(app.id, app.status, 'ACEPTADA')}
+                                                onClick={() => handleChangeStatus(app.id_cita, app.estado, 'ACEPTADA')}
                                                 disabled={isLoading}
                                                 title="Re-aceptar Cita"
                                             >
                                                 <FaRegCheckCircle />
                                             </button>
                                         )}
-                                        {(app.status === 'PENDIENTE' || app.status === 'ACEPTADA') && (
+                                        {(app.estado.toUpperCase() === 'PENDIENTE' || app.estado.toUpperCase() === 'ACEPTADA') && (
                                             <button
                                                 className="btn-icon btn-reject"
-                                                onClick={() => handleChangeStatus(app.id, app.status, 'RECHAZADA')}
+                                                onClick={() => handleChangeStatus(app.id_cita, app.estado, 'RECHAZADA')}
                                                 disabled={isLoading}
                                                 title="Rechazar Cita"
                                             >
                                                 <FaRegTimesCircle />
                                             </button>
                                         )}
-                                        {app.status === 'ACEPTADA' && (
+                                        {app.estado.toUpperCase() === 'ACEPTADA' && (
                                             <button
                                                 className="btn-icon btn-complete"
-                                                onClick={() => handleChangeStatus(app.id, app.status, 'COMPLETA')}
+                                                onClick={() => handleChangeStatus(app.id_cita, app.estado, 'COMPLETA')}
                                                 disabled={isLoading}
                                                 title="Completar Cita"
                                             >
                                                 <FaCalendarCheck />
                                             </button>
                                         )}
-                                        {(app.status === 'PENDIENTE' || app.status === 'ACEPTADA' || app.status === 'RECHAZADA') && (
+                                        {(app.estado.toUpperCase() === 'PENDIENTE' || app.estado.toUpperCase() === 'ACEPTADA' || app.estado.toUpperCase() === 'RECHAZADA') && (
                                             <button
                                                 className="btn-icon btn-cancel"
-                                                onClick={() => handleChangeStatus(app.id, app.status, 'CANCELADA')}
+                                                onClick={() => handleChangeStatus(app.id_cita, app.estado, 'CANCELADA')}
                                                 disabled={isLoading}
                                                 title="Cancelar Cita"
                                             >
-                                                <FaTimesCircle /> {/* Usando un ícono de "cerrar círculo" para cancelar */}
+                                                <FaTimesCircle />
                                             </button>
                                         )}
                                         <button
                                             className="btn-icon btn-delete"
-                                            onClick={() => handleDelete(app.id)}
+                                            onClick={() => handleDeleteConfirm(app)}
                                             disabled={isLoading}
                                             title="Eliminar Cita"
                                         >
@@ -604,7 +463,7 @@ function AdminAppointments({ user }) { // Recibe el objeto 'user' como prop
                             ))
                         ) : (
                             <tr>
-                                <td colSpan="7" className="no-results">
+                                <td colSpan="8" className="no-results">
                                     <FaInfoCircle className="info-icon" />
                                     No se encontraron citas que coincidan con el filtro o la búsqueda.
                                 </td>
@@ -614,189 +473,28 @@ function AdminAppointments({ user }) { // Recibe el objeto 'user' como prop
                 </table>
             </div>
 
-            {/* Modal para Añadir/Editar Cita */}
-            <AnimatePresence>
-                {isModalOpen && (
-                    <motion.div
-                        className="modal-overlay"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                    >
-                        <motion.div
-                            className="modal-content"
-                            initial={{ scale: 0.9, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.9, opacity: 0 }}
-                            transition={{ duration: 0.2 }}
-                        >
-                            <div className="modal-header">
-                                <h3>{editingAppointment ? 'Editar Cita' : 'Registrar Nueva Cita'}</h3>
-                                <button className="close-modal-btn" onClick={() => { setIsModalOpen(false); setFormErrors({}); }}>
-                                    <FaTimes />
-                                </button>
-                            </div>
-                            <form onSubmit={handleSubmit} className="modal-form">
-                                <div className="form-group">
-                                    <label htmlFor="id_cliente">Cliente</label>
-                                    {/* Cliente deshabilitado en modo edición */}
-                                    {editingAppointment ? (
-                                        <input
-                                            type="text"
-                                            id="id_cliente_display"
-                                            // Asegura que clients esté cargado antes de intentar encontrar
-                                            value={clients.length > 0 ? `${clients.find(c => c.id === formData.id_cliente)?.nombre || ''} ${clients.find(c => c.id === formData.id_cliente)?.apellido || ''}` : 'Cargando...'}
-                                            disabled
-                                            className="disabled-input-text"
-                                        />
-                                    ) : (
-                                        <select
-                                            id="id_cliente"
-                                            name="id_cliente"
-                                            value={formData.id_cliente}
-                                            onChange={handleFormChange}
-                                            required
-                                            disabled={isSubmitting}
-                                        >
-                                            <option value="">Selecciona un cliente</option>
-                                            {clients.map(client => (
-                                                <option key={client.id} value={client.id}>
-                                                    {client.nombre} {client.apellido} ({client.email})
-                                                </option>
-                                            ))}
-                                        </select>
-                                    )}
-                                    {formErrors.id_cliente && <p className="error-message-inline">{formErrors.id_cliente}</p>}
-                                </div>
+            {/* Renderiza el AdminAppointmentForm como un componente separado */}
+            <AdminAppointmentForm
+                isOpen={isFormModalOpen}
+                onClose={() => setIsFormModalOpen(false)}
+                appointment={currentAppointmentToEdit} // Pasa el objeto de la cita para edición o null para nueva
+                onSaveSuccess={handleSaveSuccess}
+            />
 
-                                <div className="form-group">
-                                    <label htmlFor="id_mascota">Mascota</label>
-                                    {/* Mascota deshabilitada en modo edición */}
-                                    {editingAppointment ? (
-                                        <input
-                                            type="text"
-                                            id="id_mascota_display"
-                                            // Asegura que pets esté cargado antes de intentar encontrar
-                                            value={pets.length > 0 ? `${pets.find(p => p.id_mascota === formData.id_mascota)?.nombre || ''} (${pets.find(p => p.id_mascota === formData.id_mascota)?.especie || ''})` : 'Cargando...'}
-                                            disabled
-                                            className="disabled-input-text"
-                                        />
-                                    ) : (
-                                        <select
-                                            id="id_mascota"
-                                            name="id_mascota"
-                                            value={formData.id_mascota}
-                                            onChange={handleFormChange}
-                                            required
-                                            disabled={isSubmitting || !formData.id_cliente} // Deshabilita si no hay cliente seleccionado
-                                        >
-                                            <option value="">Selecciona una mascota</option>
-                                            {/* Filtra mascotas por el cliente seleccionado */}
-                                            {pets.filter(pet => formData.id_cliente && pet.id_propietario === parseInt(formData.id_cliente)).map(pet => (
-                                                <option key={pet.id_mascota} value={pet.id_mascota}>
-                                                    {pet.nombre} ({pet.especie})
-                                                </option>
-                                            ))}
-                                        </select>
-                                    )}
-                                    {formErrors.id_mascota && <p className="error-message-inline">{formErrors.id_mascota}</p>}
-                                </div>
-
-                                <div className="form-group">
-                                    <label htmlFor="id_servicio">Servicio Principal</label>
-                                    <select
-                                        id="id_servicio"
-                                        name="id_servicio"
-                                        value={formData.id_servicio}
-                                        onChange={handleFormChange}
-                                        required
-                                        disabled={isSubmitting}
-                                    >
-                                        <option value="">Selecciona un servicio</option>
-                                        {services.map(service => (
-                                            <option key={service.id_servicio} value={service.id_servicio}>
-                                                {service.nombre} (${service.precio})
-                                            </option>
-                                        ))}
-                                    </select>
-                                    {formErrors.id_servicio && <p className="error-message-inline">{formErrors.id_servicio}</p>}
-                                </div>
-
-                                <div className="form-group">
-                                    <label htmlFor="id_veterinario">Veterinario Asignado</label>
-                                    <select
-                                        id="id_veterinario"
-                                        name="id_veterinario"
-                                        value={formData.id_veterinario}
-                                        onChange={handleFormChange}
-                                        disabled={isSubmitting}
-                                    >
-                                        <option value="">(Asignación automática)</option>
-                                        {vets.map(vet => (
-                                            <option key={vet.id} value={vet.id}>
-                                                {vet.nombre} {vet.apellido} ({vet.email})
-                                            </option>
-                                        ))}
-                                    </select>
-                                    {formErrors.id_veterinario && <p className="error-message-inline">{formErrors.id_veterinario}</p>}
-                                </div>
-
-                                <div className="form-group">
-                                    <label htmlFor="fecha">Fecha y Hora</label>
-                                    <input
-                                        type="datetime-local"
-                                        id="fecha"
-                                        name="fecha"
-                                        value={formData.fecha}
-                                        onChange={handleFormChange}
-                                        min={getMinDateTime()} // Asegura que la fecha no sea pasada
-                                        required
-                                        disabled={isSubmitting}
-                                    />
-                                    {formErrors.fecha && <p className="error-message-inline">{formErrors.fecha}</p>}
-                                </div>
-
-                                <div className="form-group">
-                                    <label htmlFor="ubicacion">Detalle de Ubicación/Servicio</label>
-                                    <input
-                                        type="text"
-                                        id="ubicacion"
-                                        name="ubicacion"
-                                        value={formData.ubicacion}
-                                        onChange={handleFormChange}
-                                        placeholder="EJ: CONSULTORIO 1, SALA DE RAYOS X"
-                                        disabled={isSubmitting}
-                                    />
-                                    {formErrors.ubicacion && <p className="error-message-inline">{formErrors.ubicacion}</p>}
-                                </div>
-
-                                <div className="form-group">
-                                    <label htmlFor="estado">Estado</label>
-                                    <select
-                                        id="estado"
-                                        name="estado"
-                                        value={formData.estado}
-                                        onChange={handleFormChange}
-                                        required
-                                        disabled={isSubmitting}
-                                    >
-                                        <option value="PENDIENTE">PENDIENTE</option>
-                                        <option value="ACEPTADA">ACEPTADA</option>
-                                        <option value="RECHAZADA">RECHAZADA</option>
-                                        <option value="COMPLETA">COMPLETA</option>
-                                        <option value="CANCELADA">CANCELADA</option>
-                                    </select>
-                                    {formErrors.estado && <p className="error-message-inline">{formErrors.estado}</p>}
-                                </div>
-
-                                <button type="submit" className="submit-btn" disabled={isSubmitting}>
-                                    {isSubmitting ? <FaSpinner className="spinner-icon" /> : (editingAppointment ? 'Actualizar Cita' : 'Registrar Cita')}
-                                </button>
-                            </form>
-                        </motion.div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+            {/* Modal para Confirmación de Eliminación */}
+            <Modal isOpen={showDeleteConfirm} onClose={() => setShowDeleteConfirm(false)} title="Confirmar Eliminación">
+                <div className="modal-content-delete">
+                    <p>¿Estás seguro de que quieres eliminar la cita de <strong>{appointmentToDelete?.cliente}</strong> con <strong>{appointmentToDelete?.mascota_nombre}</strong> el <strong>{appointmentToDelete?.fecha}</strong>?</p>
+                    <div className="form-actions">
+                        <button className="btn-delete" onClick={handleDelete} disabled={isLoading}>
+                            {isLoading ? <FaSpinner className="spinner" /> : <FaTrash />} Eliminar
+                        </button>
+                        <button className="btn-secondary" onClick={() => setShowDeleteConfirm(false)} disabled={isLoading}>
+                            <FaTimes /> Cancelar
+                        </button>
+                    </div>
+                </div>
+            </Modal>
 
             {/* Modal para Ver Detalles de Cita */}
             <AnimatePresence>
@@ -824,7 +522,7 @@ function AdminAppointments({ user }) { // Recibe el objeto 'user' como prop
                                 <p><strong>Fecha y Hora:</strong> {viewingAppointment.fecha_cita}</p>
                                 <p><strong>Estado:</strong> <span className={`status-badge ${getStatusBadge(viewingAppointment.estado)}`}>{getStatusText(viewingAppointment.estado)}</span></p>
                                 <p><strong>Servicio:</strong> {viewingAppointment.servicio_nombre}</p>
-                                <p><strong>Detalle Ubicación/Servicio:</strong> {viewingAppointment.observaciones || 'N/A'}</p>
+                                <p><strong>Notas Adicionales:</strong> {viewingAppointment.observaciones || 'N/A'}</p>
                                 <p><strong>Mascota:</strong> {viewingAppointment.mascota_nombre} ({viewingAppointment.mascota_especie} - {viewingAppointment.mascota_raza})</p>
                                 {viewingAppointment.mascota_imagen_url && (
                                     <div className="mt-4 text-center">

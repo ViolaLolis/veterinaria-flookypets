@@ -2,9 +2,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { FaSave, FaTimes, FaSpinner } from 'react-icons/fa';
 import { validateField } from '../../utils/validation';
-import '../Styles/AdminStyles.css'; // Asegúrate de que los estilos sean adecuados
-import Modal from '../../utils/Modal'; // Asumo que tienes un componente Modal
-import Notification from '../../utils/Notification'; // Asumo que tienes un componente Notification
+import Modal from '../../Components/Modal';
+import Notification from '../../Components/Notification';
+import './Styles/AdminStyles.css';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
@@ -22,17 +22,17 @@ const AdminAppointmentForm = ({ isOpen, onClose, appointment, onSaveSuccess }) =
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [notification, setNotification] = useState(null);
     const [clientes, setClientes] = useState([]);
-    const [mascotas, setMascotas] = useState([]);
+    const [mascotas, setMascotas] = useState([]); // All pets
     const [servicios, setServicios] = useState([]);
     const [veterinarios, setVeterinarios] = useState([]);
-    const [filteredMascotas, setFilteredMascotas] = useState([]); // Mascotas filtradas por cliente
+    const [filteredMascotas, setFilteredMascotas] = useState([]); // Mascotas filtered by selected client
 
-    // Función para obtener el token de autenticación
+    // Function to get authentication token
     const getAuthToken = () => {
         return localStorage.getItem('token');
     };
 
-    // Función mejorada para hacer fetch con autenticación
+    // Enhanced fetch function with authentication
     const authFetch = useCallback(async (url, options = {}) => {
         const token = getAuthToken();
         if (!token) {
@@ -61,9 +61,11 @@ const AdminAppointmentForm = ({ isOpen, onClose, appointment, onSaveSuccess }) =
         return response;
     }, []);
 
-    // Cargar datos de la cita si está en modo edición
+    // Load appointment data if in edit mode
     useEffect(() => {
+        console.log("AdminAppointmentForm - useEffect [appointment, isOpen]:", appointment);
         if (appointment) {
+            // Initialize formData directly from the appointment prop
             setFormData({
                 id_cliente: appointment.id_cliente || '',
                 id_mascota: appointment.id_mascota || '',
@@ -71,10 +73,10 @@ const AdminAppointmentForm = ({ isOpen, onClose, appointment, onSaveSuccess }) =
                 id_veterinario: appointment.id_veterinario || '',
                 fecha_cita: appointment.fecha_cita ? new Date(appointment.fecha_cita).toISOString().slice(0, 16) : '',
                 notas_adicionales: appointment.notas_adicionales || '',
-                estado: appointment.estado ? appointment.estado.toUpperCase() : 'PENDIENTE' // Asegurar mayúsculas
+                estado: appointment.estado ? appointment.estado.toUpperCase() : 'PENDIENTE' // Ensure uppercase
             });
         } else {
-            // Resetear formulario para nueva cita
+            // Reset form for new appointment
             setFormData({
                 id_cliente: '',
                 id_mascota: '',
@@ -89,13 +91,14 @@ const AdminAppointmentForm = ({ isOpen, onClose, appointment, onSaveSuccess }) =
         setNotification(null);
     }, [appointment, isOpen]);
 
-    // Cargar clientes, mascotas, servicios y veterinarios
+    // Load clients, all pets, services, and veterinarians
     useEffect(() => {
         const fetchDependencies = async () => {
             try {
+                console.log("AdminAppointmentForm - fetchDependencies: Fetching all required data.");
                 const [clientesRes, mascotasRes, serviciosRes, vetsRes] = await Promise.all([
-                    authFetch(`${API_BASE_URL}/usuarios`), // Endpoint para usuarios clientes
-                    authFetch(`${API_BASE_URL}/mascotas`),
+                    authFetch(`${API_BASE_URL}/usuarios`), // Endpoint for client users
+                    authFetch(`${API_BASE_URL}/mascotas`), // All pets
                     authFetch(`${API_BASE_URL}/servicios`),
                     authFetch(`${API_BASE_URL}/usuarios/veterinarios`)
                 ]);
@@ -105,17 +108,29 @@ const AdminAppointmentForm = ({ isOpen, onClose, appointment, onSaveSuccess }) =
                 const serviciosData = await serviciosRes.json();
                 const vetsData = await vetsRes.json();
 
-                if (clientesData.success) setClientes(clientesData.data);
-                else setNotification({ message: clientesData.message || 'Error al cargar clientes.', type: 'error' });
+                if (clientesData.success) {
+                    setClientes(clientesData.data);
+                } else {
+                    setNotification({ message: clientesData.message || 'Error al cargar clientes.', type: 'error' });
+                }
 
-                if (mascotasData.success) setMascotas(mascotasData.data);
-                else setNotification({ message: mascotasData.message || 'Error al cargar mascotas.', type: 'error' });
+                if (mascotasData.success) {
+                    setMascotas(mascotasData.data);
+                } else {
+                    setNotification({ message: mascotasData.message || 'Error al cargar mascotas.', type: 'error' });
+                }
 
-                if (serviciosData.success) setServicios(serviciosData.data);
-                else setNotification({ message: serviciosData.message || 'Error al cargar servicios.', type: 'error' });
+                if (serviciosData.success) {
+                    setServicios(serviciosData.data);
+                } else {
+                    setNotification({ message: serviciosData.message || 'Error al cargar servicios.', type: 'error' });
+                }
 
-                if (vetsData.success) setVeterinarios(vetsData.data);
-                else setNotification({ message: vetsData.message || 'Error al cargar veterinarios.', type: 'error' });
+                if (vetsData.success) {
+                    setVeterinarios(vetsData.data);
+                } else {
+                    setNotification({ message: vetsData.message || 'Error al cargar veterinarios.', type: 'error' });
+                }
 
             } catch (err) {
                 console.error('Error fetching dependencies:', err);
@@ -128,55 +143,75 @@ const AdminAppointmentForm = ({ isOpen, onClose, appointment, onSaveSuccess }) =
         }
     }, [isOpen, authFetch]);
 
-    // Filtrar mascotas cuando cambia el cliente seleccionado
+    // Filter pets when client is selected (only applicable in creation mode)
     useEffect(() => {
+        console.log("AdminAppointmentForm - useEffect [formData.id_cliente, mascotas, appointment]:", {
+            id_cliente: formData.id_cliente,
+            id_mascota: formData.id_mascota,
+            mascotasLength: mascotas.length,
+            isAppointment: !!appointment
+        });
+
         if (formData.id_cliente) {
             const clientMascotas = mascotas.filter(m => m.id_propietario === parseInt(formData.id_cliente));
             setFilteredMascotas(clientMascotas);
-            // Si la mascota seleccionada no pertenece al nuevo cliente, resetearla
-            if (formData.id_mascota && !clientMascotas.some(m => m.id_mascota === parseInt(formData.id_mascota))) {
-                setFormData(prev => ({ ...prev, id_mascota: '' }));
+
+            // Only reset id_mascota if in creation mode and the selected pet is not valid for the client
+            if (!appointment) {
+                if (formData.id_mascota && !clientMascotas.some(m => m.id_mascota === parseInt(formData.id_mascota))) {
+                    setFormData(prev => ({ ...prev, id_mascota: '' }));
+                }
             }
         } else {
             setFilteredMascotas([]);
-            setFormData(prev => ({ ...prev, id_mascota: '' }));
+            // Only reset id_mascota if not in edit mode
+            if (!appointment) {
+                setFormData(prev => ({ ...prev, id_mascota: '' }));
+            }
         }
-    }, [formData.id_cliente, mascotas]);
+    }, [formData.id_cliente, mascotas, appointment]);
 
-    // Manejar cambios en el formulario
+
+    // Handle form changes
     const handleChange = (e) => {
         const { name, value } = e.target;
+        console.log(`AdminAppointmentForm - handleChange: ${name} changed to ${value}`);
         setFormData(prev => ({ ...prev, [name]: value }));
 
-        // Validar campo en tiempo real
+        // Validate field in real-time
         const validationError = validateField(`${name}_cita`, value, formData, !appointment);
         setFormErrors(prev => ({ ...prev, [name]: validationError }));
     };
 
-    // Manejar blur para mostrar errores al salir del campo
+    // Handle blur to show errors when leaving a field
     const handleBlur = (e) => {
         const { name, value } = e.target;
         const validationError = validateField(`${name}_cita`, value, formData, !appointment);
         setFormErrors(prev => ({ ...prev, [name]: validationError }));
     };
 
-    // Enviar formulario (añadir o actualizar)
+    // Submit form (add or update)
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
         setNotification(null);
 
-        // Validar todos los campos antes de enviar
+        // Validate all fields before submitting
         let errors = {};
         let hasErrors = false;
 
         const fieldsToValidate = [
-            'id_cliente', 'id_mascota', 'id_servicio', 'fecha_cita', 'estado', 'notas_adicionales'
+            'id_cliente', 'id_mascota', 'id_servicio', 'fecha_cita', 'estado'
         ];
-        // id_veterinario es opcional, solo se valida si tiene un valor
+        // id_veterinario is optional, only validate if it has a value
         if (formData.id_veterinario) {
             fieldsToValidate.push('id_veterinario');
         }
+        // notas_adicionales is optional, only validate if it has a value
+        if (formData.notas_adicionales) {
+            fieldsToValidate.push('notas_adicionales');
+        }
+
 
         for (const field of fieldsToValidate) {
             const errorMsg = validateField(`${field}_cita`, formData[field], formData, !appointment);
@@ -196,45 +231,62 @@ const AdminAppointmentForm = ({ isOpen, onClose, appointment, onSaveSuccess }) =
 
         try {
             let response;
+            const dataToSend = { ...formData };
+            dataToSend.estado = dataToSend.estado.toUpperCase(); // Ensure state is uppercase
+
+            console.log("AdminAppointmentForm - Sending appointment data:", dataToSend); // Debugging log
+
             if (appointment) {
-                // Actualizar cita
+                // Update appointment
                 response = await authFetch(`${API_BASE_URL}/citas/${appointment.id_cita}`, {
                     method: 'PUT',
-                    body: JSON.stringify(formData),
+                    body: JSON.stringify(dataToSend),
                 });
             } else {
-                // Crear nueva cita
-                response = await authFetch(`${API_BASE_URL}/citas/agendar`, { // Usar la ruta de agendar
+                // Create new appointment
+                response = await authFetch(`${API_BASE_URL}/citas/agendar`, {
                     method: 'POST',
-                    body: JSON.stringify(formData),
+                    body: JSON.stringify(dataToSend),
                 });
             }
 
             const data = await response.json();
+            console.log("AdminAppointmentForm - Backend response for appointment:", data); // Debugging log
 
             if (data.success) {
                 setNotification({ message: data.message, type: 'success' });
-                onSaveSuccess(); // Notificar al componente padre para recargar la lista
-                onClose(); // Cerrar el modal
+                onSaveSuccess(); // Notify parent component to reload the list
+                onClose(); // Close the modal
             } else {
                 setNotification({ message: data.message || 'Error al guardar la cita.', type: 'error' });
             }
         } catch (err) {
-            console.error('Error saving appointment:', err);
-            setNotification({ message: 'Error al conectar con el servidor para guardar la cita.', type: 'error' });
+            console.error('AdminAppointmentForm - Error submitting appointment form:', err);
+            setNotification({ message: `Error al guardar la cita: ${err.message || 'Error desconocido'}`, type: 'error' });
         } finally {
             setIsSubmitting(false);
         }
     };
 
-    const getClientName = (id) => {
+    // Helper functions to get names for display (from fetched lists or appointment prop)
+    const getClientDisplay = (id) => {
+        // If in edit mode, use the name from the appointment prop directly for display
+        if (appointment && parseInt(id) === appointment.id_cliente) {
+            return `${appointment.propietario_nombre}`; // Removed email for cleaner display
+        }
+        // Otherwise, try to find it in the fetched clients list
         const client = clientes.find(c => c.id === parseInt(id));
-        return client ? `${client.nombre} ${client.apellido}` : '';
+        return client ? `${client.nombre} ${client.apellido}` : 'Cargando...';
     };
 
-    const getMascotaName = (id) => {
+    const getMascotaDisplay = (id) => {
+        // If in edit mode, use the name from the appointment prop directly for display
+        if (appointment && parseInt(id) === appointment.id_mascota) {
+            return `${appointment.mascota_nombre}`; // Removed species for cleaner display, as requested
+        }
+        // Otherwise, try to find it in the fetched mascotas list
         const mascota = mascotas.find(m => m.id_mascota === parseInt(id));
-        return mascota ? `${mascota.nombre} (${mascota.especie})` : '';
+        return mascota ? `${mascota.nombre}` : 'Cargando...'; // Removed species for cleaner display, as requested
     };
 
     const getServicioName = (id) => {
@@ -244,7 +296,7 @@ const AdminAppointmentForm = ({ isOpen, onClose, appointment, onSaveSuccess }) =
 
     const getVeterinarioName = (id) => {
         const veterinario = veterinarios.find(v => v.id === parseInt(id));
-        return veterinario ? `${veterinario.nombre} ${veterinario.apellido}` : '';
+        return veterinario ? `${veterinario.nombre} ${veterinario.apellido} (${veterinario.email})` : '';
     };
 
     return (
@@ -260,17 +312,17 @@ const AdminAppointmentForm = ({ isOpen, onClose, appointment, onSaveSuccess }) =
                 <div className="form-grid">
                     <div className="form-group">
                         <label htmlFor="id_cliente">Cliente:</label>
+                        {/* In edit mode, display client name as plain text input, disabled */}
                         {appointment ? (
-                            // En modo edición, mostrar el nombre del cliente como texto plano o input deshabilitado
-                            <input
+                             <input
                                 type="text"
                                 id="cliente_display"
-                                value={getClientName(formData.id_cliente)}
+                                value={getClientDisplay(formData.id_cliente)}
                                 className="input-disabled"
                                 disabled
                             />
                         ) : (
-                            // En modo creación, permitir seleccionar el cliente
+                            // In creation mode, allow selecting the client
                             <select
                                 id="id_cliente"
                                 name="id_cliente"
@@ -293,17 +345,17 @@ const AdminAppointmentForm = ({ isOpen, onClose, appointment, onSaveSuccess }) =
 
                     <div className="form-group">
                         <label htmlFor="id_mascota">Mascota:</label>
+                        {/* In edit mode, display pet name as plain text input, disabled */}
                         {appointment ? (
-                            // En modo edición, mostrar el nombre de la mascota como texto plano o input deshabilitado
                             <input
                                 type="text"
                                 id="mascota_display"
-                                value={getMascotaName(formData.id_mascota)}
+                                value={getMascotaDisplay(formData.id_mascota)}
                                 className="input-disabled"
                                 disabled
                             />
                         ) : (
-                            // En modo creación, permitir seleccionar la mascota (filtrada por cliente)
+                            // In creation mode, allow selecting the pet (filtered by client)
                             <select
                                 id="id_mascota"
                                 name="id_mascota"

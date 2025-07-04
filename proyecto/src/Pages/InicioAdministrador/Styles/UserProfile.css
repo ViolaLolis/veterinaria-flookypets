@@ -1,470 +1,334 @@
-/* src/Styles/AdminProfile.css - Diseño para el perfil del Administrador */
+/* src/Pages/InicioAdministrador/Styles/UserProfile.css */
 
-/* Definición de variables CSS para consistencia, si no están ya en AdminStyles.css */
+/* --- Variables CSS (repetidas para auto-contención, aunque se recomienda usar un archivo de variables global) --- */
 :root {
-  --primary-color: #00acc1; /* Azul cian vibrante (principal) */
-  --primary-light: #4dd0e1; /* Azul cian más claro */
-  --primary-dark: #007c91;  /* Azul cian más oscuro para sombras profundas */
-  --primary-glow: rgba(0, 172, 193, 0.3); /* Efecto de brillo para enfoque */
+    --color-primary-cyan: #00BCD4; /* Azul cian vibrante */
+    --color-dark-cyan: #0097A7;   /* Tono más oscuro de cian */
+    --color-light-cyan: #E0F7FA;  /* Tono muy claro de cian */
+    --color-accent-green: #28a745;
+    --color-accent-red: #dc3545;
+    --color-text-dark: #333;
+    --color-text-medium: #555;
+    --color-text-light: #6c757d;
+    --color-background-light: #f0f2f5; /* Fondo general */
+    --color-background-white: #ffffff; /* Fondos de tarjetas y modales */
+    --color-border-light: #e0e0e0;
+    --color-border-medium: #ccc;
 
-  --secondary-background: #ecf0f1; /* Gris muy claro para fondos generales */
-  --surface-white: #ffffff;      /* Blanco puro para tarjetas y modales */
+    --spacing-xs: 0.5rem;
+    --spacing-sm: 0.8rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+    --spacing-xxl: 3rem;
 
-  --text-dark: #2c3e50; /* Gris oscuro para texto principal */
-  --text-medium: #546e7a; /* Gris medio para texto secundario/labels */
-  --text-light: #90a4ae; /* Gris claro para placehoders/bordes suaves */
+    --border-radius-sm: 8px;
+    --border-radius-md: 12px;
+    --border-radius-lg: 16px;
 
-  --success-color: #2ecc71; /* Verde brillante para éxito */
-  --danger-color: #e74c3c;  /* Rojo intenso para errores/eliminar */
-  --warning-color: #f39c12; /* Naranja para advertencias */
-
-  /* Sombras y Elevación */
-  --shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.05);
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
-  --shadow-md: 0 5px 15px rgba(0, 0, 0, 0.12);
-  --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.15);
+    --shadow-sm: 0 2px 5px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 15px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.15);
 }
 
-/* Contenedor principal de la página de perfil del administrador */
-.admin-profile-container {
-    padding: 2rem;
-    max-width: 850px; /* Ancho máximo un poco mayor para mejor distribución del contenido */
-    margin: 3rem auto; /* Margen superior/inferior, centrado horizontalmente */
-    min-height: calc(100vh - 6rem); /* Asegura que ocupe al menos la altura de la ventana (ajustar si hay nav/footer) */
+/* Contenedor principal del perfil, usa estilos de AdminStyles.css */
+.admin-user-profile {
+    max-width: 900px; /* Ancho máximo para la tarjeta de perfil */
+    margin: var(--spacing-xl) auto; /* Centrar en la página */
+    padding: var(--spacing-xl);
+    background-color: var(--color-background-white);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-lg);
+    animation: fadeIn 0.6s ease-out;
+}
+
+/* Tarjeta de perfil */
+.profile-card {
     display: flex;
-    flex-direction: column;
-    align-items: center; /* Centra el contenido horizontalmente */
-    background-color: var(--secondary-background); /* Fondo suave */
-    border-radius: 12px; /* Bordes más redondeados para un aspecto moderno */
-    box-shadow: var(--shadow-lg); /* Sombra prominente para el contenedor general */
+    flex-direction: column; /* Apilar en móvil */
+    align-items: center;
+    gap: var(--spacing-xl);
+    padding: var(--spacing-lg);
 }
 
-/* Encabezado principal de la página de perfil */
-.admin-content-header {
-    margin-bottom: 2.5rem; /* Más espacio debajo del título principal */
-    text-align: center;
-    width: 100%;
-}
-
-.admin-content-header h2 {
-    color: var(--text-dark); /* Color de texto oscuro para un encabezado fuerte */
-    font-size: 2.2rem;
-    font-weight: 700; /* Texto más audaz */
+/* Sección de la imagen de perfil */
+.profile-image-section {
+    position: relative;
+    width: 180px; /* Tamaño de la imagen */
+    height: 180px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 5px solid var(--color-primary-cyan);
+    box-shadow: 0 6px 20px rgba(0, 188, 212, 0.3);
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.8rem;
-    margin: 0; /* Elimina márgenes predeterminados */
+    background-color: var(--color-light-cyan); /* Fondo para placeholder */
+    transition: all 0.3s ease;
 }
 
-.admin-content-header .header-icon {
-    font-size: 1.8rem; /* Icono más grande para el encabezado principal */
-    color: var(--primary-color); /* Color primario para el icono */
+.profile-image-section:hover {
+    transform: scale(1.03);
+    box-shadow: 0 8px 25px rgba(0, 188, 212, 0.4);
 }
 
-/* Tarjeta de información del perfil */
-.profile-card {
-    background: var(--surface-white); /* Blanco puro para las tarjetas */
-    border-radius: 12px; /* Bordes más redondeados */
-    box-shadow: var(--shadow-md); /* Sombra media para la tarjeta */
-    overflow: hidden; /* Asegura que los bordes redondeados se apliquen al contenido */
-    width: 100%; /* Ocupa todo el ancho del contenedor padre */
-    max-width: 680px; /* Ancho máximo para la tarjeta */
-    border: 1px solid var(--text-light); /* Borde sutil */
-    display: flex;
-    flex-direction: column; /* Apila las secciones verticalmente */
-}
-
-/* Secciones dentro de la tarjeta de perfil (información personal, seguridad) */
-.profile-section, .password-section {
-    padding: 2rem 2.5rem; /* Mayor relleno para más espacio */
-}
-
-.profile-section {
-    border-bottom: 1px solid var(--secondary-background); /* Separador sutil */
-}
-
-.password-section {
-    padding-top: 1.5rem; /* Menor relleno superior para esta sección */
-}
-
-/* Encabezados de las subsecciones */
-.section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
-    padding-bottom: 0.8rem;
-    border-bottom: 1px solid var(--text-light); /* Borde sutil */
-}
-
-.section-header h3 {
-    color: var(--text-dark); /* Texto oscuro para los subtítulos */
-    font-size: 1.5rem;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 0.8rem;
-    margin: 0;
-}
-
-.section-header .section-icon {
-    font-size: 1.3rem; /* Icono más grande para los encabezados de sección */
-    color: var(--primary-color);
-}
-
-/* Visualización de la información del perfil (modo lectura) */
-.profile-info {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem; /* Espacio aumentado entre los elementos de información */
-}
-
-.info-item {
-    display: flex;
-    align-items: flex-start; /* Alinea el icono y el texto en la parte superior */
-    gap: 1.2rem; /* Más espacio entre el icono y el texto */
-    padding-bottom: 1rem;
-    border-bottom: 1px dashed var(--text-light); /* Separador punteado para un aspecto más suave */
-}
-
-.info-item:last-child {
-    border-bottom: none; /* Elimina el borde del último elemento */
-    padding-bottom: 0;
-}
-
-.info-icon {
-    color: var(--primary-color);
-    font-size: 1.5rem; /* Iconos de información más grandes */
-    min-width: 30px; /* Asegura un ancho mínimo para una alineación consistente */
-    text-align: center;
-}
-
-.info-label {
-    display: block;
-    font-size: 0.95rem; /* Ligeramente más grande */
-    color: var(--text-medium);
-    margin-bottom: 0.3rem; /* Espacio debajo de la etiqueta */
-    font-weight: 600; /* Etiqueta más audaz */
-}
-
-.info-value {
-    font-weight: 500;
-    color: var(--text-dark);
-    font-size: 1.05rem; /* Texto de valor ligeramente más grande */
-    word-break: break-word; /* Asegura que las palabras largas se rompan en varias líneas */
-}
-
-/* Formulario de edición */
-.edit-form {
-    margin-top: 1rem;
-}
-
-.form-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Columnas autoajustables, mínimo 280px */
-    gap: 1.5rem; /* Mayor espacio entre elementos de la cuadrícula */
-    margin-bottom: 2rem; /* Más espacio antes del botón de guardar */
-}
-
-.form-group {
-    margin-bottom: 0; /* Elimina el margen predeterminado, la cuadrícula maneja el espaciado */
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 0.6rem; /* Más espacio debajo de la etiqueta */
-    color: var(--text-dark);
-    font-weight: 600;
-    font-size: 0.95rem;
-}
-
-.form-group input, .disabled-input {
+.profile-image {
     width: 100%;
-    padding: 0.9rem 1rem; /* Mayor relleno */
-    border: 1px solid var(--text-light); /* Color de borde sutil */
-    border-radius: 8px; /* Más redondeado */
-    transition: all 0.3s ease;
-    font-family: 'Inter', sans-serif; /* Fuente consistente */
-    font-size: 1rem;
-    background-color: var(--surface-white);
-    color: var(--text-dark);
-}
-
-.disabled-input {
-    background-color: var(--secondary-background); /* Gris más claro para campos deshabilitados */
-    color: var(--text-medium);
-    cursor: not-allowed;
-}
-
-.form-group input:focus {
-    border-color: var(--primary-color);
-    outline: none;
-    box-shadow: 0 0 0 3px var(--primary-glow); /* Efecto de brillo mejorado */
-}
-
-/* Mensajes de error en línea */
-.error-message-inline {
-    color: var(--danger-color);
-    font-size: 0.85rem;
-    margin-top: 0.4rem;
+    height: 100%;
+    object-fit: cover; /* Asegura que la imagen cubra el área sin distorsionarse */
     display: block;
 }
 
-/* Botones de acción */
-.edit-btn, .toggle-btn, .cancel-btn, .save-btn {
-    padding: 0.7rem 1.4rem;
-    border: none;
-    border-radius: 8px; /* Bordes redondeados consistentes */
-    cursor: pointer;
-    transition: all 0.3s ease;
+/* Overlay para el botón de subir imagen */
+.image-upload-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
     display: flex;
     align-items: center;
-    gap: 0.6rem; /* Más espacio entre icono y texto */
-    font-weight: 600;
-    font-size: 0.95rem;
-    text-decoration: none; /* Para botones que podrían ser enlaces (como el de cambiar contraseña) */
-    justify-content: center; /* Centra el contenido en los botones */
-}
-
-.edit-btn {
-    background-color: var(--primary-color); /* Color primario más fuerte para editar */
-    color: white;
-}
-
-.edit-btn:hover {
-    background-color: var(--primary-dark);
-    transform: translateY(-2px); /* Efecto de elevación sutil */
-    box-shadow: var(--shadow-sm);
-}
-
-.toggle-btn { /* Para el botón "Cambiar Contraseña" */
-    background-color: var(--text-medium); /* Gris más oscuro, distinto del botón de edición */
-    color: white;
-}
-
-.toggle-btn:hover {
-    background-color: var(--text-dark); /* Más oscuro al pasar el ratón */
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-sm);
-}
-
-.cancel-btn {
-    background-color: var(--text-light); /* Gris claro para cancelar */
-    color: var(--text-dark);
-}
-
-.cancel-btn:hover {
-    background-color: var(--text-medium);
-    color: white;
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-sm);
-}
-
-.save-btn {
-    background-color: var(--success-color); /* Verde para acciones de guardar */
-    color: white;
-    margin-top: 1.5rem; /* Espacio encima del botón de guardar */
-    /* Este botón necesita estar dentro de un flexbox para align-self */
-}
-
-.save-btn:hover {
-    background-color: #27ae60; /* Verde más oscuro al pasar el ratón */
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-sm);
-}
-
-.save-btn:disabled {
-    background-color: var(--success-color);
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none; /* Sin transformación cuando está deshabilitado */
-    box-shadow: none;
-}
-
-/* Contenedor de botones para el formulario de edición */
-.form-actions {
-    display: flex;
-    justify-content: flex-end; /* Alinea los botones a la derecha */
-    gap: 1rem;
-    margin-top: 1.5rem; /* Espacio encima de los botones de acción */
-}
-
-
-/* Estilo de notificaciones flotantes */
-.notification {
-    position: fixed;
-    bottom: 2rem;
-    right: 2rem;
-    padding: 1rem 1.5rem;
-    border-radius: 8px;
-    box-shadow: var(--shadow-md);
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    font-weight: 500;
-}
-
-.notification.success {
-    background-color: var(--success-color);
-    color: white;
-}
-
-.notification.error {
-    background-color: var(--danger-color);
-    color: white;
-}
-
-.notification-icon {
-    font-size: 1.3rem;
-}
-
-.close-notification {
-    background: none;
-    border: none;
-    color: white;
-    font-size: 1.2rem;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
     cursor: pointer;
-    margin-left: 0.5rem;
-    opacity: 0.8;
 }
 
-.close-notification:hover {
+.profile-image-section:hover .image-upload-overlay {
     opacity: 1;
 }
 
-/* Estilos para los estados de carga y error */
-.loading-state, .error-state, .no-data-state {
+.upload-icon {
+    color: var(--color-background-white);
+    font-size: 3rem;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.upload-icon:hover {
+    transform: scale(1.1);
+}
+
+/* Formulario de perfil */
+.profile-form {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* 2 columnas en pantallas grandes, 1 en pequeñas */
+    gap: var(--spacing-lg);
+}
+
+.form-group {
     display: flex;
     flex-direction: column;
+}
+
+.form-group label {
+    margin-bottom: var(--spacing-xs);
+    font-weight: 600;
+    color: var(--color-text-dark);
+    font-size: 0.95rem;
+}
+
+.form-group p { /* Estilo para el texto cuando no está en modo edición */
+    padding: 0.8rem 1rem;
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--border-radius-sm);
+    background-color: #f8f8f8;
+    color: var(--color-text-medium);
+    font-size: 1rem;
+    min-height: 44px; /* Altura mínima para alinear con inputs */
+    display: flex;
     align-items: center;
-    justify-content: center;
-    min-height: 60vh;
-    text-align: center;
-    background-color: var(--surface-white); /* Fondo de la tarjeta */
-    border-radius: 12px;
-    box-shadow: var(--shadow-md);
-    padding: 2rem;
-    margin: 3rem auto;
-    max-width: 500px;
 }
 
-.loading-spinner .spinner-icon {
-    font-size: 3rem;
-    color: var(--primary-color);
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="date"],
+.form-group select {
+    padding: 0.8rem 1rem;
+    border: 1px solid var(--color-border-medium);
+    border-radius: var(--border-radius-sm);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background-color: #fdfdfd;
+    color: var(--color-text-dark);
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    border-color: var(--color-primary-cyan);
+    box-shadow: 0 0 0 3px rgba(0, 188, 212, 0.25);
+    outline: none;
+}
+
+.form-group .input-error {
+    border-color: var(--color-accent-red);
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.2);
+}
+
+.error-message-inline {
+    color: var(--color-accent-red);
+    font-size: 0.85rem;
+    margin-top: 0.4rem;
+    text-align: left;
+}
+
+/* Estilos para el checkbox */
+.form-group input[type="checkbox"] {
+    width: auto; /* Ancho automático para checkbox */
+    margin-top: 0.5rem;
+    transform: scale(1.2); /* Aumentar tamaño del checkbox */
+    margin-left: 0.2rem;
+}
+
+/* Acciones del formulario */
+.profile-actions {
+    grid-column: 1 / -1; /* Ocupar todo el ancho de la cuadrícula */
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacing-md);
+    padding-top: var(--spacing-lg);
+    border-top: 1px solid var(--color-border-light);
+    margin-top: var(--spacing-lg);
+}
+
+/* Botones (usando clases de AdminStyles.css) */
+.edit-btn, .save-btn, .cancel-btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.edit-btn {
+    background-color: var(--color-primary-cyan);
+    color: var(--color-background-white);
+    box-shadow: 0 3px 6px rgba(0, 188, 212, 0.3);
+}
+
+.edit-btn:hover {
+    background-color: var(--color-dark-cyan);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 10px rgba(0, 188, 212, 0.4);
+}
+
+.save-btn {
+    background: linear-gradient(135deg, var(--color-accent-green) 0%, #218838 100%);
+    color: var(--color-background-white);
+    box-shadow: 0 4px 10px rgba(40, 167, 69, 0.4);
+}
+
+.save-btn:hover {
+    background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(40, 167, 69, 0.5);
+}
+
+.cancel-btn {
+    background-color: var(--color-text-light);
+    color: var(--color-background-white);
+    box-shadow: 0 3px 6px rgba(108, 117, 125, 0.3);
+}
+
+.cancel-btn:hover {
+    background-color: #5a6268;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 10px rgba(108, 117, 125, 0.4);
+}
+
+.edit-btn:disabled, .save-btn:disabled, .cancel-btn:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+.spinner-icon {
     animation: spin 1s linear infinite;
-    margin-bottom: 1rem;
 }
 
-.loading-spinner p, .error-message, .info-message p {
-    font-size: 1.2rem;
-    color: var(--text-dark);
-}
-
-.error-message .info-icon, .no-data-state .info-icon {
-    font-size: 2rem;
-    color: var(--danger-color);
-    margin-bottom: 1rem;
-}
-
-/* Animación de spinner */
-@keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-}
-
-/* Ajustes responsivos */
-@media (max-width: 768px) {
-    .admin-profile-container {
-        padding: 1rem;
-        margin: 1.5rem auto;
-        border-radius: 8px; /* Menos redondeado en pantallas pequeñas */
-    }
-
+/* Responsive Adjustments */
+@media (min-width: 768px) {
     .profile-card {
-        border-radius: 8px;
+        flex-direction: row; /* Lado a lado en pantallas más grandes */
+        align-items: flex-start; /* Alinear arriba */
     }
 
-    .profile-section, .password-section {
-        padding: 1.5rem; /* Relleno reducido */
+    .profile-image-section {
+        flex-shrink: 0; /* No permitir que se encoja */
+        margin-right: var(--spacing-xl); /* Espacio a la derecha del formulario */
     }
 
-    .section-header {
-        flex-direction: column; /* Apila título y botón en columna */
-        align-items: flex-start;
-        gap: 0.8rem;
-    }
-
-    .section-header h3 {
-        font-size: 1.3rem;
-    }
-
-    .form-grid {
-        grid-template-columns: 1fr; /* Una sola columna en pantallas pequeñas */
-        gap: 1rem;
-    }
-
-    .notification {
-        width: calc(100% - 2rem); /* Ocupa casi todo el ancho */
-        right: 1rem;
-        bottom: 1rem;
-        padding: 0.8rem 1rem;
-        font-size: 0.9rem;
-    }
-
-    .notification-icon {
-        font-size: 1.1rem;
-    }
-
-    .close-notification {
-        font-size: 1rem;
+    .profile-form {
+        flex-grow: 1; /* Ocupar el espacio restante */
     }
 }
 
-@media (max-width: 480px) {
-    .admin-profile-container {
-        padding: 0.5rem;
-        margin: 1rem auto;
+@media (max-width: 767px) {
+    .profile-card {
+        padding: var(--spacing-md);
     }
 
-    .admin-content-header h2 {
-        font-size: 1.8rem;
-        gap: 0.6rem;
+    .profile-image-section {
+        width: 150px;
+        height: 150px;
+        border-width: 4px;
+        margin-bottom: var(--spacing-lg); /* Espacio debajo de la imagen en móvil */
     }
-    .admin-content-header .header-icon {
-        font-size: 1.5rem;
+
+    .upload-icon {
+        font-size: 2.5rem;
     }
-    .profile-section, .password-section {
-        padding: 1rem;
+
+    .profile-form {
+        grid-template-columns: 1fr; /* Una columna en móvil */
+        gap: var(--spacing-md);
     }
-    .info-item {
-        flex-direction: column; /* Apila icono y texto en columna */
-        align-items: flex-start;
-        gap: 0.5rem;
-    }
-    .info-icon {
-        font-size: 1.3rem;
-    }
-    .info-label {
-        font-size: 0.85rem;
-    }
-    .info-value {
-        font-size: 1rem;
-    }
-    .edit-btn, .toggle-btn, .cancel-btn, .save-btn {
-        width: 100%; /* Botones a ancho completo en pantallas muy pequeñas */
+
+    .form-group p,
+    .form-group input[type="text"],
+    .form-group input[type="email"],
+    .form-group input[type="date"],
+    .form-group select {
+        padding: 0.7rem 0.8rem;
         font-size: 0.9rem;
-        padding: 0.6rem 1rem;
     }
-    .form-actions {
+
+    .profile-actions {
         flex-direction: column;
-        gap: 0.8rem;
+        gap: var(--spacing-sm);
     }
-    .loading-state, .error-state, .no-data-state {
-        padding: 1rem;
-        margin: 1rem auto;
-        max-width: 95%;
+
+    .edit-btn, .save-btn, .cancel-btn {
+        width: 100%;
+        justify-content: center;
+        font-size: 0.95rem;
+        padding: 0.7rem 1rem;
     }
 }
 
+/* Media query para pantallas muy pequeñas (ej. iPhone SE) */
+@media (max-width: 400px) {
+    .profile-image-section {
+        width: 120px;
+        height: 120px;
+        border-width: 3px;
+    }
+
+    .upload-icon {
+        font-size: 2rem;
+    }
+
+    .sidebar-header h3 {
+        font-size: 1.2rem;
+    }
+}

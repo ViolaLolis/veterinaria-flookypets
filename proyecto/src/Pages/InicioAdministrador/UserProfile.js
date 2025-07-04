@@ -241,9 +241,10 @@ function UserProfile({ user, setUser }) {
             <div className="profile-card">
                 <div className="profile-image-section">
                     <img
-                        src={selectedImage ? URL.createObjectURL(selectedImage) : (userData.imagen_url || 'https://placehold.co/150x150/aabbcc/ffffff?text=No+Image')}
+                        src={selectedImage ? URL.createObjectURL(selectedImage) : (userData.imagen_url || 'https://placehold.co/180x180/00BCD4/ffffff?text=No+Image')}
                         alt="Foto de Perfil"
                         className="profile-image"
+                        onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/180x180/00BCD4/ffffff?text=No+Image'; }}
                     />
                     {isEditing && (
                         <div className="image-upload-overlay">
@@ -267,7 +268,7 @@ function UserProfile({ user, setUser }) {
                     <div className="form-group">
                         <label>Nombre:</label>
                         {isEditing ? (
-                            <input type="text" name="nombre" value={formData.nombre || ''} onChange={handleFormChange} disabled={isSubmitting} />
+                            <input type="text" name="nombre" value={formData.nombre || ''} onChange={handleFormChange} disabled={isSubmitting} className={formErrors.nombre ? 'input-error' : ''} />
                         ) : (
                             <p>{userData.nombre}</p>
                         )}
@@ -276,7 +277,7 @@ function UserProfile({ user, setUser }) {
                     <div className="form-group">
                         <label>Apellido:</label>
                         {isEditing ? (
-                            <input type="text" name="apellido" value={formData.apellido || ''} onChange={handleFormChange} disabled={isSubmitting} />
+                            <input type="text" name="apellido" value={formData.apellido || ''} onChange={handleFormChange} disabled={isSubmitting} className={formErrors.apellido ? 'input-error' : ''} />
                         ) : (
                             <p>{userData.apellido}</p>
                         )}
@@ -285,7 +286,7 @@ function UserProfile({ user, setUser }) {
                     <div className="form-group">
                         <label>Email:</label>
                         {isEditing ? (
-                            <input type="email" name="email" value={formData.email || ''} onChange={handleFormChange} disabled={isSubmitting} />
+                            <input type="email" name="email" value={formData.email || ''} onChange={handleFormChange} disabled={isSubmitting} className={formErrors.email ? 'input-error' : ''} />
                         ) : (
                             <p>{userData.email}</p>
                         )}
@@ -294,7 +295,7 @@ function UserProfile({ user, setUser }) {
                     <div className="form-group">
                         <label>Teléfono:</label>
                         {isEditing ? (
-                            <input type="text" name="telefono" value={formData.telefono || ''} onChange={handleFormChange} disabled={isSubmitting} />
+                            <input type="text" name="telefono" value={formData.telefono || ''} onChange={handleFormChange} disabled={isSubmitting} className={formErrors.telefono ? 'input-error' : ''} />
                         ) : (
                             <p>{userData.telefono}</p>
                         )}
@@ -303,7 +304,7 @@ function UserProfile({ user, setUser }) {
                     <div className="form-group">
                         <label>Dirección:</label>
                         {isEditing ? (
-                            <input type="text" name="direccion" value={formData.direccion || ''} onChange={handleFormChange} disabled={isSubmitting} />
+                            <input type="text" name="direccion" value={formData.direccion || ''} onChange={handleFormChange} disabled={isSubmitting} className={formErrors.direccion ? 'input-error' : ''} />
                         ) : (
                             <p>{userData.direccion || 'N/A'}</p>
                         )}
@@ -312,7 +313,7 @@ function UserProfile({ user, setUser }) {
                     <div className="form-group">
                         <label>Tipo de Documento:</label>
                         {isEditing ? (
-                            <select name="tipo_documento" value={formData.tipo_documento || ''} onChange={handleFormChange} disabled={isSubmitting}>
+                            <select name="tipo_documento" value={formData.tipo_documento || ''} onChange={handleFormChange} disabled={isSubmitting} className={formErrors.tipo_documento ? 'input-error' : ''}>
                                 <option value="">Seleccione</option>
                                 <option value="CC">Cédula de Ciudadanía</option>
                                 <option value="CE">Cédula de Extranjería</option>
@@ -328,7 +329,7 @@ function UserProfile({ user, setUser }) {
                     <div className="form-group">
                         <label>Número de Documento:</label>
                         {isEditing ? (
-                            <input type="text" name="numero_documento" value={formData.numero_documento || ''} onChange={handleFormChange} disabled={isSubmitting} />
+                            <input type="text" name="numero_documento" value={formData.numero_documento || ''} onChange={handleFormChange} disabled={isSubmitting} className={formErrors.numero_documento ? 'input-error' : ''} />
                         ) : (
                             <p>{userData.numero_documento || 'N/A'}</p>
                         )}
@@ -337,7 +338,7 @@ function UserProfile({ user, setUser }) {
                     <div className="form-group">
                         <label>Fecha de Nacimiento:</label>
                         {isEditing ? (
-                            <input type="date" name="fecha_nacimiento" value={formData.fecha_nacimiento || ''} onChange={handleFormChange} disabled={isSubmitting} />
+                            <input type="date" name="fecha_nacimiento" value={formData.fecha_nacimiento || ''} onChange={handleFormChange} disabled={isSubmitting} className={formErrors.fecha_nacimiento ? 'input-error' : ''} />
                         ) : (
                             <p>{userData.fecha_nacimiento || 'N/A'}</p>
                         )}
@@ -360,16 +361,7 @@ function UserProfile({ user, setUser }) {
                         <p>{new Date(userData.created_at).toLocaleString()}</p>
                     </div>
 
-                    {isEditing && (
-                        <div className="form-actions">
-                            <button type="submit" className="submit-btn" disabled={isSubmitting}>
-                                {isSubmitting ? <FaSpinner className="spinner-icon" /> : 'Guardar Cambios'}
-                            </button>
-                            <button type="button" className="cancel-btn" onClick={() => { setIsEditing(false); setFormErrors({}); setSelectedImage(null); fetchUserData(); }} disabled={isSubmitting}>
-                                Cancelar
-                            </button>
-                        </div>
-                    )}
+                    {/* Los botones de guardar/cancelar se manejan en el header-actions */}
                 </form>
             </div>
         </div>

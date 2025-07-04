@@ -2,9 +2,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { FaUser, FaPlus, FaSearch, FaTimes, FaSave, FaSpinner, FaEdit, FaTrash, FaInfoCircle, FaPaw } from 'react-icons/fa';
 import { validateField } from '../../utils/validation'; // Importar la función de validación
+import Modal from '../../Components/Modal';
+import Notification from '../../Components/Notification';
 import './Styles/AdminStyles.css'; // Asegúrate de que los estilos sean adecuados
-import Modal from '../../Components/Modal'; // Asumo que tienes un componente Modal
-import Notification from '../../Components/Notification'; // Asumo que tienes un componente Notification
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
@@ -113,7 +113,13 @@ const AdminUserManagement = () => {
     // Manejar cambios en el formulario
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
-        const newValue = type === 'checkbox' ? checked : value;
+        let newValue = type === 'checkbox' ? checked : value;
+
+        // Convertir a mayúsculas para campos específicos
+        if (['nombre', 'apellido', 'email', 'direccion', 'tipo_documento', 'numero_documento'].includes(name)) {
+            newValue = typeof newValue === 'string' ? newValue.toUpperCase() : newValue;
+        }
+        
         setFormData(prev => ({ ...prev, [name]: newValue }));
 
         // Validar campo en tiempo real
@@ -162,7 +168,7 @@ const AdminUserManagement = () => {
             confirmPassword: '',
             tipo_documento: user.tipo_documento || '',
             numero_documento: user.numero_documento || '',
-            fecha_nacimiento: user.fecha_nacimiento ? user.fecha_nacimiento.split('T')[0] : '', // Formato YYYY-MM-DD
+            fecha_nacimiento: user.fecha_nacimiento ? user.fecha_nacimiento.split('T')[0] : '', // FormatoYYYY-MM-DD
             active: user.active === 1,
             imagen_url: user.imagen_url || ''
         });
@@ -222,6 +228,7 @@ const AdminUserManagement = () => {
                 updateData.universidad = null;
                 updateData.horario = null;
 
+                console.log("Sending update data to backend:", updateData); // Debugging log
                 response = await authFetch(`${API_BASE_URL}/usuarios/${currentUser.id}`, {
                     method: 'PUT',
                     body: JSON.stringify(updateData),
@@ -235,6 +242,7 @@ const AdminUserManagement = () => {
                 createData.universidad = null;
                 createData.horario = null;
 
+                console.log("Sending create data to backend:", createData); // Debugging log
                 response = await authFetch(`${API_BASE_URL}/register`, { // Usar la ruta de registro general
                     method: 'POST',
                     body: JSON.stringify(createData),
@@ -242,6 +250,7 @@ const AdminUserManagement = () => {
             }
 
             const data = await response.json();
+            console.log("Backend response:", data); // Debugging log
 
             if (data.success) {
                 setNotification({ message: data.message, type: 'success' });
@@ -330,7 +339,7 @@ const AdminUserManagement = () => {
                 <div className="table-responsive">
                     <table className="admin-table">
                         <thead>
-                            <tr>
+                            <tr> {/* No whitespace here */}
                                 <th>ID</th>
                                 <th>Nombre Completo</th>
                                 <th>Email</th>
@@ -338,11 +347,11 @@ const AdminUserManagement = () => {
                                 <th>Mascotas</th>
                                 <th>Estado</th>
                                 <th>Acciones</th>
-                            </tr>
+                            </tr> {/* No whitespace here */}
                         </thead>
                         <tbody>
                             {filteredUsers.map((user) => (
-                                <tr key={user.id}>
+                                <tr key={user.id}> {/* No whitespace here */}
                                     <td>{user.id}</td>
                                     <td>{user.nombre} {user.apellido}</td>
                                     <td>{user.email}</td>
@@ -375,7 +384,7 @@ const AdminUserManagement = () => {
                                             <FaTrash /> Eliminar
                                         </button>
                                     </td>
-                                </tr>
+                                </tr> /* No whitespace here */
                             ))}
                         </tbody>
                     </table>
@@ -482,10 +491,10 @@ const AdminUserManagement = () => {
                                 disabled={isSubmitting}
                             >
                                 <option value="">Seleccionar</option>
-                                <option value="CC">Cédula de Ciudadanía</option>
-                                <option value="CE">Cédula de Extranjería</option>
-                                <option value="TI">Tarjeta de Identidad</option>
-                                <option value="PASAPORTE">Pasaporte</option>
+                                <option value="CC">CÉDULA DE CIUDADANÍA</option>
+                                <option value="CE">CÉDULA DE EXTRANJERÍA</option>
+                                <option value="TI">TARJETA DE IDENTIDAD</option>
+                                <option value="PASAPORTE">PASAPORTE</option>
                                 <option value="NIT">NIT</option>
                             </select>
                             {formErrors.tipo_documento && <span className="error-text">{formErrors.tipo_documento}</span>}

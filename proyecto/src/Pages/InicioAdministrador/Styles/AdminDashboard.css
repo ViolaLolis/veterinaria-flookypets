@@ -1,155 +1,473 @@
-/* AdminDashboard.css - Diseño Premium con #00acc1 y #ecf0f1 */
+/* src/Pages/InicioAdministrador/Styles/AdminDashboard.css */
 
+/* --- Variables CSS para una gestión de colores y espaciado más fácil --- */
 :root {
-    --primary: #00acc1;
-    --primary-light: rgba(0, 172, 193, 0.1);
-    --primary-dark: #008c9e;
-    --primary-glow: rgba(0, 172, 193, 0.3);
-    --secondary: #ecf0f1;
-    --secondary-dark: #dfe6e9;
-    --text-dark: #2c3e50;
-    --text-light: #7f8c8d;
-    --white: #ffffff;
-    --danger: #ff6b6b;
-    --success: #1dd1a1;
-    --warning: #ff9f43;
-    --shadow: 0 4px 25px rgba(0, 0, 0, 0.08);
-    --transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-  }
-  
-  /* Estructura principal con efecto de profundidad */
-  .admin-dashboard {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    background-color: var(--secondary);
-    font-family: 'Poppins', 'Segoe UI', sans-serif;
-    color: var(--text-dark);
-    overflow-x: hidden;
-  }
-  
-  /* Contenedor principal flexible */
-  .admin-container {
-    display: flex;
-    flex: 1;
-    position: relative;
-    transition: var(--transition);
-  }
-  
-  /* Contenido principal con efecto de elevación */
-  .admin-content {
-    flex: 1;
-    padding: 2.5rem;
-    background-color: var(--secondary);
-    margin-left: 280px;
-    transition: var(--transition);
-    min-height: calc(100vh - 80px);
-  }
-  
-  .admin-content::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 280px;
-    width: calc(100% - 280px);
-    height: 100%;
-    background: radial-gradient(circle at 80% 20%, rgba(0, 172, 193, 0.05) 0%, transparent 40%);
-    pointer-events: none;
-  }
-  
-  /* Animaciones personalizadas */
-  @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-8px); }
-  }
-  
-  @keyframes pulse {
-    0% { box-shadow: 0 0 0 0 var(--primary-glow); }
-    70% { box-shadow: 0 0 0 15px transparent; }
-    100% { box-shadow: 0 0 0 0 transparent; }
-  }
-  
-  @keyframes slideIn {
-    from { transform: translateX(-20px); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
-  }
-  
-  /* Pantalla de carga */
-  .admin-loading {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    background-color: var(--secondary);
-  }
-  
-  .loading-spinner {
-    width: 70px;
-    height: 70px;
-    border: 5px solid var(--secondary-dark);
-    border-top: 5px solid var(--primary);
-    border-radius: 50%;
-    animation: spin 1.5s linear infinite, pulse 2s infinite;
-    margin-bottom: 2rem;
-  }
-  
-  .admin-loading p {
-    font-size: 1.2rem;
-    color: var(--text-dark);
-    margin-top: 1.5rem;
-    animation: slideIn 0.6s ease-out;
-  }
-  
-  @keyframes spin {
+    --color-primary-cyan: #00BCD4; /* Nuevo azul cian vibrante */
+    --color-dark-cyan: #0097A7;   /* Nuevo azul oscuro */
+    --color-light-cyan: #E0F7FA;  /* Nuevo azul claro */
+    --color-accent-green: #28a745;
+    --color-accent-red: #dc3545;
+    --color-text-dark: #333;
+    --color-text-medium: #555;
+    --color-text-light: #6c757d;
+    --color-background-light: #f0f2f5;
+    --color-background-white: #ffffff;
+    --color-border-light: #e0e0e0;
+    --color-border-medium: #ccc;
+
+    --spacing-xs: 0.5rem;
+    --spacing-sm: 0.8rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+    --spacing-xxl: 3rem;
+
+    --border-radius-sm: 8px;
+    --border-radius-md: 12px;
+    --border-radius-lg: 16px;
+
+    --shadow-sm: 0 2px 5px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 15px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.15);
+
+    --navbar-height: 60px; /* Altura de la barra de navegación superior */
+    --sidebar-width: 250px;
+    --sidebar-width-mobile: 280px; /* Ancho de la barra lateral en móvil */
+}
+
+/* --- Global Animations (repetidas para auto-contención) --- */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
-  }
-  
-  /* Efectos hover para el contenido */
-  .admin-content > * {
-    transition: var(--transition);
-    animation: slideIn 0.4s ease-out;
-  }
-  
-  .admin-content > *:hover {
-    transform: translateY(-3px);
-  }
-  
-  /* Responsive Design */
-  @media (max-width: 1200px) {
-    .admin-sidebar {
-      transform: translateX(-100%);
-      width: 300px;
+}
+
+@keyframes bounceIn {
+    0% { transform: scale(0.3); opacity: 0; }
+    50% { transform: scale(1.05); opacity: 1; }
+    70% { transform: scale(0.9); }
+    100% { transform: scale(1); }
+}
+
+/* --- General Layout del Dashboard --- */
+.admin-dashboard-container {
+    display: flex;
+    min-height: 100vh;
+    background-color: var(--color-background-light);
+    color: var(--color-text-dark);
+}
+
+/* --- Sidebar (Barra Lateral) --- */
+.admin-dashboard-container > .admin-sidebar {
+    width: var(--sidebar-width);
+    background-color: var(--color-background-white);
+    box-shadow: var(--shadow-md);
+    border-right: 1px solid var(--color-border-light);
+    height: 100vh; /* Ocupa toda la altura del viewport */
+    position: sticky;
+    top: 0; /* Se pega al borde superior */
+    overflow-y: auto; /* Re-habilitado para permitir el desplazamiento si el contenido es largo */
+    transition: transform 0.3s ease-in-out, width 0.3s ease-in-out;
+    flex-shrink: 0; /* Evita que la barra lateral se encoja */
+    padding: var(--spacing-xl) var(--spacing-md);
+    z-index: 400; /* Asegura que esté debajo de la navbar principal pero sobre el contenido */
+}
+
+.admin-dashboard-container > .admin-sidebar.open {
+    transform: translateX(0); /* Para móvil, se desliza hacia adentro */
+}
+
+.sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+    border-bottom: 1px solid var(--color-border-light);
+}
+
+.sidebar-header h3 {
+    font-size: 1.6rem;
+    color: var(--color-dark-cyan);
+    margin: 0;
+    font-weight: 700;
+    white-space: nowrap; /* Evita que el texto se envuelva */
+    overflow: hidden; /* Oculta el texto si se desborda */
+    text-overflow: ellipsis; /* Añade puntos suspensivos si el texto se desborda */
+}
+
+.close-sidebar-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--color-text-light);
+    cursor: pointer;
+    transition: color 0.3s ease, transform 0.2s ease;
+    display: none; /* Oculto por defecto, se muestra en móvil */
+}
+
+.close-sidebar-btn:hover {
+    color: var(--color-accent-red);
+    transform: rotate(90deg);
+}
+
+.sidebar-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-nav ul li {
+    margin-bottom: var(--spacing-xs);
+}
+
+.sidebar-nav ul li a {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md) var(--spacing-sm);
+    text-decoration: none;
+    color: var(--color-text-dark);
+    font-size: 1rem; /* Tamaño de fuente base */
+    font-weight: 500;
+    border-radius: var(--border-radius-sm);
+    transition: all 0.3s ease;
+    white-space: nowrap; /* Evita que el texto se envuelva */
+    overflow: hidden; /* Oculta el texto si se desborda */
+    text-overflow: ellipsis; /* Añade puntos suspensivos si el texto se desborda */
+}
+
+.sidebar-nav ul li a:hover {
+    background-color: var(--color-light-cyan);
+    color: var(--color-primary-cyan);
+    transform: translateX(5px);
+}
+
+.sidebar-nav ul li a.active {
+    background-color: var(--color-primary-cyan);
+    color: var(--color-background-white);
+    font-weight: 600;
+    box-shadow: 0 3px 8px rgba(0, 188, 212, 0.3); /* Sombra con el nuevo cian */
+}
+
+.sidebar-nav .nav-icon {
+    font-size: 1.2rem;
+    color: var(--color-text-medium);
+    transition: color 0.3s ease;
+}
+
+.sidebar-nav ul li a.active .nav-icon {
+    color: var(--color-background-white);
+}
+
+.sidebar-footer {
+    padding-top: var(--spacing-lg);
+    border-top: 1px solid var(--color-border-light);
+    margin-top: var(--spacing-xl);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.sidebar-footer a,
+.sidebar-footer .logout-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md) var(--spacing-sm);
+    text-decoration: none;
+    color: var(--color-text-dark);
+    font-size: 1rem; /* Tamaño de fuente base */
+    font-weight: 500;
+    border-radius: var(--border-radius-sm);
+    transition: all 0.3s ease;
+    background: none;
+    border: none;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sidebar-footer a:hover,
+.sidebar-footer .logout-btn:hover {
+    background-color: var(--color-light-cyan);
+    color: var(--color-primary-cyan);
+    transform: translateX(5px);
+}
+
+.sidebar-footer .logout-btn {
+    color: var(--color-accent-red);
+    font-weight: 600;
+}
+
+.sidebar-footer .logout-btn:hover {
+    background-color: rgba(220, 53, 69, 0.1);
+    color: #a71d2a;
+}
+
+/* --- Main Content Area --- */
+.admin-main-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.admin-header {
+    background-color: var(--color-background-white);
+    padding: var(--spacing-md) var(--spacing-xl);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--color-border-light);
+    height: var(--navbar-height); /* Coincide con la altura de la navbar */
+    flex-shrink: 0;
+    z-index: 450; /* Asegura que esté sobre el contenido, debajo de la navbar principal */
+}
+
+.admin-header h1 {
+    font-size: 1.8rem;
+    color: var(--color-dark-cyan);
+    margin: 0;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.menu-toggle-btn {
+    background: none;
+    border: none;
+    font-size: 1.8rem;
+    color: var(--color-primary-cyan);
+    cursor: pointer;
+    display: none; /* Oculto por defecto, se muestra en móvil */
+    margin-right: var(--spacing-md);
+    transition: transform 0.3s ease;
+}
+
+.menu-toggle-btn:hover {
+    transform: scale(1.1);
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-lg);
+}
+
+.header-right .user-info {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    color: var(--color-text-dark);
+    font-weight: 600;
+    font-size: 1rem;
+    white-space: nowrap;
+}
+
+.header-right .user-avatar-icon {
+    font-size: 2rem;
+    color: var(--color-primary-cyan);
+}
+
+.notification-bell-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--color-text-medium);
+    cursor: pointer;
+    position: relative;
+    transition: color 0.3s ease, transform 0.2s ease;
+}
+
+.notification-bell-btn:hover {
+    color: var(--color-primary-cyan);
+    transform: scale(1.1);
+}
+
+.notification-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: var(--color-accent-red);
+    color: var(--color-background-white);
+    font-size: 0.75rem;
+    font-weight: 700;
+    border-radius: 50%;
+    padding: 0.2em 0.5em;
+    min-width: 20px;
+    text-align: center;
+    line-height: 1;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    animation: bounceIn 0.6s ease-out;
+}
+
+.admin-content-area {
+    padding: var(--spacing-xl); /* Espaciado para el contenido real renderizado por Outlet */
+    flex-grow: 1;
+    overflow-y: auto; /* Mantener overflow-y auto aquí para el contenido principal si es necesario */
+}
+
+/* --- Responsive Adjustments --- */
+
+/* Mobile (hasta 767px) */
+@media (max-width: 767px) {
+    .admin-dashboard-container {
+        flex-direction: column; /* Apila la barra lateral y el contenido principal */
     }
-    
-    .admin-sidebar.active {
-      transform: translateX(0);
+
+    /* Barra lateral fija para móvil */
+    .admin-dashboard-container > .admin-sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        width: var(--sidebar-width-mobile);
+        transform: translateX(-100%); /* Oculta fuera de la pantalla por defecto */
+        z-index: 1001; /* Alto z-index para superponer el contenido */
+        box-shadow: var(--shadow-lg); /* Sombra más fuerte cuando está abierta */
+        padding-top: var(--navbar-height); /* Espacio para el encabezado fijo */
+        border-right: none; /* Sin borde a la derecha cuando está fija */
+        /* Re-habilitar overflow-y para el sidebar en móvil si el contenido es largo */
+        overflow-y: auto;
     }
-    
-    .admin-content {
-      margin-left: 0;
+
+    .admin-dashboard-container > .admin-sidebar.open {
+        transform: translateX(0); /* Se desliza hacia adentro */
     }
-    
-    .admin-content::before {
-      left: 0;
-      width: 100%;
+
+    .sidebar-header {
+        display: flex; /* Asegura que el encabezado sea visible en la barra lateral móvil */
     }
-  }
-  
-  @media (max-width: 768px) {
-    .admin-content {
-      padding: 1.8rem;
+
+    .sidebar-header h3 {
+        font-size: 1.4rem; /* Reducir tamaño de fuente para el título del sidebar en móvil */
     }
-  }
-  
-  @media (max-width: 576px) {
-    .admin-content {
-      padding: 1.5rem;
+
+    .close-sidebar-btn {
+        display: block; /* Muestra el botón de cerrar en la barra lateral móvil */
     }
-    
-    .loading-spinner {
-      width: 50px;
-      height: 50px;
+
+    .menu-toggle-btn {
+        display: block; /* Muestra el botón de menú hamburguesa en el encabezado principal */
     }
-  }
+
+    .admin-header {
+        padding: var(--spacing-md) var(--spacing-lg);
+        justify-content: flex-start; /* Alinea los elementos al inicio */
+        gap: var(--spacing-md);
+        position: sticky; /* Mantiene el encabezado fijo en móvil */
+        top: 0;
+        z-index: 501; /* Sobre el contenido principal, debajo de la barra lateral fija */
+    }
+
+    .admin-header h1 {
+        font-size: 1.5rem;
+        flex-grow: 1; /* Permite que el título ocupe el espacio disponible */
+    }
+
+    .header-right .user-info span {
+        display: none; /* Oculta el nombre de usuario en el encabezado pequeño */
+    }
+
+    .admin-content-area {
+        padding: var(--spacing-lg);
+    }
+
+    /* Ajuste de tamaño de fuente para elementos de navegación en sidebar móvil */
+    .sidebar-nav ul li a,
+    .sidebar-footer a,
+    .sidebar-footer .logout-btn {
+        font-size: 0.9rem; /* Tamaño de fuente más pequeño para elementos de menú en móvil */
+        padding: var(--spacing-sm) var(--spacing-xs); /* Reducir padding */
+    }
+
+    .sidebar-nav .nav-icon {
+        font-size: 1.1rem; /* Iconos ligeramente más pequeños en móvil */
+    }
+}
+
+/* Tablets (768px a 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .admin-dashboard-container > .admin-sidebar {
+        width: 220px; /* Barra lateral ligeramente más estrecha para tablets */
+        padding: var(--spacing-lg) var(--spacing-sm);
+        /* Re-habilitar overflow-y para el sidebar en tablet si el contenido es largo */
+        overflow-y: auto;
+    }
+
+    .sidebar-header h3 {
+        font-size: 1.4rem;
+    }
+
+    .sidebar-nav ul li a {
+        font-size: 0.95rem;
+    }
+
+    .sidebar-nav .nav-icon {
+        font-size: 1.1rem;
+    }
+
+    .admin-header h1 {
+        font-size: 1.6rem;
+    }
+
+    .admin-content-area {
+        padding: var(--spacing-xl);
+    }
+}
+
+/* Pantallas grandes (1440px y más, para monitores de 27 pulgadas y televisores) */
+@media (min-width: 1440px) {
+    .admin-dashboard-container > .admin-sidebar {
+        width: 300px; /* Barra lateral más ancha para pantallas grandes */
+        padding: var(--spacing-xl) var(--spacing-lg);
+        overflow-y: auto; /* Mantener overflow-y auto para el sidebar en pantallas grandes */
+    }
+
+    .sidebar-header h3 {
+        font-size: 2rem;
+    }
+
+    .sidebar-nav ul li a {
+        font-size: 1.1rem;
+        padding: var(--spacing-lg) var(--spacing-md);
+    }
+
+    .sidebar-nav .nav-icon {
+        font-size: 1.4rem;
+    }
+
+    .admin-header {
+        padding: var(--spacing-lg) var(--spacing-xxl);
+    }
+
+    .admin-header h1 {
+        font-size: 2.2rem;
+    }
+
+    .header-right .user-avatar-icon {
+        font-size: 2.5rem;
+    }
+
+    .notification-bell-btn {
+        font-size: 1.8rem;
+    }
+
+    .admin-content-area {
+        padding: var(--spacing-xxl);
+    }
+}
