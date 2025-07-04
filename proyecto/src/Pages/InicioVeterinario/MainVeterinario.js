@@ -1,5 +1,4 @@
-// src/Pages/InicioVeterinario/MainVeterinario.js
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import styles from './Style/MainVeterinarioStyles.module.css';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -7,7 +6,7 @@ import {
   faPaw, faUser,
   faCalendarAlt, faNotesMedical, faCheckCircle,
   faPlus, faHome,
-  faSignOutAlt, faTimesCircle // Agregado faTimesCircle para notificaciones de error
+  faSignOutAlt, faTimesCircle, faBell, faExclamationTriangle // Agregado faBell y faExclamationTriangle
 } from '@fortawesome/free-solid-svg-icons';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 
@@ -37,16 +36,21 @@ const itemVariants = {
   }
 };
 
-const MainVeterinario = ({ user, setUser }) => { // Recibe user y setUser como props
+const MainVeterinario = ({ user, setUser }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [notification, setNotification] = useState(null); // Estado para la notificación
+  const [notification, setNotification] = useState(null); // Estado para la notificación simple
   const [notificationTimeout, setNotificationTimeout] = useState(null); // Para limpiar el timeout
 
-  // Función para mostrar notificaciones
+  // --- NUEVOS ESTADOS PARA NOTIFICACIONES DEL VETERINARIO ---
+  const [vetNotifications, setVetNotifications] = useState([]);
+  const [showVetNotificationsMenu, setShowVetNotificationsMenu] = useState(false);
+  const vetNotificationsRef = useRef(null);
+  // --- FIN NUEVOS ESTADOS ---
+
+  // Función para mostrar notificaciones simples (las que aparecen y desaparecen)
   const showNotification = useCallback((message, type = 'info', duration = 3000) => {
-    // Limpiar cualquier timeout existente para que la nueva notificación se muestre inmediatamente
     if (notificationTimeout) {
       clearTimeout(notificationTimeout);
     }
@@ -68,12 +72,99 @@ const MainVeterinario = ({ user, setUser }) => { // Recibe user y setUser como p
     };
   }, [notificationTimeout]);
 
-  // Add this console.log for debugging context
-  useEffect(() => {
-    console.log("MainVeterinario rendering. User:", user);
-    console.log("Context passed to Outlet:", { user, showNotification });
-  }, [user, showNotification]);
+  // --- NUEVA FUNCIÓN PARA OBTENER NOTIFICACIONES DEL VETERINARIO (MOCK) ---
+  const fetchVetNotifications = useCallback(async (currentVetId) => {
+    // Simulamos datos de notificaciones para un veterinario específico
+    const mockVetNotificationsData = [
+      {
+        id_notificacion: 101,
+        id_veterinario: 1, // ID del veterinario para el ejemplo
+        tipo: 'cita_pendiente_atender',
+        mensaje: 'Tienes una cita pendiente para atender a Max de Juan Pérez hoy a las 11:00 AM.',
+        leida: false,
+        fecha_creacion: '2025-07-03T09:30:00Z',
+        referencia_id: 'cita_XYZ123',
+      },
+      {
+        id_notificacion: 102,
+        id_veterinario: 1,
+        tipo: 'solicitud_cita',
+        mensaje: 'Nueva solicitud de cita de Ana López para Rocky el viernes, 5 de julio a las 03:00 PM. Por favor, confirma.',
+        leida: false,
+        fecha_creacion: '2025-07-02T16:00:00Z',
+        referencia_id: 'cita_ABC456',
+      },
+      {
+        id_notificacion: 103,
+        id_veterinario: 1,
+        tipo: 'recordatorio_medicamento',
+        mensaje: 'Recordatorio: Administrar medicamento a Pipo de Luis García a las 05:00 PM.',
+        leida: true,
+        fecha_creacion: '2025-07-01T10:00:00Z',
+        referencia_id: 'mascota_Pipo',
+      },
+      {
+        id_notificacion: 104,
+        id_veterinario: 1,
+        tipo: 'cita_cancelada',
+        mensaje: 'La cita de María Fernández para su gato Félix el 04/07 ha sido cancelada.',
+        leida: false,
+        fecha_creacion: '2025-07-03T08:00:00Z',
+        referencia_id: 'cita_DEF789',
+      },
+      {
+        id_notificacion: 105,
+        id_veterinario: 2, // Otra notificación para otro veterinario (no se mostrará para el veterinario 1)
+        tipo: 'cita_pendiente_atender',
+        mensaje: 'Tienes una cita pendiente para atender a Buddy de Sofia Castro.',
+        leida: false,
+        fecha_creacion: '2025-07-03T10:00:00Z',
+        referencia_id: 'cita_GHI012',
+      },
+    ];
 
+    // Filtra las notificaciones para el veterinario actual
+    const currentVetNotifications = mockVetNotificationsData.filter(
+      (n) => n.id_veterinario === currentVetId
+    );
+    setVetNotifications(currentVetNotifications);
+  }, []);
+
+  useEffect(() => {
+    // Si el usuario (veterinario) tiene un ID, obtenemos sus notificaciones
+    if (user?.id) {
+      fetchVetNotifications(user.id);
+      // Opcional: Refrescar notificaciones cada cierto tiempo
+      const notificationInterval = setInterval(() => {
+        fetchVetNotifications(user.id);
+      }, 60000); // Cada minuto
+      return () => clearInterval(notificationInterval);
+    }
+  }, [fetchVetNotifications, user]);
+
+  const markVetNotificationAsRead = useCallback((id_notificacion) => {
+    setVetNotifications((prevNotifications) =>
+      prevNotifications.map((n) =>
+        n.id_notificacion === id_notificacion ? { ...n, leida: true } : n
+      )
+    );
+  }, []);
+
+  const unreadVetNotificationsCount = vetNotifications.filter(n => !n.leida).length;
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (vetNotificationsRef.current && !vetNotificationsRef.current.contains(event.target)) {
+        setShowVetNotificationsMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+  // --- FIN NUEVAS FUNCIONES Y EFECTOS PARA NOTIFICACIONES ---
 
   const navigateTo = useCallback((path) => {
     navigate(`/veterinario/${path}`);
@@ -82,7 +173,8 @@ const MainVeterinario = ({ user, setUser }) => { // Recibe user y setUser como p
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    setUser(null); // Limpiar el estado del usuario en App.js
+    setUser(null);
+    showNotification('¡Hasta pronto! Cerrando tu sesión...', 'success');
     navigate('/login');
   };
 
@@ -225,6 +317,22 @@ const MainVeterinario = ({ user, setUser }) => { // Recibe user y setUser como p
                   <motion.div className={styles.vetActiveIndicator} layoutId="activeIndicator" />
                 )}
               </motion.li>
+
+              {/* BOTÓN DE NOTIFICACIONES */}
+              <motion.li
+                whileHover={{ x: 5, backgroundColor: "rgba(0, 188, 212, 0.1)" }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setShowVetNotificationsMenu(!showVetNotificationsMenu)}
+                className={styles.notificationSidebarItem}
+              >
+                <div className={styles.vetNavIcon}>
+                  <FontAwesomeIcon icon={faBell} />
+                </div>
+                <span>Notificaciones</span>
+                {unreadVetNotificationsCount > 0 && (
+                  <span className={styles.notificationBadge}>{unreadVetNotificationsCount}</span>
+                )}
+              </motion.li>
             </ul>
           </nav>
 
@@ -280,13 +388,12 @@ const MainVeterinario = ({ user, setUser }) => { // Recibe user y setUser como p
           transition={{ delay: 0.3 }}
         >
           <AnimatePresence mode="wait">
-            {/* Pasa el usuario y la función de notificación a los componentes hijos */}
             <Outlet context={{ user, showNotification }} />
           </AnimatePresence>
         </motion.div>
       </div>
 
-      {/* Notificación flotante */}
+      {/* Notificación flotante (para mensajes temporales) */}
       <AnimatePresence>
         {notification && (
           <motion.div
@@ -295,10 +402,57 @@ const MainVeterinario = ({ user, setUser }) => { // Recibe user y setUser como p
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -100, opacity: 0 }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            onClick={() => setNotification(null)} // Cierra la notificación al hacer clic
+            onClick={() => setNotification(null)}
           >
-            <FontAwesomeIcon icon={notification.type === 'success' ? faCheckCircle : faTimesCircle} className={styles.notificationIcon} />
+            <FontAwesomeIcon icon={
+              notification.type === 'success' ? faCheckCircle :
+              notification.type === 'error' ? faTimesCircle :
+              faExclamationTriangle
+            } className={styles.notificationIcon} />
             <span>{notification.message}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Menú desplegable de notificaciones del veterinario */}
+      <AnimatePresence>
+        {showVetNotificationsMenu && (
+          <motion.div
+            ref={vetNotificationsRef}
+            className={styles.vetNotificationsDropdown}
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.2 }}
+          >
+            <h3>Notificaciones del Veterinario</h3>
+            {vetNotifications.length === 0 ? (
+              <p>No tienes notificaciones nuevas.</p>
+            ) : (
+              <ul>
+                {vetNotifications
+                  .sort((a, b) => new Date(b.fecha_creacion) - new Date(a.fecha_creacion))
+                  .map((notif) => (
+                    <li key={notif.id_notificacion} className={notif.leida ? styles.read : styles.unread}>
+                      <div className={styles.notificationContent}>
+                        <p className={styles.notificationMessage}>{notif.mensaje}</p>
+                        <span className={styles.notificationDate}>
+                          {new Date(notif.fecha_creacion).toLocaleString()}
+                        </span>
+                      </div>
+                      {!notif.leida && (
+                        <button
+                          className={styles.markAsReadButton}
+                          onClick={() => markVetNotificationAsRead(notif.id_notificacion)}
+                          title="Marcar como leída"
+                        >
+                          ✓
+                        </button>
+                      )}
+                    </li>
+                  ))}
+              </ul>
+            )}
           </motion.div>
         )}
       </AnimatePresence>

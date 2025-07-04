@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useOutletContext, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FaPaw, FaCalendarAlt, FaShoppingBag, FaUser, FaInfoCircle } from 'react-icons/fa';
+import { FaPaw, FaCalendarAlt, FaShoppingBag, FaUser, FaInfoCircle, FaSpinner } from 'react-icons/fa'; // Added FaSpinner
 import './Styles/InicioDashboard.css';
 
 // Componente para las tarjetas individuales del dashboard
@@ -30,35 +30,44 @@ const DashboardCard = ({ icon: Icon, title, description, ctaText, onClick, delay
 };
 
 const InicioDashboard = () => {
+  // Destructure directly from the context.
+  // user will be the userData state from InicioUsuario.
   const { user, showNotification } = useOutletContext();
   const navigate = useNavigate();
 
   const [numMascotas, setNumMascotas] = useState(0);
   const [proximaCita, setProximaCita] = useState(null);
+  const [isLoadingDashboard, setIsLoadingDashboard] = useState(true); // New loading state for this component
 
   useEffect(() => {
-    const fetchDashboardData = async () => {
-      setTimeout(() => {
-        const petsCount = user && user.mascotas ? user.mascotas.length : 0;
-        setNumMascotas(petsCount);
+    // Only fetch dashboard data if 'user' object is available
+    if (user) {
+      const fetchDashboardData = async () => {
+        // Simulate a delay for data fetching
+        setTimeout(() => {
+          const petsCount = user.mascotas ? user.mascotas.length : 0;
+          setNumMascotas(petsCount);
 
-        const mockCita = {
-          date: "2025-07-15",
-          time: "10:00 AM",
-          description: "Revisión anual",
-          id: "cita123"
-        };
-        setProximaCita(mockCita);
-      }, 500);
-    };
+          const mockCita = {
+            date: "2025-07-15", // Ensure this date is in the future relative to current time
+            time: "10:00 AM",
+            description: "Revisión anual",
+            id: "cita123"
+          };
+          setProximaCita(mockCita);
+          setIsLoadingDashboard(false); // Data loaded
+        }, 500); // Simulate network delay
+      };
 
-    fetchDashboardData();
-  }, [user]);
+      fetchDashboardData();
+    } else {
+        setIsLoadingDashboard(true); // Keep loading if user is not available yet
+    }
+  }, [user]); // Depend on 'user' to re-run when user data is loaded
 
   const handleNavigateToPets = () => {
     if (numMascotas === 0) {
-      // Mensaje actualizado
-      showNotification('No tienes mascotas registradas.', 'info');
+      showNotification('No tienes mascotas registradas. ¡Añade una ahora!', 'info'); // Updated message
     }
     navigate('/usuario/mascotas');
   };
@@ -69,6 +78,16 @@ const InicioDashboard = () => {
     }
     navigate('/usuario/citas');
   };
+
+  // Display a loading state if user data hasn't arrived yet
+  if (!user || isLoadingDashboard) {
+    return (
+      <div className="inicioDash-loading">
+        <FaSpinner className="inicioDash-spinner" />
+        <p>Cargando tu dashboard...</p>
+      </div>
+    );
+  }
 
   return (
     <motion.div
