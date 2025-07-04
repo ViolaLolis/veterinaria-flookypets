@@ -16,6 +16,8 @@ import {
   faSpinner,
   faTimesCircle
 } from '@fortawesome/free-solid-svg-icons';
+import { authFetch } from '../../utils/api'; // Importar la función authFetch
+import { validateField } from '../../utils/validation'; // Importar la función de validación
 
 const AgendarCita = () => {
   const { user, showNotification } = useOutletContext();
@@ -34,51 +36,78 @@ const AgendarCita = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Horarios disponibles, asumiendo que el backend podría devolver un subconjunto
   const horariosDisponibles = [
     '09:00', '10:00', '11:00', '12:00', '13:00',
     '14:00', '15:00', '16:00', '17:00'
   ];
 
+  // Función para obtener los datos iniciales (mascotas, veterinarios, servicio)
   const fetchInitialData = useCallback(async () => {
     setLoading(true);
     setErrorSeleccion(null);
 
+    if (!user?.id) {
+      setErrorSeleccion('No se pudo obtener la información del usuario. Por favor, inicia sesión.');
+      setLoading(false);
+      return;
+    }
+
     try {
-      const servicioId = location.state?.servicioId || 1;
+      const servicioId = location.state?.servicioId; // Obtener el ID del servicio de la navegación
 
-      const mockServicio = {
-        id_servicio: servicioId,
-        nombre: "Consulta General",
-        descripcion: "Consulta médica general para mascotas.",
-        precio: 500
-      };
-
-      const mockMascotas = [
-        { id_mascota: 1, nombre: 'Firulais', especie: 'Perro' },
-        { id_mascota: 2, nombre: 'Michi', especie: 'Gato' }
-      ];
-
-      const mockVeterinarios = [
-        { id: 101, nombre: 'Laura', apellido: 'Martínez', active: true },
-        { id: 102, nombre: 'Carlos', apellido: 'Ramírez', active: true }
-      ];
-
-      if (!user?.id) {
-        setErrorSeleccion('No se pudo obtener la información del usuario.');
+      // 1. Obtener el servicio seleccionado
+      let fetchedServicio = null;
+      if (servicioId) {
+        try {
+          const serviceResponse = await authFetch(`/servicios/${servicioId}`);
+          if (serviceResponse.success) {
+            fetchedServicio = serviceResponse.data;
+          } else {
+            showNotification(serviceResponse.message || 'Error al cargar el servicio.', 'error');
+            setErrorSeleccion('Error al cargar el servicio.');
+          }
+        } catch (err) {
+          console.error("Error fetching service:", err);
+          showNotification('Error de conexión al cargar el servicio.', 'error');
+          setErrorSeleccion('Error de conexión al cargar el servicio.');
+        }
+      } else {
+        // Si no hay servicioId en el estado, se podría redirigir o mostrar un error
+        setErrorSeleccion('No se ha seleccionado un servicio para agendar.');
         setLoading(false);
         return;
       }
 
-      setServicio(mockServicio);
-      setMascotas(mockMascotas);
-      setVeterinarios(mockVeterinarios.filter(vet => vet.active));
+      // 2. Obtener las mascotas del usuario
+      const mascotasResponse = await authFetch(`/mascotas?id_propietario=${user.id}`);
+      let fetchedMascotas = [];
+      if (mascotasResponse.success) {
+        fetchedMascotas = mascotasResponse.data;
+      } else {
+        showNotification(mascotasResponse.message || 'Error al cargar tus mascotas.', 'error');
+      }
+
+      // 3. Obtener los veterinarios
+      const veterinariosResponse = await authFetch('/usuarios/veterinarios');
+      let fetchedVeterinarios = [];
+      if (veterinariosResponse.success) {
+        fetchedVeterinarios = veterinariosResponse.data.filter(vet => vet.active);
+      } else {
+        showNotification(veterinariosResponse.message || 'Error al cargar los veterinarios.', 'error');
+      }
+
+      setServicio(fetchedServicio);
+      setMascotas(fetchedMascotas);
+      setVeterinarios(fetchedVeterinarios);
       setLoading(false);
+
     } catch (err) {
-      console.error("Error de datos locales:", err);
-      setErrorSeleccion('Error al cargar los datos locales.');
+      console.error("Error fetching initial data:", err);
+      setErrorSeleccion('Error al cargar los datos iniciales.');
       setLoading(false);
     }
-  }, [location.state, user]);
+  }, [location.state, user, showNotification]);
 
   useEffect(() => {
     fetchInitialData();
@@ -97,8 +126,13 @@ const AgendarCita = () => {
   };
 
   const handleSubmit = async () => {
-    if (!selectedMascota || !selectedTime || !servicio || !user?.id) {
-      setErrorSeleccion('Por favor, selecciona una mascota, un servicio, una fecha y una hora.');
+    // Validaciones de frontend
+    const mascotaError = validateField('id_mascota_cita', selectedMascota);
+    const servicioError = validateField('id_servicio_cita', servicio?.id_servicio);
+    const fechaHoraError = validateField('fecha_cita', date && selectedTime ? `${date.toISOString().split('T')[0]} ${selectedTime}` : '');
+
+    if (mascotaError || servicioError || fechaHoraError) {
+      setErrorSeleccion(mascotaError || servicioError || fechaHoraError);
       return;
     }
 
@@ -115,24 +149,32 @@ const AgendarCita = () => {
       const nuevaCita = {
         id_cliente: user.id,
         id_servicio: servicio.id_servicio,
-        id_veterinario: selectedVeterinario || null,
-        fecha: fechaHora.toISOString().slice(0, 19).replace('T', ' '),
-        servicios: servicio.nombre,
+        id_veterinario: selectedVeterinario ? parseInt(selectedVeterinario) : null,
+        id_mascota: parseInt(selectedMascota), // Asegurarse de que es un número
+        fecha_cita: fechaHora.toISOString().slice(0, 19).replace('T', ' '), // <--- CAMBIO AQUÍ: 'fecha' a 'fecha_cita'
+        notas_adicionales: servicio.nombre, // 'servicios' en el frontend se mapea a 'notas_adicionales' en el backend
         estado: 'pendiente'
       };
 
-      console.log('Cita simulada:', nuevaCita);
+      const response = await authFetch('/citas', {
+        method: 'POST',
+        body: nuevaCita,
+      });
 
-      setCitaAgendada(true);
-      showNotification('¡Cita agendada con éxito! (Simulada)', 'success');
-
-      setTimeout(() => {
-        navigate('/usuario/citas');
-      }, 3000);
+      if (response.success) {
+        setCitaAgendada(true);
+        showNotification('¡Cita agendada con éxito!', 'success');
+        setTimeout(() => {
+          navigate('/usuario/citas');
+        }, 3000);
+      } else {
+        showNotification(response.message || 'Error al agendar la cita.', 'error');
+        setErrorSeleccion(response.message || 'Error al agendar la cita.');
+      }
     } catch (err) {
-      console.error("Error simulado al crear cita:", err);
-      showNotification('Error al procesar la cita.', 'error');
-      setErrorSeleccion('Error al procesar la cita.');
+      console.error("Error al crear cita:", err);
+      showNotification('Error de conexión al procesar la cita.', 'error');
+      setErrorSeleccion('Error de conexión al procesar la cita.');
     } finally {
       setIsSubmitting(false);
     }
@@ -149,7 +191,7 @@ const AgendarCita = () => {
     </div>
   );
 
-  if (errorSeleccion && !citaAgendada) return (
+  if (errorSeleccion && !citaAgendada && !loading) return (
     <div className={styles.errorContainer}>
       <FontAwesomeIcon icon={faTimesCircle} className={styles.errorIcon} />
       <p>{errorSeleccion}</p>
@@ -197,7 +239,8 @@ const AgendarCita = () => {
             <h4>{servicio.nombre}</h4>
             <p>{servicio.descripcion}</p>
             <div className={styles.servicePrice}>
-              <span>${servicio.precio}</span>
+              {/* Asegúrate de que el precio se muestre correctamente si es un número */}
+              <span>${typeof servicio.precio === 'number' ? servicio.precio.toLocaleString('es-CO') : servicio.precio}</span>
             </div>
           </div>
         </motion.div>

@@ -2,104 +2,61 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import { FaPaw, FaPlus, FaInfoCircle, FaSearch } from 'react-icons/fa';
 import TarjetaMascota from './TarjetaMascota';
-import styles from './Styles/MisMascotas.module.css';
+import styles from './Styles/MisMascotas.module.css'; // Mantener la importación de CSS con .module.css
+import { authFetch } from '../../utils/api'; // Importar la función authFetch
 
 const ListaMascotasUsuario = () => {
-  const { user } = useOutletContext();
+  const { user, showNotification } = useOutletContext();
   const navigate = useNavigate();
   const [allUserPets, setAllUserPets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Mascotas locales hardcodeadas simulando datos de API
-  const mascotasSimuladas = [
-    {
-      id_mascota: '001',
-      nombre: 'Luna',
-      especie: 'Gato',
-      raza: 'Siames',
-      edad: 2,
-      peso: 4,
-      sexo: 'Hembra',
-      estado_salud: 'Saludable',
-      imagen: 'https://cdn.pixabay.com/photo/2017/11/09/21/41/cat-2934720_1280.jpg',
-      proxima_cita: '2025-08-10T09:00:00',
-    },
-    {
-      id_mascota: '002',
-      nombre: 'Max',
-      especie: 'Perro',
-      raza: 'Bulldog',
-      edad: 5,
-      peso: 20,
-      sexo: 'Macho',
-      estado_salud: 'Vacunado',
-      imagen: 'https://cdn.pixabay.com/photo/2015/03/26/09/54/bulldog-690563_1280.jpg',
-      proxima_cita: '2025-07-20T11:30:00',
-    },
-    {
-      id_mascota: '003',
-      nombre: 'Nina',
-      especie: 'Perro',
-      raza: 'Golden Retriever',
-      edad: 4,
-      peso: 30,
-      sexo: 'Hembra',
-      estado_salud: 'En tratamiento',
-      imagen: 'https://cdn.pixabay.com/photo/2015/03/26/09/41/golden-retriever-690566_1280.jpg',
-      proxima_cita: null,
-    },
-    {
-      id_mascota: '004',
-      nombre: 'Firulais',
-      especie: 'Perro',
-      raza: 'Criollo',
-      edad: 7,
-      peso: 15,
-      sexo: 'Macho',
-      estado_salud: 'Saludable',
-      imagen: 'https://cdn.pixabay.com/photo/2016/02/18/18/37/puppy-1207810_1280.jpg',
-      proxima_cita: '2025-09-01T15:00:00',
-    },
-    {
-      id_mascota: '005',
-      nombre: 'Coco',
-      especie: 'Gato',
-      raza: 'Común Europeo',
-      edad: 1,
-      peso: 3.5,
-      sexo: 'Hembra',
-      estado_salud: 'Vacunada',
-      imagen: 'https://cdn.pixabay.com/photo/2017/02/20/18/03/cat-2083492_1280.jpg',
-      proxima_cita: '2025-07-28T10:00:00',
-    },
-  ];
-
-  // Simulamos cargar los datos con un pequeño retraso
+  // Función para obtener las mascotas del usuario desde la API
   useEffect(() => {
     const fetchMascotas = async () => {
+      setLoading(true);
+      setError(null);
+
+      // Verificar si el usuario está disponible antes de intentar la llamada a la API
+      if (!user?.id) {
+        showNotification('No se pudo cargar la información del usuario. Por favor, inicia sesión.', 'error');
+        setLoading(false);
+        return;
+      }
+
       try {
-        setLoading(true);
-        // Simula una llamada a API real
-        await new Promise(resolve => setTimeout(resolve, 800)); // Simula retardo de red
-        setAllUserPets(mascotasSimuladas);
+        // Realiza la llamada a la API para obtener las mascotas del propietario actual
+        // Se asume que el endpoint /mascotas acepta un parámetro id_propietario
+        const response = await authFetch(`/mascotas?id_propietario=${user.id}`);
+        
+        if (response.success) {
+          setAllUserPets(response.data || []); // Asegurarse de que sea un array, incluso si está vacío
+        } else {
+          // Mostrar mensaje de error si la API responde con éxito: false
+          showNotification(response.message || 'Error al cargar tus mascotas.', 'error');
+          setError(response.message || 'Error al cargar tus mascotas.');
+          setAllUserPets([]); // Limpiar mascotas si hay un error
+        }
       } catch (err) {
-        setError('Error al cargar las mascotas. Por favor, inténtalo de nuevo más tarde.');
-        console.error(err);
+        // Capturar errores de red o de la función authFetch
+        console.error("Error fetching user pets:", err);
+        showNotification('Error de conexión al servidor.', 'error');
+        setError('Error de conexión al servidor.');
       } finally {
         setLoading(false);
       }
     };
 
     fetchMascotas();
-  }, []);
+  }, [user, showNotification]); // Depende del objeto user para recargar cuando esté disponible
 
   // Filtra las mascotas basándose en el término de búsqueda
   const filteredPets = allUserPets.filter(pet =>
     pet.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
     pet.especie.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    pet.raza.toLowerCase().includes(searchTerm.toLowerCase())
+    (pet.raza && pet.raza.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   return (
@@ -128,7 +85,6 @@ const ListaMascotasUsuario = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          
         </div>
       )}
 
@@ -143,9 +99,9 @@ const ListaMascotasUsuario = () => {
           <FaInfoCircle className={styles.errorIcon} />
           <p>{error}</p>
           {/* Opción para reintentar la carga si hay un error (opcional) */}
-          {/* <button className={styles.primaryButton} onClick={() => window.location.reload()}>
+          <button className={styles.primaryButton} onClick={() => window.location.reload()}>
             Reintentar
-          </button> */}
+          </button>
         </div>
       ) : filteredPets.length === 0 ? (
         <div className={styles.noContent}>

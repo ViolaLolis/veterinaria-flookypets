@@ -1,428 +1,365 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useParams, useNavigate, useOutletContext } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import styles from './Styles/EditarMascota.module.css';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPaw, faDog, faCat, faBirthdayCake, faWeight, faPalette, faVenusMars, faMicrochip, faImage, faSave, faTimesCircle, faArrowLeft, faInfoCircle, faUpload, faTimes } from '@fortawesome/free-solid-svg-icons';
-import { FaSpinner } from 'react-icons/fa';
-
-// --- DATOS DE MASCOTAS LOCALES (SIMULADOS) ---
-const datosMascotasLocales = {
-    1: {
-        id_mascota: 1,
-        id_propietario: 3,
-        nombre: 'Max',
-        especie: 'Perro',
-        raza: 'Labrador Retriever',
-        edad: 3,
-        peso: 28.5,
-        fecha_nacimiento: '2020-05-10',
-        color: 'Dorado',
-        sexo: 'Macho',
-        microchip: '123456789012345',
-        imagen_url: 'https://res.cloudinary.com/dnemd8wp0/image/upload/v1719705600/flookypets_profiles/pet_max.jpg',
-    },
-    2: {
-        id_mascota: 2,
-        id_propietario: 3,
-        nombre: 'Luna',
-        especie: 'Gato',
-        raza: 'Siamés',
-        edad: 2,
-        peso: 4.2,
-        fecha_nacimiento: '2021-03-15',
-        color: 'Blanco y café',
-        sexo: 'Hembra',
-        microchip: '234567890123456',
-        imagen_url: 'https://res.cloudinary.com/dnemd8wp0/image/upload/v1719705600/flookypets_profiles/pet_luna.jpg',
-    },
-    3: {
-        id_mascota: 3,
-        id_propietario: 9,
-        nombre: 'Rocky',
-        especie: 'Perro',
-        raza: 'Bulldog Francés',
-        edad: 4,
-        peso: 12.3,
-        fecha_nacimiento: '2019-01-20',
-        color: 'Atigrado',
-        sexo: 'Macho',
-        microchip: '345678901234567',
-        imagen_url: 'https://res.cloudinary.com/dnemd8wp0/image/upload/v1719705600/flookypets_profiles/pet_rocky.jpg',
-    },
-};
+import { FaPaw, FaEdit, FaArrowLeft, FaSpinner, FaUpload, FaInfoCircle } from 'react-icons/fa';
+import styles from './Styles/EditarMascota.module.css'; // Importar el CSS sin .module
+import { authFetch } from '../../utils/api'; // Importar la función authFetch
+import { validateField } from '../../utils/validation'; // Importar la función de validación
 
 const EditarMascota = () => {
-    const { mascotaId } = useParams();
-    const navigate = useNavigate();
-    const fileInputRef = useRef(null); // Ref para el input de archivo
+  const { id } = useParams(); // ID de la mascota a editar
+  const navigate = useNavigate();
+  const { user, showNotification } = useOutletContext(); // Obtener user y showNotification del contexto
 
-    const [formData, setFormData] = useState({
-        nombre: '',
-        especie: '',
-        raza: '',
-        edad: '',
-        peso: '',
-        fecha_nacimiento: '',
-        color: '',
-        sexo: 'Desconocido',
-        microchip: '',
+  const [formData, setFormData] = useState({
+    nombre_mascota: '',
+    especie_mascota: '',
+    raza_mascota: '',
+    edad_mascota: '',
+    peso_mascota: '',
+    sexo_mascota: '',
+    color_mascota: '',
+    microchip_mascota: '',
+    imagen_mascota: null, // Para el archivo de imagen
+  });
+  const [currentImageUrl, setCurrentImageUrl] = useState(null); // Para la URL de la imagen existente
+  const [errors, setErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [imagePreview, setImagePreview] = useState(null); // Para mostrar la vista previa de la nueva imagen
+
+  const fetchMascotaDetails = useCallback(async () => {
+    setIsLoading(true);
+    if (!user?.id) {
+      showNotification('No se pudo cargar la información del usuario. Por favor, inicia sesión.', 'error');
+      setIsLoading(false);
+      return;
+    }
+    try {
+      const response = await authFetch(`/mascotas/${id}`);
+      if (response.success) {
+        const mascotaData = response.data;
+        // Verificar si el usuario actual es el propietario o un administrador
+        if (user.id !== mascotaData.id_propietario && user.role !== 'admin') {
+          showNotification('No tienes permisos para editar esta mascota.', 'error');
+          navigate('/usuario/mascotas'); // Redirigir si no tiene permisos
+          return;
+        }
+
+        setFormData({
+          nombre_mascota: mascotaData.nombre || '',
+          especie_mascota: mascotaData.especie || '',
+          raza_mascota: mascotaData.raza || '',
+          edad_mascota: mascotaData.edad || '',
+          peso_mascota: mascotaData.peso || '',
+          sexo_mascota: mascotaData.sexo || '',
+          color_mascota: mascotaData.color || '',
+          microchip_mascota: mascotaData.microchip || '',
+          imagen_mascota: null, // No cargar el archivo, solo la URL
+        });
+        setCurrentImageUrl(mascotaData.imagen_url || null);
+      } else {
+        showNotification(response.message || 'Error al cargar los datos de la mascota.', 'error');
+        navigate('/usuario/mascotas'); // Redirigir en caso de error
+      }
+    } catch (err) {
+      console.error("Error fetching pet details for editing:", err);
+      showNotification('Error de conexión al servidor.', 'error');
+      navigate('/usuario/mascotas');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [id, user, navigate, showNotification]);
+
+  useEffect(() => {
+    fetchMascotaDetails();
+  }, [fetchMascotaDetails]);
+
+  const handleChange = (e) => {
+    const { id, value } = e.target;
+    setFormData(prev => ({ ...prev, [id]: value }));
+    const error = validateField(id, value, formData, false); // isNewEntry=false para edición
+    setErrors(prev => ({ ...prev, [id]: error }));
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validar tipo de archivo y tamaño
+      if (!file.type.startsWith('image/')) {
+        setErrors(prev => ({ ...prev, imagen_mascota: 'Solo se permiten archivos de imagen.' }));
+        setImagePreview(null);
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) { // 5MB
+        setErrors(prev => ({ ...prev, imagen_mascota: 'La imagen no debe exceder los 5MB.' }));
+        setImagePreview(null);
+        return;
+      }
+
+      setFormData(prev => ({ ...prev, imagen_mascota: file }));
+      setErrors(prev => ({ ...prev, imagen_mascota: null }));
+      setImagePreview(URL.createObjectURL(file)); // Crear URL para la vista previa
+    } else {
+      setFormData(prev => ({ ...prev, imagen_mascota: null }));
+      setImagePreview(null);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    let newErrors = {};
+    Object.keys(formData).forEach(key => {
+      if (key !== 'imagen_mascota') {
+        const error = validateField(key, formData[key], formData, false);
+        if (error) {
+          newErrors[key] = error;
+        }
+      }
     });
-
-    const [imageFile, setImageFile] = useState(null); // Para el archivo de imagen
-    const [imagePreviewUrl, setImagePreviewUrl] = useState(''); // Para la URL de previsualización
-
-    const [isLoading, setIsLoading] = useState(true);
-    const [isSaving, setIsSaving] = useState(false);
-    const [mascotaFound, setMascotaFound] = useState(true);
-
-    useEffect(() => {
-        setIsLoading(true);
-        const timer = setTimeout(() => {
-            const mascota = datosMascotasLocales[mascotaId];
-            if (mascota) {
-                setFormData({
-                    nombre: mascota.nombre || '',
-                    especie: mascota.especie || '',
-                    raza: mascota.raza || '',
-                    edad: mascota.edad || '',
-                    peso: mascota.peso || '',
-                    fecha_nacimiento: mascota.fecha_nacimiento || '',
-                    color: mascota.color || '',
-                    sexo: mascota.sexo || 'Desconocido',
-                    microchip: mascota.microchip || '',
-                });
-                // Si hay una URL de imagen, la mostramos como previsualización inicial
-                if (mascota.imagen_url) {
-                    setImagePreviewUrl(mascota.imagen_url);
-                }
-                setMascotaFound(true);
-            } else {
-                setFormData({
-                    nombre: '',
-                    especie: '',
-                    raza: '',
-                    edad: '',
-                    peso: '',
-                    fecha_nacimiento: '',
-                    color: '',
-                    sexo: 'Desconocido',
-                    microchip: '',
-                });
-                setImageFile(null);
-                setImagePreviewUrl('');
-                setMascotaFound(false);
-            }
-            setIsLoading(false);
-        }, 500);
-
-        return () => clearTimeout(timer);
-    }, [mascotaId]);
-
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value,
-        }));
-    };
-
-    // Manejar el cambio del input de archivo
-    const handleImageChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            setImageFile(file);
-            // Crear una URL para previsualizar la imagen
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setImagePreviewUrl(reader.result);
-            };
-            reader.readAsDataURL(file);
-        } else {
-            setImageFile(null);
-            setImagePreviewUrl('');
-        }
-    };
-
-    // Función para remover la imagen seleccionada
-    const handleRemoveImage = () => {
-        setImageFile(null);
-        setImagePreviewUrl('');
-        if (fileInputRef.current) {
-            fileInputRef.current.value = ""; // Limpia el valor del input file
-        }
-    };
-
-    const handleGoBack = () => {
-        navigate(-1);
-    };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setIsSaving(true);
-        try {
-            await new Promise(resolve => setTimeout(resolve, 1500));
-
-            console.log('Datos del formulario "guardados" localmente:', formData);
-            if (imageFile) {
-                console.log('Archivo de imagen "cargado" localmente:', imageFile.name, imageFile);
-            } else {
-                console.log('No se seleccionó ninguna imagen nueva.');
-            }
-
-            alert(`¡Mascota "${formData.nombre}" (ID: ${mascotaId}) "actualizada" localmente con éxito!`);
-            navigate('/usuario/mascotas');
-        } catch (err) {
-            alert('Error al "guardar" los cambios localmente. Revisa la consola.');
-            console.error('Error al simular el guardado:', err);
-        } finally {
-            setIsSaving(false);
-        }
-    };
-
-    if (isLoading) {
-        return (
-            <div className={styles['editMascota-loadingContainer']}>
-                <FaSpinner className={styles.spinnerIcon} />
-                <p>Cargando datos de la mascota...</p>
-            </div>
-        );
+    if (errors.imagen_mascota) {
+      newErrors.imagen_mascota = errors.imagen_mascota;
     }
 
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      showNotification('Por favor, corrige los errores en el formulario.', 'error');
+      setIsSubmitting(false);
+      return;
+    }
+
+    try {
+      let imageUrlToSave = currentImageUrl; // Por defecto, mantener la imagen actual
+      if (formData.imagen_mascota) {
+        // Si se seleccionó una nueva imagen, subirla
+        const formDataImage = new FormData();
+        formDataImage.append('image', formData.imagen_mascota);
+        const uploadResponse = await authFetch('/upload-image', {
+          method: 'POST',
+          body: formDataImage,
+          headers: {
+            // No Content-Type header when sending FormData, browser sets it
+          }
+        });
+        if (uploadResponse.success) {
+          imageUrlToSave = uploadResponse.imageUrl;
+        } else {
+          showNotification(uploadResponse.message || 'Error al subir la nueva imagen de la mascota.', 'error');
+          setIsSubmitting(false);
+          return;
+        }
+      }
+
+      const updatedMascota = {
+        nombre: formData.nombre_mascota,
+        especie: formData.especie_mascota,
+        raza: formData.raza_mascota,
+        edad: formData.edad_mascota ? parseInt(formData.edad_mascota) : null,
+        peso: formData.peso_mascota ? parseFloat(formData.peso_mascota) : null,
+        sexo: formData.sexo_mascota,
+        color: formData.color_mascota,
+        microchip: formData.microchip_mascota,
+        imagen_url: imageUrlToSave, // Usar la nueva URL o la existente
+      };
+
+      const response = await authFetch(`/mascotas/${id}`, {
+        method: 'PUT',
+        body: updatedMascota,
+      });
+
+      if (response.success) {
+        showNotification('¡Mascota actualizada con éxito!', 'success');
+        navigate(`/usuario/mascotas/${id}`); // Redirigir al detalle de la mascota
+      } else {
+        showNotification(response.message || 'Error al actualizar la mascota.', 'error');
+      }
+    } catch (err) {
+      console.error("Error updating pet:", err);
+      showNotification('Error de conexión al servidor al actualizar la mascota.', 'error');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (isLoading) {
     return (
-        <motion.div
-            className={styles['editMascota-container']}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-        >
-            <div className={styles['editMascota-header']}>
-                <motion.button
-                    onClick={handleGoBack}
-                    className={styles['editMascota-backButton']}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                >
-                    <FontAwesomeIcon icon={faArrowLeft} />
-                </motion.button>
-                <FontAwesomeIcon icon={faPaw} className={styles.icon} />
-                <h3>Editar Mascota</h3> {/* Fixed Title */}
-            </div>
-
-            {!mascotaFound && (
-                <motion.div
-                    className={styles['editMascota-infoMessage']}
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4 }}
-                >
-                    <FontAwesomeIcon icon={faInfoCircle} /> No se encontró una mascota con el ID `{mascotaId}`. Puedes rellenar los campos para simular una nueva mascota.
-                </motion.div>
-            )}
-
-            <form onSubmit={handleSubmit} className={styles['editMascota-form']}>
-                <div className={styles['editMascota-formGrid']}>
-                    {/* Nombre */}
-                    <div className={styles['editMascota-formGroup']}>
-                        <label htmlFor="nombre">
-                            <FontAwesomeIcon icon={faDog} /> Nombre:
-                        </label>
-                        <input
-                            type="text"
-                            id="nombre"
-                            name="nombre"
-                            value={formData.nombre}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
-
-                    {/* Especie */}
-                    <div className={styles['editMascota-formGroup']}>
-                        <label htmlFor="especie">
-                            <FontAwesomeIcon icon={faCat} /> Especie:
-                        </label>
-                        <input
-                            type="text"
-                            id="especie"
-                            name="especie"
-                            value={formData.especie}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
-
-                    {/* Raza */}
-                    <div className={styles['editMascota-formGroup']}>
-                        <label htmlFor="raza">
-                            <FontAwesomeIcon icon={faPaw} /> Raza:
-                        </label>
-                        <input
-                            type="text"
-                            id="raza"
-                            name="raza"
-                            value={formData.raza}
-                            onChange={handleChange}
-                        />
-                    </div>
-
-                    {/* Edad */}
-                    <div className={styles['editMascota-formGroup']}>
-                        <label htmlFor="edad">
-                            <FontAwesomeIcon icon={faBirthdayCake} /> Edad (años):
-                        </label>
-                        <input
-                            type="number"
-                            id="edad"
-                            name="edad"
-                            value={formData.edad}
-                            onChange={handleChange}
-                            min="0"
-                        />
-                    </div>
-
-                    {/* Peso */}
-                    <div className={styles['editMascota-formGroup']}>
-                        <label htmlFor="peso">
-                            <FontAwesomeIcon icon={faWeight} /> Peso (kg):
-                        </label>
-                        <input
-                            type="number"
-                            id="peso"
-                            name="peso"
-                            value={formData.peso}
-                            onChange={handleChange}
-                            min="0"
-                            step="0.1"
-                        />
-                    </div>
-
-                    {/* Fecha de Nacimiento */}
-                    <div className={styles['editMascota-formGroup']}>
-                        <label htmlFor="fecha_nacimiento">
-                            <FontAwesomeIcon icon={faBirthdayCake} /> Fecha de Nacimiento:
-                        </label>
-                        <input
-                            type="date"
-                            id="fecha_nacimiento"
-                            name="fecha_nacimiento"
-                            value={formData.fecha_nacimiento}
-                            onChange={handleChange}
-                        />
-                    </div>
-
-                    {/* Color */}
-                    <div className={styles['editMascota-formGroup']}>
-                        <label htmlFor="color">
-                            <FontAwesomeIcon icon={faPalette} /> Color:
-                        </label>
-                        <input
-                            type="text"
-                            id="color"
-                            name="color"
-                            value={formData.color}
-                            onChange={handleChange}
-                        />
-                    </div>
-
-                    {/* Sexo */}
-                    <div className={styles['editMascota-formGroup']}>
-                        <label htmlFor="sexo">
-                            <FontAwesomeIcon icon={faVenusMars} /> Sexo:
-                        </label>
-                        <select
-                            id="sexo"
-                            name="sexo"
-                            value={formData.sexo}
-                            onChange={handleChange}
-                            required
-                        >
-                            <option value="Macho">Macho</option>
-                            <option value="Hembra">Hembra</option>
-                            <option value="Desconocido">Desconocido</option>
-                        </select>
-                    </div>
-
-                    {/* Microchip */}
-                    <div className={styles['editMascota-formGroup']}>
-                        <label htmlFor="microchip">
-                            <FontAwesomeIcon icon={faMicrochip} /> Microchip:
-                        </label>
-                        <input
-                            type="text"
-                            id="microchip"
-                            name="microchip"
-                            value={formData.microchip}
-                            onChange={handleChange}
-                        />
-                    </div>
-
-                    {/* Campo de carga de Imagen */}
-                    <div className={`${styles['editMascota-formGroup']} ${styles['editMascota-imageUploadGroup']}`}>
-                        <label>
-                            <FontAwesomeIcon icon={faImage} /> Imagen de la Mascota:
-                        </label>
-                        <input
-                            type="file"
-                            id="imageUpload"
-                            name="image"
-                            accept="image/*"
-                            onChange={handleImageChange}
-                            className={styles['editMascota-hiddenFileInput']}
-                            ref={fileInputRef} // Asignar la ref al input
-                        />
-                        <motion.label
-                            htmlFor="imageUpload"
-                            className={`${styles['editMascota-uploadButton']} ${styles['editMascota-whiteText']}`}
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                        >
-                            <FontAwesomeIcon icon={faUpload} /> Seleccionar Imagen
-                        </motion.label>
-
-                        {imagePreviewUrl && (
-                            <motion.div
-                                className={styles['editMascota-imagePreviewContainer']}
-                                initial={{ opacity: 0, scale: 0.8 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.8 }}
-                                transition={{ duration: 0.2 }}
-                            >
-                                <img src={imagePreviewUrl} alt="Previsualización de Mascota" />
-                                <motion.button
-                                    type="button"
-                                    onClick={handleRemoveImage}
-                                    className={styles['editMascota-removeImageButton']}
-                                    whileHover={{ scale: 1.1 }}
-                                    whileTap={{ scale: 0.9 }}
-                                >
-                                    <FontAwesomeIcon icon={faTimes} />
-                                </motion.button>
-                            </motion.div>
-                        )}
-                    </div>
-                </div>
-
-                <motion.button
-                    type="submit"
-                    className={styles['editMascota-saveButton']}
-                    whileHover={{ scale: 1.03 }}
-                    whileTap={{ scale: 0.97 }}
-                    disabled={isSaving}
-                >
-                    {isSaving ? (
-                        <>
-                            <FaSpinner className={styles['editMascota-spinner']} /> Guardando...
-                        </>
-                    ) : (
-                        <>
-                            <FontAwesomeIcon icon={faSave} /> Guardar Cambios
-                        </>
-                    )}
-                </motion.button>
-            </form>
-        </motion.div>
+      <div className="loading-container">
+        <FaSpinner className="spinner-icon" />
+        <p>Cargando datos de la mascota...</p>
+      </div>
     );
+  }
+
+  return (
+    <motion.div
+      className="editar-mascota-container"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+    >
+      <div className="editar-mascota-header">
+        <FaEdit className="editar-mascota-icon" />
+        <h2>Editar Mascota</h2>
+        <button onClick={() => navigate(-1)} className="back-button">
+          <FaArrowLeft /> Volver
+        </button>
+      </div>
+
+      <form onSubmit={handleSubmit} className="editar-mascota-form">
+        <div className="form-grid">
+          <div className="form-group">
+            <label htmlFor="nombre_mascota">Nombre:</label>
+            <input
+              type="text"
+              id="nombre_mascota"
+              value={formData.nombre_mascota}
+              onChange={handleChange}
+              placeholder="Nombre de la mascota"
+              required
+            />
+            {errors.nombre_mascota && <p className="error-text">{errors.nombre_mascota}</p>}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="especie_mascota">Especie:</label>
+            <input
+              type="text"
+              id="especie_mascota"
+              value={formData.especie_mascota}
+              onChange={handleChange}
+              placeholder="Ej: Perro, Gato, Ave"
+              required
+            />
+            {errors.especie_mascota && <p className="error-text">{errors.especie_mascota}</p>}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="raza_mascota">Raza:</label>
+            <input
+              type="text"
+              id="raza_mascota"
+              value={formData.raza_mascota}
+              onChange={handleChange}
+              placeholder="Ej: Labrador, Siames"
+            />
+            {errors.raza_mascota && <p className="error-text">{errors.raza_mascota}</p>}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="edad_mascota">Edad (años):</label>
+            <input
+              type="number"
+              id="edad_mascota"
+              value={formData.edad_mascota}
+              onChange={handleChange}
+              placeholder="Edad en años"
+              min="0"
+              max="30"
+            />
+            {errors.edad_mascota && <p className="error-text">{errors.edad_mascota}</p>}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="peso_mascota">Peso (kg):</label>
+            <input
+              type="number"
+              id="peso_mascota"
+              value={formData.peso_mascota}
+              onChange={handleChange}
+              placeholder="Peso en kg"
+              step="0.1"
+              min="0.1"
+              max="200"
+            />
+            {errors.peso_mascota && <p className="error-text">{errors.peso_mascota}</p>}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="sexo_mascota">Sexo:</label>
+            <select
+              id="sexo_mascota"
+              value={formData.sexo_mascota}
+              onChange={handleChange}
+            >
+              <option value="">Seleccionar</option>
+              <option value="Macho">Macho</option>
+              <option value="Hembra">Hembra</option>
+            </select>
+            {errors.sexo_mascota && <p className="error-text">{errors.sexo_mascota}</p>}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="color_mascota">Color:</label>
+            <input
+              type="text"
+              id="color_mascota"
+              value={formData.color_mascota}
+              onChange={handleChange}
+              placeholder="Ej: Marrón, Negro"
+            />
+            {errors.color_mascota && <p className="error-text">{errors.color_mascota}</p>}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="microchip_mascota">Número de Microchip (opcional):</label>
+            <input
+              type="text"
+              id="microchip_mascota"
+              value={formData.microchip_mascota}
+              onChange={handleChange}
+              placeholder="Número de identificación"
+            />
+            {errors.microchip_mascota && <p className="error-text">{errors.microchip_mascota}</p>}
+          </div>
+
+          <div className="form-group full-width">
+            <label htmlFor="imagen_mascota" className="image-upload-label">
+              <FaUpload /> Cambiar Imagen de la Mascota (opcional)
+            </label>
+            <input
+              type="file"
+              id="imagen_mascota"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="file-input"
+            />
+            {(imagePreview || currentImageUrl) && (
+              <div className="image-preview-container">
+                <img
+                  src={imagePreview || currentImageUrl}
+                  alt="Vista previa de la mascota"
+                  className="image-preview"
+                  onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/150x150/cccccc/ffffff?text=No+Img'; }}
+                />
+              </div>
+            )}
+            {errors.imagen_mascota && <p className="error-text">{errors.imagen_mascota}</p>}
+          </div>
+        </div>
+
+        <motion.button
+          type="submit"
+          className="submit-button"
+          disabled={isSubmitting || Object.values(errors).some(error => error !== null)}
+          whileHover={{ scale: 1.03 }}
+          whileTap={{ scale: 0.97 }}
+        >
+          {isSubmitting ? (
+            <>
+              <FaSpinner className="spinner-icon" />
+              <span>Guardando...</span>
+            </>
+          ) : (
+            <>
+              <FaEdit /> Guardar Cambios
+            </>
+          )}
+        </motion.button>
+      </form>
+    </motion.div>
+  );
 };
 
 export default EditarMascota;

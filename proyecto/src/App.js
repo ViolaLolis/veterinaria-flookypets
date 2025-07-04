@@ -100,9 +100,13 @@ function App() {
         }
     }, [user]); // Se ejecuta cada vez que el objeto 'user' cambia
 
-    // handleLogout ya no es necesario pasarlo a Login o a los layouts principales
-    // ya que Protegida ahora maneja el cierre de sesión y setUser se encarga de limpiar el localStorage.
-    // Si necesitas un botón de "Cerrar Sesión" en tus layouts, simplemente llama a setUser(null) desde allí.
+    // Función handleLogout definida aquí en App.js
+    const handleLogout = () => {
+        setUser(null);
+        // localStorage.removeItem('user'); // Ya manejado por el useEffect anterior
+        // localStorage.removeItem('token'); // Ya manejado por el useEffect anterior
+        // No es necesario navegar aquí si Protegida ya lo hace, pero se puede dejar como fallback
+    };
 
     return (
         <Router>
@@ -120,9 +124,10 @@ function App() {
                     <Route path="/register" element={<Registro />} />
 
                     {/* Rutas de administrador */}
-                    {/* Pasa user y setUser a Protegida */}
-                    <Route element={<Protegida user={user} setUser={setUser} allowedRoles={['admin']} />}>
-                        <Route path="/admin" element={<AdminDashboard user={user} setUser={setUser} />}>
+                    {/* Pasa user, setUser Y handleLogout a Protegida */}
+                    <Route element={<Protegida user={user} setUser={setUser} allowedRoles={['admin']} handleLogout={handleLogout} />}>
+                        {/* Pasa user, setUser Y handleLogout a AdminDashboard */}
+                        <Route path="/admin" element={<AdminDashboard user={user} setUser={setUser} handleLogout={handleLogout} />}>
                             <Route index element={<AdminStats user={user} />} />
                             <Route path="dashboard" element={<AdminStats user={user} />} />
                             <Route path="services" element={<ServicesManagement user={user} />} />
@@ -138,8 +143,8 @@ function App() {
                     </Route>
 
                     {/* Rutas de veterinario */}
-                    {/* Pasa user y setUser a Protegida. Los administradores también pueden acceder aquí. */}
-                    <Route element={<Protegida user={user} setUser={setUser} allowedRoles={['veterinario', 'admin']} />}>
+                    {/* Pasa user, setUser Y handleLogout a Protegida. Los administradores también pueden acceder aquí. */}
+                    <Route element={<Protegida user={user} setUser={setUser} allowedRoles={['veterinario', 'admin']} handleLogout={handleLogout} />}>
                         <Route path="/veterinario" element={<MainVeterinario user={user} setUser={setUser} />}>
                             <Route index element={<NavegacionVeterinario />} />
                             <Route path="navegacion" element={<NavegacionVeterinario />} />
@@ -165,8 +170,8 @@ function App() {
                     </Route>
 
                     {/* Rutas de usuario (InicioUsuario como layout principal) */}
-                    {/* Pasa user y setUser a Protegida */}
-                    <Route element={<Protegida user={user} setUser={setUser} allowedRoles={['usuario']} />}>
+                    {/* Pasa user, setUser Y handleLogout a Protegida */}
+                    <Route element={<Protegida user={user} setUser={setUser} allowedRoles={['usuario']} handleLogout={handleLogout} />}>
                         <Route path="/usuario" element={<InicioUsuario user={user} setUser={setUser} />}>
                             {/* Rutas anidadas que se renderizarán dentro del <Outlet /> de InicioUsuario */}
                             <Route index element={<HomeDashboard />} />

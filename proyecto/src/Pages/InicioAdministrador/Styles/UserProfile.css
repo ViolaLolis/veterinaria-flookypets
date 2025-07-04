@@ -1,127 +1,166 @@
 /* src/Pages/InicioAdministrador/Styles/UserProfile.css */
 
-/* --- Variables CSS (repetidas para auto-contención, aunque se recomienda usar un archivo de variables global) --- */
-:root {
-    --color-primary-cyan: #00BCD4; /* Azul cian vibrante */
-    --color-dark-cyan: #0097A7;   /* Tono más oscuro de cian */
-    --color-light-cyan: #E0F7FA;  /* Tono muy claro de cian */
-    --color-accent-green: #28a745;
-    --color-accent-red: #dc3545;
-    --color-text-dark: #333;
-    --color-text-medium: #555;
-    --color-text-light: #6c757d;
-    --color-background-light: #f0f2f5; /* Fondo general */
-    --color-background-white: #ffffff; /* Fondos de tarjetas y modales */
-    --color-border-light: #e0e0e0;
-    --color-border-medium: #ccc;
+/* Valores de color directos para consistencia, sin usar :root */
+/* Azul vibrante */
+/* Verde para éxito */
+/* Naranja para advertencias/énfasis */
+/* Rojo para errores/eliminación */
+/* Texto oscuro principal */
+/* Texto claro (para fondos oscuros) */
+/* Fondo claro general */
+/* Fondo oscuro para sidebar/header */
+/* Color de borde sutil */
+/* Sombras */
+/* Velocidad de transición */
 
-    --spacing-xs: 0.5rem;
-    --spacing-sm: 0.8rem;
-    --spacing-md: 1rem;
-    --spacing-lg: 1.5rem;
-    --spacing-xl: 2rem;
-    --spacing-xxl: 3rem;
-
-    --border-radius-sm: 8px;
-    --border-radius-md: 12px;
-    --border-radius-lg: 16px;
-
-    --shadow-sm: 0 2px 5px rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 4px 15px rgba(0, 0, 0, 0.1);
-    --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.15);
-}
-
-/* Animaciones */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-/* Contenedor principal del perfil */
+/* Contenedor principal de la página de perfil del usuario */
 .admin-user-profile {
-    max-width: 900px; /* Ancho máximo para la tarjeta de perfil */
-    margin: var(--spacing-xl) auto; /* Centrar en la página */
-    padding: var(--spacing-xl);
-    background-color: var(--color-background-white);
-    border-radius: var(--border-radius-lg);
-    box-shadow: var(--shadow-lg);
-    animation: fadeIn 0.6s ease-out;
+    background-color: #f8f9fa; /* Fondo claro general */
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    margin-bottom: 30px;
+    font-family: 'Inter', sans-serif; /* Asegura la fuente para este componente */
 }
 
-/* Encabezado de la sección (reusa estilos de AdminStyles si existen) */
-.admin-content-header {
+/* Encabezado de la página de perfil */
+.admin-user-profile .admin-content-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: var(--spacing-xl);
-    padding-bottom: var(--spacing-md);
-    border-bottom: 1px solid var(--color-border-light);
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e0e0e0; /* Color de borde sutil */
+    flex-wrap: wrap;
+    gap: 15px;
 }
 
-.admin-content-header h2 {
+/* Título del encabezado */
+.admin-user-profile .admin-content-header h2 {
     font-size: 1.8rem;
-    color: var(--color-dark-cyan);
+    color: #2c3e50; /* Texto oscuro principal */
     margin: 0;
     display: flex;
     align-items: center;
-    gap: var(--spacing-sm);
+    gap: 10px;
+    font-weight: 700;
 }
 
-.admin-content-header .header-icon {
+/* Icono del título */
+.admin-user-profile .admin-content-header .header-icon {
     font-size: 2rem;
-    color: var(--color-primary-cyan);
+    color: #3498db; /* Azul vibrante */
 }
 
-.admin-content-header .header-actions {
+/* Acciones del encabezado (botones de editar/guardar/cancelar) */
+.admin-user-profile .admin-content-header .header-actions {
     display: flex;
-    gap: var(--spacing-md);
+    gap: 15px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
 }
 
-
-/* Tarjeta de perfil */
-.profile-card {
+/* Botones de acción en el encabezado */
+.admin-user-profile .edit-btn,
+.admin-user-profile .save-btn,
+.admin-user-profile .cancel-btn {
+    padding: 12px 25px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
     display: flex;
-    flex-direction: column; /* Apilar en móvil */
     align-items: center;
-    gap: var(--spacing-xl);
-    padding: var(--spacing-lg);
+    gap: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.admin-user-profile .edit-btn {
+    background: linear-gradient(135deg, #12f3d5, #22e6cc); /* Naranja para advertencias/énfasis */
+    color: white;
+    border: none;
+    height: 45px; /* Altura consistente */
+    width: 120px; /* Ancho fijo para consistencia */
+}
+
+.admin-user-profile .edit-btn:hover {
+    background: linear-gradient(135deg, #22d9e6, #12d9f3);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(243, 156, 18, 0.3);
+}
+
+.admin-user-profile .save-btn {
+    background: linear-gradient(135deg, #2ecc71, #27ae60); /* Verde para éxito */
+    color: white;
+    border: none;
+}
+
+.admin-user-profile .save-btn:hover {
+    background: linear-gradient(135deg, #27ae60, #2ecc71);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(46, 204, 113, 0.3);
+}
+
+.admin-user-profile .cancel-btn {
+    background-color: #ecf0f1; /* Fondo claro general */
+    color: #2c3e50; /* Texto oscuro principal */
+    border: 1px solid #bdc3c7;
+}
+
+.admin-user-profile .cancel-btn:hover {
+    background-color: #dbe4e9;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(189, 195, 199, 0.3);
+}
+
+.admin-user-profile .edit-btn:disabled,
+.admin-user-profile .save-btn:disabled,
+.admin-user-profile .cancel-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+/* Tarjeta principal del perfil */
+.admin-user-profile .profile-card {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    margin-top: 30px;
+    display: flex;
+    flex-direction: column; /* Apilado en móvil por defecto */
+    align-items: center;
+    gap: 30px; /* Espacio entre la imagen y el formulario */
 }
 
 /* Sección de la imagen de perfil */
-.profile-image-section {
+.admin-user-profile .profile-image-section {
     position: relative;
-    width: 180px; /* Tamaño de la imagen */
+    width: 180px;
     height: 180px;
     border-radius: 50%;
     overflow: hidden;
-    border: 5px solid var(--color-primary-cyan);
-    box-shadow: 0 6px 20px rgba(0, 188, 212, 0.3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: var(--color-light-cyan); /* Fondo para placeholder */
-    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+    border: 5px solid #3498db; /* Azul vibrante */
+    flex-shrink: 0;
 }
 
-.profile-image-section:hover {
-    transform: scale(1.03);
-    box-shadow: 0 8px 25px rgba(0, 188, 212, 0.4);
-}
-
-.profile-image {
+.admin-user-profile .profile-image {
     width: 100%;
     height: 100%;
-    object-fit: cover; /* Asegura que la imagen cubra el área sin distorsionarse */
+    object-fit: cover;
     display: block;
+    transition: transform 0.3s ease;
 }
 
-/* Overlay para el botón de subir imagen */
-.image-upload-overlay {
+.admin-user-profile .profile-image-section:hover .profile-image {
+    transform: scale(1.05);
+}
+
+.admin-user-profile .image-upload-overlay {
     position: absolute;
     top: 0;
     left: 0;
@@ -129,284 +168,255 @@
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
     display: flex;
-    align-items: center;
     justify-content: center;
+    align-items: center;
     opacity: 0;
     transition: opacity 0.3s ease;
     cursor: pointer;
 }
 
-.profile-image-section:hover .image-upload-overlay {
+.admin-user-profile .profile-image-section:hover .image-upload-overlay {
     opacity: 1;
 }
 
-.upload-icon {
-    color: var(--color-background-white);
-    font-size: 3rem;
+.admin-user-profile .upload-icon {
+    color: white;
+    font-size: 2.5rem;
     cursor: pointer;
     transition: transform 0.2s ease;
 }
 
-.upload-icon:hover {
+.admin-user-profile .upload-icon:hover {
     transform: scale(1.1);
 }
 
-/* Formulario de perfil */
-.profile-form {
-    width: 100%;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* 2 columnas en pantallas grandes, 1 en pequeñas */
-    gap: var(--spacing-lg);
+/* Mensaje de error para la imagen */
+.admin-user-profile .profile-image-section .error-message-inline {
+    position: absolute;
+    bottom: -25px; /* Debajo de la imagen */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 150%; /* Puede ser más ancho que la imagen */
+    font-size: 0.8rem;
+    color: #e74c3c; /* Rojo para errores/eliminación */
+    white-space: nowrap; /* Evita que el texto se rompa */
 }
 
-.form-group {
+
+/* Formulario de perfil */
+.admin-user-profile .profile-form {
+    flex-grow: 1;
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.admin-user-profile .profile-form .form-group {
     display: flex;
     flex-direction: column;
 }
 
-.form-group label {
-    margin-bottom: var(--spacing-xs);
+.admin-user-profile .profile-form .form-group label {
+    margin-bottom: 8px;
     font-weight: 600;
-    color: var(--color-text-dark);
+    color: #2c3e50; /* Texto oscuro principal */
     font-size: 0.95rem;
 }
 
-.form-group p { /* Estilo para el texto cuando no está en modo edición */
-    padding: 0.8rem 1rem;
-    border: 1px solid var(--color-border-light);
-    border-radius: var(--border-radius-sm);
-    background-color: #f8f8f8;
-    color: var(--color-text-medium);
-    font-size: 1rem;
-    min-height: 44px; /* Altura mínima para alinear con inputs */
+/* Estilos para campos no editables */
+.admin-user-profile .profile-form .form-group p {
+    background-color: #f0f4f8;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    color: #2c3e50; /* Texto oscuro principal */
+    border: 1px solid #e0e0e0; /* Color de borde sutil */
+    min-height: 40px; /* Altura mínima para consistencia */
     display: flex;
     align-items: center;
 }
 
-.form-group input[type="text"],
-.form-group input[type="email"],
-.form-group input[type="date"],
-.form-group select {
-    padding: 0.8rem 1rem;
-    border: 1px solid var(--color-border-medium);
-    border-radius: var(--border-radius-sm);
-    font-size: 1rem;
-    transition: all 0.3s ease;
-    background-color: #fdfdfd;
-    color: var(--color-text-dark);
+/* Estilos para campos editables */
+.admin-user-profile .profile-form .form-group input[type="text"],
+.admin-user-profile .profile-form .form-group input[type="email"],
+.admin-user-profile .profile-form .form-group input[type="date"],
+.admin-user-profile .profile-form .form-group select {
+    padding: 10px 12px;
+    border: 1px solid #e0e0e0; /* Color de borde sutil */
+    border-radius: 8px;
+    font-size: 0.9rem;
+    color: #2c3e50; /* Texto oscuro principal */
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    width: 100%;
 }
 
-.form-group input:focus,
-.form-group select:focus {
-    border-color: var(--color-primary-cyan);
-    box-shadow: 0 0 0 3px rgba(0, 188, 212, 0.25);
+.admin-user-profile .profile-form .form-group input:focus,
+.admin-user-profile .profile-form .form-group select:focus {
+    border-color: #3498db; /* Azul vibrante */
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
     outline: none;
 }
 
-.form-group .input-error {
-    border-color: var(--color-accent-red);
-    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.2);
+/* Estilos de error para campos */
+.admin-user-profile .profile-form .form-group input.input-error,
+.admin-user-profile .profile-form .form-group select.input-error {
+    border-color: #e74c3c; /* Rojo para errores/eliminación */
 }
 
-.error-message-inline {
-    color: var(--color-accent-red);
-    font-size: 0.85rem;
-    margin-top: 0.4rem;
-    text-align: left;
+.admin-user-profile .profile-form .form-group .error-message-inline {
+    color: #e74c3c; /* Rojo para errores/eliminación */
+    font-size: 0.8rem;
+    margin-top: 5px;
 }
 
-/* Estilos para el checkbox */
-.form-group input[type="checkbox"] {
-    width: auto; /* Ancho automático para checkbox */
-    margin-top: 0.5rem;
-    transform: scale(1.2); /* Aumentar tamaño del checkbox */
-    margin-left: 0.2rem;
+/* Estilo para checkbox (activo/inactivo) */
+.admin-user-profile .profile-form .form-group input[type="checkbox"] {
+    width: auto;
+    margin-right: 10px;
+    transform: scale(1.2);
 }
 
-/* Acciones del formulario (botones) */
-.edit-btn, .save-btn, .cancel-btn {
-    padding: 0.75rem 1.5rem;
-    border: none;
-    border-radius: var(--border-radius-sm);
-    cursor: pointer;
-    font-size: 1rem;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-xs);
-    transition: all 0.3s ease;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    box-shadow: var(--shadow-sm); /* Sombra base para todos los botones */
-}
-
-.edit-btn {
-    background-color: var(--color-primary-cyan);
-    color: var(--color-background-white);
-    box-shadow: 0 4px 10px rgba(0, 188, 212, 0.3); /* Sombra más pronunciada */
-}
-
-.edit-btn:hover {
-    background-color: var(--color-dark-cyan);
-    transform: translateY(-3px); /* Efecto 3D sutil */
-    box-shadow: 0 6px 15px rgba(0, 188, 212, 0.4); /* Sombra al hacer hover */
-}
-
-.save-btn {
-    background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%); /* Verde más vibrante */
-    color: var(--color-background-white);
-    box-shadow: 0 4px 10px rgba(76, 175, 80, 0.4);
-}
-
-.save-btn:hover {
-    background: linear-gradient(135deg, #388E3C 0%, #2E7D32 100%);
-    transform: translateY(-3px);
-    box-shadow: 0 6px 15px rgba(76, 175, 80, 0.5);
-}
-
-.cancel-btn {
-    background-color: #EF5350; /* Rojo más suave */
-    color: var(--color-background-white);
-    box-shadow: 0 4px 10px rgba(239, 83, 80, 0.3);
-}
-
-.cancel-btn:hover {
-    background-color: #D32F2F; /* Rojo más oscuro */
-    transform: translateY(-3px);
-    box-shadow: 0 6px 15px rgba(239, 83, 80, 0.4);
-}
-
-.edit-btn:disabled, .save-btn:disabled, .cancel-btn:disabled {
-    background-color: #cccccc;
-    cursor: not-allowed;
-    box-shadow: none;
-    transform: none;
-    opacity: 0.7;
-}
-
-.spinner-icon {
-    animation: spin 1s linear infinite;
-}
-
-/* Mensajes de carga y error (reusan estilos de AdminDashboard.css o generales) */
-.admin-loading, .error-message, .no-results {
+/* Mensajes de carga y error */
+.admin-user-profile .admin-loading,
+.admin-user-profile .error-message,
+.admin-user-profile .no-results {
+    text-align: center;
+    padding: 40px;
+    font-size: 1.1rem;
+    color: #555;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    margin-top: 30px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: var(--spacing-xl);
-    border-radius: var(--border-radius-md);
-    background-color: var(--color-background-white);
-    box-shadow: var(--shadow-md);
-    margin: var(--spacing-xl) auto;
-    max-width: 600px;
-    text-align: center;
-    color: var(--color-text-medium);
+    gap: 15px;
 }
 
-.admin-loading .loading-spinner .spinner-icon {
+.admin-user-profile .loading-spinner .spinner-icon {
     font-size: 3rem;
-    color: var(--color-primary-cyan);
-    margin-bottom: var(--spacing-md);
+    color: #3498db; /* Azul vibrante */
+    animation: spin 1.5s linear infinite;
 }
 
-.error-message .info-icon, .no-results .info-icon {
-    font-size: 2.5rem;
-    color: var(--color-accent-red);
-    margin-bottom: var(--spacing-md);
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
-.error-message p, .no-results p {
-    margin-top: var(--spacing-sm);
-    font-size: 0.95rem;
-    color: var(--color-text-light);
+.admin-user-profile .error-message {
+    color: #e74c3c; /* Rojo para errores/eliminación */
 }
 
-/* Responsive Adjustments */
-@media (min-width: 768px) {
-    .profile-card {
-        flex-direction: row; /* Lado a lado en pantallas más grandes */
-        align-items: flex-start; /* Alinear arriba */
-    }
+.admin-user-profile .error-message .info-icon,
+.admin-user-profile .no-results .info-icon {
+    font-size: 3rem;
+    color: #e74c3c; /* Rojo para errores/eliminación */
+}
 
-    .profile-image-section {
-        flex-shrink: 0; /* No permitir que se encoja */
-        margin-right: var(--spacing-xl); /* Espacio a la derecha del formulario */
-    }
+.admin-user-profile .no-results {
+    color: #7f8c8d;
+}
 
-    .profile-form {
-        flex-grow: 1; /* Ocupar el espacio restante */
+.admin-user-profile .no-results .info-icon {
+    color: #7f8c8d;
+}
+
+/* Responsive Design */
+@media (min-width: 769px) {
+    .admin-user-profile .profile-card {
+        flex-direction: row; /* En fila para pantallas grandes */
+        align-items: flex-start; /* Alinea al inicio */
     }
 }
 
-@media (max-width: 767px) {
-    .admin-user-profile {
-        margin: var(--spacing-lg) auto;
-        padding: var(--spacing-lg);
+@media (max-width: 768px) {
+    .admin-user-profile .admin-content-header .header-actions {
+        justify-content: center; /* Centra los botones en pantallas pequeñas */
     }
-
-    .admin-content-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: var(--spacing-md);
+    .admin-user-profile .profile-card {
+        padding: 20px;
     }
-
-    .admin-content-header h2 {
-        font-size: 1.5rem;
-    }
-
-    .admin-content-header .header-actions {
-        flex-direction: column;
-        width: 100%;
-        gap: var(--spacing-sm);
-    }
-
-    .profile-card {
-        padding: var(--spacing-md);
-    }
-
-    .profile-image-section {
+    .admin-user-profile .profile-image-section {
         width: 150px;
         height: 150px;
-        border-width: 4px;
-        margin-bottom: var(--spacing-lg); /* Espacio debajo de la imagen en móvil */
     }
-
-    .upload-icon {
-        font-size: 2.5rem;
+    .admin-user-profile .upload-icon {
+        font-size: 2rem;
     }
-
-    .profile-form {
-        grid-template-columns: 1fr; /* Una columna en móvil */
-        gap: var(--spacing-md);
+    .admin-user-profile .profile-form {
+        grid-template-columns: 1fr; /* Una columna en pantallas pequeñas */
     }
-
-    .form-group p,
-    .form-group input[type="text"],
-    .form-group input[type="email"],
-    .form-group input[type="date"],
-    .form-group select {
-        padding: 0.7rem 0.8rem;
-        font-size: 0.9rem;
-    }
-
-    .edit-btn, .save-btn, .cancel-btn {
-        width: 100%;
+    .admin-user-profile .edit-btn,
+    .admin-user-profile .save-btn,
+    .admin-user-profile .cancel-btn {
+        width: 100%; /* Ocupa todo el ancho */
         justify-content: center;
-        font-size: 0.95rem;
-        padding: 0.7rem 1rem;
     }
 }
 
-/* Media query para pantallas muy pequeñas (ej. iPhone SE) */
-@media (max-width: 400px) {
-    .profile-image-section {
+@media (max-width: 480px) {
+    .admin-user-profile .profile-card {
+        padding: 15px;
+    }
+    .admin-user-profile .profile-image-section {
         width: 120px;
         height: 120px;
         border-width: 3px;
     }
-
-    .upload-icon {
-        font-size: 2rem;
+    .admin-user-profile .upload-icon {
+        font-size: 1.8rem;
+    }
+    .admin-user-profile .profile-form .form-group label {
+        font-size: 0.9rem;
+    }
+    .admin-user-profile .profile-form .form-group p,
+    .admin-user-profile .profile-form .form-group input,
+    .admin-user-profile .profile-form .form-group select {
+        padding: 8px 10px;
+        font-size: 0.85rem;
+    }
+    .admin-user-profile .edit-btn,
+    .admin-user-profile .save-btn,
+    .admin-user-profile .cancel-btn {
+        padding: 10px 20px;
+        font-size: 0.9rem;
     }
 }
+
+/* Estilos para pantallas grandes (27" y TV) */
+@media (min-width: 1920px) {
+    .admin-user-profile .profile-card {
+        padding: 40px;
+    }
+    .admin-user-profile .profile-image-section {
+        width: 220px;
+        height: 220px;
+        border-width: 6px;
+    }
+    .admin-user-profile .upload-icon {
+        font-size: 3rem;
+    }
+    .admin-user-profile .profile-form {
+        gap: 30px;
+    }
+    .admin-user-profile .profile-form .form-group label {
+        font-size: 1.05rem;
+    }
+    .admin-user-profile .profile-form .form-group p,
+    .admin-user-profile .profile-form .form-group input,
+    .admin-user-profile .profile-form .form-group select {
+        padding: 12px 15px;
+        font-size: 1rem;
+    }
+    .admin-user-profile .edit-btn,
+    .admin-user-profile .save-btn,
+    .admin-user-profile .cancel-btn {
+        padding: 15px 30px;
+        font-size: 1.1rem;
+    }
+}
+

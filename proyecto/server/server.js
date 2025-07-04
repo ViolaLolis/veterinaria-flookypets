@@ -133,14 +133,31 @@ const isOwnerOrAdmin = async (req, res, next) => {
     try {
         if (req.originalUrl.startsWith('/mascotas')) {
             if (req.method === 'GET') {
-                const requestedOwnerId = parseInt(req.query.id_propietario);
-                // Si el usuario es un cliente y solicita mascotas de otro propietario, denegar.
-                // Si no se especifica id_propietario, se asume que quiere las suyas.
-                if (userRole === 'usuario' && (isNaN(requestedOwnerId) || requestedOwnerId !== userIdFromToken)) {
-                    console.log(`[isOwnerOrAdmin - /mascotas GET] Denegado: Usuario ${userIdFromToken} intentó acceder a mascotas de ${requestedOwnerId || 'propietario no especificado/diferente'}.`);
-                    return res.status(403).json({ success: false, message: "Acceso denegado. Solo puedes ver tus propias mascotas." });
+                if (req.params.id) { // Specific pet by ID: /mascotas/:id
+                    const idMascota = parseInt(req.params.id);
+                    if (isNaN(idMascota)) {
+                        console.log("[isOwnerOrAdmin - /mascotas/:id GET] ID de mascota inválido.");
+                        return res.status(400).json({ success: false, message: "ID de mascota no válido." });
+                    }
+                    const [rows] = await pool.query("SELECT id_propietario FROM mascotas WHERE id_mascota = ?", [idMascota]);
+                    if (rows.length === 0) {
+                        console.log(`[isOwnerOrAdmin - /mascotas/:id GET] Mascota con ID ${idMascota} no encontrada.`);
+                        return res.status(404).json({ success: false, message: "Mascota no encontrada." });
+                    }
+                    const resourceOwnerId = rows[0].id_propietario;
+                    if (resourceOwnerId !== userIdFromToken) {
+                        console.log(`[isOwnerOrAdmin - /mascotas/:id GET] Denegado: Usuario ${userIdFromToken} intentó acceder a mascota de ${resourceOwnerId}.`);
+                        return res.status(403).json({ success: false, message: "Acceso denegado. Solo puedes ver tus propias mascotas." });
+                    }
+                    return next(); // Owner can see their own pet
+                } else { // List of pets: /mascotas or /mascotas?id_propietario=X
+                    const requestedOwnerId = parseInt(req.query.id_propietario);
+                    if (userRole === 'usuario' && (isNaN(requestedOwnerId) || requestedOwnerId !== userIdFromToken)) {
+                        console.log(`[isOwnerOrAdmin - /mascotas GET List] Denegado: Usuario ${userIdFromToken} intentó acceder a mascotas de ${requestedOwnerId || 'propietario no especificado/diferente'}.`);
+                        return res.status(403).json({ success: false, message: "Acceso denegado. Solo puedes ver tus propias mascotas." });
+                    }
+                    return next();
                 }
-                return next();
             } else if (req.method === 'POST') {
                 const newPetOwnerId = parseInt(req.body.id_propietario);
                 if (newPetOwnerId !== userIdFromToken) {
@@ -151,44 +168,62 @@ const isOwnerOrAdmin = async (req, res, next) => {
             } else if (req.params.id) { // PUT, DELETE /mascotas/:id
                 const idMascota = parseInt(req.params.id);
                 if (isNaN(idMascota)) {
-                    console.log("[isOwnerOrAdmin - /mascotas/:id] ID de mascota inválido.");
+                    console.log("[isOwnerOrAdmin - /mascotas/:id PUT/DELETE] ID de mascota inválido.");
                     return res.status(400).json({ success: false, message: "ID de mascota no válido." });
                 }
                 const [rows] = await pool.query("SELECT id_propietario FROM mascotas WHERE id_mascota = ?", [idMascota]);
                 if (rows.length === 0) {
-                    console.log(`[isOwnerOrAdmin - /mascotas/:id] Mascota con ID ${idMascota} no encontrada.`);
+                    console.log(`[isOwnerOrAdmin - /mascotas/:id PUT/DELETE] Mascota con ID ${idMascota} no encontrada.`);
                     return res.status(404).json({ success: false, message: "Mascota no encontrada." });
                 }
                 const resourceOwnerId = rows[0].id_propietario;
                 if (resourceOwnerId !== userIdFromToken) {
-                    console.log(`[isOwnerOrAdmin - /mascotas/:id] Denegado: Usuario ${userIdFromToken} intentó modificar mascota de ${resourceOwnerId}.`);
+                    console.log(`[isOwnerOrAdmin - /mascotas/:id PUT/DELETE] Denegado: Usuario ${userIdFromToken} intentó modificar/eliminar mascota de ${resourceOwnerId}.`);
                     return res.status(403).json({ success: false, message: "Acceso denegado. No eres el propietario de esta mascota." });
                 }
                 return next();
             }
         } else if (req.originalUrl.startsWith('/historial_medico')) {
-            // Para GET de historial_medico/:id
-            if (req.method === 'GET' && req.params.id) {
-                const idHistorial = parseInt(req.params.id);
-                if (isNaN(idHistorial)) {
-                    console.log("[isOwnerOrAdmin - /historial_medico GET] ID de historial médico inválido.");
-                    return res.status(400).json({ success: false, message: "ID de historial médico no válido." });
-                }
-                const [rows] = await pool.query(
-                    "SELECT m.id_propietario FROM historial_medico h JOIN mascotas m ON h.id_mascota = m.id_mascota WHERE h.id_historial = ?",
-                    [idHistorial]
-                );
-                if (rows.length === 0) {
-                    console.log(`[isOwnerOrAdmin - /historial_medico GET] Historial médico con ID ${idHistorial} no encontrado.`);
-                    return res.status(404).json({ success: false, message: "Historial médico no encontrado." });
-                }
-                const resourceOwnerId = rows[0].id_propietario;
+            if (req.method === 'GET') {
+                if (req.params.id) { // Specific historial record by ID: /historial_medico/:id
+                    const idHistorial = parseInt(req.params.id);
+                    if (isNaN(idHistorial)) {
+                        console.log("[isOwnerOrAdmin - /historial_medico/:id GET] ID de historial médico inválido.");
+                        return res.status(400).json({ success: false, message: "ID de historial médico no válido." });
+                    }
+                    const [rows] = await pool.query(
+                        "SELECT m.id_propietario FROM historial_medico h JOIN mascotas m ON h.id_mascota = m.id_mascota WHERE h.id_historial = ?",
+                        [idHistorial]
+                    );
+                    if (rows.length === 0) {
+                        console.log(`[isOwnerOrAdmin - /historial_medico/:id GET] Historial médico con ID ${idHistorial} no encontrado.`);
+                        return res.status(404).json({ success: false, message: "Historial médico no encontrado." });
+                    }
+                    const resourceOwnerId = rows[0].id_propietario;
 
-                if (resourceOwnerId !== userIdFromToken) {
-                    console.log(`[isOwnerOrAdmin - /historial_medico GET] Denegado: Usuario ${userIdFromToken} intentó acceder a historial médico de ${resourceOwnerId}.`);
-                    return res.status(403).json({ success: false, message: "Acceso denegado. Solo puedes ver los historiales de tus propias mascotas." });
+                    if (resourceOwnerId !== userIdFromToken) {
+                        console.log(`[isOwnerOrAdmin - /historial_medico/:id GET] Denegado: Usuario ${userIdFromToken} intentó acceder a historial médico de ${resourceOwnerId}.`);
+                        return res.status(403).json({ success: false, message: "Acceso denegado. Solo puedes ver los historiales de tus propias mascotas." });
+                    }
+                    return next();
+                } else if (req.query.id_mascota) { // List of historial records for a specific pet: /historial_medico?id_mascota=X
+                    const idMascota = parseInt(req.query.id_mascota);
+                    if (isNaN(idMascota)) {
+                        console.log("[isOwnerOrAdmin - /historial_medico?id_mascota GET] ID de mascota inválido.");
+                        return res.status(400).json({ success: false, message: "ID de mascota no válido." });
+                    }
+                    const [rows] = await pool.query("SELECT id_propietario FROM mascotas WHERE id_mascota = ?", [idMascota]);
+                    if (rows.length === 0) {
+                        console.log(`[isOwnerOrAdmin - /historial_medico?id_mascota GET] Mascota con ID ${idMascota} no encontrada.`);
+                        return res.status(404).json({ success: false, message: "Mascota no encontrada." });
+                    }
+                    const resourceOwnerId = rows[0].id_propietario;
+                    if (resourceOwnerId !== userIdFromToken) {
+                        console.log(`[isOwnerOrAdmin - /historial_medico?id_mascota GET] Denegado: Usuario ${userIdFromToken} intentó acceder a historiales de mascota de ${resourceOwnerId}.`);
+                        return res.status(403).json({ success: false, message: "Acceso denegado. Solo puedes ver los historiales de tus propias mascotas." });
+                    }
+                    return next(); // Owner can see their own pet's medical records
                 }
-                return next();
             }
         } else if (req.originalUrl.startsWith('/citas')) {
             // Para GET, PUT, DELETE /citas/:id
@@ -214,11 +249,8 @@ const isOwnerOrAdmin = async (req, res, next) => {
             }
             // Para POST /citas (crear cita)
             if (req.method === 'POST') {
-                const newCitaClientId = parseInt(req.body.id_cliente);
-                if (newCitaClientId !== userIdFromToken) {
-                    console.log(`[isOwnerOrAdmin - /citas POST] Denegado: Usuario ${userIdFromToken} intentó crear cita para ${newCitaClientId}.`);
-                    return res.status(403).json({ success: false, message: "Acceso denegado. Solo puedes crear citas para tu propio perfil." });
-                }
+                // The actual parsing of the body will happen in the route handler due to the workaround.
+                // This middleware just ensures the user is authenticated.
                 return next();
             }
             // Para GET /citas (listar citas)
@@ -951,7 +983,8 @@ app.delete("/api/admin/administrators/:id", authenticateToken, isAdmin, async (r
 // ### **GESTIÓN DE VETERINARIOS**
 
 // Obtener todos los veterinarios
-app.get("/usuarios/veterinarios", authenticateToken, isVetOrAdmin, async (req, res) => {
+// MODIFICADO: Se eliminó el middleware isVetOrAdmin para permitir que usuarios regulares accedan a esta lista para agendar citas.
+app.get("/usuarios/veterinarios", authenticateToken, async (req, res) => {
     try {
         const [vets] = await pool.query(
             "SELECT id, nombre, apellido, email, telefono, direccion, active, imagen_url, created_at FROM usuarios WHERE role = 'veterinario'"
@@ -1069,7 +1102,7 @@ app.put("/usuarios/veterinarios/:id", authenticateToken, isAdmin, async (req, re
 
     } catch (error) {
         console.error("Error al actualizar veterinario:", error);
-        res.status(500).json({ success: false, message: "Error al actualizar veterinario", error: process.env.NODE_ENV === 'development' ? error.stack : error.message });
+        res.status(500).json({ success: false, message: "Error al actualizar veterinario", error: process.NODE_ENV === 'development' ? error.stack : error.message });
     }
 });
 
@@ -1144,6 +1177,22 @@ app.get("/servicios", authenticateToken, async (req, res) => {
         res.status(500).json({ success: false, message: "Error al obtener servicios", error: process.env.NODE_ENV === 'development' ? error.stack : error.message });
     }
 });
+
+// NUEVA RUTA: Obtener un servicio por ID
+app.get("/servicios/:id", authenticateToken, async (req, res) => {
+    const { id } = req.params;
+    try {
+        const [service] = await pool.query("SELECT * FROM servicios WHERE id_servicio = ?", [id]);
+        if (service.length === 0) {
+            return res.status(404).json({ success: false, message: "Servicio no encontrado." });
+        }
+        res.json({ success: true, data: service[0] });
+    } catch (error) {
+        console.error(`Error al obtener servicio ${id}:`, error);
+        res.status(500).json({ success: false, message: "Error al obtener servicio.", error: process.env.NODE_ENV === 'development' ? error.stack : error.message });
+    }
+});
+
 
 // Crear nuevo servicio
 app.post("/servicios", authenticateToken, isAdmin, async (req, res) => { // express.json() ya es global
@@ -1271,7 +1320,8 @@ app.get("/usuarios", authenticateToken, isVetOrAdmin, async (req, res) => {
 app.get("/usuarios/:id", authenticateToken, isOwnerOrAdmin, async (req, res) => {
     const { id } = req.params;
     try {
-        const [user] = await pool.query(
+        // Fetch user basic data
+        const [users] = await pool.query(
             `SELECT id, nombre, apellido, email, telefono, direccion, tipo_documento, numero_documento,
                     fecha_nacimiento, role, active, created_at, experiencia, universidad, horario, imagen_url,
                     notificaciones_activas, sonido_notificacion, recordatorios_cita, intervalo_recordatorio
@@ -1279,10 +1329,27 @@ app.get("/usuarios/:id", authenticateToken, isOwnerOrAdmin, async (req, res) => 
              WHERE id = ?`,
             [id]
         );
-        if (user.length === 0) {
+
+        if (users.length === 0) {
             return res.status(404).json({ success: false, message: "Usuario no encontrado." });
         }
-        res.json({ success: true, data: user[0] });
+        let user = users[0];
+
+        // Fetch count of registered pets for this user
+        const [[{ num_mascotas }]] = await pool.query(
+            "SELECT COUNT(*) as num_mascotas FROM mascotas WHERE id_propietario = ?",
+            [id]
+        );
+        user.mascotasRegistradas = num_mascotas;
+
+        // Fetch count of completed appointments for this user
+        const [[{ citas_realizadas }]] = await pool.query(
+            "SELECT COUNT(*) as citas_realizadas FROM citas WHERE id_cliente = ? AND estado = 'COMPLETA'",
+            [id]
+        );
+        user.citasRealizadas = citas_realizadas;
+
+        res.json({ success: true, data: user });
     } catch (error) {
         console.error(`Error al obtener usuario ${id}:`, error);
         res.status(500).json({ success: false, message: "Error al obtener datos del usuario.", error: process.env.NODE_ENV === 'development' ? error.stack : error.message });
@@ -1583,19 +1650,51 @@ app.delete("/mascotas/:id", authenticateToken, isVetOrAdmin, async (req, res) =>
 // =============================================
 
 // Obtener todos los historiales médicos (para veterinarios y administradores)
-app.get("/historial_medico", authenticateToken, isVetOrAdmin, async (req, res) => {
+app.get("/historial_medico", authenticateToken, async (req, res) => { // Removed isVetOrAdmin here, auth is handled by isOwnerOrAdmin if id_mascota is present
     try {
-        const [historiales] = await pool.query(
-            `SELECT h.*, m.nombre as mascota_nombre, m.especie, m.raza,
+        const { id_mascota } = req.query;
+        let query = `SELECT h.*, m.nombre as mascota_nombre, m.especie, m.raza,
                     CONCAT(u_prop.nombre, ' ', u_prop.apellido) as propietario_nombre,
                     CONCAT(u_vet.nombre, ' ', u_vet.apellido) as veterinario_nombre,
                     u_vet.id as veterinario_id -- Añadido para el frontend
              FROM historial_medico h
              JOIN mascotas m ON h.id_mascota = m.id_mascota
              JOIN usuarios u_prop ON m.id_propietario = u_prop.id
-             LEFT JOIN usuarios u_vet ON h.veterinario = u_vet.id
-             ORDER BY h.fecha_consulta DESC`
-        );
+             LEFT JOIN usuarios u_vet ON h.veterinario = u_vet.id`;
+        const queryParams = [];
+        const conditions = [];
+
+        if (req.user.role === 'usuario') {
+            // If a regular user, they can only see their own pet's medical history
+            if (id_mascota) {
+                // Verify if the pet belongs to the user
+                const [petOwner] = await pool.query("SELECT id_propietario FROM mascotas WHERE id_mascota = ?", [id_mascota]);
+                if (petOwner.length === 0 || petOwner[0].id_propietario !== req.user.id) {
+                    return res.status(403).json({ success: false, message: "Acceso denegado. Solo puedes ver los historiales de tus propias mascotas." });
+                }
+                conditions.push(`h.id_mascota = ?`);
+                queryParams.push(id_mascota);
+            } else {
+                // If no specific pet ID is provided, a regular user cannot see all medical records
+                return res.status(403).json({ success: false, message: "Acceso denegado. Se requiere especificar una mascota para ver el historial." });
+            }
+        } else if (req.user.role === 'veterinario' || req.user.role === 'admin') {
+            // Vets and Admins can filter by id_mascota or see all
+            if (id_mascota) {
+                conditions.push(`h.id_mascota = ?`);
+                queryParams.push(id_mascota);
+            }
+        } else {
+            return res.status(403).json({ success: false, message: "Acceso denegado. Rol no autorizado para ver historiales médicos." });
+        }
+
+        if (conditions.length > 0) {
+            query += ` WHERE ` + conditions.join(' AND ');
+        }
+
+        query += ` ORDER BY h.fecha_consulta DESC`;
+
+        const [historiales] = await pool.query(query, queryParams);
         res.json({ success: true, data: historiales });
     } catch (error) {
         console.error("Error al obtener historiales médicos:", error);
@@ -1623,7 +1722,8 @@ app.get("/historial_medico/:id", authenticateToken, isOwnerOrAdmin, async (req, 
             return res.status(404).json({ success: false, message: "Historial médico no encontrado." });
         }
         res.json({ success: true, data: historial[0] });
-    } catch (error) {
+    }
+    catch (error) {
         console.error(`Error al obtener historial médico ${id}:`, error);
         res.status(500).json({ success: false, message: "Error al obtener historial médico.", error: process.env.NODE_ENV === 'development' ? error.stack : error.message });
     }
@@ -1879,8 +1979,43 @@ app.get("/citas/:id", authenticateToken, isOwnerOrAdmin, async (req, res) => {
 });
 
 // Registrar nueva cita (para usuarios y admins/vets)
-app.post("/citas/agendar", authenticateToken, async (req, res) => { // express.json() ya es global. Cambiado a /citas/agendar para mayor claridad
-    const { fecha_cita, notas_adicionales, id_servicio, id_cliente, id_veterinario, id_mascota } = req.body;
+app.post("/citas", authenticateToken, async (req, res) => { // express.json() ya es global. Changed from /citas/agendar to /citas
+    let requestBody = req.body;
+
+    // WORKAROUND: If express.json() failed to parse (because it received a double-stringified JSON),
+    // req.body might be empty or not an object. We need to re-read the raw body stream.
+    if (typeof requestBody !== 'object' || requestBody === null || Object.keys(requestBody).length === 0) {
+        let rawData = '';
+        await new Promise((resolve, reject) => {
+            req.on('data', chunk => {
+                rawData += chunk;
+            });
+            req.on('end', () => {
+                resolve();
+            });
+            req.on('error', err => {
+                reject(err);
+            });
+        });
+
+        if (rawData.startsWith('"') && rawData.endsWith('"')) {
+            try {
+                // Attempt to parse the rawData twice
+                requestBody = JSON.parse(JSON.parse(rawData));
+                console.warn("WORKAROUND: Double-stringified JSON detected and re-parsed in /citas route.");
+            } catch (parseError) {
+                console.error("WORKAROUND FAILED: Could not re-parse double-stringified JSON in /citas route.", parseError);
+                return res.status(400).json({ success: false, message: "Datos de solicitud inválidos o corruptos." });
+            }
+        } else {
+            // If it's not double-stringified, but express.json() still failed,
+            // it's likely genuinely malformed or empty.
+            console.error("Request body is not an object and not double-stringified JSON. Raw data:", rawData);
+            return res.status(400).json({ success: false, message: "Datos de solicitud inválidos." });
+        }
+    }
+
+    const { fecha_cita, notas_adicionales, id_servicio, id_cliente, id_veterinario, id_mascota } = requestBody;
     let estado = req.body.estado ? req.body.estado.toUpperCase() : 'PENDIENTE'; // Asegurar que el estado inicial sea PENDIENTE en mayúsculas
 
     if (!fecha_cita || !id_servicio || !id_cliente || !id_mascota) {
@@ -1890,7 +2025,7 @@ app.post("/citas/agendar", authenticateToken, async (req, res) => { // express.j
     if (req.user.role === 'usuario' && req.user.id !== id_cliente) {
         return res.status(403).json({ success: false, message: "Acceso denegado. No puedes crear citas para otros usuarios." });
     }
-    console.log("[CREATE_APPOINTMENT] Received data:", req.body); // Debugging log
+    console.log("[CREATE_APPOINTMENT] Received data:", requestBody); // Debugging log
 
 
     let assignedVetId = id_veterinario;

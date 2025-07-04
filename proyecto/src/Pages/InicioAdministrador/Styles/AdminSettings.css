@@ -1,309 +1,161 @@
-/* src/Styles/AdminSettings.css - Diseño Profesional y Moderno */
+/* src/Pages/InicioAdministrador/Styles/AdminSettings.css */
 
-/* Contenedor principal de Configuración */
-.admin-settings-container {
-  background-color: #ffffff;
-  border-radius: 14px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  padding: 2rem;
-  margin: 1.5rem auto;
-  max-width: 900px;
-  border: 1px solid rgba(0, 172, 193, 0.1);
-  animation: fadeIn 0.5s ease-out;
+/* Estilos específicos para la página de Configuración del Sistema */
+
+.admin-settings-form {
+    margin-top: 20px;
 }
 
-/* Encabezado de la página (compartido con AdminStyles) */
-.admin-content-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #e0e0e0;
-  flex-wrap: wrap;
-  gap: 1rem;
+.admin-settings-form .form-section {
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 30px;
+    background-color: #fdfdfd;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
 }
 
-.admin-content-header h2 {
-  display: flex;
-  align-items: center;
-  font-size: 1.8rem;
-  color: #007c91;
-  font-weight: 700;
-  margin: 0;
+.admin-settings-form .form-section legend {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    padding: 0 10px;
+    margin-left: -10px; /* Ajuste para que la leyenda se superponga al borde */
 }
 
-.header-icon {
-  font-size: 2.2rem;
-  margin-right: 0.8rem;
-  color: #00acc1;
+.admin-settings-form .form-group {
+    margin-bottom: 18px;
 }
 
-/* Botones principales de acción (Editar/Guardar) */
-.btn-primary {
-  background-color: #00acc1;
-  color: #ffffff;
-  padding: 0.8rem 1.5rem;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  font-size: 0.95rem;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 8px rgba(0, 172, 193, 0.2);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+.admin-settings-form .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--text-color-dark);
+    font-size: 0.95rem;
 }
 
-.btn-primary:hover {
-  background-color: #007c91;
-  box-shadow: 0 6px 12px rgba(0, 172, 193, 0.3);
-  transform: translateY(-2px);
+.admin-settings-form .form-group input[type="text"],
+.admin-settings-form .form-group input[type="email"],
+.admin-settings-form .form-group textarea,
+.admin-settings-form .form-group select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    color: var(--text-color-dark);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-.btn-primary:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  box-shadow: none;
-  transform: none;
+.admin-settings-form .form-group input:focus,
+.admin-settings-form .form-group textarea:focus,
+.admin-settings-form .form-group select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+    outline: none;
 }
 
-/* Mensajes de Éxito */
-.success-message {
-  background-color: #e8f5e9; /* Verde muy claro */
-  color: #2e7d32; /* Verde oscuro */
-  padding: 1rem 1.5rem;
-  border-radius: 10px;
-  margin-bottom: 1.5rem;
-  font-weight: 600;
-  border: 1px solid #a5d6a7;
-  animation: fadeIn 0.4s ease-out;
+.admin-settings-form .form-group textarea {
+    min-height: 80px;
+    resize: vertical;
 }
 
-/* Secciones de Configuración */
-.settings-section {
-  background-color: #fcfcfc;
-  border-radius: 10px;
-  padding: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  border: 1px solid #eceff1;
-  margin-bottom: 2rem;
+.admin-settings-form .form-group-checkbox {
+    display: flex;
+    align-items: center;
+    margin-bottom: 18px;
 }
 
-.settings-section h3 {
-  display: flex;
-  align-items: center;
-  font-size: 1.4rem;
-  color: #007c91;
-  font-weight: 600;
-  margin-bottom: 1.5rem;
-  padding-bottom: 0.8rem;
-  border-bottom: 1px solid #e0e0e0;
+.admin-settings-form .form-group-checkbox input[type="checkbox"] {
+    margin-right: 10px;
+    transform: scale(1.2); /* Agrandar el checkbox */
+    cursor: pointer;
 }
 
-.settings-section h3 .icon {
-  font-size: 1.6rem;
-  margin-right: 0.6rem;
-  color: #00acc1;
+.admin-settings-form .form-group-checkbox label {
+    margin-bottom: 0; /* Eliminar margen inferior para alineación */
+    cursor: pointer;
 }
 
-/* Grupos de Formulario */
-.form-group {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 1.2rem;
+.admin-settings-form .error-message-inline {
+    color: var(--danger-color);
+    font-size: 0.8rem;
+    margin-top: 5px;
 }
 
-.form-group label {
-  font-size: 0.9rem;
-  color: #555;
-  margin-bottom: 0.5rem;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
+.admin-settings-form .submit-btn {
+    background: linear-gradient(135deg, var(--secondary-color), #27ae60);
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(46, 204, 113, 0.2);
+    width: auto; /* Ajusta el ancho al contenido */
+    margin-left: auto; /* Alinea a la derecha */
+    margin-right: auto; /* Centra si no hay espacio a la derecha */
+    display: block; /* Para que margin: auto funcione */
 }
 
-.form-group label .icon {
-  font-size: 1.1rem;
-  color: #00acc1;
+.admin-settings-form .submit-btn:hover {
+    background: linear-gradient(135deg, #27ae60, var(--secondary-color));
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(46, 204, 113, 0.3);
 }
 
-.setting-value {
-  padding: 0.8rem 1rem;
-  background-color: #f4f6f9;
-  border-radius: 8px;
-  color: #2c3e50;
-  font-size: 0.95rem;
-  border: 1px solid #b0bec5;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+.admin-settings-form .submit-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
 }
 
-.setting-value.pre-line {
-  white-space: pre-line; /* Mantiene saltos de línea */
+.admin-settings-form .spinner-icon {
+    animation: spin 1s linear infinite;
 }
 
-.form-group input[type="text"],
-.form-group textarea,
-.form-group select {
-  padding: 0.8rem 1rem;
-  border: 1px solid #b0bec5;
-  border-radius: 8px;
-  font-size: 0.95rem;
-  color: #2c3e50;
-  background-color: #f4f6f9;
-  transition: all 0.3s ease;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+/* Responsive Design */
+@media (max-width: 768px) {
+    .admin-settings-form .form-section {
+        padding: 15px;
+    }
+    .admin-settings-form .form-section legend {
+        font-size: 1.2rem;
+    }
+    .admin-settings-form .form-group label {
+        font-size: 0.9rem;
+    }
+    .admin-settings-form .form-group input,
+    .admin-settings-form .form-group textarea,
+    .admin-settings-form .form-group select {
+        font-size: 0.85rem;
+        padding: 8px 10px;
+    }
+    .admin-settings-form .submit-btn {
+        width: 100%;
+        justify-content: center;
+        padding: 10px 20px;
+        font-size: 0.9rem;
+    }
 }
 
-.form-group input[type="text"]:focus,
-.form-group textarea:focus,
-.form-group select:focus {
-  border-color: #00acc1;
-  box-shadow: 0 0 0 3px rgba(0, 172, 193, 0.3);
-  outline: none;
-  background-color: #ffffff;
-}
-
-.form-group textarea {
-  min-height: 80px;
-  resize: vertical;
-}
-
-/* Checkboxes personalizados */
-.checkbox-group label {
-  position: relative;
-  cursor: pointer;
-  padding-left: 28px; /* Espacio para el checkbox custom */
-  user-select: none;
-}
-
-.checkbox-group input[type="checkbox"] {
-  position: absolute;
-  opacity: 0;
-  cursor: pointer;
-  height: 0;
-  width: 0;
-}
-
-.checkbox-group label::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  height: 20px;
-  width: 20px;
-  background-color: #ffffff;
-  border: 2px solid #00acc1;
-  border-radius: 4px;
-  transition: all 0.3s ease;
-}
-
-.checkbox-group input[type="checkbox"]:checked + label::before {
-  background-color: #00acc1;
-  border-color: #00acc1;
-}
-
-.checkbox-group input[type="checkbox"]:checked + label::after {
-  content: '\2713'; /* Tick mark */
-  font-size: 14px;
-  color: #ffffff;
-  position: absolute;
-  left: 4px;
-  top: 50%;
-  transform: translateY(-50%);
-  line-height: 1;
-}
-
-.checkbox-group input[type="checkbox"]:disabled + label {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
-.checkbox-group input[type="checkbox"]:disabled + label::before {
-  border-color: #b0bec5;
-  background-color: #eceff1;
-}
-
-/* Animaciones */
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-/* Responsive */
-@media (max-width: 1024px) {
-  .admin-settings-container {
-      padding: 1.5rem;
-      margin: 1rem auto;
-  }
-  .admin-content-header h2 {
-      font-size: 1.6rem;
-  }
-  .header-icon {
-      font-size: 2rem;
-  }
-  .btn-primary {
-      padding: 0.7rem 1.2rem;
-      font-size: 0.9rem;
-  }
-  .settings-section h3 {
-      font-size: 1.2rem;
-  }
-  .settings-section h3 .icon {
-      font-size: 1.4rem;
-  }
-  .form-group label {
-      font-size: 0.85rem;
-  }
-  .setting-value, .form-group input, .form-group textarea, .form-group select {
-      padding: 0.7rem 0.8rem;
-      font-size: 0.9rem;
-  }
-}
-
-@media (max-width: 767px) {
-  .admin-content-header {
-      flex-direction: column;
-      align-items: flex-start;
-  }
-  .admin-content-header h2 {
-      width: 100%;
-      text-align: center;
-      justify-content: center;
-  }
-  .btn-primary {
-      width: 100%;
-      justify-content: center;
-  }
-  .settings-section h3 {
-      width: 100%;
-      text-align: center;
-      justify-content: center;
-  }
-  .form-group label {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 0.3rem;
-  }
-  .checkbox-group label {
-      padding-left: 0;
-      flex-direction: row;
-      justify-content: flex-start;
-  }
-  .checkbox-group label::before {
-      position: static;
-      transform: none;
-      margin-right: 0.5rem;
-  }
-  .checkbox-group input[type="checkbox"]:checked + label::after {
-      left: auto;
-      top: auto;
-      transform: none;
-      margin-left: -20px; /* Ajuste para el tick */
-  }
+@media (max-width: 480px) {
+    .admin-settings-form .form-section legend {
+        font-size: 1.1rem;
+    }
+    .admin-settings-form .form-group label {
+        font-size: 0.85rem;
+    }
+    .admin-settings-form .form-group input,
+    .admin-settings-form .form-group textarea,
+    .admin-settings-form .form-group select {
+        font-size: 0.8rem;
+    }
 }

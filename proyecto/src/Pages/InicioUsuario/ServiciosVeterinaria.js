@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faConciergeBell, faSearch, faInfoCircle, faSpinner, faBroom } from '@fortawesome/free-solid-svg-icons'; // Added faBroom for clear search
-import TarjetaServicio from './TarjetaServicio';
-import styles from './Styles/ServiciosVeterinaria.module.css';
-import { authFetch } from './api';
+import { faConciergeBell, faSearch, faInfoCircle, faSpinner, faBroom } from '@fortawesome/free-solid-svg-icons';
+import TarjetaServicio from './TarjetaServicio'; // Asegúrate de que TarjetaServicio esté en la misma carpeta o ajusta la ruta
+import styles from './Styles/ServiciosVeterinaria.module.css'; // Importar el CSS sin .module
+import { authFetch } from '../../utils/api'; // Importar la función authFetch
 import { toast } from 'react-toastify'; // Import toast for user feedback
 
-function ServiciosVeterinaria() {
+function ServiciosUsuario() { // Renombrado de ServiciosVeterinaria a ServiciosUsuario
     const [services, setServices] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [isLoading, setIsLoading] = useState(true);
@@ -20,7 +20,12 @@ function ServiciosVeterinaria() {
         try {
             const response = await authFetch('/servicios'); // Endpoint para obtener servicios
             if (response.success) {
-                setServices(response.data || []); // Ensure it's an array, even if empty
+                // Ensure precio is a number
+                const fetchedServices = response.data.map(service => ({
+                    ...service,
+                    precio: typeof service.precio === 'string' ? parseFloat(service.precio) : service.precio
+                }));
+                setServices(fetchedServices || []); // Ensure it's an array, even if empty
             } else {
                 // More specific error message if available
                 setError(response.message || 'Error al cargar los servicios. Por favor, inténtalo de nuevo.');
@@ -65,8 +70,8 @@ function ServiciosVeterinaria() {
     // --- Render Logic ---
     if (isLoading) {
         return (
-            <div className={styles.loadingContainer} aria-live="polite" aria-busy="true">
-                <FontAwesomeIcon icon={faSpinner} spin className={styles.spinnerIcon} />
+            <div className="loading-container" aria-live="polite" aria-busy="true">
+                <FontAwesomeIcon icon={faSpinner} spin className="spinner-icon" />
                 <p>Cargando servicios...</p>
             </div>
         );
@@ -74,10 +79,10 @@ function ServiciosVeterinaria() {
 
     if (error) {
         return (
-            <div className={styles.errorMessage} role="alert">
-                <FontAwesomeIcon icon={faInfoCircle} className={styles.errorIcon} />
+            <div className="error-message" role="alert">
+                <FontAwesomeIcon icon={faInfoCircle} className="error-icon" />
                 <p>{error}</p>
-                <button onClick={fetchServices} className={styles.retryButton}>
+                <button onClick={fetchServices} className="retry-button">
                     Reintentar
                 </button>
             </div>
@@ -86,53 +91,53 @@ function ServiciosVeterinaria() {
 
     return (
         <motion.div
-            className={styles.servicesDashboard}
+            className="services-dashboard"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
         >
-            <div className={styles.dashboardHeader}>
-                <div className={styles.headerTitle}>
-                    <FontAwesomeIcon icon={faConciergeBell} className={styles.titleIcon} />
-                    <h2>Servicios Disponibles</h2> {/* Changed title for better clarity */}
+            <div className="dashboard-header">
+                <div className="header-title">
+                    <FontAwesomeIcon icon={faConciergeBell} className="title-icon" />
+                    <h2>Servicios Disponibles</h2>
                 </div>
-                <div className={styles.searchContainer}>
+                <div className="search-container">
                     <input
                         type="text"
                         placeholder="Buscar por nombre, descripción, categoría o especialista..."
                         value={searchTerm}
                         onChange={handleSearchChange}
-                        className={styles.searchInput}
+                        className="search-input"
                         aria-label="Buscar servicios"
                     />
                     {searchTerm && ( // Show clear button only when there's a search term
                         <button
                             onClick={handleClearSearch}
-                            className={styles.clearSearchButton}
+                            className="clear-search-button"
                             aria-label="Limpiar búsqueda"
                             title="Limpiar búsqueda"
                         >
                             <FontAwesomeIcon icon={faBroom} />
                         </button>
                     )}
-                    <FontAwesomeIcon icon={faSearch} className={styles.searchIcon} />
+                    <FontAwesomeIcon icon={faSearch} className="search-icon" />
                 </div>
             </div>
 
             {filteredServices.length > 0 ? (
-                <div className={styles.servicesGrid}>
-                    <AnimatePresence mode="popLayout"> {/* Use mode="popLayout" for smoother exit animations */}
+                <div className="services-grid">
+                    <AnimatePresence mode="popLayout">
                         {filteredServices.map(service => (
                             <TarjetaServicio key={service.id_servicio} servicio={service} />
                         ))}
                     </AnimatePresence>
                 </div>
             ) : (
-                <div className={styles.noResults}>
-                    <FontAwesomeIcon icon={faInfoCircle} className={styles.infoIcon} />
+                <div className="no-results">
+                    <FontAwesomeIcon icon={faInfoCircle} className="info-icon" />
                     <p>{searchTerm ? `No se encontraron resultados para "${searchTerm}".` : 'Actualmente no hay servicios disponibles.'}</p>
                     {searchTerm && ( // Suggest clearing search if no results
-                        <button onClick={handleClearSearch} className={styles.clearSearchButtonInNoResults}>
+                        <button onClick={handleClearSearch} className="clear-search-button-in-no-results">
                             Limpiar búsqueda
                         </button>
                     )}
@@ -142,4 +147,4 @@ function ServiciosVeterinaria() {
     );
 }
 
-export default ServiciosVeterinaria;
+export default ServiciosUsuario;

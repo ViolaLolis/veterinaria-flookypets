@@ -1,105 +1,130 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useOutletContext } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FaSpinner, FaInfoCircle, FaCalendarAlt, FaUserMd,
   FaClipboardList, FaMoneyBillWave, FaTimesCircle, FaRegCheckCircle,
   FaEdit
 } from 'react-icons/fa';
-import styles from './Styles/DetalleCita.css';
-
-// Funciones auxiliares
-const getAppointments = () => {
-  const stored = localStorage.getItem('citas');
-  return stored ? JSON.parse(stored) : [];
-};
-
-const saveAppointments = (appointments) => {
-  localStorage.setItem('citas', JSON.stringify(appointments));
-};
+import styles from './Styles/DetalleCita.css'; // Asegúrate de que el CSS sea un módulo
+import { authFetch } from '../../utils/api'; // Importar la función authFetch
+import { validateField } from '../../utils/validation'; // Importar la función de validación
 
 const DetalleCita = () => {
   const { citaId } = useParams();
   const navigate = useNavigate();
+  const { user, showNotification } = useOutletContext(); // Obtener user y showNotification del contexto
 
   const [cita, setCita] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [notification, setNotification] = useState(null);
   const [isManaging, setIsManaging] = useState(false);
   const [showRescheduleModal, setShowRescheduleModal] = useState(false);
   const [newDate, setNewDate] = useState('');
   const [newTime, setNewTime] = useState('');
-
-  // Simulación de usuario actual
-  const user = {
-    id: 'user123',
-    role: 'usuario'
-  };
+  const [rescheduleErrors, setRescheduleErrors] = useState({}); // Estado para errores de reagendamiento
 
   useEffect(() => {
-    setIsLoading(true);
-    setTimeout(() => {
-      const storedCitas = getAppointments();
-      const foundCita = storedCitas.find(c => c.id === citaId);
-      if (foundCita) {
-        setCita({ ...foundCita });
-        if (foundCita.estado !== 'completa' && foundCita.estado !== 'cancelada') {
-          setNewDate(foundCita.fecha.split(' ')[0]);
-          setNewTime(foundCita.fecha.split(' ')[1].substring(0, 5));
-        }
+    const fetchCitaDetails = async () => {
+      setIsLoading(true);
+      if (!user?.id) {
+        showNotification('No se pudo cargar la información del usuario. Por favor, inicia sesión.', 'error');
+        setIsLoading(false);
+        return;
       }
-      setIsLoading(false);
-    }, 300);
-  }, [citaId]);
+      try {
+        // La ruta de la API debería ser /citas/:id
+        const response = await authFetch(`/citas/${citaId}`);
+        if (response.success) {
+          const fetchedCita = response.data;
+          setCita(fetchedCita);
+          // Pre-llenar fecha y hora para reagendar si la cita no está completada/cancelada
+          if (fetchedCita.estado !== 'completa' && fetchedCita.estado !== 'cancelada') {
+            const datePart = fetchedCita.fecha.split(' ')[0];
+            const timePart = fetchedCita.fecha.split(' ')[1].substring(0, 5);
+            setNewDate(datePart);
+            setNewTime(timePart);
+          }
+        } else {
+          showNotification(response.message || 'Error al cargar los detalles de la cita.', 'error');
+          setCita(null); // Asegurarse de que la cita sea nula si falla la carga
+        }
+      } catch (err) {
+        console.error("Error fetching cita details:", err);
+        showNotification('Error de conexión al servidor.', 'error');
+        setCita(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  const showNotif = (msg, type = 'success') => {
-    setNotification({ msg, type });
-    setTimeout(() => setNotification(null), 3000);
-  };
+    fetchCitaDetails();
+  }, [citaId, user, showNotification]);
 
-  const updateCitaInStorage = (updatedCita) => {
-    const citas = getAppointments();
-    const updatedList = citas.map(c => c.id === updatedCita.id ? updatedCita : c);
-    saveAppointments(updatedList);
-    setCita(updatedCita);
+  const updateCitaStatus = async (newStatus) => {
+    if (!cita || isManaging) return;
+
+    setIsManaging(true);
+    try {
+      const response = await authFetch(`/citas/${cita.id_cita}`, {
+        method: 'PUT',
+        body: { estado: newStatus }
+      });
+
+      if (response.success) {
+        setCita(prev => ({ ...prev, estado: newStatus }));
+        showNotification(`Cita ${newStatus} correctamente.`, 'success');
+      } else {
+        showNotification(response.message || `Error al actualizar el estado de la cita a ${newStatus}.`, 'error');
+      }
+    } catch (err) {
+      console.error(`Error updating cita status to ${newStatus}:`, err);
+      showNotification('Error de conexión al servidor.', 'error');
+    } finally {
+      setIsManaging(false);
+    }
   };
 
   const handleCancel = () => {
-    if (!cita || cita.estado === 'cancelada' || cita.estado === 'completa') return;
-    setIsManaging(true);
-    setTimeout(() => {
-      const updated = { ...cita, estado: 'cancelada' };
-      updateCitaInStorage(updated);
-      showNotif('Cita cancelada.');
-      setIsManaging(false);
-    }, 500);
+    updateCitaStatus('cancelada');
   };
 
   const handleComplete = () => {
-    if (!cita || cita.estado !== 'aceptada') return;
-    setIsManaging(true);
-    setTimeout(() => {
-      const updated = { ...cita, estado: 'completa' };
-      updateCitaInStorage(updated);
-      showNotif('Cita completada.');
-      setIsManaging(false);
-    }, 500);
+    updateCitaStatus('completa');
   };
 
-  const handleReschedule = () => {
-    if (!newDate || !newTime) {
-      showNotif('Selecciona nueva fecha y hora.', 'error');
+  const handleReschedule = async () => {
+    // Validaciones de frontend para la nueva fecha y hora
+    const dateTimeString = `${newDate} ${newTime}`;
+    const dateError = validateField('fecha_cita', dateTimeString);
+
+    if (dateError) {
+      setRescheduleErrors({ newDate: dateError });
+      showNotification(dateError, 'error');
       return;
     }
+    setRescheduleErrors({}); // Limpiar errores si la validación pasa
+
     setIsManaging(true);
-    setTimeout(() => {
-      const newFecha = `${newDate} ${newTime}:00`;
-      const updated = { ...cita, fecha: newFecha, estado: 'pendiente' };
-      updateCitaInStorage(updated);
-      showNotif('Cita reagendada.');
-      setShowRescheduleModal(false);
+    try {
+      const newFecha = `${newDate} ${newTime}:00`; // Formato DATETIME para MySQL
+      const response = await authFetch(`/citas/${cita.id_cita}`, {
+        method: 'PUT',
+        body: { fecha: newFecha, estado: 'pendiente' } // Reagendar la cita como pendiente
+      });
+
+      if (response.success) {
+        setCita(prev => ({ ...prev, fecha: newFecha, estado: 'pendiente' }));
+        showNotification('Cita reagendada con éxito.', 'success');
+        setShowRescheduleModal(false);
+      } else {
+        showNotification(response.message || 'Error al reagendar la cita.', 'error');
+      }
+    } catch (err) {
+      console.error("Error rescheduling appointment:", err);
+      showNotification('Error de conexión al servidor al reagendar la cita.', 'error');
+    } finally {
       setIsManaging(false);
-    }, 500);
+    }
   };
 
   if (isLoading) {
@@ -115,15 +140,16 @@ const DetalleCita = () => {
     return (
       <div className={styles.noDataMessage}>
         <FaInfoCircle className={styles.infoIcon} />
-        <p>No se encontró la cita.</p>
+        <p>No se encontró la cita o no tienes permisos para verla.</p>
         <button onClick={() => navigate(-1)} className={styles.backButton}>Volver</button>
       </div>
     );
   }
 
-  const isClient = user.id === cita.id_cliente;
-  const isVet = user.id === cita.id_veterinario;
-  const isAdmin = user.role === 'admin';
+  // Lógica de permisos basada en el rol y el ID del usuario
+  const isClient = user?.id === cita.id_cliente;
+  const isVet = user?.id === cita.id_veterinario && user?.role === 'veterinario';
+  const isAdmin = user?.role === 'admin';
 
   const canCancel = (isClient || isVet || isAdmin) && cita.estado !== 'cancelada' && cita.estado !== 'completa';
   const canComplete = (isVet || isAdmin) && cita.estado === 'aceptada';
@@ -133,43 +159,34 @@ const DetalleCita = () => {
     <div className={styles.detalleCitaContainer}>
       <h2>Detalle de la Cita</h2>
 
-      {notification && (
-        <motion.div
-          className={`${styles.notification} ${styles[notification.type]}`}
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          {notification.msg}
-        </motion.div>
-      )}
-
       <div className={styles.citaInfoCard}>
-        <div><FaCalendarAlt /> <strong>Fecha:</strong> {cita.fecha}</div>
+        <div><FaCalendarAlt /> <strong>Fecha:</strong> {new Date(cita.fecha).toLocaleString('es-ES', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</div>
         <div><FaClipboardList /> <strong>Servicio:</strong> {cita.servicio_nombre}</div>
-        <div><FaMoneyBillWave /> <strong>Precio:</strong> ${cita.precio}</div>
+        <div><FaMoneyBillWave /> <strong>Precio:</strong> ${typeof cita.precio === 'number' ? cita.precio.toLocaleString('es-CO') : cita.precio}</div>
         <div><FaInfoCircle /> <strong>Estado:</strong> {cita.estado}</div>
-        <div><FaUserMd /> <strong>Veterinario:</strong> {cita.veterinario_nombre}</div>
-        <div><FaUserMd /> <strong>Cliente:</strong> {cita.cliente_nombre}</div>
+        <div><FaUserMd /> <strong>Veterinario:</strong> {cita.veterinario_nombre || 'Sin asignar'}</div>
+        <div><FaUserMd /> <strong>Cliente:</strong> {cita.cliente_nombre || 'Desconocido'}</div>
+        {cita.mascota_nombre && <div><FaUserMd /> <strong>Mascota:</strong> {cita.mascota_nombre} ({cita.mascota_especie})</div>}
         {cita.servicios && <div><FaClipboardList /> <strong>Detalles:</strong> {cita.servicios}</div>}
       </div>
 
       <div className={styles.citaActions}>
         {canReschedule && (
-          <motion.button onClick={() => setShowRescheduleModal(true)}>
+          <motion.button onClick={() => setShowRescheduleModal(true)} disabled={isManaging}>
             <FaEdit /> Reagendar
           </motion.button>
         )}
         {canCancel && (
           <motion.button onClick={handleCancel} disabled={isManaging}>
-            {isManaging ? <FaSpinner /> : <FaTimesCircle />} Cancelar
+            {isManaging ? <FaSpinner className={styles.buttonSpinner} /> : <FaTimesCircle />} Cancelar
           </motion.button>
         )}
         {canComplete && (
           <motion.button onClick={handleComplete} disabled={isManaging}>
-            {isManaging ? <FaSpinner /> : <FaRegCheckCircle />} Completar
+            {isManaging ? <FaSpinner className={styles.buttonSpinner} /> : <FaRegCheckCircle />} Completar
           </motion.button>
         )}
-        <motion.button onClick={() => navigate(-1)}>Volver</motion.button>
+        <motion.button onClick={() => navigate(-1)} disabled={isManaging}>Volver</motion.button>
       </div>
 
       <AnimatePresence>
@@ -189,16 +206,19 @@ const DetalleCita = () => {
               <input
                 type="date"
                 value={newDate}
-                onChange={e => setNewDate(e.target.value)}
+                onChange={e => { setNewDate(e.target.value); setRescheduleErrors(prev => ({ ...prev, newDate: null })); }}
                 min={new Date().toISOString().split('T')[0]}
               />
+              {rescheduleErrors.newDate && <p className={styles.errorText}>{rescheduleErrors.newDate}</p>}
               <input
                 type="time"
                 value={newTime}
-                onChange={e => setNewTime(e.target.value)}
+                onChange={e => { setNewTime(e.target.value); setRescheduleErrors(prev => ({ ...prev, newDate: null })); }}
               />
-              <button onClick={handleReschedule}>Guardar</button>
-              <button onClick={() => setShowRescheduleModal(false)}>Cancelar</button>
+              <motion.button onClick={handleReschedule} disabled={isManaging} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                {isManaging ? <FaSpinner className={styles.buttonSpinner} /> : 'Guardar'}
+              </motion.button>
+              <motion.button onClick={() => setShowRescheduleModal(false)} disabled={isManaging} className={styles.cancelButton} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>Cancelar</motion.button>
             </motion.div>
           </motion.div>
         )}
