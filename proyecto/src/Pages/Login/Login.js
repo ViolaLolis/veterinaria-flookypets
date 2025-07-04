@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import "../Styles/Login.css";
@@ -17,7 +17,11 @@ function Login({ setUser }) {
     email: false,
     password: false
   });
+  const [attempts, setAttempts] = useState(0);
+  const [isBlocked, setIsBlocked] = useState(false);
+  const [blockTime, setBlockTime] = useState(30);
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Validación en tiempo real
   useEffect(() => {
@@ -37,6 +41,22 @@ function Login({ setUser }) {
     setErrors(prev => ({ ...prev, ...newErrors }));
   }, [email, password, touched]);
 
+  // Efecto para el temporizador de bloqueo
+  useEffect(() => {
+    let timer;
+    if (isBlocked && blockTime > 0) {
+      timer = setTimeout(() => {
+        setBlockTime(prev => prev - 1);
+      }, 1000);
+    } else if (isBlocked && blockTime === 0) {
+      setIsBlocked(false);
+      setAttempts(0);
+      setBlockTime(30);
+    }
+    
+    return () => clearTimeout(timer);
+  }, [isBlocked, blockTime]);
+
   const handleBlur = (field) => {
     setTouched(prev => ({ ...prev, [field]: true }));
   };
@@ -47,6 +67,15 @@ function Login({ setUser }) {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+
+    // Si la cuenta está bloqueada, no hacer nada
+    if (isBlocked) {
+      setErrors(prev => ({
+        ...prev,
+        form: `Cuenta bloqueada temporalmente. Intente nuevamente en ${blockTime} segundos.`
+      }));
+      return;
+    }
 
     setTouched({
       email: true,
@@ -77,21 +106,40 @@ function Login({ setUser }) {
       const data = await response.json();
 
       if (!response.ok) {
-        setErrors(prev => ({
-          ...prev,
-          form: data.message || '⚠ Error al iniciar sesión ⚠'
-        }));
+        // Incrementar intentos fallidos
+        const newAttempts = attempts + 1;
+        setAttempts(newAttempts);
+
+        // Bloquear después de 3 intentos fallidos
+        if (newAttempts >= 3) {
+          setIsBlocked(true);
+          setErrors(prev => ({
+            ...prev,
+            form: `⚠ Demasiados intentos fallidos. Cuenta bloqueada por 30 segundos. ⚠`
+          }));
+        } else {
+          setErrors(prev => ({
+            ...prev,
+            form: data.message || `⚠ Credenciales incorrectas. Intentos restantes: ${3 - newAttempts} ⚠`
+          }));
+        }
         return;
       }
 
-      // Login exitoso
+      // Login exitoso - resetear contador de intentos
+      setAttempts(0);
+      setIsBlocked(false);
+      setBlockTime(30);
+
       setUser(data);
-      // >>>>>>>>>> LÍNEA CRUCIAL AÑADIDA <<<<<<<<<<
-      localStorage.setItem('token', data.token); // <-- ¡Guardando el token!
+      localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data));
 
+      // Limpiar banderas de sesión inválida
+      sessionStorage.removeItem('sessionInvalidated');
+      sessionStorage.removeItem('logoutReason');
 
-      // Redirige según el rol del usuario
+      // Redirigir según el rol del usuario
       if (data.role === 'admin') {
         navigate('/admin');
       } else if (data.role === 'veterinario') {
@@ -125,7 +173,24 @@ function Login({ setUser }) {
 
           <div className="auth-form">
             <h2>Iniciar Sesión</h2>
-            {errors.form && <p className="error-message">⚠ {errors.form} ⚠</p>}
+            
+            {/* Mostrar mensaje de razón de logout si existe */}
+            {location.state?.reason && (
+              <div className="info-message">
+                {location.state.reason === 'inactividad' 
+                  ? 'Su sesión expiró por inactividad' 
+                  : 'Debe iniciar sesión nuevamente'}
+              </div>
+            )}
+            
+            {errors.form && (
+              <p className={`error-message ${isBlocked ? 'blocked-message' : ''}`}>
+                {errors.form}
+                {isBlocked && (
+                  <span className="blocked-timer"> ({blockTime}s)</span>
+                )}
+              </p>
+            )}
 
             <form onSubmit={handleLogin}>
               <div className="form-field">
@@ -139,6 +204,7 @@ function Login({ setUser }) {
                   }}
                   onBlur={() => handleBlur('email')}
                   className={errors.email ? 'input-error' : ''}
+                  disabled={isBlocked}
                 />
                 {errors.email && <span className="field-error">⚠ {errors.email} ⚠</span>}
               </div>
@@ -155,11 +221,13 @@ function Login({ setUser }) {
                     }}
                     onBlur={() => handleBlur('password')}
                     className={errors.password ? 'input-error' : ''}
+                    disabled={isBlocked}
                   />
                   <button
                     type="button"
                     className="toggle-password"
                     onClick={toggleShowPassword}
+                    disabled={isBlocked}
                   >
                     <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
                   </button>
@@ -169,10 +237,10 @@ function Login({ setUser }) {
 
               <button
                 type="submit"
-                className="btn-auth"
-                disabled={!!errors.email || !!errors.password}
+                className={`btn-auth ${isBlocked ? 'btn-disabled' : ''}`}
+                disabled={!!errors.email || !!errors.password || isBlocked}
               >
-                Iniciar Sesión
+                {isBlocked ? `Espere ${blockTime}s` : 'Iniciar Sesión'}
               </button>
             </form>
 

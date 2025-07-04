@@ -2,12 +2,12 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import styles from './Style/NavegacionVeterinarioStyles.module.css';
 import { motion, AnimatePresence } from 'framer-motion';
-import { authFetch } from './api'; // Asegúrate de que la ruta sea correcta
+import { authFetch } from '../../utils/api'; // Asegúrate de que la ruta sea correcta, asumo que está en utils/api
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
     faPaw, faUser, faCalendarAlt,
-    faNotesMedical, faCheckCircle, faClock ,faPlus, faUserPlus, faClipboardList, faChevronRight,
+    faNotesMedical, faCheckCircle, faClock, faPlus, faUserPlus, faClipboardList, faChevronRight,
     faSpinner, faExclamationTriangle, faTimesCircle, faCheck // Añadidos para carga y error, y botones de aceptar/rechazar
 } from '@fortawesome/free-solid-svg-icons';
 
@@ -48,43 +48,42 @@ const NavegacionVeterinario = () => {
     const fetchVetDashboardData = useCallback(async () => {
         if (!user?.id) {
             setIsLoading(false);
+            setError('Usuario no autenticado.');
             return;
         }
         setIsLoading(true);
         setError(null);
         try {
             // 1. Fetch pending appointments for today, specifically for the logged-in vet
-            const today = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
-            // Solicita citas para el veterinario logeado con estado 'PENDIENTE'
-            const appointmentsResponse = await authFetch(`/citas?fecha=${today}&estado=PENDIENTE`);
+            // La ruta /veterinario/citas/ultimas ya filtra por el veterinario logeado y estado PENDIENTE
+            const appointmentsResult = await authFetch(`/veterinario/citas/ultimas`);
             
             let pendingToday = [];
-            if (appointmentsResponse.success) {
-                // El backend ya debería haber filtrado por id_veterinario (middleware) y estado='PENDIENTE'
-                pendingToday = appointmentsResponse.data;
+            if (appointmentsResult.success) {
+                pendingToday = appointmentsResult.data;
             } else {
-                showNotification(appointmentsResponse.message || 'Error al cargar citas pendientes.', 'error');
-                setError(appointmentsResponse.message || 'Error al cargar citas pendientes.');
+                showNotification(appointmentsResult.message || 'Error al cargar citas pendientes.', 'error');
+                setError(appointmentsResult.message || 'Error al cargar citas pendientes.');
             }
 
             // 2. Fetch completed appointments count for today
-            const completedCountResponse = await authFetch(`/veterinario/citas/completadas/count`);
+            const completedCountResult = await authFetch(`/veterinario/citas/completadas/count`);
             let completedTodayCount = 0;
-            if (completedCountResponse.success) {
-                completedTodayCount = completedCountResponse.count;
+            if (completedCountResult.success) {
+                completedTodayCount = completedCountResult.count;
             } else {
-                showNotification(completedCountResponse.message || 'Error al cargar citas completadas.', 'error');
-                setError(prev => prev ? prev + ' ' + completedCountResponse.message : completedCountResponse.message);
+                showNotification(completedCountResult.message || 'Error al cargar citas completadas.', 'error');
+                setError(prev => prev ? prev + ' ' + completedCountResult.message : completedCountResult.message);
             }
 
             // 3. Fetch unread notifications
-            const notificationsResponse = await authFetch(`/api/notifications/veterinarian/${user.id}`);
+            const notificationsResult = await authFetch(`/api/notifications/user/${user.id}`); // Usar la ruta general de notificaciones de usuario
             let unreadNotificationsCount = 0;
-            if (notificationsResponse.success) {
-                unreadNotificationsCount = notificationsResponse.data.filter(n => !n.leida).length;
+            if (notificationsResult.success) {
+                unreadNotificationsCount = notificationsResult.data.filter(n => !n.leida).length;
             } else {
-                showNotification(notificationsResponse.message || 'Error al cargar notificaciones.', 'error');
-                setError(prev => prev ? prev + ' ' + notificationsResponse.message : notificationsResponse.message);
+                showNotification(notificationsResult.message || 'Error al cargar notificaciones.', 'error');
+                setError(prev => prev ? prev + ' ' + notificationsResult.message : notificationsResult.message);
             }
 
             // Update pending appointments state
@@ -94,6 +93,7 @@ const NavegacionVeterinario = () => {
                 mascota: cita.mascota_nombre,
                 propietario: cita.propietario_nombre,
                 servicio: cita.servicio_nombre,
+                precio: cita.precio, // Asegúrate de que el backend devuelva el precio
                 estado: cita.estado,
                 icon: faPaw, // Default icon, consider dynamic based on service type
                 color: "#00acc1", // Default color, consider dynamic
@@ -115,25 +115,31 @@ const NavegacionVeterinario = () => {
         } finally {
             setIsLoading(false);
         }
-    }, [user, showNotification]);
+    }, [user, showNotification, authFetch]); // Añadido authFetch a las dependencias
 
     useEffect(() => {
         fetchVetDashboardData();
+        // Opcional: Establecer un intervalo de actualización para el dashboard
+        const dashboardRefreshInterval = setInterval(fetchVetDashboardData, 60000); // Cada 60 segundos
+        return () => clearInterval(dashboardRefreshInterval);
     }, [fetchVetDashboardData]);
 
     // Función para manejar el cambio de estado de la cita (Aceptar/Rechazar/Completar)
     const handleUpdateAppointmentStatus = useCallback(async (id, newStatus) => {
         // Optimistic UI update: Remove the appointment from the list immediately
-        // This makes the UI feel more responsive. The fetchVetDashboardData() call
-        // will then re-synchronize the state with the backend.
         setVetDashPendingAppointments(prevCitas =>
             prevCitas.filter(cita => cita.id !== id)
         );
+        // También actualiza el contador de citas pendientes si se acepta o rechaza
+        setVetDashStats(prevStats => ({
+            ...prevStats,
+            totalCitasHoy: prevStats.totalCitasHoy - 1,
+            citasCompletadasHoy: newStatus === 'COMPLETA' ? prevStats.citasCompletadasHoy + 1 : prevStats.citasCompletadasHoy
+        }));
 
         try {
             const response = await authFetch(`/citas/${id}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ estado: newStatus.toUpperCase() })
             });
 
@@ -152,7 +158,7 @@ const NavegacionVeterinario = () => {
             // Revert optimistic update on network error (re-fetch will handle this)
             fetchVetDashboardData();
         }
-    }, [showNotification, fetchVetDashboardData]);
+    }, [showNotification, fetchVetDashboardData, authFetch]);
 
 
     const vetDashQuickActions = [
@@ -201,7 +207,7 @@ const NavegacionVeterinario = () => {
             transition={{ duration: 0.6, ease: "easeOut" }}
         >
             <h1 className={styles.vetDash_greetingText}>
-                {vetDashGreeting}, Dr/a. <span style={{ fontWeight: 'bold' }}>{user?.nombre || 'Veterinario'}</span>**!
+                {vetDashGreeting}, Dr/a. <span style={{ fontWeight: 'bold' }}>{user?.nombre || 'Veterinario'}</span>!
             </h1>
             <p className={styles.vetDash_subHeaderMessage}>Aquí tienes un resumen rápido de tu jornada y las acciones clave.</p>
 
@@ -371,6 +377,7 @@ const NavegacionVeterinario = () => {
                                             <span className={styles.vetDash_serviceType}> - {cita.servicio}</span>
                                         </h4>
                                         <p className={styles.vetDash_propietarioName}>Propietario: <strong>{cita.propietario}</strong></p>
+                                        <p className={styles.vetDash_servicePrice}>Precio: <strong>${cita.precio?.toLocaleString('es-CO')}</strong></p>
                                     </div>
                                     <div className={styles.vetDash_appointmentActions}>
                                         {/* Botones de Aceptar/Rechazar para citas PENDIENTES */}
@@ -394,12 +401,12 @@ const NavegacionVeterinario = () => {
                                                 </motion.button>
                                             </>
                                         )}
-                                        {/* Botón de Marcar Completada si la cita ya está ACEPTADA (o para otros estados si se desea) */}
+                                        {/* Botón de Marcar Completada si la cita ya está ACEPTADA */}
                                         {cita.estado === 'ACEPTADA' && (
                                             <motion.button
                                                 className={`${styles.vetDash_actionButton} ${styles.vetDash_completeButton}`}
                                                 onClick={() => handleUpdateAppointmentStatus(cita.id, 'COMPLETA')}
-                                                whileHover={{ scale: 1.05, backgroundColor: 'var(--color-success-dark)', color: 'white' }}
+                                                whileHover={{ scale: 1.05, backgroundColor: 'var(--color-primary-dark)', color: 'white' }}
                                                 whileTap={{ scale: 0.95 }}
                                             >
                                                 Marcar Completada

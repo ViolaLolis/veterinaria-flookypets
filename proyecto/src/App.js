@@ -1,4 +1,3 @@
-// src/App.js
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
 import Main from "./Pages/Inicio/Main";
@@ -65,10 +64,6 @@ import { NotificationProvider } from "./Notifications/NotificationContext.js";
 // Importar el componente para mostrar las notificaciones
 import NotificationDisplay from "./Notifications/NotificationDisplay.js";
 
-// NO MÁS LÓGICA DE SUPRESIÓN DE CONSOLE AQUÍ. MUEVE ESTO A index.js (o main.jsx)
-// para asegurar que se ejecute antes de que se cargue React y otros componentes.
-
-
 function App() {
     // Inicializa el estado del usuario intentando recuperarlo del localStorage
     const [user, setUser] = useState(() => {
@@ -80,8 +75,7 @@ function App() {
                 return { ...parsedUser, token: storedToken };
             }
         } catch (error) {
-            // Este console.error será suprimido en producción por la lógica en index.js
-            console.error("Error al recuperar usuario del localStorage en App.js:", error);
+            console.error("Error al recuperar usuario del localStorage:", error);
             localStorage.removeItem('user');
             localStorage.removeItem('token');
         }
@@ -100,32 +94,19 @@ function App() {
     }, [user]);
 
     // EFECTO PARA MOSTRAR LA ADVERTENCIA DE LA CONSOLA SOLO EN PRODUCCIÓN
-    // Aseguramos que se llame showConsoleWarning solo una vez al montar la aplicación
-    // y solo en el entorno de producción.
     useEffect(() => {
         if (process.env.NODE_ENV === 'production') {
-            // Importar dinámicamente la función para asegurar que se cargue y ejecute
-            // después de que window._originalConsoleLog esté disponible.
             import('./utils/consoleWarning.js').then(({ showConsoleWarning }) => {
                 showConsoleWarning();
             }).catch(err => {
-                // Este error se imprimiría usando el console.error ya suprimido si no fuera por
-                // que es un error de importación, el cual el navegador podría mostrar directamente.
-                // Es un caso muy raro, pero es bueno manejarlo.
-                // Si llegara aquí, significa que showConsoleWarning.js no se encontró o tuvo un error.
-                if (window._originalConsoleError) { // Si el original error fue guardado
+                if (window._originalConsoleError) {
                    window._originalConsoleError("Error al cargar la advertencia de la consola:", err);
                 } else {
-                   // Fallback si no se guardó el original (debería estar ya suprimido de todas formas)
                    console.error("Error al cargar la advertencia de la consola:", err);
                 }
             });
         }
     }, []);
-
-    const handleLogout = () => {
-        setUser(null);
-    };
 
     return (
         <Router>
@@ -138,8 +119,9 @@ function App() {
                     <Route path="/olvide-contraseña" element={<ForgotPassword />} />
                     <Route path="/register" element={<Registro />} />
 
-                    <Route element={<Protegida user={user} setUser={setUser} allowedRoles={['admin']} handleLogout={handleLogout} />}>
-                        <Route path="/admin" element={<AdminDashboard user={user} setUser={setUser} handleLogout={handleLogout} />}>
+                    {/* Rutas para Administrador */}
+                    <Route element={<Protegida user={user} setUser={setUser} allowedRoles={['admin']} />}>
+                        <Route path="/admin" element={<AdminDashboard user={user} setUser={setUser} />}>
                             <Route index element={<AdminStats user={user} />} />
                             <Route path="dashboard" element={<AdminStats user={user} />} />
                             <Route path="services" element={<ServicesManagement user={user} />} />
@@ -153,7 +135,8 @@ function App() {
                         </Route>
                     </Route>
 
-                    <Route element={<Protegida user={user} setUser={setUser} allowedRoles={['veterinario', 'admin']} handleLogout={handleLogout} />}>
+                    {/* Rutas para Veterinario */}
+                    <Route element={<Protegida user={user} setUser={setUser} allowedRoles={['veterinario', 'admin']} />}>
                         <Route path="/veterinario" element={<MainVeterinario user={user} setUser={setUser} />}>
                             <Route index element={<NavegacionVeterinario />} />
                             <Route path="navegacion" element={<NavegacionVeterinario />} />
@@ -170,7 +153,6 @@ function App() {
                             <Route path="citas/:id" element={<DetalleCitaVeterinario />} />
                             <Route path="historiales" element={<ListaHistorialesVeterinario />} />
                             <Route path="historiales/registrar" element={<RegistrarHistorialMedico />} />
-                            <Route path="historiales/:id" element={<DetalleHistorialVeterinario />} />
                             <Route path="historiales/editar/:id" element={<EditarHistorialMedico />} />
                             <Route path="perfil" element={<VerPerfilVeterinario setUser={setUser} />} />
                             <Route path="perfil/editar" element={<EditarPerfilVeterinario />} />
@@ -178,7 +160,8 @@ function App() {
                         </Route>
                     </Route>
 
-                    <Route element={<Protegida user={user} setUser={setUser} allowedRoles={['usuario']} handleLogout={handleLogout} />}>
+                    {/* Rutas para Usuario */}
+                    <Route element={<Protegida user={user} setUser={setUser} allowedRoles={['usuario']} />}>
                         <Route path="/usuario" element={<InicioUsuario user={user} setUser={setUser} />}>
                             <Route index element={<HomeDashboard />} />
                             <Route path="mascotas" element={<ListaMascotasUsuario user={user} />} />

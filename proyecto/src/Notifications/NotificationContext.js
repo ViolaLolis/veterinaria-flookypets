@@ -17,90 +17,41 @@ export const NotificationProvider = ({ children }) => {
   const [userRole, setUserRole] = useState(null);
   const intervalRef = useRef(null); // Para el intervalo de polling
 
-  // Función para obtener el token JWT del localStorage
-  const getToken = () => {
+  // Función para obtener el token JWT y datos del usuario del localStorage
+  const getTokenAndUser = useCallback(() => {
     try {
-      const user = localStorage.getItem('user');
-      return user ? JSON.parse(user).token : null;
-    } catch (error) {
-      console.error("Error al parsear el usuario del localStorage para token:", error);
-      return null;
-    }
-  };
-
-  // Efecto para obtener el userId y userRole del localStorage al cargar
-  useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      try {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
         const parsedUser = JSON.parse(storedUser);
-        setUserId(parsedUser.id);
-        setUserRole(parsedUser.role);
-      } catch (error) {
-        console.error("Error al parsear el usuario almacenado:", error);
-        setUserId(null);
-        setUserRole(null);
-        localStorage.removeItem('user'); // Limpiar datos corruptos
-        localStorage.removeItem('token');
+        return { token: parsedUser.token, id: parsedUser.id, role: parsedUser.role };
       }
-    } else {
-      setUserId(null);
-      setUserRole(null);
+      return { token: null, id: null, role: null };
+    } catch (error) {
+      console.error("Error al parsear el usuario del localStorage para token/ID/rol:", error);
+      return { token: null, id: null, role: null };
     }
   }, []);
 
-  // Función para obtener notificaciones desde el backend
-  const fetchNotifications = useCallback(async () => {
-    if (!userId) {
-      // Si no hay ID de usuario, no hay notificaciones que buscar.
-      // Esto es normal si el usuario no ha iniciado sesión o se ha deslogueado.
-      setNotifications([]); // Limpiar notificaciones si no hay usuario logueado
-      return;
-    }
+  // Efecto para obtener el userId y userRole del localStorage al cargar
+  useEffect(() => {
+    const { id, role } = getTokenAndUser();
+    setUserId(id);
+    setUserRole(role);
+  }, [getTokenAndUser]);
 
-    // No necesitamos getToken() aquí directamente porque authFetch ya lo maneja.
-    // authFetch lanzará un error si no hay token o es inválido.
-    try {
-      // CAMBIO CLAVE: Se agregó '/api' a la ruta para que coincida con el backend
-      const result = await authFetch(`/api/notifications/user/${userId}`);
-
-      if (result.success && Array.isArray(result.data)) {
-        // Filtra solo las notificaciones no leídas para mostrarlas
-        const unreadNotifications = result.data.filter(notif => !notif.leida);
-        setNotifications(unreadNotifications);
-      } else {
-        console.error("Error al obtener notificaciones:", result.message || "Formato de respuesta inesperado.");
-        setNotifications([]); // Limpiar si hay un error en el formato
-      }
-    } catch (error) {
-      console.error("Error de red o autenticación al obtener notificaciones:", error.message);
-      // Si hay un error de autenticación (ej. token expirado), limpiar notificaciones
-      if (error.message.includes('No autorizado') || error.message.includes('Token inválido')) {
-        setNotifications([]);
-        // Opcional: Aquí podrías añadir lógica para forzar un logout o redirigir al login
-        // localStorage.removeItem('user');
-        // localStorage.removeItem('token');
-        // window.location.href = '/login';
-      }
-      setNotifications([]); // Limpiar notificaciones en caso de cualquier error de fetch
-    }
-  }, [userId]); // Depende de userId para re-ejecutarse cuando el usuario cambia
-
-  // Función para añadir una notificación temporal (no persistente en la BD)
-  const addNotification = useCallback((type, message, duration = 5000) => {
-    // Genera un ID único para notificaciones efímeras (no de la BD)
+  // Función para agregar una notificación al estado local (principalmente para notificaciones efímeras del frontend)
+  const addNotification = useCallback(({ message, type = 'info', ephemeral = false, duration = 5000 }) => {
     const newNotification = {
-      id: Date.now() + Math.random(), // ID temporal único para el frontend
-      tipo: type,
+      id: Date.now() + Math.random(), // ID único para notificaciones efímeras
       mensaje: message,
-      leida: false, // Las notificaciones efímeras no se marcan como leídas en la BD
-      fecha_creacion: new Date().toISOString()
+      tipo: type,
+      leida: false,
+      fecha_creacion: new Date().toISOString(),
+      ephemeral: ephemeral, // Marca si es una notificación temporal solo para el frontend
     };
+    setNotifications(prevNotifications => [newNotification, ...prevNotifications]);
 
-    setNotifications(prevNotifications => [...prevNotifications, newNotification]);
-
-    // Elimina la notificación después de 'duration' milisegundos
-    if (duration > 0) {
+    if (ephemeral) {
       setTimeout(() => {
         setNotifications(prevNotifications =>
           prevNotifications.filter(notif => notif.id !== newNotification.id)
@@ -109,64 +60,82 @@ export const NotificationProvider = ({ children }) => {
     }
   }, []);
 
-  // Función para marcar una notificación como leída en el backend
-  const markNotificationAsRead = useCallback(async (notificationId) => {
-    // Solo intenta marcar como leída si es una notificación de la BD (tiene id_notificacion)
-    const notificationToMark = notifications.find(n => (n.id_notificacion === notificationId || n.id === notificationId));
+  // Función para obtener notificaciones desde la API
+  const fetchNotifications = useCallback(async () => {
+    if (!userId) return; // Solo intentar obtener si hay un userId
 
-    if (notificationToMark && notificationToMark.id_notificacion) { // Verifica si tiene un ID de BD
+    try {
+      const response = await authFetch(`/api/notifications/user/${userId}`);
+      if (response.success) {
+        // Filtrar notificaciones efímeras del estado local antes de cargar nuevas desde la BD
+        const currentEphemeralNotifications = notifications.filter(notif => notif.ephemeral);
+        setNotifications([...currentEphemeralNotifications, ...response.data]);
+      } else {
+        console.error("Error al obtener notificaciones:", response.message);
+        // addNotification({ message: response.message, type: 'error', ephemeral: true }); // Opcional: notificar al usuario sobre el error
+      }
+    } catch (error) {
+      console.error("Error de red al obtener notificaciones:", error);
+      // addNotification({ message: 'Error de conexión al cargar notificaciones.', type: 'error', ephemeral: true }); // Opcional
+    }
+  }, [userId, notifications]); // Dependencia 'notifications' para mantener las efímeras
+
+  // Función para marcar una notificación como leída
+  const markNotificationAsRead = useCallback(async (notificationId, isDbNotification = true) => {
+    if (isDbNotification) {
       try {
-        // CAMBIO CLAVE: Se cambió la ruta para marcar como leída
-        const response = await authFetch(`/api/notifications/mark-read/${notificationToMark.id_notificacion}`, {
+        const response = await authFetch(`/api/notifications/${notificationId}/read`, {
           method: 'PUT',
-          body: JSON.stringify({ leida: true }) // Enviar el estado 'leida'
         });
         if (response.success) {
-          // Actualiza el estado local para reflejar que está leída
           setNotifications(prevNotifications =>
             prevNotifications.map(notif =>
-              notif.id_notificacion === notificationToMark.id_notificacion ? { ...notif, leida: true } : notif
+              notif.id_notificacion === notificationId ? { ...notif, leida: true } : notif
             )
           );
         } else {
           console.error("Error al marcar notificación como leída:", response.message);
+          addNotification({ message: `Error: ${response.message}`, type: 'error', ephemeral: true });
         }
       } catch (error) {
-        console.error("Error de conexión al marcar notificación como leída:", error.message);
+        console.error("Error de red al marcar notificación como leída:", error);
+        addNotification({ message: 'Error de conexión al marcar notificación como leída.', type: 'error', ephemeral: true });
       }
-    } else {
-      // Si es una notificación efímera, simplemente la eliminamos del estado local
-      removeNotification(notificationId);
+    } else { // Si es efímera, solo actualiza el estado local
+      setNotifications(prevNotifications =>
+        prevNotifications.map(notif =>
+          notif.id === notificationId ? { ...notif, leida: true } : notif
+        )
+      );
     }
-  }, [authFetch, notifications]); // Depende de authFetch y notifications
+  }, [authFetch, addNotification]);
 
-  // Función para eliminar una notificación del estado local (y del backend si es persistente)
-  const removeNotification = useCallback(async (notificationId) => {
-    const notificationToRemove = notifications.find(n => (n.id_notificacion === notificationId || n.id === notificationId));
 
-    if (notificationToRemove && notificationToRemove.id_notificacion) { // Si tiene ID de BD, intenta eliminar del backend
+  // Función para eliminar una notificación
+  const removeNotification = useCallback(async (notificationId, isDbNotification = true) => {
+    if (isDbNotification) {
       try {
-        // CAMBIO CLAVE: Se cambió la ruta para eliminar notificación
-        const response = await authFetch(`/api/notifications/${notificationToRemove.id_notificacion}`, {
-          method: 'DELETE'
+        const response = await authFetch(`/api/notifications/${notificationId}`, {
+          method: 'DELETE',
         });
         if (response.success) {
           setNotifications(prevNotifications =>
-            prevNotifications.filter(notif => notif.id_notificacion !== notificationToRemove.id_notificacion)
+            prevNotifications.filter(notif => notif.id_notificacion !== notificationId)
           );
+          addNotification({ message: 'Notificación eliminada.', type: 'success', ephemeral: true });
         } else {
-          console.error("Error al eliminar notificación del backend:", response.message);
+          console.error("Error al eliminar notificación:", response.message);
+          addNotification({ message: `Error: ${response.message}`, type: 'error', ephemeral: true });
         }
       } catch (error) {
-        console.error("Error de conexión al eliminar notificación:", error.message);
+        console.error("Error de red al eliminar notificación:", error.message);
       }
     } else { // Si es efímera o no tiene ID de BD, solo elimina del estado local
       setNotifications(prevNotifications =>
         prevNotifications.filter(notif => notif.id !== notificationId)
       );
     }
-  }, [authFetch, notifications]);
-
+  }, [authFetch, notifications, addNotification]); // add addNotification to dependencies
 
   // Efecto para iniciar y limpiar el polling de notificaciones
   useEffect(() => {
