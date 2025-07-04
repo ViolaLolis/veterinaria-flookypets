@@ -1,462 +1,506 @@
-/* AdminsManagement.css - Diseño Profesional con #00acc1 y #ecf0f1 */
-
+/* Variables CSS para colores y espaciado */
 :root {
-    --primary: #00acc1;
-    --primary-light: rgba(0, 172, 193, 0.1);
-    --primary-dark: #008c9e;
-    --primary-glow: rgba(0, 172, 193, 0.3);
-    --secondary: #ecf0f1;
-    --secondary-dark: #dfe6e9;
-    --text-dark: #2c3e50;
-    --text-light: #7f8c8d;
-    --white: #ffffff;
-    --success: #1dd1a1;
-    --warning: #ff9f43;
-    --danger: #ff6b6b;
-    --shadow: 0 4px 25px rgba(0, 0, 0, 0.08);
-    --transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-  }
-  
-  /* Estructura principal con efecto de elevación */
-  .admins-management {
-    padding: 2.5rem;
-    background-color: var(--white);
-    border-radius: 18px;
-    box-shadow: var(--shadow);
-    margin: 1.5rem;
-    transition: var(--transition);
-    border: 1px solid rgba(0, 172, 193, 0.1);
-    position: relative;
-    overflow: hidden;
-  }
-  
-  .admins-management::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(circle at 80% 20%, rgba(0, 172, 193, 0.05) 0%, transparent 40%);
-    pointer-events: none;
-  }
-  
-  .admins-management:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 35px rgba(0, 172, 193, 0.15);
-  }
-  
-  /* Encabezado con efecto de neón */
-  .management-header {
+    --primary-color: #00acc1; /* Azul verdoso vibrante */
+    --primary-dark: #007c91;  /* Tono más oscuro */
+    --primary-light: #80deea; /* Tono más claro */
+    --secondary-color: #2196F3; /* Azul estándar para contrastes si es necesario (ej. icon color) */
+    --secondary-dark: #1976D2;
+    --accent-color: #FFC107; /* Amarillo para advertencias/otros (ej. icon color) */
+    --danger-color: #F44336; /* Rojo para acciones peligrosas (no tanto aquí, pero útil) */
+    --danger-dark: #D32F2F;
+
+    /* Mantengo algunas variables genéricas que no se sobrescribieron, o ajusto si hay conflicto */
+    /* --secondary-color: #6c757d; // Reemplazada por el nuevo --secondary-color */
+    --success-color: #28a745; /* Verde para éxito (mantengo el original si no se especifica) */
+    --danger-dark-btn: #c82333; /* Rojo más oscuro para hover de botones (ajustado para ser una sombra de --danger-color) */
+    --info-color: #17a2b8; /* Azul claro para información (mantengo el original) */
+    --light-bg: #f8f9fa; /* Fondo claro */
+    --dark-bg: #343a40; /* Fondo oscuro (para texto, etc.) */
+    --white: #fff;
+    --border-color: #dee2e6; /* Color de borde de tabla */
+    --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Sombra para tarjetas/modales */
+    --border-radius: 8px;
+    --spacing-unit: 1rem; /* 16px */
+}
+
+/* Contenedor principal del componente */
+.admin-content-container {
+    padding: var(--spacing-unit) calc(var(--spacing-unit) * 1.5); /* 16px 24px */
+    background-color: var(--light-bg);
+    min-height: calc(100vh - 60px); /* Ajustar según la altura de tu navbar/header */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #333;
+}
+
+/* Encabezado de la sección */
+.admin-content-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 2.5rem;
-    padding-bottom: 1.8rem;
-    border-bottom: 2px solid var(--primary-light);
-    flex-wrap: wrap;
-    gap: 1.5rem;
-  }
-  
-  .management-header h2 {
-    color: var(--text-dark);
-    font-size: 2rem;
+    flex-wrap: wrap; /* Permite que los elementos se envuelvan en pantallas pequeñas */
+    margin-bottom: calc(var(--spacing-unit) * 2); /* 32px */
+    padding-bottom: var(--spacing-unit);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.admin-content-header h2 {
+    font-size: 2rem; /* 32px */
+    color: var(--dark-bg);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem; /* Espacio entre icono y texto */
     margin: 0;
-    position: relative;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  }
-  
-  /* Barra de búsqueda futurista */
-  .header-actions {
+    flex-grow: 1; /* Permite que el título ocupe espacio */
+}
+
+.admin-content-header .header-icon {
+    color: var(--primary-color); /* Usando el nuevo primary-color */
+    font-size: 2.2rem;
+}
+
+/* Acciones del encabezado (búsqueda y botón de añadir) */
+.header-actions {
     display: flex;
+    gap: var(--spacing-unit); /* Espacio entre la caja de búsqueda y el botón */
     align-items: center;
-    gap: 1.5rem;
     flex-wrap: wrap;
-  }
-  
-  .search-bar {
+    margin-top: var(--spacing-unit); /* Espacio superior en móviles */
+}
+
+/* Caja de búsqueda */
+.search-box {
     position: relative;
-    flex-grow: 1;
-    min-width: 300px;
-  }
-  
-  .search-bar input {
-    width: 100%;
-    padding: 1rem 1.5rem 1rem 3.5rem;
-    border: 2px solid var(--secondary-dark);
-    border-radius: 50px;
-    background-color: var(--white);
+    display: flex;
+    align-items: center;
+}
+
+.search-box input {
+    padding: 0.75rem 1rem 0.75rem 2.5rem; /* Espacio para el icono */
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
     font-size: 1rem;
-    transition: var(--transition);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-  }
-  
-  .search-bar input:focus {
+    width: 250px; /* Ancho fijo, se ajustará con media queries */
+    transition: all 0.3s ease;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.search-box input:focus {
+    border-color: var(--primary-color); /* Usando el nuevo primary-color */
+    box-shadow: 0 0 0 0.2rem rgba(0, 172, 193, 0.25); /* Ajustar el rgba al nuevo primary-color */
     outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 4px rgba(0, 172, 193, 0.2);
-  }
-  
-  .search-bar i {
+}
+
+.search-box .search-icon {
     position: absolute;
-    left: 1.5rem;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--primary);
-    font-size: 1.2rem;
-    transition: var(--transition);
-  }
-  
-  .search-bar:hover i {
-    transform: translateY(-50%) scale(1.1);
-  }
-  
-  /* Botón principal con efecto de partículas */
-  .add-btn {
-    padding: 0.8rem 1.8rem;
-    border-radius: 50px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: var(--transition);
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-    color: var(--white);
+    left: 1rem;
+    color: var(--secondary-color); /* Usando el nuevo secondary-color */
+    font-size: 1rem;
+}
+
+/* Botones generales */
+.add-new-btn, .submit-btn, .btn-icon, .btn-cancel {
+    padding: 0.75rem 1.25rem;
     border: none;
-    box-shadow: 0 4px 15px rgba(0, 172, 193, 0.3);
-    position: relative;
-    overflow: hidden;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    cursor: pointer;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.6rem;
-  }
-  
-  .add-btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(0, 172, 193, 0.4);
-  }
-  
-  .add-btn::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: all 0.6s ease;
-  }
-  
-  .add-btn:hover::before {
-    left: 100%;
-  }
-  
-  /* Formulario de edición */
-  .edit-form {
-    background-color: var(--white);
-    border-radius: 12px;
-    padding: 2rem;
-    box-shadow: var(--shadow);
-    margin-bottom: 2rem;
-    border: 1px solid rgba(0, 172, 193, 0.1);
-    transition: var(--transition);
-  }
-  
-  .edit-form:hover {
-    box-shadow: 0 8px 25px rgba(0, 172, 193, 0.15);
-  }
-  
-  .edit-form h3 {
-    color: var(--primary);
-    margin-bottom: 1.5rem;
-    font-size: 1.5rem;
-    border-bottom: 2px solid var(--primary-light);
-    padding-bottom: 0.8rem;
-  }
-  
-  .form-row {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 1.5rem;
-  }
-  
-  .form-group {
-    display: flex;
-    flex-direction: column;
     gap: 0.5rem;
-  }
-  
-  .form-group label {
-    font-weight: 600;
-    color: var(--text-dark);
-    font-size: 0.95rem;
-  }
-  
-  .form-group input {
-    padding: 1rem;
-    border: 2px solid var(--secondary-dark);
-    border-radius: 8px;
-    font-size: 1rem;
-    transition: var(--transition);
-    background-color: var(--white);
-  }
-  
-  .form-group input:focus {
-    outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(0, 172, 193, 0.2);
-  }
-  
-  .form-group input:disabled {
-    background-color: var(--secondary);
-    opacity: 0.7;
-  }
-  
-  .form-actions {
-    display: flex;
-    gap: 1rem;
-    margin-top: 1.5rem;
-  }
-  
-  .save-btn, .cancel-btn {
-    padding: 1rem 1.8rem;
-    border-radius: 50px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: var(--transition);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.8rem;
-    font-size: 1rem;
-    border: none;
-  }
-  
-  .save-btn {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    white-space: nowrap; /* Evita que el texto se rompa */
+}
+
+.add-new-btn {
+    background-color: var(--primary-color); /* Usando el nuevo primary-color */
     color: var(--white);
-    box-shadow: 0 4px 15px rgba(0, 172, 193, 0.3);
-  }
-  
-  .save-btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(0, 172, 193, 0.4);
-  }
-  
-  .cancel-btn {
-    background-color: var(--white);
-    color: var(--primary);
-    border: 2px solid var(--primary);
-  }
-  
-  .cancel-btn:hover {
-    background-color: var(--primary-light);
-    transform: translateY(-3px);
-  }
-  
-  /* Tabla de administradores */
-  .admins-table-container {
-    background-color: var(--white);
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: var(--shadow);
-    transition: var(--transition);
-    position: relative;
-    overflow-x: auto;
-  }
-  
-  .admins-table-container:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 40px rgba(0, 172, 193, 0.15);
-  }
-  
-  .admins-table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    min-width: 800px;
-  }
-  
-  .admins-table th {
-    background: linear-gradient(to right, var(--primary-light), var(--secondary));
-    padding: 1.5rem;
-    text-align: left;
-    color: var(--primary);
-    font-weight: 700;
-    position: sticky;
-    top: 0;
-    border-bottom: 2px solid var(--primary-light);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    font-size: 0.9rem;
-  }
-  
-  .admins-table td {
-    padding: 1.5rem;
-    border-bottom: 1px solid var(--secondary-dark);
-    transition: var(--transition);
-  }
-  
-  .admins-table tr:last-child td {
-    border-bottom: none;
-  }
-  
-  .admins-table tr:hover td {
-    background-color: var(--primary-light);
-    transform: scale(1.01);
-  }
-  
-  /* Botones de acción en tabla */
-  .actions-cell {
-    display: flex;
-    gap: 0.8rem;
-  }
-  
-  .edit-btn, .delete-btn {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: var(--transition);
-    border: none;
-    font-size: 1rem;
-  }
-  
-  .edit-btn {
-    background-color: var(--primary-light);
-    color: var(--primary);
-  }
-  
-  .edit-btn:hover {
-    background-color: var(--primary);
-    color: var(--white);
+    box-shadow: 0 2px 5px rgba(0, 172, 193, 0.2); /* Ajustar el rgba al nuevo primary-color */
+}
+
+.add-new-btn:hover {
+    background-color: var(--primary-dark); /* Usando el nuevo primary-dark */
     transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(0, 172, 193, 0.2);
-  }
-  
-  .delete-btn {
-    background-color: rgba(255, 107, 107, 0.1);
-    color: var(--danger);
-  }
-  
-  .delete-btn:hover:not(:disabled) {
-    background-color: var(--danger);
-    color: var(--white);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(255, 107, 107, 0.2);
-  }
-  
-  .delete-btn:disabled {
-    opacity: 0.5;
+    box-shadow: 0 4px 8px rgba(0, 172, 193, 0.3); /* Ajustar el rgba al nuevo primary-color */
+}
+
+.add-new-btn:disabled, .submit-btn:disabled, .btn-icon:disabled, .btn-cancel:disabled {
+    background-color: var(--secondary-color); /* Usando el nuevo secondary-color */
     cursor: not-allowed;
-  }
-  
-  /* Mensajes y estados */
-  .no-results {
-    text-align: center;
-    padding: 3rem;
-    color: var(--text-light);
-    font-size: 1.2rem;
-  }
-  
-  .error-message {
-    background-color: rgba(255, 107, 107, 0.1);
-    color: var(--danger);
-    padding: 1.5rem;
-    border-radius: 8px;
-    margin-bottom: 2rem;
+    opacity: 0.7;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Tabla de administradores */
+.admin-table-container {
+    background-color: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    overflow-x: auto; /* Permite desplazamiento horizontal en pantallas pequeñas */
+    margin-bottom: calc(var(--spacing-unit) * 2);
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px; /* Asegura que la tabla no sea demasiado estrecha */
+}
+
+.admin-table th, .admin-table td {
+    padding: var(--spacing-unit); /* 16px */
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.admin-table th {
+    background-color: var(--primary-color); /* Usando el nuevo primary-color */
+    color: var(--white);
     font-weight: 600;
-    border-left: 4px solid var(--danger);
-    animation: slideIn 0.4s ease-out;
-  }
-  
-  .loading-container {
+    text-transform: uppercase;
+    font-size: 0.9rem;
+}
+
+.admin-table tbody tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.admin-table tbody tr:hover {
+    background-color: #e9ecef;
+}
+
+.admin-table .actions-cell {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-start; /* Alinea los botones a la izquierda */
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+}
+
+.admin-table .btn-icon {
+    background: none;
+    border: 1px solid var(--secondary-color); /* Usando el nuevo secondary-color */
+    color: var(--secondary-color); /* Usando el nuevo secondary-color */
+    padding: 0.5rem;
+    border-radius: 50%; /* Botones redondos */
+    width: 38px; /* Tamaño fijo */
+    height: 38px; /* Tamaño fijo */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+}
+
+.admin-table .btn-icon:hover {
+    background-color: var(--primary-color); /* Usando el nuevo primary-color */
+    color: var(--white);
+    border-color: var(--primary-color); /* Usando el nuevo primary-color */
+    transform: scale(1.05);
+}
+
+.admin-table .btn-delete {
+    border-color: var(--danger-color); /* Usando el nuevo danger-color */
+    color: var(--danger-color); /* Usando el nuevo danger-color */
+}
+
+.admin-table .btn-delete:hover {
+    background-color: var(--danger-color); /* Usando el nuevo danger-color */
+    color: var(--white);
+    border-color: var(--danger-color); /* Usando el nuevo danger-color */
+}
+
+/* Mensajes de estado (carga, error, no resultados) */
+.admin-loading, .error-message, .no-results {
+    text-align: center;
+    padding: calc(var(--spacing-unit) * 2);
+    font-size: 1.1rem;
+    color: var(--secondary-color); /* Usando el nuevo secondary-color */
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 300px;
-  }
-  
-  .loading-spinner {
-    width: 60px;
-    height: 60px;
-    border: 5px solid var(--secondary-dark);
-    border-top: 5px solid var(--primary);
-    border-radius: 50%;
-    animation: spin 1.2s linear infinite;
-    margin-bottom: 1.5rem;
-  }
-  
-  @keyframes spin {
+    gap: 0.75rem;
+}
+
+.loading-spinner .spinner-icon {
+    font-size: 3rem;
+    color: var(--primary-color); /* Usando el nuevo primary-color */
+    animation: spin 1s linear infinite;
+}
+
+.error-message .info-icon, .no-results .info-icon {
+    font-size: 2.5rem;
+    color: var(--info-color); /* Mantengo el original, no se especificó un cambio */
+}
+
+.error-message {
+    background-color: #ffe3e6; /* Fondo rojo claro */
+    border: 1px solid var(--danger-color); /* Usando el nuevo danger-color */
+    border-radius: var(--border-radius);
+    color: var(--danger-dark); /* Usando el nuevo danger-dark */
+    margin: calc(var(--spacing-unit) * 2);
+    box-shadow: var(--box-shadow);
+}
+
+.error-message p {
+    margin: 0;
+}
+
+/* Animación de spinner */
+@keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
-  }
-  
-  @keyframes slideIn {
-    from { transform: translateY(-20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-  }
-  
-  /* Responsive */
-  @media (max-width: 1200px) {
-    .admins-management {
-      padding: 2rem;
-      margin: 1rem;
+}
+
+/* Modal Overlay */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* Asegura que esté por encima de todo */
+}
+
+/* Contenido del Modal */
+.modal-content {
+    background: var(--white);
+    padding: calc(var(--spacing-unit) * 2);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    width: 90%;
+    max-width: 500px; /* Ancho máximo para el modal */
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh; /* Para que sea scrollable si el contenido es mucho */
+    overflow-y: auto;
+}
+
+.modal-content.small-modal {
+    max-width: 400px; /* Para el modal de confirmación */
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: var(--spacing-unit);
+    margin-bottom: calc(var(--spacing-unit) * 1.5);
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: var(--dark-bg);
+}
+
+.close-modal-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--secondary-color); /* Usando el nuevo secondary-color */
+    cursor: pointer;
+    transition: color 0.2s ease;
+    padding: 0.25rem; /* Para un área de clic más grande */
+}
+
+.close-modal-btn:hover {
+    color: var(--danger-color); /* Usando el nuevo danger-color */
+}
+
+/* Formulario dentro del modal */
+.modal-form .form-group {
+    margin-bottom: calc(var(--spacing-unit) * 1.25); /* 20px */
+}
+
+.modal-form label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #555;
+    font-size: 0.95rem;
+}
+
+.modal-form input[type="text"],
+.modal-form input[type="email"],
+.modal-form input[type="password"] {
+    width: calc(100% - 2px); /* Ancho completo menos el borde */
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.modal-form input[type="text"]:focus,
+.modal-form input[type="email"]:focus,
+.modal-form input[type="password"]:focus {
+    border-color: var(--primary-color); /* Usando el nuevo primary-color */
+    box-shadow: 0 0 0 0.2rem rgba(0, 172, 193, 0.25); /* Ajustar el rgba al nuevo primary-color */
+    outline: none;
+}
+
+.modal-form input:disabled {
+    background-color: #e9ecef;
+    cursor: not-allowed;
+    opacity: 0.8;
+}
+
+.error-message-inline {
+    color: var(--danger-color); /* Usando el nuevo danger-color */
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+    margin-bottom: 0;
+    font-weight: 500;
+}
+
+.modal-form .submit-btn {
+    width: 100%;
+    background-color: var(--success-color); /* Mantengo el original para éxito */
+    color: var(--white);
+    padding: 0.85rem 1.5rem;
+    font-size: 1.1rem;
+    margin-top: var(--spacing-unit);
+    box-shadow: 0 2px 5px rgba(40, 167, 69, 0.2);
+}
+
+.modal-form .submit-btn:hover {
+    background-color: #218838; /* Verde más oscuro */
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+}
+
+/* Estilos para el modal de confirmación */
+.modal-body {
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #495057;
+    margin-bottom: calc(var(--spacing-unit) * 1.5);
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacing-unit);
+    padding-top: var(--spacing-unit);
+    border-top: 1px solid var(--border-color);
+}
+
+.modal-footer .btn-cancel {
+    background-color: var(--secondary-color); /* Usando el nuevo secondary-color */
+    color: var(--white);
+    padding: 0.75rem 1.25rem;
+}
+
+.modal-footer .btn-cancel:hover {
+    background-color: var(--secondary-dark); /* Usando el nuevo secondary-dark */
+    transform: translateY(-2px);
+}
+
+.modal-footer .btn-delete {
+    background-color: var(--danger-color); /* Usando el nuevo danger-color */
+    color: var(--white);
+    padding: 0.75rem 1.25rem;
+}
+
+.modal-footer .btn-delete:hover {
+    background-color: var(--danger-dark); /* Usando el nuevo danger-dark */
+    transform: translateY(-2px);
+}
+
+/* Media Queries para responsividad */
+@media (max-width: 768px) {
+    .admin-content-header {
+        flex-direction: column;
+        align-items: flex-start;
     }
-    
-    .management-header {
-      flex-direction: column;
-      align-items: flex-start;
+
+    .admin-content-header h2 {
+        font-size: 1.8rem;
+        margin-bottom: var(--spacing-unit);
     }
-    
+
     .header-actions {
-      width: 100%;
+        flex-direction: column;
+        width: 100%;
+        gap: 0.75rem;
     }
-    
-    .search-bar {
-      min-width: 100%;
+
+    .search-box {
+        width: 100%;
     }
-  }
-  
-  @media (max-width: 768px) {
-    .admins-management {
-      padding: 1.5rem;
-      margin: 0.5rem;
+
+    .search-box input {
+        width: 100%;
     }
-    
-    .edit-form {
-      padding: 1.5rem;
+
+    .add-new-btn {
+        width: 100%;
     }
-    
-    .form-row {
-      grid-template-columns: 1fr;
+
+    .admin-table-container {
+        border-radius: 0; /* Quitar bordes redondeados en móviles */
     }
-    
-    .form-actions {
-      flex-direction: column;
+
+    .admin-table th, .admin-table td {
+        padding: 0.75rem;
+        font-size: 0.9rem;
     }
-    
-    .save-btn, .cancel-btn {
-      width: 100%;
+
+    .admin-table .actions-cell {
+        flex-direction: column; /* Apila los botones de acción */
+        gap: 0.25rem;
+        align-items: flex-start;
     }
-  }
-  
-  @media (max-width: 576px) {
-    .management-header h2 {
-      font-size: 1.6rem;
+
+    .admin-table .btn-icon {
+        width: 32px;
+        height: 32px;
+        font-size: 0.9rem;
     }
-    
-    .edit-form h3 {
-      font-size: 1.3rem;
+
+    .modal-content {
+        padding: var(--spacing-unit);
+        width: 95%;
     }
-    
-    .add-btn {
-      padding: 0.7rem 1.2rem;
-      font-size: 0.9rem;
-      width: 100%;
+
+    .modal-header h3 {
+        font-size: 1.3rem;
     }
-  }
+
+    .modal-form .submit-btn {
+        font-size: 1rem;
+        padding: 0.75rem 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .admin-content-container {
+        padding: var(--spacing-unit);
+    }
+
+    .admin-content-header h2 {
+        font-size: 1.5rem;
+    }
+
+    .admin-content-header .header-icon {
+        font-size: 1.8rem;
+    }
+
+    .search-box input {
+        font-size: 0.9rem;
+        padding: 0.6rem 1rem 0.6rem 2.2rem;
+    }
+
+    .search-box .search-icon {
+        left: 0.8rem;
+        font-size: 0.9rem;
+    }
+}

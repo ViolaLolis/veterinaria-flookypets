@@ -1,347 +1,296 @@
-/* src/Pages/InicioAdministrador/Styles/AdminAppointments.css */
+/* src/Components/Admin/Styles/AdminAppointments.css */
 
-/* Contenedor principal de la página de citas */
-.admin-appointments-page-container {
-    background-color: #ffffff; /* Fondo blanco para el contenedor principal */
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); /* Sombra suave */
+/* --- Contenedor Principal --- */
+.admin-content-container {
     padding: 30px;
+    background-color: #f0f2f5;
+    min-height: calc(100vh - 60px); /* Ajusta según tu header/footer */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #333;
+}
+
+/* --- Encabezado de la Sección --- */
+.admin-content-header {
+    background-color: #ffffff;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     margin-bottom: 30px;
-    font-family: 'Inter', sans-serif; /* Asegura la fuente para este componente */
     display: flex;
     flex-direction: column;
+    gap: 20px; /* Espacio entre el título y las acciones */
 }
 
-/* Encabezado de la página */
-.admin-appointments-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 25px;
-    padding-bottom: 15px;
-    border-bottom: 1px solid #e0e0e0; /* Línea divisoria sutil */
-    flex-wrap: wrap; /* Permite que los elementos se envuelvan */
-    gap: 15px; /* Espacio entre elementos */
-}
-
-/* Título del encabezado */
-.admin-appointments-header h2 {
-    font-size: 1.8rem;
-    color: #2c3e50; /* Texto oscuro principal */
+.admin-content-header h2 {
+    font-size: 1.8em;
+    color: #2c3e50;
     margin: 0;
     display: flex;
     align-items: center;
     gap: 10px;
-    font-weight: 700;
 }
 
-/* Icono del título */
-.admin-appointments-header .header-icon {
-    font-size: 2rem;
-    color: #3498db; /* Azul vibrante */
+.admin-content-header .header-icon {
+    font-size: 1.2em;
+    color: #007bff;
 }
 
-/* Contenedor de acciones en el encabezado (búsqueda, filtros, añadir) */
-.admin-appointments-header .header-actions {
+.header-actions {
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column; /* Columna por defecto para dispositivos pequeños */
     gap: 15px;
-    justify-content: flex-end;
-    width: 100%; /* Ocupa todo el ancho para una mejor organización */
+    align-items: flex-start;
 }
 
-/* Barra de búsqueda */
-.admin-appointments-search-box {
+@media (min-width: 768px) {
+    .header-actions {
+        flex-direction: row; /* Fila en pantallas medianas y grandes */
+        justify-content: space-between;
+        align-items: center;
+    }
+}
+
+/* --- Caja de Búsqueda --- */
+.search-box {
     position: relative;
-    flex-grow: 1; /* Permite que la barra de búsqueda crezca */
-    max-width: 400px; /* Ancho máximo para desktop */
-    min-width: 250px; /* Ancho mínimo para que no se vea mal en móvil */
+    flex-grow: 1; /* Permite que ocupe el espacio disponible */
+    max-width: 100%;
 }
 
-.admin-appointments-search-box .search-icon {
+@media (min-width: 768px) {
+    .search-box {
+        max-width: 400px; /* Ancho máximo para el campo de búsqueda en pantallas grandes */
+    }
+}
+
+.search-box input {
+    width: 100%;
+    padding: 12px 15px 12px 45px; /* Espacio para el ícono */
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 1em;
+    color: #555;
+    transition: all 0.3s ease;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.search-box input:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+    outline: none;
+}
+
+.search-box .search-icon {
     position: absolute;
     left: 15px;
     top: 50%;
     transform: translateY(-50%);
-    color: #7f8c8d; /* Gris para iconos */
-    font-size: 1rem;
+    color: #888;
+    font-size: 1.1em;
 }
 
-.admin-appointments-search-box input {
-    width: 100%;
-    padding: 12px 15px 12px 45px; /* Espacio para el icono */
-    border: 1px solid #dcdcdc; /* Color de borde sutil */
-    border-radius: 8px;
-    font-size: 0.95rem;
-    color: #2c3e50; /* Texto oscuro principal */
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
-    background-color: #fefefe;
-}
-
-.admin-appointments-search-box input:focus {
-    border-color: #3498db; /* Azul vibrante */
-    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
-    outline: none;
-}
-
-/* Contenedor de botones de filtro */
-.admin-appointments-filter-buttons {
+/* --- Botones de Filtro de Estado --- */
+.filter-buttons {
     display: flex;
-    gap: 8px; /* Espacio entre los botones de filtro */
-    flex-wrap: wrap; /* Permite que los botones se envuelvan */
-    justify-content: flex-end; /* Alinea a la derecha */
-    flex-grow: 2; /* Permite que los filtros ocupen más espacio si es necesario */
+    flex-wrap: wrap; /* Permite que los botones se envuelvan en líneas múltiples */
+    gap: 10px;
 }
 
-/* Estilo base para los botones de filtro */
-.admin-appointments-filter-btn {
-    padding: 10px 15px;
-    border-radius: 8px;
-    border: 1px solid #dcdcdc; /* Borde suave */
-    background-color: #f0f4f8; /* Fondo gris claro */
-    color: #555; /* Texto gris oscuro */
+.filter-btn {
+    padding: 10px 18px;
+    border: 1px solid #dcdcdc;
+    border-radius: 25px; /* Bordes más redondeados */
+    background-color: #f2f2f2;
+    color: #555;
+    font-size: 0.9em;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-    font-size: 0.9rem;
-    white-space: nowrap; /* Evita que el texto se rompa */
-    flex-grow: 1; /* Permite que los botones se distribuyan uniformemente */
-    text-align: center;
-    min-width: 100px; /* Ancho mínimo para cada botón */
+    white-space: nowrap; /* Evita que el texto del botón se rompa */
 }
 
-.admin-appointments-filter-btn:hover {
-    background-color: #e0e7ed;
-    border-color: #c0c7ce;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+.filter-btn:hover:not(:disabled) {
+    background-color: #e0e0e0;
+    color: #333;
+    border-color: #c0c0c0;
 }
 
-/* Estilo para el botón de filtro activo */
-.admin-appointments-filter-btn.active {
-    background-color: #3498db; /* Azul vibrante */
-    color: #ffffff;
-    border-color: #3498db;
-    box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
-    transform: translateY(-2px);
-    font-weight: 600;
+.filter-btn.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.2);
 }
 
-.admin-appointments-filter-btn.active:hover {
-    background-color: #2980b9;
-    border-color: #2980b9;
-    transform: translateY(-1px); /* Menos movimiento al hacer hover sobre activo */
+.filter-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 
-/* Botón de "Nueva Cita" */
-.admin-appointments-add-new-btn {
+/* --- Botón "Nueva Cita" --- */
+.add-new-btn {
+    background-color: #28a744; /* Verde para añadir */
+    color: white;
     padding: 12px 25px;
+    border: none;
     border-radius: 8px;
+    font-size: 1em;
     cursor: pointer;
-    font-size: 1rem;
-    font-weight: 600;
     display: flex;
     align-items: center;
     gap: 8px;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    background: linear-gradient(135deg, #2ecc71, #27ae60); /* Verde para éxito */
-    color: white;
-    border: none;
-    flex-shrink: 0; /* Evita que se encoja */
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    font-weight: 600;
 }
 
-.admin-appointments-add-new-btn:hover {
-    background: linear-gradient(135deg, #27ae60, #2ecc71);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(46, 204, 113, 0.3);
+.add-new-btn:hover:not(:disabled) {
+    background-color: #218838;
+    box-shadow: 0 4px 10px rgba(40, 167, 68, 0.25);
 }
 
-.admin-appointments-add-new-btn:disabled {
+.add-new-btn:disabled {
     opacity: 0.6;
     cursor: not-allowed;
-    box-shadow: none;
-    transform: none;
 }
 
-/* Contenedor de la tabla */
-.admin-appointments-table-container {
+/* --- Contenedor de la Tabla --- */
+.admin-table-container {
     background-color: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-    overflow-x: auto; /* Permite el scroll horizontal en tablas grandes */
-    margin-top: 30px;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    overflow-x: auto; /* Permite desplazamiento horizontal en pantallas pequeñas */
 }
 
-/* Tabla de citas */
-.admin-appointments-table {
+.admin-table {
     width: 100%;
-    border-collapse: collapse;
-    min-width: 1000px; /* Aumenta el ancho mínimo para mejor presentación */
+    border-collapse: separate; /* Para border-radius en celdas */
+    border-spacing: 0; /* Elimina espacio entre celdas */
+    min-width: 800px; /* Asegura un ancho mínimo para la tabla */
 }
 
-.admin-appointments-table th,
-.admin-appointments-table td {
-    padding: 15px 20px;
+.admin-table th,
+.admin-table td {
+    padding: 15px;
     text-align: left;
-    border-bottom: 1px solid #e0e0e0; /* Color de borde sutil */
+    border-bottom: 1px solid #eee;
 }
 
-.admin-appointments-table th {
-    background-color: #f0f4f8;
-    color: #2c3e50; /* Texto oscuro principal */
+.admin-table th {
+    background-color: #f8f9fa;
+    color: #555;
     font-weight: 600;
+    font-size: 0.95em;
     text-transform: uppercase;
-    font-size: 0.9rem;
+    position: sticky; /* Encabezado pegajoso */
+    top: 0;
+    z-index: 10;
 }
 
-.admin-appointments-table tbody tr:hover {
-    background-color: #f5f5f5;
+/* Bordes redondeados para thead */
+.admin-table thead tr:first-child th:first-child {
+    border-top-left-radius: 8px;
+}
+.admin-table thead tr:first-child th:last-child {
+    border-top-right-radius: 8px;
 }
 
-.admin-appointments-table tbody tr:last-child td {
+.admin-table tbody tr:last-child td {
     border-bottom: none;
 }
 
-/* Iconos en línea dentro de la tabla o texto */
-.admin-appointments-table .icon {
-    margin-right: 8px;
-    color: #7f8c8d; /* Gris para iconos */
-    font-size: 1rem;
+.admin-table tbody tr:hover {
+    background-color: #f5f5f5;
+    transition: background-color 0.2s ease;
 }
 
-/* Badges de estado */
-.admin-appointments-table .status-badge {
+/* Estilos para celdas con íconos */
+.admin-table td .icon {
+    margin-right: 6px;
+    color: #666;
+}
+
+/* --- Badges de Estado --- */
+.status-badge {
+    display: inline-block;
     padding: 6px 12px;
     border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: 600;
+    font-size: 0.85em;
+    font-weight: bold;
     text-transform: uppercase;
-    display: inline-block;
-    min-width: 90px;
-    text-align: center;
+    color: white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.admin-appointments-table .badge-success {
-    background-color: #e6ffee; /* Verde claro */
-    color: #27ae60; /* Verde para éxito */
-}
+.badge-success { background-color: #28a745; } /* Completada */
+.badge-warning { background-color: #ffc107; color: #333; } /* Pendiente */
+.badge-info { background-color: #17a2b8; } /* Aceptada */
+.badge-danger { background-color: #dc3545; } /* Rechazada */
+.badge-secondary { background-color: #6c757d; } /* Cancelada / Por defecto */
 
-.admin-appointments-table .badge-warning {
-    background-color: #fffde6; /* Amarillo claro */
-    color: #f39c12; /* Naranja para advertencias/énfasis */
-}
-
-.admin-appointments-table .badge-info {
-    background-color: #e6f7ff; /* Azul claro */
-    color: #3498db; /* Azul vibrante */
-}
-
-.admin-appointments-table .badge-danger {
-    background-color: #ffe6e6; /* Rojo claro */
-    color: #e74c3c; /* Rojo para errores/eliminación */
-}
-
-.admin-appointments-table .badge-secondary {
-    background-color: #f0f4f8; /* Gris claro */
-    color: #7f8c8d; /* Gris oscuro */
-}
-
-/* Celdas de acciones en la tabla */
-.admin-appointments-table .actions-cell {
+/* --- Botones de Acción de la Tabla --- */
+.actions-cell {
     white-space: nowrap; /* Evita que los botones se envuelvan */
 }
 
-/* Botones de acción en la tabla */
-.admin-appointments-table .btn-icon {
+.btn-icon {
     background: none;
     border: none;
-    color: #7f8c8d; /* Gris para iconos */
-    font-size: 1.1rem;
+    color: #007bff;
+    font-size: 1.1em;
     cursor: pointer;
     margin: 0 5px;
-    transition: color 0.2s ease, transform 0.2s ease;
-    padding: 5px; /* Aumenta el área de clic */
+    padding: 5px;
     border-radius: 50%; /* Hace que el área de clic sea redonda */
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }
 
-.admin-appointments-table .btn-icon:hover {
-    transform: scale(1.1);
+.btn-icon:hover:not(:disabled) {
+    background-color: #e6f2ff;
+    color: #0056b3;
+    transform: translateY(-2px);
 }
 
-.admin-appointments-table .btn-icon:disabled {
-    opacity: 0.4;
+.btn-icon:disabled {
+    color: #cccccc;
     cursor: not-allowed;
+    opacity: 0.7;
 }
 
-.admin-appointments-table .btn-icon.btn-accept {
-    color: #27ae60; /* Verde para éxito */
-}
+/* Colores específicos para botones de acción */
+.btn-icon.btn-accept { color: #28a745; }
+.btn-icon.btn-accept:hover:not(:disabled) { background-color: #e6ffe6; }
 
-.admin-appointments-table .btn-icon.btn-accept:hover {
-    color: #2ecc71;
-}
+.btn-icon.btn-reject { color: #dc3545; }
+.btn-icon.btn-reject:hover:not(:disabled) { background-color: #ffe6e6; }
 
-.admin-appointments-table .btn-icon.btn-reject {
-    color: #f39c12; /* Naranja para advertencias/énfasis */
-}
+.btn-icon.btn-complete { color: #17a2b8; }
+.btn-icon.btn-complete:hover:not(:disabled) { background-color: #e6f7fa; }
 
-.admin-appointments-table .btn-icon.btn-reject:hover {
-    color: #e67e22;
-}
+.btn-icon.btn-cancel { color: #6c757d; }
+.btn-icon.btn-cancel:hover:not(:disabled) { background-color: #f0f0f0; }
 
-.admin-appointments-table .btn-icon.btn-complete {
-    color: #3498db; /* Azul vibrante */
-}
-
-.admin-appointments-table .btn-icon.btn-complete:hover {
-    color: #2980b9;
-}
-
-.admin-appointments-table .btn-icon.btn-cancel {
-    color: #7f8c8d; /* Gris oscuro */
-}
-
-.admin-appointments-table .btn-icon.btn-cancel:hover {
-    color: #555;
-}
-
-.admin-appointments-table .btn-icon.btn-delete {
-    color: #e74c3c; /* Rojo para errores/eliminación */
-}
-
-.admin-appointments-table .btn-icon.btn-delete:hover {
-    color: #c0392b;
-}
+.btn-icon.btn-delete { color: #dc3545; } /* Rojo para eliminar */
+.btn-icon.btn-delete:hover:not(:disabled) { background-color: #ffe6e6; }
 
 
-/* Mensajes de carga, error y sin resultados */
-.admin-appointments-loading,
-.admin-appointments-error-message,
-.admin-appointments-no-results {
+/* --- Mensajes de Carga y Error --- */
+.admin-loading, .error-message {
     text-align: center;
-    padding: 40px;
-    font-size: 1.1rem;
+    padding: 50px;
+    font-size: 1.2em;
     color: #555;
     background-color: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    margin-top: 30px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 15px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    margin: 30px;
 }
 
-.admin-appointments-loading .loading-spinner .spinner-icon {
-    font-size: 3rem;
-    color: #3498db; /* Azul vibrante */
-    animation: spin 1.5s linear infinite;
+.loading-spinner .spinner-icon {
+    font-size: 3em;
+    color: #007bff;
+    animation: spin 1s linear infinite;
+    margin-bottom: 15px;
 }
 
 @keyframes spin {
@@ -349,32 +298,27 @@
     100% { transform: rotate(360deg); }
 }
 
-.admin-appointments-error-message {
-    color: #e74c3c; /* Rojo para errores/eliminación */
+.error-message {
+    color: #dc3545;
+    border: 1px solid #dc3545;
+    background-color: #f8d7da;
 }
 
-.admin-appointments-error-message .info-icon,
-.admin-appointments-no-results .info-icon {
-    font-size: 3rem;
-    color: #e74c3c; /* Rojo para errores/eliminación */
+.error-message .info-icon {
+    font-size: 1.5em;
+    margin-right: 10px;
+    vertical-align: middle;
 }
 
-.admin-appointments-no-results {
-    color: #7f8c8d;
-}
-
-.admin-appointments-no-results .info-icon {
-    color: #7f8c8d;
-}
-
-/* Estilos para el modal de vista de detalles de cita */
-/* Esto se aplicará al modal general, pero se asegura la especificidad */
+/* --- Estilos para el Modal genérico (asumiendo su estructura) --- */
+/* Estos deberían ir en el CSS de tu componente Modal si es genérico,
+   pero los incluyo aquí por si acaso lo manejas en este archivo. */
 .modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
+    right: 0;
+    bottom: 0;
     background-color: rgba(0, 0, 0, 0.6);
     display: flex;
     justify-content: center;
@@ -384,393 +328,152 @@
 
 .modal-content {
     background-color: #ffffff;
+    padding: 30px;
     border-radius: 12px;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
     width: 90%;
     max-width: 600px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
+    position: relative;
     max-height: 90vh; /* Limita la altura del modal */
+    overflow-y: auto; /* Permite scroll si el contenido es largo */
 }
 
 .modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px 25px;
-    border-bottom: 1px solid #e0e0e0;
-    background-color: #f0f4f8;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
 }
 
 .modal-header h3 {
     margin: 0;
-    font-size: 1.5rem;
+    font-size: 1.5em;
     color: #2c3e50;
 }
 
-.modal-header .close-modal-btn {
+.close-modal-btn {
     background: none;
     border: none;
-    font-size: 1.5rem;
-    color: #7f8c8d;
+    font-size: 1.5em;
+    color: #888;
     cursor: pointer;
     transition: color 0.2s ease;
 }
 
-.modal-header .close-modal-btn:hover {
-    color: #e74c3c;
+.close-modal-btn:hover {
+    color: #333;
 }
 
 .modal-body {
-    padding: 25px;
-    overflow-y: auto; /* Permite scroll si el contenido es largo */
-    flex-grow: 1;
-}
-
-.modal-body.view-details-modal p {
-    margin-bottom: 10px;
-    font-size: 1rem;
-    color: #444;
-    line-height: 1.5;
-}
-
-.modal-body.view-details-modal strong {
-    color: #2c3e50; /* Texto oscuro principal */
-    margin-right: 5px;
-}
-
-.modal-body.view-details-modal h4 {
-    font-size: 1.3rem;
-    color: #34495e;
-    margin-top: 25px;
-    margin-bottom: 15px;
-    border-bottom: 1px solid #ececec;
-    padding-bottom: 8px;
-    font-weight: 600;
-}
-
-.modal-body.view-details-modal .pet-image-container {
-    margin-top: 20px;
-    text-align: center;
-}
-
-.modal-body.view-details-modal .pet-image {
-    width: 120px;
-    height: 120px;
-    object-fit: cover;
-    border-radius: 50%;
-    border: 4px solid #3498db; /* Azul vibrante */
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
-    transition: transform 0.3s ease;
-}
-
-.modal-body.view-details-modal .pet-image:hover {
-    transform: scale(1.05);
+    font-size: 1em;
+    line-height: 1.6;
 }
 
 .modal-footer {
-    padding: 20px 25px;
-    border-top: 1px solid #e0e0e0;
     display: flex;
     justify-content: flex-end;
-    gap: 10px;
-    background-color: #f0f4f8;
-}
-
-.modal-footer .btn-secondary {
-    padding: 10px 20px;
-    border-radius: 8px;
-    background-color: #ecf0f1;
-    color: #2c3e50;
-    border: 1px solid #bdc3c7;
-    cursor: pointer;
-    font-weight: 600;
-    transition: all 0.3s ease;
-}
-
-.modal-footer .btn-secondary:hover {
-    background-color: #dbe4e9;
-    transform: translateY(-1px);
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+    margin-top: 20px;
 }
 
 /* Estilos específicos para el modal de confirmación de eliminación */
 .modal-content-delete {
-    padding: 25px;
     text-align: center;
 }
 
 .modal-content-delete p {
-    font-size: 1.1rem;
-    color: #34495e;
     margin-bottom: 25px;
-}
-
-.modal-content-delete strong {
-    font-weight: 700;
-    color: #e74c3c;
+    font-size: 1.1em;
+    color: #555;
 }
 
 .modal-content-delete .form-actions {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
+    justify-content: center; /* Centra los botones en el modal de eliminación */
 }
 
-.modal-content-delete .btn-delete,
-.modal-content-delete .btn-secondary {
-    padding: 12px 25px;
+/* Estilos para el modal de Ver Detalles */
+.view-details-modal p {
+    margin-bottom: 10px;
+    font-size: 1.05em;
+}
+
+.view-details-modal strong {
+    color: #2c3e50;
+}
+
+.view-details-modal .mt-4 { margin-top: 1rem; }
+.view-details-modal .mb-2 { margin-bottom: 0.5rem; }
+.view-details-modal .text-lg { font-size: 1.125rem; }
+.view-details-modal .font-semibold { font-weight: 600; }
+.view-details-modal .text-center { text-align: center; }
+.view-details-modal .w-32 { width: 8rem; }
+.view-details-modal .h-32 { height: 8rem; }
+.view-details-modal .object-cover { object-fit: cover; }
+.view-details-modal .rounded-full { border-radius: 9999px; }
+.view-details-modal .mx-auto { margin-left: auto; margin-right: auto; }
+.view-details-modal .shadow-md { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
+
+
+/* Estilos para Notification (si no están ya en otro archivo) */
+/* (Ajusta estas clases si tu componente Notification tiene nombres diferentes) */
+.notification-container { /* Un contenedor para todas las notificaciones */
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.notification {
+    padding: 15px 20px;
     border-radius: 8px;
-    cursor: pointer;
-    font-size: 1rem;
-    font-weight: 600;
     display: flex;
     align-items: center;
-    gap: 8px;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    justify-content: space-between;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    min-width: 280px;
+    animation: fadeInSlideIn 0.5s ease-out forwards;
 }
 
-.modal-content-delete .btn-delete {
-    background: linear-gradient(135deg, #e74c3c, #c0392b); /* Rojo para errores/eliminación */
-    color: white;
+.notification.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.notification.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.notification .close-btn {
+    background: none;
     border: none;
+    font-size: 1.1em;
+    cursor: pointer;
+    color: inherit; /* Hereda el color del texto de la notificación */
+    margin-left: 15px;
+    opacity: 0.8;
 }
 
-.modal-content-delete .btn-delete:hover {
-    background: linear-gradient(135deg, #c0392b, #e74c3c);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(231, 76, 60, 0.3);
+.notification .close-btn:hover {
+    opacity: 1;
 }
 
-.modal-content-delete .btn-delete:disabled,
-.modal-content-delete .btn-secondary:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    box-shadow: none;
-    transform: none;
-}
-
-.modal-content-delete .spinner {
-    animation: spin 1s linear infinite;
-}
-
-
-/* Responsive Design */
-@media (max-width: 1200px) {
-    .admin-appointments-search-box {
-        max-width: 350px;
+@keyframes fadeInSlideIn {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
     }
-    .admin-appointments-filter-buttons {
-        flex-grow: 1; /* Permite que los filtros se distribuyan mejor */
-        justify-content: flex-start;
-    }
-}
-
-@media (max-width: 992px) {
-    .admin-appointments-header .header-actions {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-    }
-    .admin-appointments-search-box {
-        width: 100%;
-        max-width: none; /* Ocupa todo el ancho disponible */
-    }
-    .admin-appointments-filter-buttons {
-        width: 100%;
-        justify-content: space-between; /* Distribuye los botones de filtro */
-    }
-    .admin-appointments-filter-btn {
-        flex-grow: 1;
-        width: auto; /* Permite que el ancho se ajuste al contenido */
-    }
-    .admin-appointments-add-new-btn {
-        width: 100%;
-        justify-content: center;
-    }
-    .modal-content {
-        max-width: 90%;
-    }
-}
-
-@media (max-width: 768px) {
-    .admin-appointments-filter-buttons {
-        flex-direction: column; /* Apila los botones de filtro */
-        width: 100%;
-    }
-
-    .admin-appointments-filter-btn {
-        width: 100%;
-    }
-
-    /* Asegura que la tabla se desplace horizontalmente si es demasiado ancha */
-    .admin-appointments-table-container {
-        overflow-x: auto;
-    }
-    .admin-appointments-table {
-        min-width: 700px; /* Asegura un ancho mínimo para la tabla en móviles */
-    }
-
-    .modal-content {
-        width: 95%;
-        padding: 20px;
-    }
-    .modal-body.view-details-modal h4 {
-        font-size: 1.2rem;
-    }
-    .modal-body.view-details-modal .pet-image {
-        width: 100px;
-        height: 100px;
-    }
-}
-
-@media (max-width: 480px) {
-    .admin-appointments-page-container {
-        padding: 15px;
-    }
-    .admin-appointments-header {
-        padding: 15px 0;
-    }
-    .admin-appointments-header h2 {
-        font-size: 1.5rem;
-    }
-    .admin-appointments-header .header-icon {
-        font-size: 1.8rem;
-    }
-    .admin-appointments-search-box input {
-        font-size: 0.85rem;
-        padding: 8px 10px 8px 35px;
-    }
-    .admin-appointments-search-box .search-icon {
-        font-size: 0.9rem;
-        left: 10px;
-    }
-    .admin-appointments-filter-btn {
-        padding: 8px 12px;
-        font-size: 0.8rem;
-    }
-    .admin-appointments-add-new-btn {
-        padding: 10px 18px;
-        font-size: 0.9rem;
-    }
-    .admin-appointments-table th,
-    .admin-appointments-table td {
-        padding: 10px 15px;
-        font-size: 0.85rem;
-    }
-    .admin-appointments-table .status-badge {
-        padding: 4px 8px;
-        font-size: 0.7rem;
-        min-width: 70px;
-    }
-    .admin-appointments-table .btn-icon {
-        font-size: 1rem;
-        margin: 0 3px;
-    }
-    .modal-content {
-        padding: 15px;
-    }
-    .modal-header h3 {
-        font-size: 1.3rem;
-    }
-    .modal-header .close-modal-btn {
-        font-size: 1.3rem;
-    }
-    .modal-body.view-details-modal p {
-        font-size: 0.9rem;
-    }
-    .modal-body.view-details-modal h4 {
-        font-size: 1.1rem;
-    }
-    .modal-body.view-details-modal .pet-image {
-        width: 80px;
-        height: 80px;
-        border-width: 3px;
-    }
-    .modal-footer .btn-secondary,
-    .modal-content-delete .btn-delete,
-    .modal-content-delete .btn-secondary {
-        padding: 10px 20px;
-        font-size: 0.9rem;
-    }
-}
-
-/* Estilos para pantallas grandes (27" y TV) */
-@media (min-width: 1920px) {
-    .admin-appointments-page-container {
-        padding: 40px;
-    }
-    .admin-appointments-header {
-        padding-bottom: 20px;
-    }
-    .admin-appointments-header h2 {
-        font-size: 2.2rem;
-    }
-    .admin-appointments-header .header-icon {
-        font-size: 2.5rem;
-    }
-    .admin-appointments-search-box {
-        max-width: 500px;
-    }
-    .admin-appointments-search-box input {
-        padding: 15px 20px 15px 50px;
-        font-size: 1.1rem;
-    }
-    .admin-appointments-search-box .search-icon {
-        left: 20px;
-        font-size: 1.2rem;
-    }
-    .admin-appointments-filter-buttons {
-        gap: 12px;
-    }
-    .admin-appointments-filter-btn {
-        padding: 12px 20px;
-        font-size: 1rem;
-    }
-    .admin-appointments-add-new-btn {
-        padding: 15px 25px;
-        font-size: 1.1rem;
-    }
-    .admin-appointments-table th,
-    .admin-appointments-table td {
-        padding: 20px 25px;
-        font-size: 1rem;
-    }
-    .admin-appointments-table .status-badge {
-        padding: 8px 15px;
-        font-size: 0.9rem;
-        min-width: 100px;
-    }
-    .admin-appointments-table .btn-icon {
-        font-size: 1.2rem;
-        margin: 0 8px;
-    }
-    .modal-content {
-        max-width: 900px;
-        padding: 40px;
-    }
-    .modal-header h3 {
-        font-size: 1.8rem;
-    }
-    .modal-header .close-modal-btn {
-        font-size: 1.8rem;
-    }
-    .modal-body.view-details-modal p {
-        font-size: 1.05rem;
-    }
-    .modal-body.view-details-modal h4 {
-        font-size: 1.4rem;
-    }
-    .modal-body.view-details-modal .pet-image {
-        width: 150px;
-        height: 150px;
-        border-width: 5px;
-    }
-    .modal-footer .btn-secondary,
-    .modal-content-delete .btn-delete,
-    .modal-content-delete .btn-secondary {
-        padding: 15px 30px;
-        font-size: 1.1rem;
+    to {
+        opacity: 1;
+        transform: translateX(0);
     }
 }

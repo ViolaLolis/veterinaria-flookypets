@@ -1,434 +1,524 @@
-/* Estilos base */
-.services-management {
+/* General Page Layout */
+.admin-content-container {
     padding: 2rem;
-    background-color: #f9f9f9;
-    min-height: 100vh;
-  }
-  
-  .management-header {
+    background-color: #f8f9fa; /* A very light grey for the background */
+    min-height: calc(100vh - var(--header-height, 0px)); /* Adjust if you have a fixed header */
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    font-family: 'Roboto', sans-serif; /* Modern, readable font */
+}
+
+/* Loading and Error States */
+.admin-loading, .error-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px; /* Ensure it takes up some space */
+    color: var(--primary-dark);
+    font-size: 1.2rem;
+    text-align: center;
+    padding: 2rem;
+    border-radius: 8px;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.admin-loading .spinner-icon {
+    font-size: 3rem;
+    animation: spin 1s linear infinite;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.error-message .info-icon {
+    font-size: 2.5rem;
+    color: var(--danger-color);
+    margin-bottom: 1rem;
+}
+
+.error-message p {
+    font-size: 1rem;
+    color: #6c757d;
+    margin-top: 0.5rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Header Section */
+.admin-content-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 2rem;
-    flex-wrap: wrap;
-    gap: 1rem;
-  }
-  
-  .management-header h2 {
-    color: #00acc1;
-    font-size: 1.8rem;
+    flex-wrap: wrap; /* Allows items to wrap on smaller screens */
+    gap: 1rem; /* Space between elements when wrapped */
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.admin-content-header h2 {
+    font-size: 2rem;
+    color: var(--primary-dark);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
     margin: 0;
-  }
-  
-  .header-actions {
+}
+
+.admin-content-header .header-icon {
+    font-size: 2.2rem;
+    color: var(--primary-color);
+}
+
+.header-actions {
     display: flex;
     gap: 1rem;
-    align-items: center;
-  }
-  
-  /* Barra de búsqueda */
-  .search-bar {
+    flex-wrap: wrap;
+    justify-content: flex-end; /* Align to the right */
+}
+
+.search-box {
     position: relative;
     display: flex;
     align-items: center;
-    background-color: white;
-    border-radius: 30px;
-    padding: 0.5rem 1rem;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.search-box .search-icon {
+    position: absolute;
+    left: 10px;
+    color: #888;
+    font-size: 1rem;
+}
+
+.search-box input[type="text"] {
+    padding: 0.75rem 1rem 0.75rem 2.5rem; /* Left padding for icon */
+    border: 1px solid #ced4da;
+    border-radius: 25px; /* Pill shape */
+    font-size: 1rem;
+    width: 250px;
     transition: all 0.3s ease;
-    width: 300px;
-  }
-  
-  .search-bar:focus-within {
-    box-shadow: 0 2px 10px rgba(0, 172, 193, 0.3);
-  }
-  
-  .search-bar input {
-    border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.search-box input[type="text"]:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px var(--primary-light);
     outline: none;
-    padding: 0.5rem;
-    width: 100%;
-    background: transparent;
-  }
-  
-  .search-icon {
-    color: #00acc1;
-    margin-right: 0.5rem;
-  }
-  
-  .clear-search {
-    background: transparent;
-    border: none;
-    color: #777;
-    cursor: pointer;
-    padding: 0.3rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: color 0.2s;
-  }
-  
-  .clear-search:hover {
-    color: #00acc1;
-  }
-  
-  /* Botones */
-  .add-btn {
-    background-color: #00acc1;
+}
+
+.search-box input[type="text"]::placeholder {
+    color: #a0a0a0;
+}
+
+.add-new-btn {
+    background-color: var(--primary-color);
     color: white;
+    padding: 0.75rem 1.5rem;
     border: none;
-    padding: 0.7rem 1.5rem;
-    border-radius: 30px;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-weight: 600;
-    box-shadow: 0 2px 5px rgba(0, 172, 193, 0.3);
-  }
-  
-  .add-btn:hover {
-    background-color: #008fa1;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 172, 193, 0.4);
-  }
-  
-  /* Grid de servicios */
-  .services-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 1.5rem;
-    margin-top: 1.5rem;
-  }
-  
-  .service-card {
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-    overflow: hidden;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .service-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 15px rgba(0, 172, 193, 0.15);
-  }
-  
-  .card-header {
-    background-color: #00acc1;
-    color: white;
-    padding: 1rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  .card-header h3 {
-    margin: 0;
-    font-size: 1.2rem;
-  }
-  
-  .price-badge {
-    background-color: white;
-    color: #00acc1;
-    padding: 0.3rem 0.8rem;
-    border-radius: 20px;
-    font-weight: bold;
-    font-size: 0.9rem;
-  }
-  
-  .card-body {
-    padding: 1.2rem;
-    flex-grow: 1;
-  }
-  
-  .card-body p {
-    color: #555;
-    margin: 0;
-    line-height: 1.5;
-  }
-  
-  .card-footer {
-    display: flex;
-    border-top: 1px solid #ecf0f1;
-    padding: 0.8rem;
-    gap: 0.5rem;
-  }
-  
-  .edit-btn, .delete-btn {
-    flex: 1;
-    padding: 0.6rem;
-    border: none;
-    border-radius: 5px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
+    border-radius: 25px; /* Pill shape */
+    font-size: 1rem;
     font-weight: 500;
-  }
-  
-  .edit-btn {
-    background-color: rgba(0, 172, 193, 0.1);
-    color: #00acc1;
-  }
-  
-  .edit-btn:hover {
-    background-color: rgba(0, 172, 193, 0.2);
-  }
-  
-  .delete-btn {
-    background-color: rgba(255, 0, 0, 0.1);
-    color: #ff4444;
-  }
-  
-  .delete-btn:hover {
-    background-color: rgba(255, 0, 0, 0.2);
-  }
-  
-  /* No results */
-  .no-results {
-    grid-column: 1 / -1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.add-new-btn:hover {
+    background-color: var(--primary-dark);
+    transform: translateY(-2px);
+}
+
+.add-new-btn:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* Table Styling */
+.admin-table-container {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    overflow-x: auto; /* Ensures table is scrollable on small screens */
+    padding: 1.5rem;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: separate; /* For rounded corners on rows */
+    border-spacing: 0 10px; /* Space between rows */
+}
+
+.admin-table thead tr {
+    background-color: var(--primary-light);
+    color: var(--primary-dark);
+    font-weight: 600;
+}
+
+.admin-table th, .admin-table td {
+    padding: 1rem 1.2rem;
+    text-align: left;
+    white-space: nowrap; /* Prevents text from wrapping in cells */
+}
+
+.admin-table th {
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+}
+
+.admin-table tbody tr {
+    background-color: #ffffff;
+    border-radius: 8px; /* Rounded corners for each row */
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.admin-table tbody tr:hover {
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+/* Specific styling for the first and last cells of each row for rounded corners */
+.admin-table tbody tr td:first-child {
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+}
+
+.admin-table tbody tr td:last-child {
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+.admin-table td {
+    color: #495057;
+    font-size: 0.9rem;
+    vertical-align: middle;
+    border-bottom: 1px solid #f1f1f1; /* Light separator for visual clarity */
+}
+
+/* Remove bottom border for the last row for cleaner look */
+.admin-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.actions-cell {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    align-items: center;
+}
+
+.btn-icon {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1rem;
+    color: var(--secondary-color);
+    padding: 0.5rem;
+    border-radius: 50%; /* Circular buttons */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.btn-icon:hover {
+    background-color: var(--secondary-light); /* Assuming secondary-light is a lighter version of secondary-color */
+    color: var(--secondary-dark);
+}
+
+.btn-icon.btn-delete {
+    color: var(--danger-color);
+}
+
+.btn-icon.btn-delete:hover {
+    background-color: rgba(244, 67, 54, 0.1); /* Light red background on hover */
+    color: var(--danger-dark);
+}
+
+.btn-icon:disabled {
+    color: #cccccc;
+    cursor: not-allowed;
+    background: none;
+}
+
+.no-results {
     text-align: center;
+    color: #6c757d;
     padding: 2rem;
-    color: #777;
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-  }
-  
-  /* Loading */
-  .loading-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 300px;
-    gap: 1rem;
-  }
-  
-  .loading-spinner {
+    font-style: italic;
     display: flex;
     align-items: center;
     justify-content: center;
-  }
-  
-  .spinner-icon {
-    font-size: 2rem;
-    color: #00acc1;
-    animation: spin 1s linear infinite;
-  }
-  
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-  
-  /* Error */
-  .error-message {
-    background-color: #ffebee;
-    color: #c62828;
-    padding: 1rem;
-    border-radius: 5px;
-    margin-bottom: 1.5rem;
-    text-align: center;
-  }
-  
-  /* Modal */
-  .modal-overlay {
+    gap: 0.5rem;
+}
+
+/* Modal Styling */
+.modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
-    right: 0;
-    bottom: 0;
+    width: 100%;
+    height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 1000;
-  }
-  
-  .modal-content {
-    background: white;
+    backdrop-filter: blur(5px); /* Soft blur effect */
+}
+
+.modal-content {
+    background-color: #ffffff;
+    border-radius: 12px;
     padding: 2rem;
-    border-radius: 10px;
     width: 90%;
     max-width: 500px;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
     position: relative;
-    animation: modalFadeIn 0.3s ease-out;
-  }
-  
-  @keyframes modalFadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(-20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  
-  .close-modal {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.75rem;
+    color: var(--primary-dark);
+}
+
+.close-modal-btn {
     background: none;
     border: none;
-    font-size: 1.2rem;
-    color: #777;
+    font-size: 1.5rem;
+    color: #6c757d;
     cursor: pointer;
-    transition: color 0.2s;
-  }
-  
-  .close-modal:hover {
-    color: #00acc1;
-  }
-  
-  .modal-content h3 {
-    color: #00acc1;
-    margin-top: 0;
-    margin-bottom: 1.5rem;
-    text-align: center;
-  }
-  
-  .form-group {
-    margin-bottom: 1.2rem;
-  }
-  
-  .form-group label {
+    transition: color 0.2s ease;
+}
+
+.close-modal-btn:hover {
+    color: var(--danger-color);
+}
+
+.modal-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.form-group {
+    margin-bottom: 0.75rem;
+}
+
+.form-group label {
     display: block;
     margin-bottom: 0.5rem;
-    color: #555;
-    font-weight: 500;
-  }
-  
-  .form-group input, .form-group textarea {
-    width: 100%;
-    padding: 0.8rem;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    transition: border 0.3s;
-    font-family: inherit;
-  }
-  
-  .form-group textarea {
-    resize: vertical;
-    min-height: 100px;
-  }
-  
-  .form-group input:focus, .form-group textarea:focus {
-    border-color: #00acc1;
+    font-weight: 600;
+    color: #343a40;
+    font-size: 0.95rem;
+}
+
+.form-group input[type="text"],
+.form-group textarea {
+    width: calc(100% - 20px); /* Adjust for padding */
+    padding: 0.75rem 10px;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-group input[type="text"]:focus,
+.form-group textarea:focus {
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 3px var(--secondary-light); /* Assuming secondary-light exists */
     outline: none;
-    box-shadow: 0 0 0 2px rgba(0, 172, 193, 0.2);
-  }
-  
-  .form-actions {
-    display: flex;
-    gap: 1rem;
-    margin-top: 1.5rem;
-  }
-  
-  .save-btn, .cancel-btn {
-    flex: 1;
-    padding: 0.8rem;
+}
+
+.form-group textarea {
+    resize: vertical; /* Allow vertical resizing */
+    min-height: 80px;
+}
+
+.error-message-inline {
+    color: var(--danger-color);
+    font-size: 0.85rem;
+    margin-top: 0.4rem;
+    margin-bottom: 0;
+    padding-left: 5px;
+    display: block;
+}
+
+.submit-btn {
+    background-color: var(--secondary-color);
+    color: white;
+    padding: 1rem 1.5rem;
     border: none;
-    border-radius: 5px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s ease;
-    font-weight: 500;
+    margin-top: 1.5rem;
+    transition: background-color 0.3s ease, transform 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-  }
-  
-  .save-btn {
-    background-color: #00acc1;
-    color: white;
-  }
-  
-  .save-btn:hover {
-    background-color: #008fa1;
-  }
-  
-  .save-btn:disabled {
-    background-color: #b2ebf2;
+}
+
+.submit-btn:hover {
+    background-color: var(--secondary-dark);
+    transform: translateY(-1px);
+}
+
+.submit-btn:disabled {
+    background-color: #cccccc;
     cursor: not-allowed;
-  }
-  
-  .cancel-btn {
-    background-color: #ecf0f1;
-    color: #555;
-  }
-  
-  .cancel-btn:hover {
-    background-color: #e0e0e0;
-  }
-  
-  /* Notificación */
-  .notification {
-    position: fixed;
-    bottom: 2rem;
-    right: 2rem;
-    padding: 1rem 1.5rem;
-    border-radius: 5px;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
-    z-index: 1001;
-    animation: slideIn 0.3s ease-out;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-  
-  .notification.success {
-    background-color: #00acc1;
-    color: white;
-  }
-  
-  .notification.error {
-    background-color: #ff4444;
-    color: white;
-  }
-  
-  @keyframes slideIn {
-    from {
-      transform: translateX(100%);
-      opacity: 0;
+}
+
+.submit-btn .spinner-icon {
+    font-size: 1.2rem;
+    animation: spin 1s linear infinite;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .admin-content-container {
+        padding: 1rem;
     }
-    to {
-      transform: translateX(0);
-      opacity: 1;
+
+    .admin-content-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1.5rem;
     }
-  }
-  
-  /* Responsive */
-  @media (max-width: 768px) {
-    .management-header {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-    
+
     .header-actions {
-      width: 100%;
-      flex-direction: column;
-      gap: 1rem;
+        width: 100%;
+        justify-content: space-between;
     }
-    
-    .search-bar {
-      width: 100%;
+
+    .search-box {
+        width: calc(100% - 100px); /* Make search box take most of the width */
     }
-    
-    .services-grid {
-      grid-template-columns: 1fr;
+
+    .search-box input[type="text"] {
+        width: 100%;
     }
-    
-    .form-actions {
-      flex-direction: column;
+
+    .add-new-btn {
+        width: auto; /* Allow button to size naturally */
+        min-width: 150px;
+        justify-content: center;
     }
-  }
+
+    .admin-table thead {
+        display: none; /* Hide header on small screens */
+    }
+
+    .admin-table, .admin-table tbody, .admin-table tr, .admin-table td {
+        display: block;
+        width: 100%;
+    }
+
+    .admin-table tr {
+        margin-bottom: 1rem;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .admin-table td {
+        text-align: right;
+        padding-left: 50%; /* Space for pseudo-element labels */
+        position: relative;
+        border-bottom: 1px solid #f1f1f1;
+        font-size: 0.9rem;
+    }
+
+    .admin-table td:last-child {
+        border-bottom: none;
+    }
+
+    .admin-table td::before {
+        content: attr(data-label); /* Use data-label for content */
+        position: absolute;
+        left: 10px;
+        width: calc(50% - 20px);
+        padding-right: 10px;
+        white-space: nowrap;
+        text-align: left;
+        font-weight: 600;
+        color: var(--primary-dark);
+    }
+
+    /* Set data-label for each td in your JS or JSX, e.g., <td data-label="Nombre">{service.nombre}</td> */
+    .admin-table td:nth-of-type(1)::before { content: "ID"; }
+    .admin-table td:nth-of-type(2)::before { content: "Nombre"; }
+    .admin-table td:nth-of-type(3)::before { content: "Descripción"; }
+    .admin-table td:nth-of-type(4)::before { content: "Precio"; }
+    .admin-table td:nth-of-type(5)::before { content: "Acciones"; }
+
+    .actions-cell {
+        justify-content: flex-end; /* Align actions to the right */
+        padding-right: 10px;
+    }
+
+    .modal-content {
+        padding: 1.5rem;
+    }
+
+    .modal-header h3 {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .header-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .search-box, .add-new-btn {
+        width: 100%;
+    }
+
+    .search-box input[type="text"] {
+        width: calc(100% - 2.5rem); /* Adjust for icon */
+    }
+}
+
+/* Custom properties for colors (as you provided) */
+:root {
+    --primary-color: #00acc1;
+    --primary-dark: #007c91;
+    --primary-light: #80deea;
+    --secondary-color: #2196F3;
+    --secondary-dark: #00acc1;
+    --accent-color: #FFC107;
+    --danger-color: #F44336;
+    --danger-dark: #D32F2F;
+}
+
+/* You might want to add a light version of secondary-color if not already defined for hover effects */
+:root {
+    --secondary-light: #90CAF9; /* Example light secondary color */
+}

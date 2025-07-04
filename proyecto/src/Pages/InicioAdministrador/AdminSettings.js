@@ -1,10 +1,10 @@
 // src/Pages/InicioAdministrador/AdminSettings.js
 import React, { useState, useCallback, useEffect } from 'react';
 import { FaCog, FaSave, FaSpinner, FaInfoCircle } from 'react-icons/fa';
-import { authFetch } from '../../utils/api'; // Ruta ajustada
-import { validateField } from '../../utils/validation'; // Importa la función de validación
-import './Styles/AdminSettings.css'; // Ruta relativa al CSS
-import { useNotifications } from '../../Notifications/NotificationContext'; // Ruta ajustada
+import { authFetch } from '../../utils/api';
+import { validateField } from '../../utils/validation';
+import './Styles/AdminSettings.css'; // Make sure this path is correct
+import { useNotifications } from '../../Notifications/NotificationContext'; // Make sure this path is correct
 
 function AdminSettings({ user }) {
     const [settings, setSettings] = useState({
@@ -14,30 +14,31 @@ function AdminSettings({ user }) {
         email_clinica: '',
         horario_atencion: '',
         politica_cancelacion: '',
-        notificaciones_activas: true, // Nuevo campo para configuración de notificaciones
-        sonido_notificacion: 'default', // Nuevo campo
-        recordatorios_cita: true, // Nuevo campo
-        intervalo_recordatorio: '30 minutos' // Nuevo campo
     });
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState('');
     const [formErrors, setFormErrors] = useState({});
-    const { addNotification } = useNotifications(); // Usa el hook de notificaciones
+    const { addNotification } = useNotifications();
 
-    // Función para cargar la configuración actual
-    // NOTA: Necesitas un endpoint en tu backend para obtener y guardar esta configuración.
-    // Asumo un endpoint '/admin/settings' para GET y PUT.
     const fetchSettings = useCallback(async () => {
         setIsLoading(true);
         setError('');
         try {
-            const responseData = await authFetch('/admin/settings'); // Ajusta este endpoint si es diferente
+            const responseData = await authFetch('/admin/settings');
             if (responseData.success && responseData.data) {
-                setSettings(responseData.data);
+                // Filter out any extra fields that might come from the backend if not used in this form
+                const {
+                    notificaciones_activas, // Removed from UI
+                    sonido_notificacion,    // Removed from UI
+                    recordatorios_cita,     // Removed from UI
+                    intervalo_recordatorio, // Removed from UI
+                    ...restSettings // Capture only the settings relevant to this form
+                } = responseData.data;
+                setSettings(restSettings);
             } else {
                 addNotification('error', responseData.message || 'Error al cargar la configuración.', 5000);
-                // Si no hay configuración en la DB, inicializa con valores por defecto o vacíos
+                // If no configuration is found, initialize with empty values
                 setSettings({
                     nombre_clinica: '',
                     direccion_clinica: '',
@@ -45,17 +46,13 @@ function AdminSettings({ user }) {
                     email_clinica: '',
                     horario_atencion: '',
                     politica_cancelacion: '',
-                    notificaciones_activas: true,
-                    sonido_notificacion: 'default',
-                    recordatorios_cita: true,
-                    intervalo_recordatorio: '30 minutos'
                 });
             }
         } catch (err) {
             setError(`Error de conexión al cargar la configuración: ${err.message}`);
             addNotification('error', `Error de conexión: ${err.message}`, 5000);
             console.error('Error fetching settings:', err);
-            // Si hay un error de conexión, inicializa con valores por defecto
+            // If there's a connection error, initialize with empty values
             setSettings({
                 nombre_clinica: '',
                 direccion_clinica: '',
@@ -63,10 +60,6 @@ function AdminSettings({ user }) {
                 email_clinica: '',
                 horario_atencion: '',
                 politica_cancelacion: '',
-                notificaciones_activas: true,
-                sonido_notificacion: 'default',
-                recordatorios_cita: true,
-                intervalo_recordatorio: '30 minutos'
             });
         } finally {
             setIsLoading(false);
@@ -83,13 +76,12 @@ function AdminSettings({ user }) {
     }, [user, fetchSettings]);
 
     const handleFormChange = useCallback((e) => {
-        const { name, value, type, checked } = e.target;
-        const newValue = type === 'checkbox' ? checked : value;
+        const { name, value } = e.target; // No more checkboxes, so simplified
 
-        setSettings(prev => ({ ...prev, [name]: newValue }));
+        setSettings(prev => ({ ...prev, [name]: value }));
 
-        // Validar el campo individualmente al cambiar
-        const errorMessage = validateField(name, newValue, { ...settings, [name]: newValue }, false);
+        // Validate the field individually on change
+        const errorMessage = validateField(name, value, { ...settings, [name]: value }, false);
         setFormErrors(prev => ({ ...prev, [name]: errorMessage }));
     }, [settings]);
 
@@ -98,7 +90,7 @@ function AdminSettings({ user }) {
         setIsSubmitting(true);
         setError('');
 
-        // Validar todos los campos antes de enviar
+        // Validate all fields before submitting
         let errors = {};
         Object.keys(settings).forEach(key => {
             const errorMessage = validateField(key, settings[key], settings, false);
@@ -115,7 +107,7 @@ function AdminSettings({ user }) {
         }
 
         try {
-            const response = await authFetch('/admin/settings', { // Ajusta este endpoint si es diferente
+            const response = await authFetch('/admin/settings', { // Adjust this endpoint if different
                 method: 'PUT',
                 body: settings
             });
@@ -234,64 +226,6 @@ function AdminSettings({ user }) {
                             disabled={isSubmitting}
                         ></textarea>
                         {formErrors.politica_cancelacion && <p className="error-message-inline">{formErrors.politica_cancelacion}</p>}
-                    </div>
-                </fieldset>
-
-                <fieldset className="form-section mt-6">
-                    <legend>Configuración de Notificaciones</legend>
-                    <div className="form-group-checkbox">
-                        <input
-                            type="checkbox"
-                            id="notificaciones_activas"
-                            name="notificaciones_activas"
-                            checked={settings.notificaciones_activas}
-                            onChange={handleFormChange}
-                            disabled={isSubmitting}
-                        />
-                        <label htmlFor="notificaciones_activas">Activar Notificaciones Globales</label>
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="sonido_notificacion">Sonido de Notificación</label>
-                        <select
-                            id="sonido_notificacion"
-                            name="sonido_notificacion"
-                            value={settings.sonido_notificacion}
-                            onChange={handleFormChange}
-                            disabled={isSubmitting}
-                        >
-                            <option value="default">Por defecto</option>
-                            <option value="bell">Campana</option>
-                            <option value="chime">Timbre</option>
-                            <option value="none">Ninguno</option>
-                        </select>
-                        {formErrors.sonido_notificacion && <p className="error-message-inline">{formErrors.sonido_notificacion}</p>}
-                    </div>
-                    <div className="form-group-checkbox">
-                        <input
-                            type="checkbox"
-                            id="recordatorios_cita"
-                            name="recordatorios_cita"
-                            checked={settings.recordatorios_cita}
-                            onChange={handleFormChange}
-                            disabled={isSubmitting}
-                        />
-                        <label htmlFor="recordatorios_cita">Enviar Recordatorios de Citas</label>
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="intervalo_recordatorio">Intervalo de Recordatorio</label>
-                        <select
-                            id="intervalo_recordatorio"
-                            name="intervalo_recordatorio"
-                            value={settings.intervalo_recordatorio}
-                            onChange={handleFormChange}
-                            disabled={isSubmitting || !settings.recordatorios_cita}
-                        >
-                            <option value="15 minutos">15 minutos antes</option>
-                            <option value="30 minutos">30 minutos antes</option>
-                            <option value="1 hora">1 hora antes</option>
-                            <option value="24 horas">24 horas antes</option>
-                        </select>
-                        {formErrors.intervalo_recordatorio && <p className="error-message-inline">{formErrors.intervalo_recordatorio}</p>}
                     </div>
                 </fieldset>
 

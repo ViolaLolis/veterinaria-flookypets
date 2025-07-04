@@ -1,0 +1,514 @@
+/* Styles/AdminUserManagement.css */
+
+/* Importar las variables de color globales si no están ya importadas en un archivo CSS global */
+/* Si ya tienes un archivo global como 'base.css' con :root, no necesitas este @import */
+/* @import './base.css'; */
+
+/* Contenedor principal de la administración */
+.admin-container {
+    padding: 30px;
+    background-color: var(--background-light);
+    min-height: calc(100vh - 60px); /* Ajusta si tienes un header/footer fijo */
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    margin: 20px;
+}
+
+.admin-title {
+    color: var(--primary-dark);
+    font-size: 2.2em;
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-weight: 700;
+    border-bottom: 2px solid var(--primary-light);
+    padding-bottom: 15px;
+}
+
+/* Sección de acciones (búsqueda y añadir) */
+.admin-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.search-bar {
+    position: relative;
+    flex-grow: 1;
+    max-width: 400px;
+}
+
+.search-input {
+    width: 100%;
+    padding: 12px 40px 12px 45px; /* Espacio para icono y botón de limpiar */
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1em;
+    color: var(--text-color-dark);
+    background-color: var(--card-background);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.search-input:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 172, 193, 0.1);
+}
+
+.search-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-color-light);
+    font-size: 1.1em;
+}
+
+.clear-search {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-color-medium);
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: color 0.3s ease;
+}
+
+.clear-search:hover {
+    color: var(--danger-color);
+}
+
+.add-btn {
+    padding: 12px 25px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.add-btn:hover:not(:disabled) {
+    background-color: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 172, 193, 0.3);
+}
+
+.add-btn:disabled {
+    background-color: var(--primary-light);
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* Mensajes de estado (errores, carga, no resultados) */
+.error-message {
+    background-color: #FFEBEE; /* Red Lighten-5 */
+    color: var(--danger-dark);
+    padding: 15px 20px;
+    border-radius: 8px;
+    margin-bottom: 25px;
+    border: 1px solid var(--danger-color);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.loading-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-size: 1.2em;
+    color: var(--primary-dark);
+    padding: 40px;
+    text-align: center;
+}
+
+.spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.no-results {
+    text-align: center;
+    padding: 50px 20px;
+    background-color: var(--card-background);
+    border-radius: 12px;
+    box-shadow: 0 2px 10px var(--shadow-light);
+    color: var(--text-color-medium);
+    font-size: 1.1em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.no-results .info-icon {
+    font-size: 2.5em;
+    color: var(--accent-color);
+}
+
+.no-results .add-btn {
+    margin-top: 15px;
+    padding: 10px 20px;
+    font-size: 0.95em;
+}
+
+/* Tabla de gestión de usuarios */
+.table-responsive {
+    overflow-x: auto; /* Permite scroll horizontal en pantallas pequeñas */
+    margin-top: 20px;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: var(--card-background);
+    border-radius: 12px;
+    overflow: hidden; /* Asegura que las esquinas redondeadas se vean bien con el overflow */
+    box-shadow: 0 4px 15px var(--shadow-light);
+}
+
+.admin-table th,
+.admin-table td {
+    padding: 15px 20px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: middle;
+}
+
+.admin-table th {
+    background-color: var(--primary-dark);
+    color: white;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.9em;
+    letter-spacing: 0.5px;
+}
+
+.admin-table tr:last-child td {
+    border-bottom: none;
+}
+
+.admin-table tbody tr:nth-child(even) {
+    background-color: var(--background-medium); /* Ligeramente más oscuro para filas pares */
+}
+
+.admin-table tbody tr:hover {
+    background-color: var(--primary-light);
+    cursor: default;
+}
+
+/* Badges de estado y conteo de mascotas */
+.status-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8em;
+    font-weight: 600;
+    text-transform: uppercase;
+    display: inline-block;
+}
+
+.status-badge.active {
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+.status-badge.inactive {
+    background-color: var(--danger-color);
+    color: white;
+}
+
+.pet-count-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background-color: var(--accent-color);
+    color: var(--text-color-dark);
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8em;
+    font-weight: 600;
+}
+
+/* Columna de acciones en la tabla */
+.actions-column {
+    white-space: nowrap; /* Evita que los botones se rompan en varias líneas */
+}
+
+.actions-column button {
+    margin-right: 8px;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9em;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.actions-column button:last-child {
+    margin-right: 0;
+}
+
+.btn-edit {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.btn-edit:hover:not(:disabled) {
+    background-color: var(--primary-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 3px 6px rgba(0, 172, 193, 0.2);
+}
+
+.btn-delete {
+    background-color: var(--danger-color);
+    color: white;
+}
+
+.btn-delete:hover:not(:disabled) {
+    background-color: var(--danger-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 3px 6px rgba(244, 67, 54, 0.2);
+}
+
+.actions-column button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+
+/* Estilos para el formulario en el modal */
+.admin-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.form-group {
+    margin-bottom: 0; /* Ya lo maneja el gap del grid */
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--text-color-dark);
+    font-size: 0.95em;
+}
+
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="password"],
+.form-group input[type="date"],
+.form-group select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1em;
+    color: var(--text-color-dark);
+    background-color: var(--background-light);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 172, 193, 0.2);
+}
+
+.form-group .input-error {
+    border-color: var(--danger-color);
+}
+
+.error-text {
+    color: var(--danger-color);
+    font-size: 0.85em;
+    margin-top: 5px;
+    display: block;
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.checkbox-group input[type="checkbox"] {
+    width: auto; /* Ancho automático para checkboxes */
+    margin: 0;
+    transform: scale(1.2); /* Hacer el checkbox un poco más grande */
+}
+
+.checkbox-group label {
+    margin-bottom: 0;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+/* Acciones del formulario (botones de guardar/cancelar) */
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+.form-actions button {
+    padding: 12px 25px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1em;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.form-actions .btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+    box-shadow: 0 4px 8px rgba(0, 172, 193, 0.2);
+}
+
+.form-actions .btn-primary:hover:not(:disabled) {
+    background-color: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 172, 193, 0.3);
+}
+
+.form-actions .btn-secondary {
+    background-color: var(--background-medium);
+    color: var(--text-color-dark);
+    border: 1px solid var(--border-color);
+}
+
+.form-actions .btn-secondary:hover:not(:disabled) {
+    background-color: #cfd8dc; /* Ligeramente más oscuro que background-medium */
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.form-actions .btn-delete {
+    background-color: var(--danger-color);
+    color: white;
+}
+.form-actions .btn-delete:hover:not(:disabled) {
+    background-color: var(--danger-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(244, 67, 54, 0.3);
+}
+
+.form-actions button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Estilos específicos para el modal de eliminación */
+.modal-content-delete {
+    text-align: center;
+    padding: 20px;
+}
+
+.modal-content-delete p {
+    font-size: 1.1em;
+    color: var(--text-color-dark);
+    margin-bottom: 25px;
+}
+
+.modal-content-delete .form-actions {
+    justify-content: center; /* Centrar botones en el modal de confirmación */
+    border-top: none; /* No border top for delete modal actions */
+    padding-top: 0;
+    margin-top: 0;
+}
+
+/* Media Queries para responsividad */
+@media (max-width: 768px) {
+    .admin-container {
+        padding: 20px;
+        margin: 10px;
+    }
+
+    .admin-title {
+        font-size: 1.8em;
+        margin-bottom: 25px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .admin-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .search-bar {
+        max-width: 100%;
+    }
+
+    .add-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .admin-table th,
+    .admin-table td {
+        padding: 10px 12px;
+    }
+
+    .admin-table th:nth-child(1), .admin-table td:nth-child(1), /* ID */
+    .admin-table th:nth-child(4), .admin-table td:nth-child(4), /* Teléfono */
+    .admin-table th:nth-child(5), .admin-table td:nth-child(5) { /* Mascotas */
+        display: none; /* Ocultar columnas menos importantes en móviles */
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr; /* Una columna en pantallas pequeñas */
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .form-actions button {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .admin-title {
+        font-size: 1.5em;
+    }
+}

@@ -1,161 +1,198 @@
 /* src/Pages/InicioAdministrador/Styles/AdminSettings.css */
 
-/* Estilos específicos para la página de Configuración del Sistema */
-
-.admin-settings-form {
-    margin-top: 20px;
+/* Contenedor principal de la página de configuración */
+.admin-content-container {
+    padding: 30px;
+    background-color: #f0f2f5; /* Fondo más claro para la página */
+    min-height: calc(100vh - 60px); /* Ajusta según tu header/footer */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #333;
 }
 
-.admin-settings-form .form-section {
-    border: 1px solid var(--border-color);
+/* Encabezado de la Sección */
+.admin-content-header {
+    background-color: #ffffff;
+    padding: 25px;
     border-radius: 10px;
-    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.admin-content-header h2 {
+    font-size: 2em;
+    color: #2c3e50;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.admin-content-header .header-icon {
+    font-size: 1.3em;
+    color: #00acc1;
+}
+
+/* Estilos del Formulario de Configuración */
+.admin-settings-form {
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Fieldset para agrupar secciones del formulario */
+.form-section {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 25px;
     margin-bottom: 30px;
     background-color: #fdfdfd;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-.admin-settings-form .form-section legend {
-    font-size: 1.3rem;
-    font-weight: 600;
-    color: var(--primary-color);
+.form-section legend {
+    font-size: 1.4em;
+    font-weight: 700;
+    color: #00acc1; /* Color distintivo para las leyendas */
     padding: 0 10px;
-    margin-left: -10px; /* Ajuste para que la leyenda se superponga al borde */
+    margin-left: -10px; /* Ajustar posición de la leyenda */
+    background-color: #ffffff; /* Fondo para la leyenda */
+    border-radius: 5px;
 }
 
-.admin-settings-form .form-group {
-    margin-bottom: 18px;
+/* Diseño de Cuadrícula para los campos dentro del fieldset */
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr; /* Una columna por defecto */
+    gap: 20px; /* Espacio entre los grupos de formulario */
 }
 
-.admin-settings-form .form-group label {
-    display: block;
+@media (min-width: 768px) {
+    .form-grid {
+        grid-template-columns: 1fr 1fr; /* Dos columnas en pantallas medianas y grandes */
+    }
+}
+
+/* Campos que ocupan todo el ancho en la cuadrícula */
+.form-group.full-width {
+    grid-column: 1 / -1; /* Ocupa todas las columnas disponibles */
+}
+
+/* Estilos para cada grupo de formulario (label + input/textarea) */
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
     margin-bottom: 8px;
     font-weight: 600;
-    color: var(--text-color-dark);
-    font-size: 0.95rem;
+    color: #555;
+    font-size: 0.95em;
 }
 
-.admin-settings-form .form-group input[type="text"],
-.admin-settings-form .form-group input[type="email"],
-.admin-settings-form .form-group textarea,
-.admin-settings-form .form-group select {
-    width: 100%;
-    padding: 10px 12px;
-    border: 1px solid var(--border-color);
+.form-group input,
+.form-group textarea {
+    padding: 12px 15px;
+    border: 1px solid #ddd;
     border-radius: 8px;
-    font-size: 0.9rem;
-    color: var(--text-color-dark);
+    font-size: 1em;
+    width: 100%;
+    box-sizing: border-box;
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    background-color: #fcfcfc;
 }
 
-.admin-settings-form .form-group input:focus,
-.admin-settings-form .form-group textarea:focus,
-.admin-settings-form .form-group select:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+.form-group input:focus,
+.form-group textarea:focus {
+    border-color: #00acc1;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
     outline: none;
 }
 
-.admin-settings-form .form-group textarea {
-    min-height: 80px;
-    resize: vertical;
+.form-group input:disabled,
+.form-group textarea:disabled {
+    background-color: #e9ecef;
+    cursor: not-allowed;
+    color: #6c757d;
 }
 
-.admin-settings-form .form-group-checkbox {
-    display: flex;
-    align-items: center;
-    margin-bottom: 18px;
-}
-
-.admin-settings-form .form-group-checkbox input[type="checkbox"] {
-    margin-right: 10px;
-    transform: scale(1.2); /* Agrandar el checkbox */
-    cursor: pointer;
-}
-
-.admin-settings-form .form-group-checkbox label {
-    margin-bottom: 0; /* Eliminar margen inferior para alineación */
-    cursor: pointer;
-}
-
-.admin-settings-form .error-message-inline {
-    color: var(--danger-color);
-    font-size: 0.8rem;
+/* Mensajes de error en línea */
+.error-message-inline {
+    color: #dc3545;
+    font-size: 0.85em;
     margin-top: 5px;
 }
 
-.admin-settings-form .submit-btn {
-    background: linear-gradient(135deg, var(--secondary-color), #27ae60);
-    color: white;
-    border: none;
-    padding: 12px 25px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 1rem;
-    font-weight: 600;
+/* Botón de Envío */
+.submit-btn {
     display: flex;
     align-items: center;
-    gap: 8px;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 10px rgba(46, 204, 113, 0.2);
-    width: auto; /* Ajusta el ancho al contenido */
-    margin-left: auto; /* Alinea a la derecha */
-    margin-right: auto; /* Centra si no hay espacio a la derecha */
-    display: block; /* Para que margin: auto funcione */
+    justify-content: center;
+    gap: 10px;
+    padding: 15px 30px;
+    background-color: #28a745; /* Verde para guardar */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    width: fit-content; /* Ajustar al contenido */
+    margin: 30px auto 0 auto; /* Centrar el botón */
 }
 
-.admin-settings-form .submit-btn:hover {
-    background: linear-gradient(135deg, #27ae60, var(--secondary-color));
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(46, 204, 113, 0.3);
+.submit-btn:hover:not(:disabled) {
+    background-color: #218838;
+    box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
 }
 
-.admin-settings-form .submit-btn:disabled {
+.submit-btn:disabled {
     opacity: 0.6;
     cursor: not-allowed;
     box-shadow: none;
-    transform: none;
 }
 
-.admin-settings-form .spinner-icon {
+.spinner-icon {
     animation: spin 1s linear infinite;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-    .admin-settings-form .form-section {
-        padding: 15px;
-    }
-    .admin-settings-form .form-section legend {
-        font-size: 1.2rem;
-    }
-    .admin-settings-form .form-group label {
-        font-size: 0.9rem;
-    }
-    .admin-settings-form .form-group input,
-    .admin-settings-form .form-group textarea,
-    .admin-settings-form .form-group select {
-        font-size: 0.85rem;
-        padding: 8px 10px;
-    }
-    .admin-settings-form .submit-btn {
-        width: 100%;
-        justify-content: center;
-        padding: 10px 20px;
-        font-size: 0.9rem;
-    }
+/* Estilos para mensajes de carga y error (reutilizados de otros componentes) */
+.admin-loading, .error-message {
+    text-align: center;
+    padding: 50px;
+    font-size: 1.2em;
+    color: #555;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    margin: 30px auto; /* Centrar en la página */
+    max-width: 800px;
 }
 
-@media (max-width: 480px) {
-    .admin-settings-form .form-section legend {
-        font-size: 1.1rem;
-    }
-    .admin-settings-form .form-group label {
-        font-size: 0.85rem;
-    }
-    .admin-settings-form .form-group input,
-    .admin-settings-form .form-group textarea,
-    .admin-settings-form .form-group select {
-        font-size: 0.8rem;
-    }
+.loading-spinner .spinner-icon {
+    font-size: 3em;
+    color: #00acc1;
+    animation: spin 1s linear infinite;
+    margin-bottom: 15px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.error-message {
+    color: #dc3545;
+    border: 1px solid #dc3545;
+    background-color: #f8d7da;
+}
+
+.error-message .info-icon {
+    font-size: 1.5em;
+    margin-right: 10px;
+    vertical-align: middle;
 }
