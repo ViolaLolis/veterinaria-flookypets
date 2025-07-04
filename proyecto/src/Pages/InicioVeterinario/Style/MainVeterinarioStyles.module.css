@@ -283,7 +283,9 @@
   background-color: #0097a7;
 }
 
-/* Floating Notification */
+/* --- ESTILOS DE NOTIFICACIONES AÑADIDOS/MODIFICADOS --- */
+
+/* Estilos para la notificación flotante (ya existente, pero asegurémonos de que tenga los tipos correctos) */
 .floatingNotification {
   position: fixed;
   top: 20px;
@@ -316,6 +318,138 @@
   font-size: 1.2rem;
 }
 
+/* Estilos para el botón de notificaciones en la barra lateral */
+.notificationSidebarItem {
+  position: relative; /* Para posicionar el badge */
+}
+
+/* Estilos para el badge de notificaciones */
+.notificationBadge {
+  background-color: #ff4d4f; /* Color rojo vibrante */
+  color: white;
+  border-radius: 50%;
+  padding: 0.2em 0.5em;
+  font-size: 0.75em;
+  font-weight: bold;
+  position: absolute;
+  top: 8px; /* Ajusta la posición vertical */
+  right: 15px; /* Ajusta la posición horizontal */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px; /* Asegura un tamaño mínimo para un solo dígito */
+  height: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Estilos para el menú desplegable de notificaciones */
+.vetNotificationsDropdown {
+  position: absolute;
+  top: 20px; /* Ajusta para que aparezca desde arriba del todo del MainVeterinario.js */
+  right: 20px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  width: 380px; /* Ancho del menú, un poco más grande para mejor lectura */
+  max-height: 450px; /* Altura máxima para scroll */
+  overflow-y: auto;
+  z-index: 1000;
+  padding: 15px;
+  border: 1px solid #e0e0e0;
+}
+
+.vetNotificationsDropdown h3 {
+  font-size: 1.3em;
+  color: #333;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 10px;
+  font-weight: 600;
+}
+
+.vetNotificationsDropdown ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.vetNotificationsDropdown li {
+  padding: 12px 10px;
+  border-bottom: 1px solid #f5f5f5;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.vetNotificationsDropdown li:last-child {
+  border-bottom: none;
+}
+
+.vetNotificationsDropdown li.unread {
+  background-color: #e0f7fa; /* Un color claro para notificaciones no leídas */
+  font-weight: 600;
+}
+
+.vetNotificationsDropdown li.read {
+  color: #757575;
+  font-weight: 400;
+}
+
+.vetNotificationsDropdown li:hover {
+  background-color: #f0f8ff;
+}
+
+.notificationContent {
+  flex-grow: 1;
+}
+
+.notificationMessage {
+  margin: 0;
+  font-size: 0.95em;
+  line-height: 1.4;
+  color: #333;
+}
+
+.vetNotificationsDropdown li.read .notificationMessage {
+  color: #757575;
+}
+
+
+.notificationDate {
+  font-size: 0.8em;
+  color: #9e9e9e;
+  margin-top: 5px;
+  display: block;
+}
+
+.markAsReadButton {
+  background-color: #00acc1;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 28px; /* Un poco más grande para mejor clic */
+  height: 28px; /* Un poco más grande para mejor clic */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1em; /* Ajustado el tamaño del check */
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  flex-shrink: 0; /* Evita que el botón se comprima */
+}
+
+.markAsReadButton:hover {
+  background-color: #0097a7;
+}
+
+.vetNotificationsDropdown p {
+  text-align: center;
+  color: #757575;
+  padding: 20px;
+}
 
 /* Responsive Adjustments */
 @media (max-width: 1200px) {
@@ -350,6 +484,10 @@
     font-size: 1.2rem;
   }
 
+  .vetUserInfo p {
+    font-size: 0.9rem;
+  }
+
   .vetNavMenu li {
     padding: 10px 15px;
     font-size: 0.95rem;
@@ -366,6 +504,10 @@
 
   .vetMainContent {
     padding: 20px;
+  }
+
+  .vetNotificationsDropdown {
+    width: 320px; /* Ajuste para pantallas medianas */
   }
 }
 
@@ -456,6 +598,14 @@
 
   .vetMainContent {
     padding: 15px;
+  }
+
+  /* Ajustes responsivos para el menú de notificaciones */
+  .vetNotificationsDropdown {
+    width: 90%;
+    right: 5%;
+    left: 5%;
+    top: 20px; /* Ajusta la posición para que no choque con el menú superior */
   }
 }
 

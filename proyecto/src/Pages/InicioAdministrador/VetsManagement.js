@@ -4,7 +4,6 @@ import { FaStethoscope, FaSearch, FaPlus, FaEdit, FaTrash, FaSpinner, FaTimes, F
 import { motion, AnimatePresence } from 'framer-motion';
 import { authFetch } from '../../utils/api'; // Ruta ajustada
 import { validateField } from '../../utils/validation'; // Importa la función de validación
-import './Styles/VetsManagement.css'; // Ruta relativa al CSS
 import { useNotifications } from '../../Notifications/NotificationContext'; // Ruta ajustada
 
 function VetsManagement({ user }) {

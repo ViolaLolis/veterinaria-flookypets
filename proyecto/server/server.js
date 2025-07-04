@@ -49,7 +49,7 @@ app.use(fileUpload({
 const pool = mysql.createPool({
     host: process.env.DB_HOST || "127.0.0.1",
     user: process.env.DB_USER || "root",
-    password: process.env.DB_PASSWORD || "12345678", // Asegúrate de que tu contraseña de MySQL sea correcta aquí o en .env
+    password: process.env.DB_PASSWORD || "", // Asegúrate de que tu contraseña de MySQL sea correcta aquí o en .env
     database: process.env.DB_NAME || "veterinaria",
     waitForConnections: true,
     connectionLimit: 10,
