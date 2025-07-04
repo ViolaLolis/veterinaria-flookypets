@@ -3,25 +3,23 @@ import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import {
     FaTachometerAlt, FaUsers, FaStethoscope, FaUserShield, FaBriefcaseMedical,
     FaCalendarAlt, FaNotesMedical, FaCog, FaSignOutAlt, FaUserCircle,
+<<<<<<< HEAD
     FaBars, FaTimes 
 } from 'react-icons/fa';
 import './Styles/AdminDashboard.css';
 
+=======
+    FaBars, FaTimes
+} from 'react-icons/fa';
+import './Styles/AdminDashboard.css';
+>>>>>>> f6b4bbc7a3019180e9e80510d604f1c1ce8d48db
 
 function AdminDashboard({ user, setUser, handleLogout }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-    // Se eliminó isNotificationsDropdownOpen, ya no se usa
-    // const [isNotificationsDropdownOpen, setIsNotificationsDropdownOpen] = useState(false);
 
     const navigate = useNavigate();
     const location = useLocation();
 
-    // Se eliminaron todas las variables relacionadas con useNotifications
-    // const { notifications, markAsRead, clearNotifications } = useNotifications();
-    // const unreadCount = notifications.filter(notif => !notif.leida).length;
-
-    // Se eliminó notificationsRef, ya no se usa
-    // const notificationsRef = useRef(null);
     const sidebarRef = useRef(null);
 
     // Redirige si el usuario no es admin o no está logueado
@@ -46,7 +44,7 @@ function AdminDashboard({ user, setUser, handleLogout }) {
         return () => {
             document.removeEventListener("mousedown", handleClickOutside);
         };
-    }, [sidebarRef, isSidebarOpen]); // notificationsRef eliminado de las dependencias
+    }, [sidebarRef, isSidebarOpen]);
 
     const handleLogoutClick = () => {
         handleLogout();
@@ -57,20 +55,8 @@ function AdminDashboard({ user, setUser, handleLogout }) {
         return location.pathname.startsWith(path) ? 'admin-nav-item active' : 'admin-nav-item';
     };
 
-    // Se eliminó toggleNotificationsDropdown, ya no se usa
-    // const toggleNotificationsDropdown = () => {
-    //     setIsNotificationsDropdownOpen(prevState => !prevState);
-    // };
-
-    // Se eliminó adminNotifications, ya no se usa
-    // const adminNotifications = notifications.filter(notif => {
-    //     const adminKeywords = [
-    //         'nueva cita', 'nuevo usuario registrado', 'nueva mascota agregada',
-    //         'cita cancelada', 'registro de pago', 'veterinario', 'servicio',
-    //         'historial', 'cliente', 'modificado', 'eliminado', 'creado'
-    //     ];
-    //     return adminKeywords.some(keyword => notif.mensaje.toLowerCase().includes(keyword));
-    // });
+    // The 'adminNotifications' constant and its filtering logic have been removed
+    // as the notification feature is currently commented out/removed.
 
     return (
         <div className="admin-dashboard-container">

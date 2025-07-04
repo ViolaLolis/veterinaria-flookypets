@@ -6,7 +6,7 @@ import {
   faMars, faVenus, faWeight, faStethoscope
 } from '@fortawesome/free-solid-svg-icons';
 import { motion } from 'framer-motion';
-import styles from './Styles/TarjetaMascota.module.css'; // Importar el CSS sin .module
+import './Styles/TarjetaMascota.module.css'; // Importar el CSS sin .module
 
 const TarjetaMascota = ({ mascota }) => {
   const navigate = useNavigate();

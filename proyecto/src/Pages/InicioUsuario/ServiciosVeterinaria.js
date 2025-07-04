@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faConciergeBell, faSearch, faInfoCircle, faSpinner, faBroom } from '@fortawesome/free-solid-svg-icons';
 import TarjetaServicio from './TarjetaServicio'; // Asegúrate de que TarjetaServicio esté en la misma carpeta o ajusta la ruta
-import styles from './Styles/ServiciosVeterinaria.module.css'; // Importar el CSS sin .module
+import './Styles/ServiciosVeterinaria.module.css'; // Importar el CSS sin .module
 import { authFetch } from '../../utils/api'; // Importar la función authFetch
 import { toast } from 'react-toastify'; // Import toast for user feedback
 

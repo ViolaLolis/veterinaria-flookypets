@@ -3,11 +3,10 @@ import { useParams, Link, useNavigate, useOutletContext } from 'react-router-dom
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FaSpinner, FaInfoCircle, FaPlusCircle, FaArrowLeft,
-  FaFileMedical, FaCalendarAlt, FaUserMd, FaWeight, FaThermometerHalf
+  FaFileMedical, FaCalendarAlt
 } from 'react-icons/fa';
-import styles from './Styles/HistorialMedico.module.css'; // Importar el CSS sin .module
+import './Styles/HistorialMedico.module.css'; // Importar el CSS sin .module
 import { authFetch } from '../../utils/api'; // Importar la función authFetch
-import { toast } from 'react-toastify'; // Import toast for user feedback
 
 const HistorialMedico = () => {
   const { mascotaId } = useParams();

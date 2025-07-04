@@ -43,7 +43,9 @@ const AdminMedicalRecords = ({ user }) => {
             },
         });
 
+        // Manejo de errores de autenticación/autorización
         if (response.status === 401 || response.status === 403) {
+<<<<<<< HEAD
             // Limpiar token si la sesión ha expirado y redirigir
             localStorage.removeItem('token');
             setError('Sesión expirada o no autorizado. Por favor, inicia sesión de nuevo.');
@@ -59,6 +61,23 @@ const AdminMedicalRecords = ({ user }) => {
         }
 
         return response;
+=======
+            const errorData = await response.json().catch(() => ({ message: 'Error de autenticación/autorización.' }));
+            setError(errorData.message || 'Sesión expirada o no autorizado. Por favor, inicia sesión de nuevo.');
+            throw new Error(errorData.message || 'No autorizado');
+        }
+
+        // Manejo de errores de respuesta no JSON
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.indexOf("application/json") !== -1) {
+            return response; // Si es JSON, retorna la respuesta para que se parsee más adelante
+        } else {
+            const text = await response.text();
+            console.error("Response was not JSON:", text);
+            setError(`Error del servidor: Respuesta inesperada. Estado: ${response.status}`);
+            throw new Error("Respuesta del servidor no es JSON");
+        }
+>>>>>>> f6b4bbc7a3019180e9e80510d604f1c1ce8d48db
     }, []);
 
     const fetchMedicalRecords = useCallback(async () => {
@@ -66,6 +85,7 @@ const AdminMedicalRecords = ({ user }) => {
         setError(''); // Limpiar errores anteriores de carga
         setNotification(null); // Limpiar notificaciones anteriores
         try {
+            // CAMBIO CORREGIDO: Se eliminó '/api' de la ruta para que coincida con el backend
             const response = await authFetch(`${API_BASE_URL}/admin/historiales`);
             const data = await response.json();
             if (data.success) {
@@ -76,8 +96,12 @@ const AdminMedicalRecords = ({ user }) => {
             }
         } catch (err) {
             console.error('Error fetching medical records:', err);
+<<<<<<< HEAD
             // El error ya se setea en authFetch, pero si hay un error de red, lo capturamos aquí
             setError(prev => prev || `Error al conectar con el servidor: ${err.message || 'Verifica tu conexión.'}`);
+=======
+            setError('Error al conectar con el servidor para cargar historiales médicos. ' + err.message);
+>>>>>>> f6b4bbc7a3019180e9e80510d604f1c1ce8d48db
         } finally {
             setIsLoading(false);
         }
@@ -138,7 +162,11 @@ const AdminMedicalRecords = ({ user }) => {
             }
         } catch (err) {
             console.error('Error deleting medical record:', err);
+<<<<<<< HEAD
             setError(prev => prev || `Error al conectar con el servidor: ${err.message || 'Verifica tu conexión.'}`);
+=======
+            setError('Error al conectar con el servidor para eliminar el historial médico. ' + err.message);
+>>>>>>> f6b4bbc7a3019180e9e80510d604f1c1ce8d48db
         } finally {
             setIsLoading(false);
             setShowDeleteConfirm(false);

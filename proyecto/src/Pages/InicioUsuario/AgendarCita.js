@@ -150,10 +150,10 @@ const AgendarCita = () => {
         id_cliente: user.id,
         id_servicio: servicio.id_servicio,
         id_veterinario: selectedVeterinario ? parseInt(selectedVeterinario) : null,
-        id_mascota: parseInt(selectedMascota), // Asegurarse de que es un número
-        fecha_cita: fechaHora.toISOString().slice(0, 19).replace('T', ' '), // <--- CAMBIO AQUÍ: 'fecha' a 'fecha_cita'
-        notas_adicionales: servicio.nombre, // 'servicios' en el frontend se mapea a 'notas_adicionales' en el backend
-        estado: 'pendiente'
+        id_mascota: parseInt(selectedMascota),
+        fecha_cita: fechaHora.toISOString().slice(0, 19).replace('T', ' '),
+        notas_adicionales: servicio.nombre,
+        estado: 'PENDIENTE' // Siempre se envía como PENDIENTE
       };
 
       const response = await authFetch('/citas', {
@@ -163,7 +163,7 @@ const AgendarCita = () => {
 
       if (response.success) {
         setCitaAgendada(true);
-        showNotification('¡Cita agendada con éxito!', 'success');
+        showNotification('¡Cita agendada con éxito y pendiente de confirmación!', 'success');
         setTimeout(() => {
           navigate('/usuario/citas');
         }, 3000);
