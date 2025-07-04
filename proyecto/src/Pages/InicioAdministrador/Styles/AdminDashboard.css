@@ -3,8 +3,8 @@
 /* --- Variables CSS para una gestión de colores y espaciado más fácil --- */
 :root {
     --color-primary-cyan: #00BCD4; /* Nuevo azul cian vibrante */
-    --color-dark-cyan: #0097A7;   /* Nuevo azul oscuro */
-    --color-light-cyan: #E0F7FA;  /* Nuevo azul claro */
+    --color-dark-cyan: #0097A7;    /* Nuevo azul oscuro */
+    --color-light-cyan: #E0F7FA;   /* Nuevo azul claro */
     --color-accent-green: #28a745;
     --color-accent-red: #dc3545;
     --color-text-dark: #333;
@@ -57,6 +57,19 @@
     70% { transform: scale(0.9); }
     100% { transform: scale(1); }
 }
+
+/* Animación específica para el dropdown de notificaciones */
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
 
 /* --- General Layout del Dashboard --- */
 .admin-dashboard-container {
@@ -283,26 +296,37 @@
     color: var(--color-primary-cyan);
 }
 
+/* --- ESTILOS DE NOTIFICACIONES AÑADIDOS/MODIFICADOS --- */
+
+/* Contenedor de la campana y el dropdown */
+.notification-container {
+    position: relative;
+    display: inline-block; /* Para que el dropdown se posicione correctamente */
+}
+
 .notification-bell-btn {
     background: none;
     border: none;
-    font-size: 1.5rem;
+    font-size: 1.5rem; /* Tamaño del icono de campana */
     color: var(--color-text-medium);
     cursor: pointer;
-    position: relative;
-    transition: color 0.3s ease, transform 0.2s ease;
+    position: relative; /* Para el badge */
+    padding: 5px; /* Área de clic */
+    border-radius: 50%;
+    transition: color 0.3s ease, transform 0.2s ease, background-color 0.2s ease;
 }
 
 .notification-bell-btn:hover {
     color: var(--color-primary-cyan);
     transform: scale(1.1);
+    background-color: var(--color-background-light); /* Fondo suave al pasar el ratón */
 }
 
 .notification-badge {
     position: absolute;
     top: -5px;
     right: -5px;
-    background-color: var(--color-accent-red);
+    background-color: var(--color-accent-red); /* Usamos la variable para el rojo */
     color: var(--color-background-white);
     font-size: 0.75rem;
     font-weight: 700;
@@ -312,7 +336,136 @@
     text-align: center;
     line-height: 1;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    animation: bounceIn 0.6s ease-out;
+    animation: bounceIn 0.6s ease-out; /* Animación al aparecer el badge */
+}
+
+/* Estilos para el menú desplegable de notificaciones del administrador */
+.admin-notifications-dropdown {
+    position: absolute;
+    top: calc(100% + var(--spacing-sm)); /* Debajo del botón de la campana con un pequeño espacio */
+    right: 0;
+    background-color: var(--color-background-white);
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-md); /* Usamos la variable de sombra */
+    width: 380px; /* Ancho ajustable */
+    max-height: 400px; /* Altura máxima para scroll */
+    overflow-y: auto;
+    z-index: 1001; /* Asegura que esté por encima de otros elementos */
+    padding: var(--spacing-md);
+    border: 1px solid var(--color-border-light);
+    transform-origin: top right;
+    animation: fadeInScale 0.2s ease-out; /* Animación de aparición */
+}
+
+.admin-notifications-dropdown h3 {
+    font-size: 1.3em;
+    color: var(--color-text-dark);
+    margin-bottom: var(--spacing-md);
+    border-bottom: 1px solid var(--color-border-light);
+    padding-bottom: var(--spacing-sm);
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.admin-notifications-dropdown ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.admin-notifications-dropdown li {
+    padding: var(--spacing-sm) var(--spacing-xs);
+    border-bottom: 1px solid var(--color-border-light);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--spacing-sm);
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.admin-notifications-dropdown li:last-child {
+    border-bottom: none;
+}
+
+.admin-notifications-dropdown li.unread {
+    background-color: var(--color-light-cyan); /* Usamos la variable para no leídas */
+    font-weight: 600;
+    color: var(--color-text-dark);
+}
+
+.admin-notifications-dropdown li.read {
+    color: var(--color-text-light); /* Más claro para leídas */
+    font-weight: 400;
+}
+
+.admin-notifications-dropdown li:hover {
+    background-color: rgba(var(--color-primary-cyan), 0.05); /* Un hover sutil con el color primario */
+}
+
+.notification-content {
+    flex-grow: 1;
+}
+
+.notification-message {
+    margin: 0;
+    font-size: 0.95em;
+    line-height: 1.4;
+    color: inherit; /* Hereda el color del padre (li.read/unread) */
+}
+
+.notification-date {
+    font-size: 0.8em;
+    color: var(--color-text-light); /* Usamos la variable */
+    margin-top: 5px;
+    display: block;
+}
+
+.mark-as-read-button {
+    background-color: var(--color-primary-cyan); /* Usamos la variable */
+    color: var(--color-background-white);
+    border: none;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+    flex-shrink: 0;
+}
+
+.mark-as-read-button:hover {
+    background-color: var(--color-dark-cyan); /* Color oscuro al pasar el ratón */
+    transform: scale(1.05);
+}
+
+.admin-notifications-dropdown p {
+    text-align: center;
+    color: var(--color-text-light);
+    padding: var(--spacing-md);
+}
+
+.clear-all-notifications-button {
+    width: 100%;
+    padding: var(--spacing-sm) var(--spacing-md);
+    background-color: var(--color-dark-cyan); /* Usamos la variable para el botón */
+    color: var(--color-background-white);
+    border: none;
+    border-radius: var(--border-radius-sm);
+    margin-top: var(--spacing-md);
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.clear-all-notifications-button:hover {
+    background-color: var(--color-primary-cyan); /* Cambia al color primario al pasar el ratón */
 }
 
 .admin-content-area {
@@ -398,6 +551,45 @@
     .sidebar-nav .nav-icon {
         font-size: 1.1rem; /* Iconos ligeramente más pequeños en móvil */
     }
+
+    /* Notificaciones móviles */
+    .admin-notifications-dropdown {
+        width: calc(100% - var(--spacing-xl)); /* Ocupa casi todo el ancho con margen a los lados */
+        right: var(--spacing-md);
+        left: var(--spacing-md);
+        top: calc(var(--navbar-height) + var(--spacing-sm)); /* Debajo del encabezado fijo */
+        max-height: 70vh; /* Ajusta la altura máxima para que quepa en la pantalla */
+        padding: var(--spacing-sm);
+    }
+
+    .admin-notifications-dropdown h3 {
+        font-size: 1.1em;
+        padding-bottom: var(--spacing-xs);
+    }
+
+    .admin-notifications-dropdown li {
+        padding: var(--spacing-xs);
+        gap: var(--spacing-xs);
+    }
+
+    .notification-message {
+        font-size: 0.85em;
+    }
+
+    .notification-date {
+        font-size: 0.7em;
+    }
+
+    .mark-as-read-button {
+        width: 24px;
+        height: 24px;
+        font-size: 0.9em;
+    }
+
+    .clear-all-notifications-button {
+        font-size: 0.85rem;
+        padding: var(--spacing-xs) var(--spacing-sm);
+    }
 }
 
 /* Tablets (768px a 1023px) */
@@ -427,6 +619,10 @@
 
     .admin-content-area {
         padding: var(--spacing-xl);
+    }
+
+    .admin-notifications-dropdown {
+        width: 320px; /* Ancho ajustado para tablets */
     }
 }
 
@@ -465,6 +661,34 @@
 
     .notification-bell-btn {
         font-size: 1.8rem;
+    }
+
+    .admin-notifications-dropdown {
+        width: 450px; /* Más ancho para pantallas grandes */
+        max-height: 500px;
+        font-size: 1.1rem;
+    }
+
+    .admin-notifications-dropdown h3 {
+        font-size: 1.5em;
+    }
+
+    .notification-message {
+        font-size: 1rem;
+    }
+
+    .notification-date {
+        font-size: 0.9em;
+    }
+
+    .mark-as-read-button {
+        width: 32px;
+        height: 32px;
+        font-size: 1.1em;
+    }
+
+    .clear-all-notifications-button {
+        font-size: 1rem;
     }
 
     .admin-content-area {
