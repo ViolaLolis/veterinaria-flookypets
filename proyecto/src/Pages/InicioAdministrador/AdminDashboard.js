@@ -1,19 +1,20 @@
 // src/Pages/InicioAdministrador/AdminDashboard.js
 import React, { useState, useEffect } from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
-import { FaTachometerAlt, FaUsers, FaStethoscope, FaCalendarAlt, FaNotesMedical, FaCog, FaSignOutAlt, FaUserCircle, FaBars, FaTimes, FaChartBar, FaUserShield, FaBriefcaseMedical } from 'react-icons/fa';
-import './Styles/AdminDashboard.css'; // Asegúrate de que este CSS exista
-import { useNotifications } from '../../Notifications/NotificationContext'; // Importa el hook de notificaciones
+import { FaTachometerAlt, FaUsers, FaStethoscope, FaUserShield, FaBriefcaseMedical, FaCalendarAlt, FaNotesMedical, FaCog, FaSignOutAlt, FaUserCircle, FaBars, FaTimes } from 'react-icons/fa';
+import './Styles/AdminDashboard.css'; // Ruta relativa al CSS
+import { useNotifications } from '../../Notifications/NotificationContext'; // Ruta ajustada
 
 function AdminDashboard({ user, setUser, handleLogout }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
-    const { notifications, markNotificationAsRead, removeNotification, clearAllNotifications } = useNotifications(); // Usa el hook de notificaciones
+    const { notifications } = useNotifications(); // Solo necesitamos 'notifications' para el contador
     const unreadCount = notifications.filter(notif => !notif.leida).length;
 
     useEffect(() => {
         // Redirigir si el usuario no es admin o no está logueado
+        // Esta lógica también está en Protegida.js, pero es una buena capa de seguridad adicional
         if (!user || user.role !== 'admin') {
             navigate('/login', { replace: true });
         }

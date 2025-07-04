@@ -2,9 +2,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { FaUserShield, FaSearch, FaPlus, FaEdit, FaTrash, FaSpinner, FaTimes, FaInfoCircle } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
-import { authFetch } from './api'; // Asegúrate de que la ruta sea correcta
-import './Styles/AdminsManagement.css'; // Asegúrate de que este CSS exista
-import { useNotifications } from '../../Notifications/NotificationContext'; // Importa el hook de notificaciones
+import { authFetch } from '../../utils/api'; // Ruta ajustada
+import { validateField } from '../../utils/validation'; // Importa la función de validación
+import './Styles/AdminsManagement.css'; // Ruta relativa al CSS
+import { useNotifications } from '../../Notifications/NotificationContext'; // Ruta ajustada
 
 function AdminsManagement({ user }) {
     const [admins, setAdmins] = useState([]);
@@ -15,6 +16,7 @@ function AdminsManagement({ user }) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingAdmin, setEditingAdmin] = useState(null); // null o el objeto del admin a editar
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [formErrors, setFormErrors] = useState({}); // Estado para errores de formulario
     const { addNotification } = useNotifications(); // Usa el hook de notificaciones
 
     const [formData, setFormData] = useState({
@@ -23,8 +25,8 @@ function AdminsManagement({ user }) {
         email: '',
         telefono: '',
         direccion: '',
-        password: '',
-        imagen_url: ''
+        password: ''
+        // Eliminado: imagen_url, ya que se gestiona en el perfil del usuario
     });
 
     const fetchAdmins = useCallback(async () => {
@@ -75,9 +77,9 @@ function AdminsManagement({ user }) {
             email: '',
             telefono: '',
             direccion: '',
-            password: '',
-            imagen_url: ''
+            password: ''
         });
+        setFormErrors({}); // Limpiar errores al abrir el modal
         setIsModalOpen(true);
     }, []);
 
@@ -90,20 +92,54 @@ function AdminsManagement({ user }) {
             telefono: admin.telefono,
             direccion: admin.direccion,
             password: '', // No cargar la contraseña por seguridad
-            imagen_url: admin.imagen_url || ''
+            // Eliminado: imagen_url
         });
+        setFormErrors({}); // Limpiar errores al abrir el modal
         setIsModalOpen(true);
     }, []);
 
     const handleFormChange = useCallback((e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
-    }, []);
+        let newValue = value;
+
+        // Convertir a mayúsculas para campos específicos, excepto email y password
+        if (!['email', 'password'].includes(name)) {
+            newValue = value.toUpperCase();
+        }
+
+        setFormData(prev => ({ ...prev, [name]: newValue }));
+
+        // Validar el campo individualmente al cambiar
+        const originalEmail = editingAdmin ? editingAdmin.email : ''; // Pasa el email original si estamos editando
+        const errorMessage = validateField(name, newValue, { ...formData, [name]: newValue }, !editingAdmin, originalEmail);
+        setFormErrors(prev => ({ ...prev, [name]: errorMessage }));
+    }, [formData, editingAdmin]);
 
     const handleSubmit = useCallback(async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
         setError('');
+
+        // Validar todos los campos antes de enviar
+        let errors = {};
+        Object.keys(formData).forEach(key => {
+            // No validar password si estamos editando y el campo está vacío
+            if (editingAdmin && key === 'password' && !formData[key]) {
+                return;
+            }
+            const originalEmail = editingAdmin ? editingAdmin.email : ''; // Pasa el email original si estamos editando
+            const errorMessage = validateField(key, formData[key], formData, !editingAdmin, originalEmail);
+            if (errorMessage) {
+                errors[key] = errorMessage;
+            }
+        });
+
+        if (Object.keys(errors).length > 0) {
+            setFormErrors(errors);
+            addNotification('error', 'Por favor, corrige los errores en el formulario.', 5000);
+            setIsSubmitting(false);
+            return;
+        }
 
         try {
             let response;
@@ -113,6 +149,8 @@ function AdminsManagement({ user }) {
             if (editingAdmin && !payload.password) {
                 delete payload.password;
             }
+            // Eliminar imagen_url del payload, ya no se gestiona aquí
+            delete payload.imagen_url;
 
             if (editingAdmin) {
                 response = await authFetch(`/api/admin/administrators/${editingAdmin.id}`, {
@@ -143,6 +181,12 @@ function AdminsManagement({ user }) {
 
     const handleDelete = useCallback(async (id) => {
         // *** REEMPLAZO DE window.confirm ***
+        // Aquí deberías integrar un modal de confirmación personalizado.
+        // Por ejemplo:
+        // const confirmed = await showCustomConfirmModal('¿Estás seguro de eliminar este administrador? Esta acción es irreversible y eliminará datos asociados.');
+        // if (!confirmed) return;
+
+        // Temporalmente, mantenemos window.confirm para funcionalidad, pero se debe reemplazar
         if (!window.confirm('¿Estás seguro de eliminar este administrador? Esta acción es irreversible y eliminará datos asociados.')) {
             return;
         }
@@ -285,7 +329,7 @@ function AdminsManagement({ user }) {
                         >
                             <div className="modal-header">
                                 <h3>{editingAdmin ? 'Editar Administrador' : 'Registrar Nuevo Administrador'}</h3>
-                                <button className="close-modal-btn" onClick={() => setIsModalOpen(false)}>
+                                <button className="close-modal-btn" onClick={() => { setIsModalOpen(false); setFormErrors({}); }}>
                                     <FaTimes />
                                 </button>
                             </div>
@@ -293,33 +337,36 @@ function AdminsManagement({ user }) {
                                 <div className="form-group">
                                     <label htmlFor="nombre">Nombre</label>
                                     <input type="text" id="nombre" name="nombre" value={formData.nombre} onChange={handleFormChange} required disabled={isSubmitting} />
+                                    {formErrors.nombre && <p className="error-message-inline">{formErrors.nombre}</p>}
                                 </div>
                                 <div className="form-group">
                                     <label htmlFor="apellido">Apellido</label>
                                     <input type="text" id="apellido" name="apellido" value={formData.apellido} onChange={handleFormChange} disabled={isSubmitting} />
+                                    {formErrors.apellido && <p className="error-message-inline">{formErrors.apellido}</p>}
                                 </div>
                                 <div className="form-group">
                                     <label htmlFor="email">Email</label>
                                     <input type="email" id="email" name="email" value={formData.email} onChange={handleFormChange} required disabled={editingAdmin || isSubmitting} />
+                                    {formErrors.email && <p className="error-message-inline">{formErrors.email}</p>}
                                 </div>
                                 <div className="form-group">
                                     <label htmlFor="telefono">Teléfono</label>
                                     <input type="text" id="telefono" name="telefono" value={formData.telefono} onChange={handleFormChange} required disabled={isSubmitting} />
+                                    {formErrors.telefono && <p className="error-message-inline">{formErrors.telefono}</p>}
                                 </div>
                                 <div className="form-group">
                                     <label htmlFor="direccion">Dirección</label>
                                     <input type="text" id="direccion" name="direccion" value={formData.direccion} onChange={handleFormChange} disabled={isSubmitting} />
+                                    {formErrors.direccion && <p className="error-message-inline">{formErrors.direccion}</p>}
                                 </div>
                                 {!editingAdmin && (
                                     <div className="form-group">
                                         <label htmlFor="password">Contraseña</label>
                                         <input type="password" id="password" name="password" value={formData.password} onChange={handleFormChange} required={!editingAdmin} disabled={isSubmitting} />
+                                        {formErrors.password && <p className="error-message-inline">{formErrors.password}</p>}
                                     </div>
                                 )}
-                                <div className="form-group">
-                                    <label htmlFor="imagen_url">URL de Imagen (Opcional)</label>
-                                    <input type="text" id="imagen_url" name="imagen_url" value={formData.imagen_url} onChange={handleFormChange} disabled={isSubmitting} />
-                                </div>
+                                {/* Eliminado el campo imagen_url */}
                                 <button type="submit" className="submit-btn" disabled={isSubmitting}>
                                     {isSubmitting ? <FaSpinner className="spinner-icon" /> : (editingAdmin ? 'Actualizar Administrador' : 'Registrar Administrador')}
                                 </button>

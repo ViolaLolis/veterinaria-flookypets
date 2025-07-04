@@ -2,9 +2,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { FaStethoscope, FaSearch, FaPlus, FaEdit, FaTrash, FaSpinner, FaTimes, FaInfoCircle, FaToggleOn, FaToggleOff } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
-import { authFetch } from './api'; // Asegúrate de que la ruta sea correcta
-import './Styles/VetsManagement.css'; // Asegúrate de que este CSS exista
-import { useNotifications } from '../../Notifications/NotificationContext'; // Importa el hook de notificaciones
+import { authFetch } from '../../utils/api'; // Ruta ajustada
+import { validateField } from '../../utils/validation'; // Importa la función de validación
+import './Styles/VetsManagement.css'; // Ruta relativa al CSS
+import { useNotifications } from '../../Notifications/NotificationContext'; // Ruta ajustada
 
 function VetsManagement({ user }) {
     const [vets, setVets] = useState([]);
@@ -15,6 +16,7 @@ function VetsManagement({ user }) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingVet, setEditingVet] = useState(null); // null o el objeto del veterinario a editar
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [formErrors, setFormErrors] = useState({}); // Estado para errores de formulario
     const { addNotification } = useNotifications(); // Usa el hook de notificaciones
 
     const [formData, setFormData] = useState({
@@ -26,8 +28,8 @@ function VetsManagement({ user }) {
         password: '',
         experiencia: '',
         universidad: '',
-        horario: '',
-        imagen_url: ''
+        horario: ''
+        // Eliminado: imagen_url, ya que se gestiona en el perfil del usuario
     });
 
     const fetchVets = useCallback(async () => {
@@ -81,9 +83,9 @@ function VetsManagement({ user }) {
             password: '',
             experiencia: '',
             universidad: '',
-            horario: '',
-            imagen_url: ''
+            horario: ''
         });
+        setFormErrors({}); // Limpiar errores al abrir el modal
         setIsModalOpen(true);
     }, []);
 
@@ -95,24 +97,58 @@ function VetsManagement({ user }) {
             email: vet.email,
             telefono: vet.telefono,
             direccion: vet.direccion,
-            password: '', // No cargar la contraseña por seguridad
+            password: '', // No cargar la contraseña por seguridad, se deja vacía para no modificarla si no se introduce una nueva
             experiencia: vet.experiencia || '',
             universidad: vet.universidad || '',
-            horario: vet.horario || '',
-            imagen_url: vet.imagen_url || ''
+            horario: vet.horario || ''
+            // Eliminado: imagen_url
         });
+        setFormErrors({}); // Limpiar errores al abrir el modal
         setIsModalOpen(true);
     }, []);
 
     const handleFormChange = useCallback((e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
-    }, []);
+        let newValue = value;
+
+        // Convertir a mayúsculas para campos específicos, excepto email y password
+        if (!['email', 'password'].includes(name)) {
+            newValue = value.toUpperCase();
+        }
+
+        setFormData(prev => ({ ...prev, [name]: newValue }));
+
+        // Validar el campo individualmente al cambiar
+        const originalEmail = editingVet ? editingVet.email : ''; // Pasa el email original si estamos editando
+        const errorMessage = validateField(name, newValue, { ...formData, [name]: newValue }, !editingVet, originalEmail);
+        setFormErrors(prev => ({ ...prev, [name]: errorMessage }));
+    }, [formData, editingVet]); // Depende de formData y editingVet para la validación
 
     const handleSubmit = useCallback(async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
         setError('');
+
+        // Validar todos los campos antes de enviar
+        let errors = {};
+        Object.keys(formData).forEach(key => {
+            // No validar password si estamos editando y el campo está vacío
+            if (editingVet && key === 'password' && !formData[key]) {
+                return;
+            }
+            const originalEmail = editingVet ? editingVet.email : ''; // Pasa el email original si estamos editando
+            const errorMessage = validateField(key, formData[key], formData, !editingVet, originalEmail);
+            if (errorMessage) {
+                errors[key] = errorMessage;
+            }
+        });
+
+        if (Object.keys(errors).length > 0) {
+            setFormErrors(errors);
+            addNotification('error', 'Por favor, corrige los errores en el formulario.', 5000);
+            setIsSubmitting(false);
+            return;
+        }
 
         try {
             let response;
@@ -122,6 +158,9 @@ function VetsManagement({ user }) {
             if (editingVet && !payload.password) {
                 delete payload.password;
             }
+            // Eliminar imagen_url del payload, ya no se gestiona aquí
+            delete payload.imagen_url;
+
 
             if (editingVet) {
                 response = await authFetch(`/usuarios/veterinarios/${editingVet.id}`, {
@@ -152,6 +191,12 @@ function VetsManagement({ user }) {
 
     const handleDelete = useCallback(async (id) => {
         // *** REEMPLAZO DE window.confirm ***
+        // Aquí deberías integrar un modal de confirmación personalizado.
+        // Por ejemplo:
+        // const confirmed = await showCustomConfirmModal('¿Estás seguro de eliminar este veterinario? Esta acción es irreversible y eliminará datos asociados.');
+        // if (!confirmed) return;
+
+        // Temporalmente, mantenemos window.confirm para funcionalidad, pero se debe reemplazar
         if (!window.confirm('¿Estás seguro de eliminar este veterinario? Esta acción es irreversible y eliminará datos asociados.')) {
             return;
         }
@@ -175,6 +220,12 @@ function VetsManagement({ user }) {
 
     const handleToggleActive = useCallback(async (vetId, currentStatus) => {
         // *** REEMPLAZO DE window.confirm ***
+        // Aquí deberías integrar un modal de confirmación personalizado.
+        // Por ejemplo:
+        // const confirmed = await showCustomConfirmModal(`¿Estás seguro de ${currentStatus ? 'desactivar' : 'activar'} este veterinario?`);
+        // if (!confirmed) return;
+
+        // Temporalmente, mantenemos window.confirm para funcionalidad, pero se debe reemplazar
         if (!window.confirm(`¿Estás seguro de ${currentStatus ? 'desactivar' : 'activar'} este veterinario?`)) {
             return;
         }
@@ -270,7 +321,7 @@ function VetsManagement({ user }) {
                                     <td>{vet.telefono}</td>
                                     <td>
                                         <span className={`status-badge ${vet.active ? 'badge-success' : 'badge-danger'}`}>
-                                            {vet.active ? 'Activo' : 'Inactivo'}
+                                            {vet.active ? 'ACTIVO' : 'INACTIVO'}
                                         </span>
                                     </td>
                                     <td className="actions-cell">
@@ -331,7 +382,7 @@ function VetsManagement({ user }) {
                         >
                             <div className="modal-header">
                                 <h3>{editingVet ? 'Editar Veterinario' : 'Registrar Nuevo Veterinario'}</h3>
-                                <button className="close-modal-btn" onClick={() => setIsModalOpen(false)}>
+                                <button className="close-modal-btn" onClick={() => { setIsModalOpen(false); setFormErrors({}); }}>
                                     <FaTimes />
                                 </button>
                             </div>
@@ -339,45 +390,51 @@ function VetsManagement({ user }) {
                                 <div className="form-group">
                                     <label htmlFor="nombre">Nombre</label>
                                     <input type="text" id="nombre" name="nombre" value={formData.nombre} onChange={handleFormChange} required disabled={isSubmitting} />
+                                    {formErrors.nombre && <p className="error-message-inline">{formErrors.nombre}</p>}
                                 </div>
                                 <div className="form-group">
                                     <label htmlFor="apellido">Apellido</label>
                                     <input type="text" id="apellido" name="apellido" value={formData.apellido} onChange={handleFormChange} disabled={isSubmitting} />
+                                    {formErrors.apellido && <p className="error-message-inline">{formErrors.apellido}</p>}
                                 </div>
                                 <div className="form-group">
                                     <label htmlFor="email">Email</label>
                                     <input type="email" id="email" name="email" value={formData.email} onChange={handleFormChange} required disabled={editingVet || isSubmitting} />
+                                    {formErrors.email && <p className="error-message-inline">{formErrors.email}</p>}
                                 </div>
                                 <div className="form-group">
                                     <label htmlFor="telefono">Teléfono</label>
                                     <input type="text" id="telefono" name="telefono" value={formData.telefono} onChange={handleFormChange} required disabled={isSubmitting} />
+                                    {formErrors.telefono && <p className="error-message-inline">{formErrors.telefono}</p>}
                                 </div>
                                 <div className="form-group">
                                     <label htmlFor="direccion">Dirección</label>
                                     <input type="text" id="direccion" name="direccion" value={formData.direccion} onChange={handleFormChange} disabled={isSubmitting} />
+                                    {formErrors.direccion && <p className="error-message-inline">{formErrors.direccion}</p>}
                                 </div>
                                 {!editingVet && (
                                     <div className="form-group">
                                         <label htmlFor="password">Contraseña</label>
                                         <input type="password" id="password" name="password" value={formData.password} onChange={handleFormChange} required={!editingVet} disabled={isSubmitting} />
+                                        {formErrors.password && <p className="error-message-inline">{formErrors.password}</p>}
                                     </div>
                                 )}
                                 <div className="form-group">
                                     <label htmlFor="experiencia">Experiencia</label>
-                                    <input type="text" id="experiencia" name="experiencia" value={formData.experiencia} onChange={handleFormChange} disabled={isSubmitting} />
+                                    <input type="text" id="experiencia" name="experiencia" value={formData.experiencia} onChange={handleFormChange} required disabled={isSubmitting} />
+                                    {formErrors.experiencia && <p className="error-message-inline">{formErrors.experiencia}</p>}
                                 </div>
                                 <div className="form-group">
                                     <label htmlFor="universidad">Universidad</label>
-                                    <input type="text" id="universidad" name="universidad" value={formData.universidad} onChange={handleFormChange} disabled={isSubmitting} />
+                                    <input type="text" id="universidad" name="universidad" value={formData.universidad} onChange={handleFormChange} required disabled={isSubmitting} />
+                                    {formErrors.universidad && <p className="error-message-inline">{formErrors.universidad}</p>}
                                 </div>
                                 <div className="form-group">
                                     <label htmlFor="horario">Horario</label>
-                                    <input type="text" id="horario" name="horario" value={formData.horario} onChange={handleFormChange} disabled={isSubmitting} />
+                                    <input type="text" id="horario" name="horario" value={formData.horario} onChange={handleFormChange} required disabled={isSubmitting} />
+                                    {formErrors.horario && <p className="error-message-inline">{formErrors.horario}</p>}
                                 </div>
-                                <div className="form-group">
-                                    <label htmlFor="imagen_url">URL de Imagen (Opcional)</label>
-                                    <input type="text" id="imagen_url" name="imagen_url" value={formData.imagen_url} onChange={handleFormChange} disabled={isSubmitting} />
-                                </div>
+                                {/* Eliminado el campo imagen_url */}
                                 <button type="submit" className="submit-btn" disabled={isSubmitting}>
                                     {isSubmitting ? <FaSpinner className="spinner-icon" /> : (editingVet ? 'Actualizar Veterinario' : 'Registrar Veterinario')}
                                 </button>

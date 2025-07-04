@@ -233,11 +233,12 @@ const isOwnerOrAdmin = async (req, res, next) => {
                 console.log("[isOwnerOrAdmin - /usuarios] ID de usuario inválido.");
                 return res.status(400).json({ success: false, message: "ID de usuario no válido." });
             }
-            if (targetUserId !== userIdFromToken) {
-                console.log(`[isOwnerOrAdmin - /usuarios] Denegado: Usuario ${userIdFromToken} intentó acceder al perfil de ${targetUserId}.`);
-                return res.status(403).json({ success: false, message: "Acceso denegado. Solo puedes ver/modificar tu propio perfil." });
+            // Permite al admin editar cualquier usuario, y al usuario editarse a sí mismo
+            if (userRole === 'admin' || targetUserId === userIdFromToken) {
+                return next();
             }
-            return next();
+            console.log(`[isOwnerOrAdmin - /usuarios] Denegado: Usuario ${userIdFromToken} intentó acceder al perfil de ${targetUserId}.`);
+            return res.status(403).json({ success: false, message: "Acceso denegado. Solo puedes ver/modificar tu propio perfil." });
 
         } else if (req.originalUrl.startsWith('/notifications')) {
             const notificationId = parseInt(req.params.id);
@@ -281,11 +282,13 @@ app.get("/", (req, res) => {
 // Aplicar express.json solo a las rutas que lo necesitan
 app.post("/login", async (req, res) => { // express.json() ya es global
     const { email, password } = req.body;
+    console.log("Received login request for email:", email); // LOG DE DEPURACIÓN
 
     try {
         const [users] = await pool.query("SELECT * FROM usuarios WHERE email = ?", [email]);
 
         if (users.length === 0) {
+            console.log("Login failed: User not found for email:", email); // LOG DE DEPURACIÓN
             return res.status(401).json({ message: "Credenciales incorrectas" });
         }
 
@@ -293,6 +296,7 @@ app.post("/login", async (req, res) => { // express.json() ya es global
         const isMatch = await bcrypt.compare(password, user.password);
 
         if (!isMatch) {
+            console.log("Login failed: Password mismatch for email:", email); // LOG DE DEPURACIÓN
             return res.status(401).json({ message: "Credenciales incorrectas" });
         }
 
@@ -313,6 +317,7 @@ app.post("/login", async (req, res) => { // express.json() ya es global
             imagen_url: user.imagen_url,
             token
         });
+        console.log("Login successful for user:", user.email); // LOG DE DEPURACIÓN
 
     } catch (error) {
         console.error("Error en login:", error);
@@ -333,7 +338,7 @@ app.post("/register", async (req, res) => { // express.json() ya es global
         // Verificar si el usuario ya existe por email
         const [existingUsers] = await pool.query("SELECT id FROM usuarios WHERE email = ?", [email]);
         if (existingUsers.length > 0) {
-            return res.status(409).json({ message: "El email ya está registrado" });
+            return res.status(409).json({ message: "El email ya está registrado" }); // Mensaje específico
         }
 
         // Hash de la contraseña antes de guardarla
@@ -364,10 +369,12 @@ app.post("/register", async (req, res) => { // express.json() ya es global
 // Ruta para recuperación de contraseña (generación de token)
 app.post("/forgot-password", async (req, res) => { // express.json() ya es global
     const { email } = req.body;
+    console.log("Received forgot-password request for email:", email); // LOG DE DEPURACIÓN
 
     try {
         const [users] = await pool.query("SELECT * FROM usuarios WHERE email = ?", [email]);
         if (users.length === 0) {
+            console.log("Forgot password failed: User not found for email:", email); // LOG DE DEPURACIÓN
             return res.status(404).json({
                 success: false,
                 message: "Usuario no encontrado"
@@ -388,6 +395,7 @@ app.post("/forgot-password", async (req, res) => { // express.json() ya es globa
             message: "Token de recuperación generado",
             resetToken: resetToken
         });
+        console.log("Forgot password successful for email:", email, "Token:", resetToken); // LOG DE DEPURACIÓN
 
     } catch (error) {
         console.error("Error en forgot-password:", error);
@@ -654,6 +662,35 @@ app.get("/api/stats/servicios-populares", authenticateToken, isAdmin, async (req
     }
 });
 
+/**
+ * NUEVO ENDPOINT: OBTENER CONFIGURACIONES DEL ADMINISTRADOR
+ * GET /admin/settings
+ * (Implementación básica para evitar el error 404)
+ */
+app.get("/admin/settings", authenticateToken, isAdmin, async (req, res) => {
+    try {
+        // En una aplicación real, aquí cargarías configuraciones desde la base de datos
+        // o un archivo de configuración. Por ahora, devolvemos un objeto vacío.
+        res.json({
+            success: true,
+            data: {
+                // Ejemplo de configuración:
+                // email_notifications_enabled: true,
+                // default_appointment_duration: 30,
+                // clinic_name: "Flooky Pets Clinic"
+            },
+            message: "Configuraciones obtenidas correctamente (implementación básica)."
+        });
+    } catch (error) {
+        console.error("Error al obtener configuraciones de admin:", error);
+        res.status(500).json({
+            success: false,
+            message: "Error al obtener configuraciones de admin",
+            error: process.env.NODE_ENV === 'development' ? error.stack : error.message
+        });
+    }
+});
+
 
 // ### **GESTIÓN DE ADMINISTRADORES**
 
@@ -681,7 +718,7 @@ app.get("/api/admin/administrators", authenticateToken, isAdmin, async (req, res
 
 // Crear nuevo administrador
 app.post("/api/admin/administrators", authenticateToken, isAdmin, async (req, res) => { // express.json() ya es global
-    const { nombre, apellido, email, telefono, direccion, password, imagen_url } = req.body;
+    const { nombre, apellido, email, telefono, direccion, password } = req.body; // Eliminado imagen_url
 
     // Validación mejorada
     if (!nombre || !email || !password || !telefono) {
@@ -718,9 +755,9 @@ app.post("/api/admin/administrators", authenticateToken, isAdmin, async (req, re
         // Insertar nuevo administrador
         const [result] = await pool.query(
             `INSERT INTO usuarios
-            (nombre, apellido, email, telefono, direccion, password, role, imagen_url)
-            VALUES (?, ?, ?, ?, ?, ?, 'admin', ?)`,
-            [nombre, apellido, email, telefono, direccion, hashedPassword, imagen_url || null]
+            (nombre, apellido, email, telefono, direccion, password, role)
+            VALUES (?, ?, ?, ?, ?, ?, 'admin')`, // Eliminado imagen_url
+            [nombre, apellido, email, telefono, direccion, hashedPassword]
         );
 
         // Obtener el administrador recién creado para devolverlo en la respuesta
@@ -750,7 +787,7 @@ app.post("/api/admin/administrators", authenticateToken, isAdmin, async (req, re
 // Actualizar administrador
 app.put("/api/admin/administrators/:id", authenticateToken, isAdmin, async (req, res) => { // express.json() ya es global
     const { id } = req.params;
-    const { nombre, apellido, telefono, direccion, imagen_url } = req.body;
+    const { nombre, apellido, telefono, direccion } = req.body; // Eliminado imagen_url
 
     // Validación básica
     if (!nombre || !telefono) {
@@ -789,7 +826,7 @@ app.put("/api/admin/administrators/:id", authenticateToken, isAdmin, async (req,
         if (apellido !== undefined) { fields.push('apellido = ?'); values.push(apellido); }
         if (telefono !== undefined) { fields.push('telefono = ?'); values.push(telefono); }
         if (direccion !== undefined) { fields.push('direccion = ?'); values.push(direccion); }
-        if (imagen_url !== undefined) { fields.push('imagen_url = ?'); values.push(imagen_url); }
+        // Eliminado: if (imagen_url !== undefined) { fields.push('imagen_url = ?'); values.push(imagen_url); }
 
 
         if (fields.length === 0) {
@@ -812,7 +849,7 @@ app.put("/api/admin/administrators/:id", authenticateToken, isAdmin, async (req,
         res.json({
             success: true,
             message: "Administrador actualizado correctamente",
-            data: newAdmin[0]
+            data: updatedAdmin[0]
         });
     } catch (error) {
         console.error("Error al actualizar administrador:", error);
@@ -917,11 +954,11 @@ app.get("/usuarios/veterinarios", authenticateToken, isVetOrAdmin, async (req, r
 
 // Crear nuevo veterinario
 app.post("/usuarios/veterinarios", authenticateToken, isAdmin, async (req, res) => { // express.json() ya es global
-    const { nombre, apellido, email, telefono, direccion, password, experiencia, universidad, horario, imagen_url } = req.body;
+    const { nombre, apellido, email, telefono, direccion, password, experiencia, universidad, horario } = req.body; // Eliminado imagen_url
 
     // Validación de campos requeridos
-    if (!nombre || !email || !password || !telefono) {
-        return res.status(400).json({ success: false, message: "Nombre, email, teléfono y contraseña son requeridos" });
+    if (!nombre || !email || !password || !telefono || !experiencia || !universidad || !horario) {
+        return res.status(400).json({ success: false, message: "Nombre, email, teléfono, contraseña, experiencia, universidad y horario son requeridos" });
     }
 
     if (password.length < 6) {
@@ -945,9 +982,9 @@ app.post("/usuarios/veterinarios", authenticateToken, isAdmin, async (req, res) 
         // Insertar nuevo veterinario con rol 'veterinario'
         const [result] = await pool.query(
             `INSERT INTO usuarios
-            (nombre, apellido, email, telefono, direccion, password, role, experiencia, universidad, horario, imagen_url)
-            VALUES (?, ?, ?, ?, ?, ?, 'veterinario', ?, ?, ?, ?)`,
-            [nombre, apellido, email, telefono, direccion, hashedPassword, experiencia || null, universidad || null, horario || null, imagen_url || null]
+            (nombre, apellido, email, telefono, direccion, password, role, experiencia, universidad, horario)
+            VALUES (?, ?, ?, ?, ?, ?, 'veterinario', ?, ?, ?)`, // Eliminado imagen_url
+            [nombre, apellido, email, telefono, direccion, hashedPassword, experiencia, universidad, horario]
         );
 
         // Obtener el veterinario recién creado para devolverlo en la respuesta
@@ -966,11 +1003,11 @@ app.post("/usuarios/veterinarios", authenticateToken, isAdmin, async (req, res) 
 // Actualizar veterinario
 app.put("/usuarios/veterinarios/:id", authenticateToken, isAdmin, async (req, res) => { // express.json() ya es global
     const { id } = req.params;
-    const { nombre, apellido, telefono, direccion, active, experiencia, universidad, horario, imagen_url } = req.body;
+    const { nombre, apellido, telefono, direccion, active, experiencia, universidad, horario } = req.body; // Eliminado imagen_url
 
     // Validación básica
-    if (!nombre || !telefono) {
-        return res.status(400).json({ success: false, message: "Nombre y teléfono son requeridos" });
+    if (!nombre || !telefono || !experiencia || !universidad || !horario) {
+        return res.status(400).json({ success: false, message: "Nombre, teléfono, experiencia, universidad y horario son requeridos" });
     }
 
     try {
@@ -995,7 +1032,7 @@ app.put("/usuarios/veterinarios/:id", authenticateToken, isAdmin, async (req, re
         if (experiencia !== undefined) { fields.push('experiencia = ?'); values.push(experiencia); }
         if (universidad !== undefined) { fields.push('universidad = ?'); values.push(universidad); }
         if (horario !== undefined) { fields.push('horario = ?'); values.push(horario); }
-        if (imagen_url !== undefined) { fields.push('imagen_url = ?'); values.push(imagen_url); }
+        // Eliminado: if (imagen_url !== undefined) { fields.push('imagen_url = ?'); values.push(imagen_url); }
 
 
         if (fields.length === 0) {
@@ -1329,9 +1366,6 @@ app.delete("/usuarios/:id", authenticateToken, isAdmin, async (req, res) => {
         // Eliminar mascotas del usuario
         await pool.query("DELETE FROM mascotas WHERE id_propietario = ?", [id]);
 
-        // Eliminar notificaciones asociadas al usuario
-        await pool.query("DELETE FROM notificaciones WHERE id_usuario = ?", [id]); // *** NUEVA LÍNEA AÑADIDA ***
-
         // Finalmente, eliminar el usuario
         const [result] = await pool.query("DELETE FROM usuarios WHERE id = ?", [id]);
 
@@ -1356,7 +1390,8 @@ app.delete("/usuarios/:id", authenticateToken, isAdmin, async (req, res) => {
 app.get("/mascotas", authenticateToken, isOwnerOrAdmin, async (req, res) => {
     try {
         const { id_propietario } = req.query;
-        let query = `SELECT m.*, CONCAT(u.nombre, ' ', u.apellido) as propietario_nombre
+        let query = `SELECT m.*, CONCAT(u.nombre, ' ', u.apellido) as propietario_nombre,
+                            u.apellido as propietario_apellido -- Añadido para mostrar en dropdown de historial
                      FROM mascotas m
                      JOIN usuarios u ON m.id_propietario = u.id`;
         const queryParams = [];
@@ -1483,9 +1518,11 @@ app.delete("/mascotas/:id", authenticateToken, isVetOrAdmin, async (req, res) =>
     try {
         await pool.query("DELETE FROM historial_medico WHERE id_mascota = ?", [id]);
 
-        const [result] = await pool.query("DELETE FROM mascotas WHERE id_mascota = ?", [id]);
+        const [result] = await pool.query("DELETE FROM citas WHERE id_mascota = ?", [id]); // Asegurar eliminación de citas
+        
+        const [result2] = await pool.query("DELETE FROM mascotas WHERE id_mascota = ?", [id]);
 
-        if (result.affectedRows === 0) {
+        if (result2.affectedRows === 0) {
             return res.status(404).json({ success: false, message: "Mascota no encontrada." });
         }
         res.json({ success: true, message: "Mascota y sus historiales/citas asociados eliminados correctamente." });
@@ -1506,7 +1543,8 @@ app.get("/historial_medico", authenticateToken, isVetOrAdmin, async (req, res) =
         const [historiales] = await pool.query(
             `SELECT h.*, m.nombre as mascota_nombre, m.especie, m.raza,
                     CONCAT(u_prop.nombre, ' ', u_prop.apellido) as propietario_nombre,
-                    CONCAT(u_vet.nombre, ' ', u_vet.apellido) as veterinario_nombre
+                    CONCAT(u_vet.nombre, ' ', u_vet.apellido) as veterinario_nombre,
+                    u_vet.id as veterinario_id -- Añadido para el frontend
              FROM historial_medico h
              JOIN mascotas m ON h.id_mascota = m.id_mascota
              JOIN usuarios u_prop ON m.id_propietario = u_prop.id
@@ -1527,7 +1565,8 @@ app.get("/historial_medico/:id", authenticateToken, isOwnerOrAdmin, async (req, 
         const [historial] = await pool.query(
             `SELECT h.*, m.nombre as mascota_nombre, m.especie, m.raza,
                     CONCAT(u_prop.nombre, ' ', u_prop.apellido) as propietario_nombre,
-                    CONCAT(u_vet.nombre, ' ', u_vet.apellido) as veterinario_nombre
+                    CONCAT(u_vet.nombre, ' ', u_vet.apellido) as veterinario_nombre,
+                    u_vet.id as veterinario_id -- Añadido para el frontend
              FROM historial_medico h
              JOIN mascotas m ON h.id_mascota = m.id_mascota
              JOIN usuarios u_prop ON m.id_propietario = u_prop.id
@@ -1688,7 +1727,7 @@ app.get("/veterinario/citas/completadas/count", authenticateToken, isVetOrAdmin,
     try {
         const veterinarioId = req.user.id;
         const [[{ count }]] = await pool.query(
-            `SELECT COUNT(*) as count FROM citas WHERE id_veterinario = ? AND estado = 'completa'`,
+            `SELECT COUNT(*) as count FROM citas WHERE id_veterinario = ? AND estado = 'COMPLETA'`,
             [veterinarioId]
         );
         res.json({ success: true, count });
@@ -1788,7 +1827,7 @@ app.get("/citas/:id", authenticateToken, isOwnerOrAdmin, async (req, res) => {
 // Registrar nueva cita (para usuarios y admins/vets)
 app.post("/citas/agendar", authenticateToken, async (req, res) => { // express.json() ya es global. Cambiado a /citas/agendar para mayor claridad
     const { fecha_cita, notas_adicionales, id_servicio, id_cliente, id_veterinario, id_mascota } = req.body;
-    let estado = req.body.estado || 'pendiente';
+    let estado = req.body.estado || 'PENDIENTE'; // Asegurar que el estado inicial sea PENDIENTE en mayúsculas
 
     if (!fecha_cita || !id_servicio || !id_cliente || !id_mascota) {
         return res.status(400).json({ success: false, message: "Fecha, servicio, cliente y mascota son requeridos para la cita." });
@@ -1827,7 +1866,7 @@ app.post("/citas/agendar", authenticateToken, async (req, res) => { // express.j
             }
             const randomIndex = Math.floor(Math.random() * vets.length);
             assignedVetId = vets[randomIndex].id;
-            estado = 'pendiente';
+            estado = 'PENDIENTE'; // Si se asigna automáticamente, el estado es pendiente
         } else {
             const [vet] = await pool.query("SELECT id FROM usuarios WHERE id = ? AND role = 'veterinario'", [assignedVetId]);
             if (vet.length === 0) {
@@ -1851,7 +1890,7 @@ app.post("/citas/agendar", authenticateToken, async (req, res) => { // express.j
 
             await pool.query(
                 `INSERT INTO notificaciones (id_usuario, tipo, mensaje, referencia_id) VALUES (?, ?, ?, ?)`,
-                [assignedVetId, 'cita_creada_vet', `Nueva cita pendiente de ${cliente_nombre} para ${mascota_nombre} (${servicio_nombre}) el ${fecha_cita}.`, newCitaId]
+                [assignedVetId, 'cita_creada_vet', `Nueva cita PENDIENTE de ${cliente_nombre} para ${mascota_nombre} (${servicio_nombre}) el ${fecha_cita}.`, newCitaId]
             );
 
             if (vetEmail) {
@@ -1874,7 +1913,7 @@ app.post("/citas/agendar", authenticateToken, async (req, res) => { // express.j
                 [id_cliente, 'cita_creada_admin_vet', `Se ha registrado una cita para ${mascota_nombre} (${servicio_nombre}) el ${fecha_cita}. Estado: ${estado}.`, newCitaId]
             );
 
-            if (estado === 'aceptada') {
+            if (estado === 'ACEPTADA') { // Cambiado a mayúsculas
                 const [vetInfo] = await pool.query("SELECT nombre, apellido, email, direccion FROM usuarios WHERE id = ?", [assignedVetId]);
                 const vetDetails = vetInfo.length > 0 ? vetInfo[0] : {};
                 simulateSendEmail(
@@ -1914,7 +1953,7 @@ app.put("/citas/:id", authenticateToken, async (req, res) => { // express.json()
             isAuthorized = true;
         } else if (userRole === 'usuario') {
             // Un usuario solo puede cancelar su propia cita si es el cliente y el estado es 'cancelada'
-            if (userIdFromToken === existingCita.id_cliente && estado === 'cancelada') {
+            if (userIdFromToken === existingCita.id_cliente && estado.toUpperCase() === 'CANCELADA') { // Convertir a mayúsculas
                 isAuthorized = true;
             }
             // Un usuario NO puede cambiar el estado de pendiente a aceptada/rechazada. Esto es para veterinarios/admins.
@@ -1938,7 +1977,7 @@ app.put("/citas/:id", authenticateToken, async (req, res) => { // express.json()
         if (fecha_cita !== undefined) { fields.push('fecha = ?'); values.push(fecha_cita); }
 
         if (estado !== undefined) {
-            fields.push('estado = ?'); values.push(estado);
+            fields.push('estado = ?'); values.push(estado.toUpperCase()); // Asegurar que el estado se guarde en mayúsculas
         }
 
         if (notas_adicionales !== undefined) { fields.push('servicios = ?'); values.push(notas_adicionales); }
@@ -2005,7 +2044,7 @@ app.put("/citas/:id", authenticateToken, async (req, res) => { // express.json()
         const updatedCita = updatedCitaRows[0];
 
         // Lógica de notificaciones solo si el estado ha cambiado
-        if (estado !== oldEstado) {
+        if (estado.toUpperCase() !== oldEstado.toUpperCase()) { // Comparar en mayúsculas
             const clienteEmail = updatedCita.propietario_email;
             const clienteId = updatedCita.id_cliente;
             const servicioNombre = updatedCita.servicio_nombre;
@@ -2016,7 +2055,7 @@ app.put("/citas/:id", authenticateToken, async (req, res) => { // express.json()
             const mascotaNombre = updatedCita.mascota_nombre;
 
 
-            if (estado === 'aceptada') {
+            if (estado.toUpperCase() === 'ACEPTADA') {
                 await pool.query(
                     `INSERT INTO notificaciones (id_usuario, tipo, mensaje, referencia_id) VALUES (?, ?, ?, ?)`,
                     [clienteId, 'cita_aceptada_user', `Tu cita para ${mascotaNombre} (${servicioNombre}) el ${citaFecha} ha sido ACEPTADA por ${veterinarioNombre}.`, id]
@@ -2026,12 +2065,12 @@ app.put("/citas/:id", authenticateToken, async (req, res) => { // express.json()
                     `Confirmación de Cita Aceptada - Flooky Pets`,
                     `Hola ${updatedCita.propietario_nombre},\n\nTu cita para el servicio de ${servicioNombre} para ${mascotaNombre} ha sido ACEPTADA.\n\nDetalles de la cita:\nFecha y Hora: ${citaFecha}\nVeterinario: ${veterinarioNombre}\nUbicación: ${updatedCita.veterinario_direccion || 'No especificada'}\n\n¡Te esperamos!\n\nSaludos,\nEl equipo de Flooky Pets`
                 );
-            } else if (estado === 'rechazada') {
+            } else if (estado.toUpperCase() === 'RECHAZADA') {
                 await pool.query(
                     `INSERT INTO notificaciones (id_usuario, tipo, mensaje, referencia_id) VALUES (?, ?, ?, ?)`,
                     [clienteId, 'cita_rechazada_user', `Tu cita para ${mascotaNombre} (${servicioNombre}) el ${citaFecha} ha sido RECHAZADA por ${veterinarioNombre}. Por favor, reagenda o contacta al veterinario.`, id]
                 );
-            } else if (estado === 'cancelada') {
+            } else if (estado.toUpperCase() === 'CANCELADA') {
                 if (userRole === 'usuario' && userIdFromToken === clienteId) {
                     await pool.query(
                         `INSERT INTO notificaciones (id_usuario, tipo, mensaje, referencia_id) VALUES (?, ?, ?, ?)`,
@@ -2095,9 +2134,7 @@ app.get("/notifications/user/:id", authenticateToken, async (req, res) => {
     }
     try {
         const [notifications] = await pool.query(
-            `SELECT id_notificacion, id_usuario, tipo, mensaje, leida,
-                    DATE_FORMAT(fecha_creacion, '%Y-%m-%d %H:%i:%s') as fecha_creacion,
-                    referencia_id
+            `SELECT id_notificacion, id_usuario, tipo, mensaje, leida, fecha_creacion, referencia_id
              FROM notificaciones
              WHERE id_usuario = ?
              ORDER BY fecha_creacion DESC`,
@@ -2204,7 +2241,9 @@ app.get("/admin/historiales", authenticateToken, isAdmin, async (req, res) => {
             `SELECT h.id_historial, DATE_FORMAT(h.fecha_consulta, '%Y-%m-%d') as fecha_consulta, h.diagnostico, h.tratamiento, h.observaciones,
             m.nombre as mascota, m.especie, m.raza,
             CONCAT(p.nombre, ' ', p.apellido) as propietario,
-            CONCAT(v.nombre, ' ', v.apellido) as veterinario
+            CONCAT(v.nombre, ' ', v.apellido) as veterinario,
+            h.veterinario as veterinario_id, -- Añadido para el frontend
+            h.id_mascota -- Añadido para el frontend
             FROM historial_medico h
             JOIN mascotas m ON h.id_mascota = m.id_mascota
             JOIN usuarios p ON m.id_propietario = p.id

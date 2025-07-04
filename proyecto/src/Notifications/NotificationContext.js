@@ -1,5 +1,6 @@
 // src/Components/Notifications/NotificationContext.js
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import { authFetch } from '../utils/api'; // Importa authFetch desde tu nuevo archivo de utilidades
 
 // Crea el contexto de notificaciones
 const NotificationContext = createContext();
@@ -8,10 +9,6 @@ const NotificationContext = createContext();
 export const useNotifications = () => {
   return useContext(NotificationContext);
 };
-
-// URL base de tu backend (asegúrate de que sea la correcta para tu entorno)
-// Es crucial que esta URL apunte a tu servidor Node.js
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 // Proveedor de notificaciones que envuelve tu aplicación
 export const NotificationProvider = ({ children }) => {
@@ -22,17 +19,30 @@ export const NotificationProvider = ({ children }) => {
 
   // Función para obtener el token JWT del localStorage
   const getToken = () => {
-    const user = localStorage.getItem('user');
-    return user ? JSON.parse(user).token : null;
+    try {
+      const user = localStorage.getItem('user');
+      return user ? JSON.parse(user).token : null;
+    } catch (error) {
+      console.error("Error al parsear el usuario del localStorage para token:", error);
+      return null;
+    }
   };
 
   // Efecto para obtener el userId y userRole del localStorage al cargar
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
-      const parsedUser = JSON.parse(storedUser);
-      setUserId(parsedUser.id);
-      setUserRole(parsedUser.role);
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        setUserId(parsedUser.id);
+        setUserRole(parsedUser.role);
+      } catch (error) {
+        console.error("Error al parsear el usuario almacenado:", error);
+        setUserId(null);
+        setUserRole(null);
+        localStorage.removeItem('user'); // Limpiar datos corruptos
+        localStorage.removeItem('token');
+      }
     } else {
       setUserId(null);
       setUserRole(null);
@@ -43,208 +53,151 @@ export const NotificationProvider = ({ children }) => {
   const fetchNotifications = useCallback(async () => {
     if (!userId) {
       // Si no hay ID de usuario, no hay notificaciones que buscar.
-      // Esto es normal si el usuario no ha iniciado sesión.
-      setNotifications([]); // Limpiar notificaciones si no hay usuario
+      // Esto es normal si el usuario no ha iniciado sesión o se ha deslogueado.
+      setNotifications([]); // Limpiar notificaciones si no hay usuario logueado
       return;
     }
 
-    const token = getToken();
-    if (!token) {
-      console.warn("No se encontró token de autenticación para obtener notificaciones. Limpiando notificaciones.");
-      setNotifications([]);
-      return;
-    }
-
+    // No necesitamos getToken() aquí directamente porque authFetch ya lo maneja.
+    // authFetch lanzará un error si no hay token o es inválido.
     try {
-      const response = await fetch(`${API_BASE_URL}/notifications/user/${userId}`, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      // Usamos authFetch para que maneje la autenticación automáticamente
+      const result = await authFetch(`/notifications/user/${userId}`);
 
-      if (!response.ok) {
-        // Si el token expira o hay un error de autenticación (401/403), limpiar notificaciones
-        if (response.status === 401 || response.status === 403) {
-          console.error("Error de autenticación al obtener notificaciones. Por favor, inicia sesión de nuevo.");
-          setNotifications([]);
-          // Aquí podrías añadir lógica para redirigir al login si el token es inválido/expirado
-          // window.location.href = '/login';
-        }
-        throw new Error(`Error HTTP! estado: ${response.status}`);
-      }
-
-      const result = await response.json();
-      if (result.success) {
-        // Las notificaciones ya vienen filtradas por el backend por id_usuario.
-        // Aquí podrías añadir una capa de filtrado adicional si las notificaciones
-        // en la BD tuvieran un campo 'target_role' y quisieras mostrarlas condicionalmente.
-        // Por ahora, mostramos todas las notificaciones para el usuario logueado.
-        setNotifications(result.data);
+      if (result.success && Array.isArray(result.data)) {
+        // Filtra solo las notificaciones no leídas para mostrarlas
+        const unreadNotifications = result.data.filter(notif => !notif.leida);
+        setNotifications(unreadNotifications);
       } else {
-        console.error("Error al obtener notificaciones del backend:", result.message);
-        setNotifications([]);
+        console.error("Error al obtener notificaciones:", result.message || "Formato de respuesta inesperado.");
+        setNotifications([]); // Limpiar si hay un error en el formato
       }
     } catch (error) {
-      console.error("Error al obtener notificaciones:", error);
-      setNotifications([]);
+      console.error("Error de red o autenticación al obtener notificaciones:", error.message);
+      // Si hay un error de autenticación (ej. token expirado), limpiar notificaciones
+      if (error.message.includes('No autorizado') || error.message.includes('Token inválido')) {
+        setNotifications([]);
+        // Opcional: Aquí podrías añadir lógica para forzar un logout o redirigir al login
+        // localStorage.removeItem('user');
+        // localStorage.removeItem('token');
+        // window.location.href = '/login';
+      }
+      setNotifications([]); // Limpiar notificaciones en caso de cualquier error de fetch
     }
-  }, [userId]); // Dependencias para re-ejecutar cuando userId cambie
+  }, [userId]); // Depende de userId para re-ejecutarse cuando el usuario cambia
 
-  // Efecto para iniciar el polling de notificaciones
+  // Función para añadir una notificación temporal (no persistente en la BD)
+  const addNotification = useCallback((type, message, duration = 5000) => {
+    // Genera un ID único para notificaciones efímeras (no de la BD)
+    const newNotification = {
+      id: Date.now() + Math.random(), // ID temporal único para el frontend
+      tipo: type,
+      mensaje: message,
+      leida: false, // Las notificaciones efímeras no se marcan como leídas en la BD
+      fecha_creacion: new Date().toISOString()
+    };
+
+    setNotifications(prevNotifications => [...prevNotifications, newNotification]);
+
+    // Elimina la notificación después de 'duration' milisegundos
+    if (duration > 0) {
+      setTimeout(() => {
+        setNotifications(prevNotifications =>
+          prevNotifications.filter(notif => notif.id !== newNotification.id)
+        );
+      }, duration);
+    }
+  }, []);
+
+  // Función para marcar una notificación como leída en el backend
+  const markNotificationAsRead = useCallback(async (notificationId) => {
+    // Solo intenta marcar como leída si es una notificación de la BD (tiene id_notificacion)
+    const notificationToMark = notifications.find(n => (n.id_notificacion === notificationId || n.id === notificationId));
+
+    if (notificationToMark && notificationToMark.id_notificacion) { // Verifica si tiene un ID de BD
+      try {
+        const response = await authFetch(`/notifications/${notificationToMark.id_notificacion}/read`, {
+          method: 'PUT'
+        });
+        if (response.success) {
+          // Actualiza el estado local para reflejar que está leída
+          setNotifications(prevNotifications =>
+            prevNotifications.map(notif =>
+              notif.id_notificacion === notificationToMark.id_notificacion ? { ...notif, leida: true } : notif
+            )
+          );
+        } else {
+          console.error("Error al marcar notificación como leída:", response.message);
+        }
+      } catch (error) {
+        console.error("Error de conexión al marcar notificación como leída:", error.message);
+      }
+    } else {
+      // Si es una notificación efímera, simplemente la eliminamos del estado local
+      removeNotification(notificationId);
+    }
+  }, [authFetch, notifications]); // Depende de authFetch y notifications
+
+  // Función para eliminar una notificación del estado local (y del backend si es persistente)
+  const removeNotification = useCallback(async (notificationId) => {
+    const notificationToRemove = notifications.find(n => (n.id_notificacion === notificationId || n.id === notificationId));
+
+    if (notificationToRemove && notificationToRemove.id_notificacion) { // Si tiene ID de BD, intenta eliminar del backend
+      try {
+        const response = await authFetch(`/notifications/${notificationToRemove.id_notificacion}`, {
+          method: 'DELETE'
+        });
+        if (response.success) {
+          setNotifications(prevNotifications =>
+            prevNotifications.filter(notif => notif.id_notificacion !== notificationToRemove.id_notificacion)
+          );
+        } else {
+          console.error("Error al eliminar notificación del backend:", response.message);
+        }
+      } catch (error) {
+        console.error("Error de conexión al eliminar notificación:", error.message);
+      }
+    } else { // Si es efímera o no tiene ID de BD, solo elimina del estado local
+      setNotifications(prevNotifications =>
+        prevNotifications.filter(notif => notif.id !== notificationId)
+      );
+    }
+  }, [authFetch, notifications]);
+
+
+  // Efecto para iniciar y limpiar el polling de notificaciones
   useEffect(() => {
     // Limpiar cualquier intervalo existente
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
     }
 
+    // Si hay un userId, iniciar el polling
     if (userId) {
-      // Realizar la primera carga inmediatamente
-      fetchNotifications();
-      // Configurar el polling cada 10 segundos
-      intervalRef.current = setInterval(fetchNotifications, 10000); // Poll cada 10 segundos
+      fetchNotifications(); // Cargar inmediatamente al iniciar sesión
+      intervalRef.current = setInterval(fetchNotifications, 30000); // Polling cada 30 segundos
     }
 
-    // Limpiar el intervalo al desmontar el componente o cuando userId cambie
+    // Función de limpieza al desmontar o cuando userId cambia
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
       }
     };
-  }, [userId, fetchNotifications]); // Dependencias: re-ejecutar cuando userId o fetchNotifications cambien
+  }, [userId, fetchNotifications]); // Re-ejecutar cuando userId o fetchNotifications cambian
 
-  // Función para añadir una nueva notificación (normalmente llamada desde el backend)
-  // En el frontend, esto se usaría para notificaciones temporales no persistentes
-  // o para simular notificaciones antes de que el backend las persista y las devuelva.
-  // Para notificaciones persistentes, el frontend solo las "escucha" del backend.
-  const addNotification = useCallback((type, message, duration = 5000, referenceId = null) => {
-    // Esta función es para notificaciones efímeras (no persistentes en la BD)
-    // que se muestran inmediatamente en el frontend.
-    const id = Date.now() + Math.random(); // ID temporal para notificaciones efímeras
-    const newNotification = {
-      id,
-      type,
-      message,
-      leida: false, // Por defecto no leída
-      fecha_creacion: new Date().toISOString(),
-      referencia_id: referenceId,
-    };
-
-    setNotifications(prevNotifications => [...prevNotifications, newNotification]);
-
-    // Eliminar la notificación efímera después de 'duration'
-    if (duration > 0) {
-      setTimeout(() => {
-        setNotifications(prevNotifications => prevNotifications.filter(notif => notif.id !== id));
-      }, duration);
-    }
-  }, []);
-
-
-  // Función para marcar una notificación como leída en el backend
-  const markNotificationAsRead = useCallback(async (notificationId) => {
-    const token = getToken();
-    if (!token) {
-      console.warn("No se encontró token de autenticación para marcar notificación como leída.");
-      return;
-    }
-    try {
-      const response = await fetch(`${API_BASE_URL}/notifications/${notificationId}/read`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      if (response.ok) {
-        // Actualizar el estado localmente para reflejar el cambio inmediatamente
-        setNotifications(prevNotifications =>
-          prevNotifications.map(notif =>
-            notif.id_notificacion === notificationId ? { ...notif, leida: true } : notif
-          )
-        );
-        console.log(`Notificación ${notificationId} marcada como leída.`);
-      } else {
-        console.error(`Error al marcar notificación ${notificationId} como leída:`, await response.json());
-      }
-    } catch (error) {
-      console.error(`Error al marcar notificación ${notificationId} como leída:`, error);
-    }
-  }, []);
-
-  // Función para eliminar una notificación del backend
-  const removeNotification = useCallback(async (notificationId) => {
-    const token = getToken();
-    if (!token) {
-      console.warn("No se encontró token de autenticación para eliminar notificación.");
-      return;
-    }
-    try {
-      const response = await fetch(`${API_BASE_URL}/notifications/${notificationId}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      if (response.ok) {
-        // Eliminar del estado localmente
-        setNotifications(prevNotifications => prevNotifications.filter(notif => notif.id_notificacion !== notificationId));
-        console.log(`Notificación ${notificationId} eliminada.`);
-      } else {
-        console.error(`Error al eliminar notificación ${notificationId}:`, await response.json());
-      }
-    } catch (error) {
-      console.error(`Error al eliminar notificación ${notificationId}:`, error);
-    }
-  }, []);
-
-  // Función para limpiar todas las notificaciones (eliminarlas del backend)
-  const clearAllNotifications = useCallback(async () => {
-    const token = getToken();
-    if (!token) {
-      console.warn("No se encontró token de autenticación para limpiar todas las notificaciones.");
-      return;
-    }
-    try {
-      // Obtener todas las notificaciones actuales para el usuario y eliminarlas una por una
-      // Esto asegura que se respeten los permisos de eliminación individuales en el backend.
-      const response = await fetch(`${API_BASE_URL}/notifications/user/${userId}`, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      if (response.ok) {
-        const result = await response.json();
-        if (result.success && result.data.length > 0) {
-          const deletePromises = result.data.map(notif => removeNotification(notif.id_notificacion));
-          await Promise.all(deletePromises);
-          console.log("Todas las notificaciones eliminadas.");
-          setNotifications([]); // Limpiar el estado local después de eliminar todas
-        }
-      } else {
-        console.error("Error al obtener notificaciones para limpiar:", await response.json());
-      }
-    } catch (error) {
-      console.error("Error al limpiar todas las notificaciones:", error);
-    }
-  }, [userId, removeNotification]);
-
-
-  const value = {
+  // El valor del contexto que se proporcionará a los componentes hijos
+  const contextValue = {
     notifications,
-    addNotification, // Para notificaciones efímeras del frontend
-    removeNotification, // Para eliminar una notificación individual (persiste en backend)
-    markNotificationAsRead, // Para marcar como leída (persiste en backend)
-    clearAllNotifications, // Para limpiar todas (persiste en backend)
-    fetchNotifications, // Para forzar una recarga de notificaciones
-    userId,
-    userRole,
+    addNotification,
+    markNotificationAsRead,
+    removeNotification,
+    userRole, // Proporciona el rol del usuario a los consumidores del contexto
+    userId // Proporciona el ID del usuario
   };
 
   return (
-    <NotificationContext.Provider value={value}>
+    <NotificationContext.Provider value={contextValue}>
       {children}
     </NotificationContext.Provider>
   );

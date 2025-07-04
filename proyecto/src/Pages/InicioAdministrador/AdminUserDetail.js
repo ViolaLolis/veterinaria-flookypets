@@ -2,9 +2,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FaUser, FaEdit, FaSpinner, FaInfoCircle, FaSave, FaTimes, FaCamera } from 'react-icons/fa';
-import { authFetch } from './api'; // Asegúrate de que la ruta sea correcta
-import './Styles/AdminUser.css'; // Asegúrate de que este CSS exista
-import { useNotifications } from '../../Notifications/NotificationContext'; // Importa el hook de notificaciones
+import { authFetch } from '../../utils/api'; // Ruta ajustada
+import { validateField } from '../../utils/validation'; // Importa la función de validación
+import './Styles/AdminUser.css'; // Ruta relativa al CSS
+import { useNotifications } from '../../Notifications/NotificationContext'; // Ruta ajustada
 
 function AdminUserDetail({ user }) {
     const { userId } = useParams();
@@ -15,7 +16,8 @@ function AdminUserDetail({ user }) {
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [selectedImage, setSelectedImage] = useState(null); // Para la nueva imagen
+    const [selectedImage, setSelectedImage] = useState(null); // Para la nueva imagen a subir
+    const [formErrors, setFormErrors] = useState({}); // Estado para errores de formulario
     const { addNotification } = useNotifications(); // Usa el hook de notificaciones
 
     const fetchUserData = useCallback(async () => {
@@ -25,7 +27,9 @@ function AdminUserDetail({ user }) {
             const responseData = await authFetch(`/usuarios/${userId}`); // Endpoint para detalles de usuario
             if (responseData.success && responseData.data) {
                 setUserData(responseData.data);
-                setFormData(responseData.data); // Inicializa formData con los datos del usuario
+                // Asegura que fecha_nacimiento sea un string de fecha válido para input type="date"
+                const formattedDate = responseData.data.fecha_nacimiento ? new Date(responseData.data.fecha_nacimiento).toISOString().split('T')[0] : '';
+                setFormData({ ...responseData.data, fecha_nacimiento: formattedDate });
             } else {
                 addNotification('error', responseData.message || 'Error al cargar los detalles del usuario.', 5000);
                 setError(responseData.message || 'Usuario no encontrado.');
@@ -49,41 +53,95 @@ function AdminUserDetail({ user }) {
     }, [user, fetchUserData]);
 
     const handleFormChange = useCallback((e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
-    }, []);
+        const { name, value, type, checked } = e.target;
+        let newValue = type === 'checkbox' ? checked : value;
+
+        // Convertir a mayúsculas para campos específicos, excepto email
+        if (!['email'].includes(name) && typeof newValue === 'string') {
+            newValue = newValue.toUpperCase();
+        }
+
+        setFormData(prev => ({ ...prev, [name]: newValue }));
+
+        // Validar el campo individualmente al cambiar
+        const originalEmail = userData ? userData.email : ''; // Pasa el email original si estamos editando
+        const errorMessage = validateField(name, newValue, { ...formData, [name]: newValue }, false, originalEmail); // isNewEntry es false para edición
+        setFormErrors(prev => ({ ...prev, [name]: errorMessage }));
+    }, [formData, userData]);
 
     const handleImageChange = useCallback((e) => {
         if (e.target.files && e.target.files[0]) {
-            setSelectedImage(e.target.files[0]);
+            const file = e.target.files[0];
+            // Validar el tipo de archivo y tamaño si es necesario
+            if (!file.type.startsWith('image/')) {
+                addNotification('error', 'Solo se permiten archivos de imagen.', 5000);
+                setSelectedImage(null);
+                return;
+            }
+            if (file.size > 5 * 1024 * 1024) { // 5 MB
+                addNotification('error', 'La imagen es demasiado grande (máx. 5MB).', 5000);
+                setSelectedImage(null);
+                return;
+            }
+            setSelectedImage(file);
+            setFormErrors(prev => ({ ...prev, imagen_url: null })); // Limpiar error si se selecciona una imagen válida
         }
-    }, []);
+    }, [addNotification]);
 
     const handleSave = useCallback(async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
         setError('');
 
-        let imageUrlToSave = formData.imagen_url;
+        // Validar todos los campos antes de enviar
+        let errors = {};
+        Object.keys(formData).forEach(key => {
+            // No validar password aquí, ya que no se edita en este formulario
+            const originalEmail = userData ? userData.email : ''; // Pasa el email original si estamos editando
+            const errorMessage = validateField(key, formData[key], formData, false, originalEmail); // isNewEntry es false
+            if (errorMessage) {
+                errors[key] = errorMessage;
+            }
+        });
+
+        // Validar la imagen si se seleccionó una nueva
+        if (selectedImage) {
+            if (!selectedImage.type.startsWith('image/')) {
+                errors.imagen_url = 'Solo se permiten archivos de imagen.';
+            } else if (selectedImage.size > 5 * 1024 * 1024) {
+                errors.imagen_url = 'La imagen es demasiado grande (máx. 5MB).';
+            }
+        }
+
+        if (Object.keys(errors).length > 0) {
+            setFormErrors(errors);
+            addNotification('error', 'Por favor, corrige los errores en el formulario.', 5000);
+            setIsSubmitting(false);
+            return;
+        }
+
+        let imageUrlToSave = userData.imagen_url; // Mantener la imagen actual por defecto
 
         try {
             if (selectedImage) {
                 const uploadFormData = new FormData();
                 uploadFormData.append('image', selectedImage);
+                // Asegúrate de que tu backend tenga un endpoint '/upload-image'
+                // que acepte FormData y devuelva la URL de la imagen subida.
                 const uploadResponse = await authFetch('/upload-image', {
                     method: 'POST',
                     body: uploadFormData,
+                    // No Content-Type aquí, el navegador lo establecerá automáticamente para FormData
                     headers: {
-                        // No Content-Type aquí, el navegador lo establecerá automáticamente para FormData
                         'Content-Type': undefined // Importante para que fetch no lo ponga como application/json
                     }
                 });
 
-                if (uploadResponse.success) {
+                if (uploadResponse.success && uploadResponse.imageUrl) {
                     imageUrlToSave = uploadResponse.imageUrl;
                     addNotification('success', 'Imagen de perfil actualizada correctamente.', 3000);
                 } else {
-                    addNotification('error', uploadResponse.message || 'Error al subir la imagen.', 5000);
+                    addNotification('error', uploadResponse.message || 'Error al subir la imagen. No se guardarán los cambios.', 5000);
                     setIsSubmitting(false);
                     return; // Detener el proceso si la subida de imagen falla
                 }
@@ -94,9 +152,16 @@ function AdminUserDetail({ user }) {
             delete payload.id; // El ID va en la URL
             delete payload.created_at;
             delete payload.role; // El rol no debe ser editable desde aquí
-            delete payload.password; // La contraseña se maneja por separado si se actualiza
+            // La contraseña no se maneja en este formulario, así que no la enviamos.
+            delete payload.password; // Asegurarse de que no se envíe una contraseña vacía si no se cambió.
+            delete payload.reset_token;
+            delete payload.reset_token_expires;
+            delete payload.experiencia; // Campos específicos de veterinario, no de usuario/admin
+            delete payload.universidad;
+            delete payload.horario;
 
-            const response = await authFetch(`/usuarios/${userId}`, {
+
+            const response = await authFetch(`/usuarios/${userId}`, { // Usar userId de useParams
                 method: 'PUT',
                 body: payload
             });
@@ -115,7 +180,7 @@ function AdminUserDetail({ user }) {
             setIsSubmitting(false);
             setSelectedImage(null); // Limpiar la imagen seleccionada
         }
-    }, [userId, formData, selectedImage, authFetch, addNotification, fetchUserData]);
+    }, [userId, formData, selectedImage, userData?.imagen_url, authFetch, addNotification, fetchUserData]);
 
 
     if (isLoading) {
@@ -165,7 +230,7 @@ function AdminUserDetail({ user }) {
                             <button className="save-btn" onClick={handleSave} disabled={isSubmitting}>
                                 {isSubmitting ? <FaSpinner className="spinner-icon" /> : <FaSave />} Guardar Cambios
                             </button>
-                            <button className="cancel-btn" onClick={() => setIsEditing(false)} disabled={isSubmitting}>
+                            <button className="cancel-btn" onClick={() => { setIsEditing(false); setFormErrors({}); setSelectedImage(null); fetchUserData(); }} disabled={isSubmitting}>
                                 <FaTimes /> Cancelar
                             </button>
                         </>
@@ -195,6 +260,7 @@ function AdminUserDetail({ user }) {
                             </label>
                         </div>
                     )}
+                    {formErrors.imagen_url && <p className="error-message-inline text-center">{formErrors.imagen_url}</p>}
                 </div>
 
                 <form className="user-detail-form" onSubmit={handleSave}>
@@ -205,6 +271,7 @@ function AdminUserDetail({ user }) {
                         ) : (
                             <p>{userData.nombre}</p>
                         )}
+                        {isEditing && formErrors.nombre && <p className="error-message-inline">{formErrors.nombre}</p>}
                     </div>
                     <div className="form-group">
                         <label>Apellido:</label>
@@ -213,6 +280,7 @@ function AdminUserDetail({ user }) {
                         ) : (
                             <p>{userData.apellido}</p>
                         )}
+                        {isEditing && formErrors.apellido && <p className="error-message-inline">{formErrors.apellido}</p>}
                     </div>
                     <div className="form-group">
                         <label>Email:</label>
@@ -221,6 +289,7 @@ function AdminUserDetail({ user }) {
                         ) : (
                             <p>{userData.email}</p>
                         )}
+                        {isEditing && formErrors.email && <p className="error-message-inline">{formErrors.email}</p>}
                     </div>
                     <div className="form-group">
                         <label>Teléfono:</label>
@@ -229,6 +298,7 @@ function AdminUserDetail({ user }) {
                         ) : (
                             <p>{userData.telefono}</p>
                         )}
+                        {isEditing && formErrors.telefono && <p className="error-message-inline">{formErrors.telefono}</p>}
                     </div>
                     <div className="form-group">
                         <label>Dirección:</label>
@@ -237,14 +307,23 @@ function AdminUserDetail({ user }) {
                         ) : (
                             <p>{userData.direccion || 'N/A'}</p>
                         )}
+                        {isEditing && formErrors.direccion && <p className="error-message-inline">{formErrors.direccion}</p>}
                     </div>
                     <div className="form-group">
                         <label>Tipo de Documento:</label>
                         {isEditing ? (
-                            <input type="text" name="tipo_documento" value={formData.tipo_documento || ''} onChange={handleFormChange} disabled={isSubmitting} />
+                            <select name="tipo_documento" value={formData.tipo_documento || ''} onChange={handleFormChange} disabled={isSubmitting}>
+                                <option value="">Seleccione</option>
+                                <option value="CC">CÉDULA DE CIUDADANÍA</option>
+                                <option value="CE">CÉDULA DE EXTRANJERÍA</option>
+                                <option value="TI">TARJETA DE IDENTIDAD</option>
+                                <option value="PASAPORTE">PASAPORTE</option>
+                                <option value="NIT">NIT</option>
+                            </select>
                         ) : (
                             <p>{userData.tipo_documento || 'N/A'}</p>
                         )}
+                        {isEditing && formErrors.tipo_documento && <p className="error-message-inline">{formErrors.tipo_documento}</p>}
                     </div>
                     <div className="form-group">
                         <label>Número de Documento:</label>
@@ -253,14 +332,16 @@ function AdminUserDetail({ user }) {
                         ) : (
                             <p>{userData.numero_documento || 'N/A'}</p>
                         )}
+                        {isEditing && formErrors.numero_documento && <p className="error-message-inline">{formErrors.numero_documento}</p>}
                     </div>
                     <div className="form-group">
                         <label>Fecha de Nacimiento:</label>
                         {isEditing ? (
-                            <input type="date" name="fecha_nacimiento" value={formData.fecha_nacimiento ? formData.fecha_nacimiento.split('T')[0] : ''} onChange={handleFormChange} disabled={isSubmitting} />
+                            <input type="date" name="fecha_nacimiento" value={formData.fecha_nacimiento || ''} onChange={handleFormChange} disabled={isSubmitting} />
                         ) : (
                             <p>{userData.fecha_nacimiento || 'N/A'}</p>
                         )}
+                        {isEditing && formErrors.fecha_nacimiento && <p className="error-message-inline">{formErrors.fecha_nacimiento}</p>}
                     </div>
                     <div className="form-group">
                         <label>Rol:</label>
@@ -269,9 +350,9 @@ function AdminUserDetail({ user }) {
                     <div className="form-group">
                         <label>Activo:</label>
                         {isEditing ? (
-                            <input type="checkbox" name="active" checked={formData.active || false} onChange={(e) => setFormData(prev => ({ ...prev, active: e.target.checked }))} disabled={isSubmitting} />
+                            <input type="checkbox" name="active" checked={formData.active || false} onChange={handleFormChange} disabled={isSubmitting} />
                         ) : (
-                            <p>{userData.active ? 'Sí' : 'No'}</p>
+                            <p>{userData.active ? 'SÍ' : 'NO'}</p>
                         )}
                     </div>
                     <div className="form-group">
@@ -284,7 +365,7 @@ function AdminUserDetail({ user }) {
                             <button type="submit" className="submit-btn" disabled={isSubmitting}>
                                 {isSubmitting ? <FaSpinner className="spinner-icon" /> : 'Guardar Cambios'}
                             </button>
-                            <button type="button" className="cancel-btn" onClick={() => setIsEditing(false)} disabled={isSubmitting}>
+                            <button type="button" className="cancel-btn" onClick={() => { setIsEditing(false); setFormErrors({}); setSelectedImage(null); fetchUserData(); }} disabled={isSubmitting}>
                                 Cancelar
                             </button>
                         </div>

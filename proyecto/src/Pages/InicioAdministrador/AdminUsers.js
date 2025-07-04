@@ -2,9 +2,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { FaUsers, FaSearch, FaEye, FaTrash, FaSpinner, FaInfoCircle, FaToggleOn, FaToggleOff } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
-import { authFetch } from './api'; // Asegúrate de que la ruta sea correcta
-import './Styles/AdminUser.css'; // Asegúrate de que este CSS exista
-import { useNotifications } from '../../Notifications/NotificationContext'; // Importa el hook de notificaciones
+import { authFetch } from '../../utils/api'; // Ruta ajustada
+import './Styles/AdminUser.css'; // Ruta relativa al CSS
+import { useNotifications } from '../../Notifications/NotificationContext'; // Ruta ajustada
 
 function AdminUsers({ user }) {
     const [users, setUsers] = useState([]);
@@ -57,6 +57,12 @@ function AdminUsers({ user }) {
 
     const handleDelete = useCallback(async (id) => {
         // *** REEMPLAZO DE window.confirm ***
+        // Aquí deberías integrar un modal de confirmación personalizado.
+        // Por ejemplo:
+        // const confirmed = await showCustomConfirmModal('¿Estás seguro de eliminar este cliente y todos sus datos (mascotas, historiales, citas)? Esta acción es irreversible.');
+        // if (!confirmed) return;
+
+        // Temporalmente, mantenemos window.confirm para funcionalidad, pero se debe reemplazar
         if (!window.confirm('¿Estás seguro de eliminar este cliente y todos sus datos (mascotas, historiales, citas)? Esta acción es irreversible.')) {
             return;
         }
@@ -80,6 +86,12 @@ function AdminUsers({ user }) {
 
     const handleToggleActive = useCallback(async (userId, currentStatus) => {
         // *** REEMPLAZO DE window.confirm ***
+        // Aquí deberías integrar un modal de confirmación personalizado.
+        // Por ejemplo:
+        // const confirmed = await showCustomConfirmModal(`¿Estás seguro de ${currentStatus ? 'desactivar' : 'activar'} este cliente?`);
+        // if (!confirmed) return;
+
+        // Temporalmente, mantenemos window.confirm para funcionalidad, pero se debe reemplazar
         if (!window.confirm(`¿Estás seguro de ${currentStatus ? 'desactivar' : 'activar'} este cliente?`)) {
             return;
         }
@@ -171,7 +183,7 @@ function AdminUsers({ user }) {
                                     <td>{client.num_mascotas}</td>
                                     <td>
                                         <span className={`status-badge ${client.active ? 'badge-success' : 'badge-danger'}`}>
-                                            {client.active ? 'Activo' : 'Inactivo'}
+                                            {client.active ? 'ACTIVO' : 'INACTIVO'}
                                         </span>
                                     </td>
                                     <td className="actions-cell">

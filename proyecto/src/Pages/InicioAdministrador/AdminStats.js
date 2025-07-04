@@ -2,9 +2,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { FaUsers, FaStethoscope, FaUserShield, FaBriefcaseMedical, FaCalendarAlt, FaChartLine, FaSpinner, FaInfoCircle } from 'react-icons/fa';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
-import { authFetch } from './api'; // Asegúrate de que la ruta sea correcta
-import './Styles/AdminStats.css'; // Asegúrate de que este CSS exista
-import { useNotifications } from '../../Notifications/NotificationContext'; // Importa el hook de notificaciones
+import { authFetch } from '../../utils/api'; // Ruta ajustada
+import './Styles/AdminStats.css'; // Ruta relativa al CSS
+import { useNotifications } from '../../Notifications/NotificationContext'; // Ruta ajustada
 
 function AdminStats({ user }) {
     const [stats, setStats] = useState({
@@ -25,6 +25,7 @@ function AdminStats({ user }) {
         setIsLoading(true);
         setError('');
         try {
+            // Asegúrate de que estos endpoints existan en tu server.txt
             const [statsRes, citasRes, serviciosRes] = await Promise.all([
                 authFetch('/admin/stats'),
                 authFetch('/api/stats/citas-por-mes'),

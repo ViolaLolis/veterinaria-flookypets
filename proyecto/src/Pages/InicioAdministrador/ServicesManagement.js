@@ -2,9 +2,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { FaBriefcaseMedical, FaSearch, FaPlus, FaEdit, FaTrash, FaSpinner, FaTimes, FaInfoCircle } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
-import { authFetch } from './api'; // Asegúrate de que la ruta sea correcta
-import './Styles/ServicesManagement.css'; // Asegúrate de que este CSS exista
-import { useNotifications } from '../../Notifications/NotificationContext'; // Importa el hook de notificaciones
+import { authFetch } from '../../utils/api'; // Ruta ajustada
+import { validateField } from '../../utils/validation'; // Importa la función de validación
+import './Styles/ServicesManagement.css'; // Ruta relativa al CSS
+import { useNotifications } from '../../Notifications/NotificationContext'; // Ruta ajustada
 
 function ServicesManagement({ user }) {
     const [services, setServices] = useState([]);
@@ -15,6 +16,7 @@ function ServicesManagement({ user }) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingService, setEditingService] = useState(null); // null o el objeto del servicio a editar
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [formErrors, setFormErrors] = useState({}); // Estado para errores de formulario
     const { addNotification } = useNotifications(); // Usa el hook de notificaciones
 
     const [formData, setFormData] = useState({
@@ -65,6 +67,7 @@ function ServicesManagement({ user }) {
     const handleAdd = useCallback(() => {
         setEditingService(null);
         setFormData({ nombre: '', descripcion: '', precio: '' });
+        setFormErrors({}); // Limpiar errores al abrir el modal
         setIsModalOpen(true);
     }, []);
 
@@ -75,18 +78,39 @@ function ServicesManagement({ user }) {
             descripcion: service.descripcion,
             precio: service.precio
         });
+        setFormErrors({}); // Limpiar errores al abrir el modal
         setIsModalOpen(true);
     }, []);
 
     const handleFormChange = useCallback((e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
-    }, []);
+
+        // Validar el campo individualmente al cambiar
+        const errorMessage = validateField(name, value, formData);
+        setFormErrors(prev => ({ ...prev, [name]: errorMessage }));
+    }, [formData]); // Depende de formData para validaciones cruzadas si las hubiera
 
     const handleSubmit = useCallback(async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
         setError('');
+
+        // Validar todos los campos antes de enviar
+        let errors = {};
+        Object.keys(formData).forEach(key => {
+            const errorMessage = validateField(key, formData[key], formData, !editingService);
+            if (errorMessage) {
+                errors[key] = errorMessage;
+            }
+        });
+
+        if (Object.keys(errors).length > 0) {
+            setFormErrors(errors);
+            addNotification('error', 'Por favor, corrige los errores en el formulario.', 5000);
+            setIsSubmitting(false);
+            return;
+        }
 
         try {
             let response;
@@ -120,10 +144,11 @@ function ServicesManagement({ user }) {
     const handleDelete = useCallback(async (id) => {
         // *** REEMPLAZO DE window.confirm ***
         // Aquí deberías integrar un modal de confirmación personalizado.
-        // Ejemplo conceptual:
+        // Por ejemplo:
         // const confirmed = await showCustomConfirmModal('¿Estás seguro de eliminar este servicio? Esta acción es irreversible.');
         // if (!confirmed) return;
 
+        // Temporalmente, mantenemos window.confirm para funcionalidad, pero se debe reemplazar
         if (!window.confirm('¿Estás seguro de eliminar este servicio? Esta acción es irreversible.')) {
             return;
         }
@@ -279,6 +304,7 @@ function ServicesManagement({ user }) {
                                         required
                                         disabled={isSubmitting}
                                     />
+                                    {formErrors.nombre && <p className="error-message-inline">{formErrors.nombre}</p>}
                                 </div>
                                 <div className="form-group">
                                     <label htmlFor="descripcion">Descripción</label>
@@ -290,6 +316,7 @@ function ServicesManagement({ user }) {
                                         required
                                         disabled={isSubmitting}
                                     ></textarea>
+                                    {formErrors.descripcion && <p className="error-message-inline">{formErrors.descripcion}</p>}
                                 </div>
                                 <div className="form-group">
                                     <label htmlFor="precio">Precio</label>
@@ -303,6 +330,7 @@ function ServicesManagement({ user }) {
                                         required
                                         disabled={isSubmitting}
                                     />
+                                    {formErrors.precio && <p className="error-message-inline">{formErrors.precio}</p>}
                                 </div>
                                 <button type="submit" className="submit-btn" disabled={isSubmitting}>
                                     {isSubmitting ? <FaSpinner className="spinner-icon" /> : (editingService ? 'Actualizar Servicio' : 'Registrar Servicio')}
