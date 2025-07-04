@@ -9,7 +9,6 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { FaSpinner } from 'react-icons/fa';
 import { authFetch } from '../../utils/api'; // Importar la función authFetch
-import { toast } from 'react-toastify'; // Import toast for user feedback
 
 // Componente de leer más / menos
 const ReadMoreLessText = ({ text, maxLength = 100 }) => {

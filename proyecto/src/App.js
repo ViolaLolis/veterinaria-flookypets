@@ -7,7 +7,7 @@ import Registro from "./Pages/Login/Registro.js";
 import ForgotPassword from "./Pages/Login/OlvideContraseña.js";
 
 // Componentes de Usuario
-import InicioUsuario from "./Pages/InicioUsuario/InicioUsuario.js"; // Ahora es un layout
+import InicioUsuario from "./Pages/InicioUsuario/InicioUsuario.js";
 import HomeDashboard from "./Pages/InicioUsuario/InicioDashboard.js";
 import CitasUsuario from "./Pages/InicioUsuario/CitasUsuario.js";
 import ServiciosVeterinaria from "./Pages/InicioUsuario/ServiciosVeterinaria.js";
@@ -18,7 +18,7 @@ import AgendarCita from "./Pages/InicioUsuario/AgendarCita.js";
 import DetalleMascota from "./Pages/InicioUsuario/DetalleMascota.js";
 import EditarMascota from "./Pages/InicioUsuario/EditarMascota.js";
 import DetalleCita from "./Pages/InicioUsuario/DetalleCita.js";
-import EditarPerfil from "./Pages/InicioUsuario/EditarPerfil.js"; // Se corrigió la ruta si es necesario
+import EditarPerfil from "./Pages/InicioUsuario/EditarPerfil.js";
 import DetalleServicio from "./Pages/InicioUsuario/DetalleServicio.js";
 import DetalleHistorial from "./Pages/InicioUsuario/DetalleHistorial.js";
 import ListaMascotasUsuario from "./Pages/InicioUsuario/ListaMascotasUsuario.js";
@@ -48,7 +48,7 @@ import EditarHistorialMedico from "./Pages/InicioVeterinario/EditarHistorialMedi
 // Componentes de Administrador
 import AdminDashboard from "./Pages/InicioAdministrador/AdminDashboard";
 import AdminStats from "./Pages/InicioAdministrador/AdminStats";
-import AdminUserManagement from "./Pages/InicioAdministrador/AdminUserManagement"; // Asegúrate de que la ruta sea correcta
+import AdminUserManagement from "./Pages/InicioAdministrador/AdminUserManagement";
 import AdminAppointments from "./Pages/InicioAdministrador/AdminAppointments";
 import AdminMedicalRecords from "./Pages/InicioAdministrador/AdminMedicalRecords";
 import AdminSettings from "./Pages/InicioAdministrador/AdminSettings";
@@ -65,22 +65,23 @@ import { NotificationProvider } from "./Notifications/NotificationContext.js";
 // Importar el componente para mostrar las notificaciones
 import NotificationDisplay from "./Notifications/NotificationDisplay.js";
 
+// NO MÁS LÓGICA DE SUPRESIÓN DE CONSOLE AQUÍ. MUEVE ESTO A index.js (o main.jsx)
+// para asegurar que se ejecute antes de que se cargue React y otros componentes.
+
 
 function App() {
     // Inicializa el estado del usuario intentando recuperarlo del localStorage
-    // Esto es crucial para mantener la sesión si el usuario recarga la página
     const [user, setUser] = useState(() => {
         try {
             const storedUser = localStorage.getItem('user');
-            const storedToken = localStorage.getItem('token'); // También recupera el token
+            const storedToken = localStorage.getItem('token');
             if (storedUser && storedToken) {
                 const parsedUser = JSON.parse(storedUser);
-                // Asegúrate de que el objeto user siempre tenga el token
                 return { ...parsedUser, token: storedToken };
             }
         } catch (error) {
+            // Este console.error será suprimido en producción por la lógica en index.js
             console.error("Error al recuperar usuario del localStorage en App.js:", error);
-            // Si hay un error al parsear, limpia el localStorage para evitar datos corruptos
             localStorage.removeItem('user');
             localStorage.removeItem('token');
         }
@@ -88,45 +89,56 @@ function App() {
     });
 
     // Efecto para sincronizar el estado 'user' con localStorage
-    // Cada vez que el estado 'user' cambia, se actualiza el localStorage
     useEffect(() => {
         if (user) {
             localStorage.setItem('user', JSON.stringify(user));
-            localStorage.setItem('token', user.token); // Asegúrate de guardar el token
+            localStorage.setItem('token', user.token);
         } else {
-            // Si el usuario es null (sesión cerrada), limpia el localStorage
             localStorage.removeItem('user');
             localStorage.removeItem('token');
         }
-    }, [user]); // Se ejecuta cada vez que el objeto 'user' cambia
+    }, [user]);
 
-    // Función handleLogout definida aquí en App.js
+    // EFECTO PARA MOSTRAR LA ADVERTENCIA DE LA CONSOLA SOLO EN PRODUCCIÓN
+    // Aseguramos que se llame showConsoleWarning solo una vez al montar la aplicación
+    // y solo en el entorno de producción.
+    useEffect(() => {
+        if (process.env.NODE_ENV === 'production') {
+            // Importar dinámicamente la función para asegurar que se cargue y ejecute
+            // después de que window._originalConsoleLog esté disponible.
+            import('./utils/consoleWarning.js').then(({ showConsoleWarning }) => {
+                showConsoleWarning();
+            }).catch(err => {
+                // Este error se imprimiría usando el console.error ya suprimido si no fuera por
+                // que es un error de importación, el cual el navegador podría mostrar directamente.
+                // Es un caso muy raro, pero es bueno manejarlo.
+                // Si llegara aquí, significa que showConsoleWarning.js no se encontró o tuvo un error.
+                if (window._originalConsoleError) { // Si el original error fue guardado
+                   window._originalConsoleError("Error al cargar la advertencia de la consola:", err);
+                } else {
+                   // Fallback si no se guardó el original (debería estar ya suprimido de todas formas)
+                   console.error("Error al cargar la advertencia de la consola:", err);
+                }
+            });
+        }
+    }, []);
+
     const handleLogout = () => {
         setUser(null);
-        // localStorage.removeItem('user'); // Ya manejado por el useEffect anterior
-        // localStorage.removeItem('token'); // Ya manejado por el useEffect anterior
-        // No es necesario navegar aquí si Protegida ya lo hace, pero se puede dejar como fallback
     };
 
     return (
         <Router>
-            {/* Envuelve toda la aplicación con el proveedor de notificaciones */}
             <NotificationProvider>
-                {/* Componente para mostrar las notificaciones globalmente */}
                 <NotificationDisplay />
 
                 <Routes>
-                    {/* Rutas públicas */}
                     <Route path="/" element={<Main />} />
-                    {/* Login ahora solo necesita setUser */}
                     <Route path="/login" element={<Login setUser={setUser} />} />
                     <Route path="/olvide-contraseña" element={<ForgotPassword />} />
                     <Route path="/register" element={<Registro />} />
 
-                    {/* Rutas de administrador */}
-                    {/* Pasa user, setUser Y handleLogout a Protegida */}
                     <Route element={<Protegida user={user} setUser={setUser} allowedRoles={['admin']} handleLogout={handleLogout} />}>
-                        {/* Pasa user, setUser Y handleLogout a AdminDashboard */}
                         <Route path="/admin" element={<AdminDashboard user={user} setUser={setUser} handleLogout={handleLogout} />}>
                             <Route index element={<AdminStats user={user} />} />
                             <Route path="dashboard" element={<AdminStats user={user} />} />
@@ -135,15 +147,12 @@ function App() {
                             <Route path="administrators" element={<AdminsManagement user={user} />} />
                             <Route path="users" element={<AdminUserManagement user={user} />} />
                             <Route path="appointments" element={<AdminAppointments user={user} />} />
-                            {/* AdminMedicalRecords ya no necesita handleLogout como prop directa */}
                             <Route path="medical-records" element={<AdminMedicalRecords user={user} />} />
                             <Route path="settings" element={<AdminSettings user={user} />} />
                             <Route path="profile" element={<UserProfile user={user} setUser={setUser} />} />
                         </Route>
                     </Route>
 
-                    {/* Rutas de veterinario */}
-                    {/* Pasa user, setUser Y handleLogout a Protegida. Los administradores también pueden acceder aquí. */}
                     <Route element={<Protegida user={user} setUser={setUser} allowedRoles={['veterinario', 'admin']} handleLogout={handleLogout} />}>
                         <Route path="/veterinario" element={<MainVeterinario user={user} setUser={setUser} />}>
                             <Route index element={<NavegacionVeterinario />} />
@@ -169,38 +178,25 @@ function App() {
                         </Route>
                     </Route>
 
-                    {/* Rutas de usuario (InicioUsuario como layout principal) */}
-                    {/* Pasa user, setUser Y handleLogout a Protegida */}
                     <Route element={<Protegida user={user} setUser={setUser} allowedRoles={['usuario']} handleLogout={handleLogout} />}>
                         <Route path="/usuario" element={<InicioUsuario user={user} setUser={setUser} />}>
-                            {/* Rutas anidadas que se renderizarán dentro del <Outlet /> de InicioUsuario */}
                             <Route index element={<HomeDashboard />} />
-
-                            {/* Rutas de Mascotas */}
                             <Route path="mascotas" element={<ListaMascotasUsuario user={user} />} />
                             <Route path="mascotas/:id" element={<DetalleMascota user={user} />} />
                             <Route path="mascotas/editar/:id" element={<EditarMascota user={user} />} />
-
-                            {/* Rutas de Citas */}
                             <Route path="citas" element={<CitasUsuario user={user} />} />
                             <Route path="citas/agendar" element={<AgendarCita user={user} />} />
                             <Route path="citas/:id" element={<DetalleCita user={user} />} />
-
-                            {/* Rutas de Servicios */}
                             <Route path="servicios" element={<ServiciosVeterinaria user={user} />} />
                             <Route path="servicios/:id" element={<DetalleServicio user={user} />} />
-
-                            {/* Rutas de Perfil y Historial Médico - ANIDADAS DENTRO DE /usuario para usar el mismo layout */}
                             <Route path="perfil" element={<PerfilUsuario user={user} setUser={setUser} />} />
                             <Route path="perfil/editar" element={<EditarPerfil user={user} setUser={setUser} />} />
                             <Route path="perfil/configuracion" element={<ConfiguracionPerfil user={user} setUser={setUser} />} />
                             <Route path="historial/:mascotaId" element={<HistorialMedico user={user} />} />
                             <Route path="historial/:mascotaId/:historialId" element={<DetalleHistorial user={user} />} />
-
                         </Route>
                     </Route>
 
-                    {/* Ruta de fallback: redirige cualquier ruta no definida a la página principal */}
                     <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
             </NotificationProvider>

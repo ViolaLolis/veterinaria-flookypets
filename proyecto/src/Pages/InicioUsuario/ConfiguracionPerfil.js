@@ -5,7 +5,7 @@ import styles from './Styles/ConfiguracionPerfil.module.css';
 import {
   faCog, faUserEdit, faEnvelope, faLock, faCheckCircle, faCamera,
   faExclamationTriangle, faArrowLeft, faPhone, faMapMarkerAlt, faCalendarAlt,
-  faBell, faShieldAlt, faChevronDown, faChevronUp, faSpinner, faTimesCircle
+  faBell, faShieldAlt, faChevronDown, faChevronUp, faSpinner
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { authFetch } from '../../utils/api'; // Importar la función authFetch

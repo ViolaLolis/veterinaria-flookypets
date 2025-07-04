@@ -2,16 +2,16 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, Outlet, useLocation } from 'react-router-dom';
 import {
   FaPaw, FaCalendarAlt, FaShoppingBag, FaChevronDown,
-  FaSignOutAlt, FaCog, FaUser, FaSpinner, FaBars, FaTimes,
+  FaSignOutAlt, FaUser, FaSpinner, FaBars, FaTimes,
   FaHome, FaBell // Import FaBell for notifications
 } from 'react-icons/fa';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheckCircle, faTimesCircle, faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
 import styles from './Styles/InicioUsuario.module.css';
 import logo from '../Inicio/Imagenes/flooty.png';
-import { authFetch } from './api';
+import { authFetch } from './api'; // Asumiendo que `authFetch` es tu función para llamadas autenticadas
 
-const InicioUsuario = ({ user, setUser }) => { // user and setUser are props coming from a higher component (e.g., App.js)
+const InicioUsuario = ({ user, setUser }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -22,11 +22,9 @@ const InicioUsuario = ({ user, setUser }) => { // user and setUser are props com
   const [error, setError] = useState('');
   const [notification, setNotification] = useState(null);
 
-  // --- NUEVOS ESTADOS PARA NOTIFICACIONES ---
   const [notifications, setNotifications] = useState([]);
   const [showNotificationsMenu, setShowNotificationsMenu] = useState(false);
   const notificationsRef = useRef(null);
-  // --- FIN NUEVOS ESTADOS ---
 
   const profileMenuRef = useRef(null);
   const mobileNavRef = useRef(null);
@@ -73,8 +71,7 @@ const InicioUsuario = ({ user, setUser }) => { // user and setUser are props com
       const storedUser = JSON.parse(localStorage.getItem('user'));
       if (storedUser && storedUser.id) {
         currentUser = storedUser;
-        // If user was not passed as prop, set it in parent state if possible
-        if (setUser) { // Check if setUser is provided as a prop
+        if (setUser) {
             setUser(storedUser);
         }
       } else {
@@ -86,25 +83,13 @@ const InicioUsuario = ({ user, setUser }) => { // user and setUser are props com
     }
 
     try {
-      // Simulamos la llamada a la API con datos mock
-      // const response = await authFetch(`/usuarios/${currentUser.id}`);
-      const mockUserData = {
-        success: true,
-        data: {
-          id: currentUser.id,
-          nombre: currentUser.nombre,
-          email: currentUser.email,
-          imagen_url: currentUser.imagen_url || `https://api.dicebear.com/7.x/initials/svg?seed=${currentUser.nombre || 'U'}&chars=1&backgroundColor=00acc1,007c91,4dd0e1&fontFamily=Poppins`,
-          // Add a mock 'mascotas' array for testing InicioDashboard's pet count
-          mascotas: [{id:1, name:'Max'}, {id:2, name:'Luna'}] // Example mock pets
-        }
-      };
-
-      if (mockUserData.success) {
-        setUserData(mockUserData.data);
+      // Usar authFetch para obtener los datos del usuario real
+      const response = await authFetch(`/usuarios/${currentUser.id}`); // Asumiendo que esta ruta existe
+      if (response.success) {
+        setUserData(response.data);
       } else {
-        setError(mockUserData.message || 'Error al cargar los datos del usuario.');
-        showNotification(mockUserData.message || 'Error al cargar datos del perfil', 'error');
+        setError(response.message || 'Error al cargar los datos del usuario.');
+        showNotification(response.message || 'Error al cargar datos del perfil', 'error');
       }
     } catch (err) {
       setError('Error de conexión con el servidor. Intenta de nuevo más tarde.');
@@ -113,81 +98,37 @@ const InicioUsuario = ({ user, setUser }) => { // user and setUser are props com
     } finally {
       setIsLoading(false);
     }
-  }, [user, showNotification, navigate, setUser]); // Added setUser to dependencies
+  }, [user, showNotification, navigate, setUser]);
 
-  // --- NUEVA FUNCIÓN PARA OBTENER NOTIFICACIONES (MOCK) ---
+  // FUNCIÓN ACTUALIZADA PARA OBTENER NOTIFICACIONES DESDE LA API
   const fetchNotifications = useCallback(async (currentUserId) => {
-    const mockNotificationsData = [
-      {
-        id_notificacion: 1,
-        id_usuario: 3, // Juan Pérez (user@example.com)
-        tipo: 'cita_pendiente',
-        mensaje: '¡Hola Juan! Tienes una cita pendiente para Max el 15/07/2030 a las 10:00 AM.',
-        leida: false,
-        fecha_creacion: '2025-07-03T10:00:00Z',
-        referencia_id: 1, // id_cita
-      },
-      {
-        id_notificacion: 2,
-        id_usuario: 3, // Juan Pérez (user@example.com)
-        tipo: 'historial_actualizado',
-        mensaje: 'Se ha añadido una nueva entrada al historial médico de Luna.',
-        leida: false,
-        fecha_creacion: '2025-07-02T14:30:00Z',
-        referencia_id: 2, // id_mascota
-      },
-      {
-        id_notificacion: 3,
-        id_usuario: 9, // Alejandro Rojas (user1@example.com)
-        tipo: 'cita_pendiente',
-        mensaje: '¡Hola Alejandro! Tienes una cita pendiente para Rocky el 15/07/2030.',
-        leida: false,
-        fecha_creacion: '2025-07-01T11:00:00Z',
-        referencia_id: 2, // id_cita
-      },
-      {
-        id_notificacion: 4,
-        id_usuario: 3, // Juan Pérez (user@example.com)
-        tipo: 'cita_aceptada',
-        mensaje: 'Tu cita para Lily el 20/08/2030 ha sido aceptada.',
-        leida: true,
-        fecha_creacion: '2025-06-28T09:00:00Z',
-        referencia_id: 12, // id_cita
-      },
-      {
-        id_notificacion: 5,
-        id_usuario: 10, // Gabriela Sánchez (user2@example.com)
-        tipo: 'historial_actualizado',
-        mensaje: 'Se ha añadido una nueva entrada al historial médico de Milo.',
-        leida: false,
-        fecha_creacion: '2025-07-03T09:00:00Z',
-        referencia_id: 4, // id_mascota
-      },
-      {
-        id_notificacion: 6,
-        id_usuario: 3, // Juan Pérez (user@example.com)
-        tipo: 'recordatorio_cita',
-        mensaje: '¡Recordatorio! Tu cita para Max es mañana, 2025-07-04.',
-        leida: false,
-        fecha_creacion: '2025-07-03T08:00:00Z',
-        referencia_id: 1, // id_cita
+    if (!currentUserId) {
+      console.warn('No user ID provided for fetching notifications.');
+      return;
+    }
+    try {
+      const response = await authFetch(`/api/notifications`);
+      if (response.success) {
+        setNotifications(response.data);
+      } else {
+        console.error('Error al obtener notificaciones:', response.message);
+        // Opcional: showNotification('Error al cargar notificaciones', 'error');
       }
-    ];
-
-    const userNotifications = mockNotificationsData.filter(
-      (n) => n.id_usuario === currentUserId
-    );
-    setNotifications(userNotifications);
+    } catch (error) {
+      console.error('Error de conexión al obtener notificaciones:', error);
+      // Opcional: showNotification('Error de conexión con el servidor de notificaciones', 'error');
+    }
   }, []);
 
   useEffect(() => {
     fetchUserData();
     if (user?.id) {
       fetchNotifications(user.id);
+      // Establecer un intervalo para refrescar las notificaciones cada 60 segundos
       const notificationInterval = setInterval(() => {
         fetchNotifications(user.id);
       }, 60000);
-      return () => clearInterval(notificationInterval);
+      return () => clearInterval(notificationInterval); // Limpiar el intervalo al desmontar
     }
   }, [fetchUserData, fetchNotifications, user]);
 
@@ -203,13 +144,28 @@ const InicioUsuario = ({ user, setUser }) => { // user and setUser are props com
     }, 1500);
   }, [navigate, setUser, showNotification]);
 
-  const markNotificationAsRead = useCallback((id_notificacion) => {
-    setNotifications((prevNotifications) =>
-      prevNotifications.map((n) =>
-        n.id_notificacion === id_notificacion ? { ...n, leida: true } : n
-      )
-    );
-  }, []);
+  // FUNCIÓN ACTUALIZADA PARA MARCAR NOTIFICACIÓN COMO LEÍDA EN LA API
+  const markNotificationAsRead = useCallback(async (id_notificacion) => {
+    try {
+      const response = await authFetch(`/api/notifications/${id_notificacion}/read`, {
+        method: 'PUT',
+      });
+      if (response.success) {
+        setNotifications((prevNotifications) =>
+          prevNotifications.map((n) =>
+            n.id_notificacion === id_notificacion ? { ...n, leida: true } : n
+          )
+        );
+        // Opcional: showNotification('Notificación marcada como leída', 'success');
+      } else {
+        console.error('Error al marcar como leída:', response.message);
+        showNotification('Error al marcar notificación como leída', 'error');
+      }
+    } catch (error) {
+      console.error('Error de conexión al marcar notificación como leída:', error);
+      showNotification('Error de conexión', 'error');
+    }
+  }, [showNotification]);
 
   const unreadNotificationsCount = notifications.filter(n => !n.leida).length;
 
@@ -243,8 +199,7 @@ const InicioUsuario = ({ user, setUser }) => { // user and setUser are props com
     );
   }
 
-  // Render a specific error message if user data couldn't be loaded or identified
-  if (error && !user?.id) { // Only show this error if there's an issue with user identification specifically
+  if (error && !user?.id) {
     return (
       <div className={styles.errorMessage}>
         <FontAwesomeIcon icon={faTimesCircle} className={styles.errorIcon} />
@@ -257,7 +212,6 @@ const InicioUsuario = ({ user, setUser }) => { // user and setUser are props com
     );
   }
 
-  // If user data is still null but not loading (and no specific error for user ID), might be a temporary state
   if (!user && !isLoading) {
     return (
         <div className={styles.errorMessage}>
@@ -267,10 +221,8 @@ const InicioUsuario = ({ user, setUser }) => { // user and setUser are props com
     );
   }
 
-
   return (
     <div className={styles.dashboardContainer}>
-      {/* Notificación simple sin animaciones */}
       {notification && (
         <div className={`${styles.notification} ${styles[notification.type]}`}>
           <FontAwesomeIcon
@@ -418,12 +370,6 @@ const InicioUsuario = ({ user, setUser }) => { // user and setUser are props com
                 >
                   <FaUser /> Mi Perfil
                 </button>
-                <button
-                  className={styles.dropdownItem}
-                  onClick={() => { navigate('/usuario/settings'); setShowProfileMenu(false); }}
-                >
-                  <FaCog /> Ajustes
-                </button>
                 <div className={styles.dropdownDivider}></div>
                 <button
                   className={`${styles.dropdownItem} ${styles.logoutButton}`}
@@ -440,7 +386,6 @@ const InicioUsuario = ({ user, setUser }) => { // user and setUser are props com
       </header>
 
       <main className={styles.mainContent}>
-        {/* Pass user and showNotification (and setUser if needed by children) to the Outlet's context */}
         <Outlet context={{ user: userData, setUser, showNotification }} />
       </main>
     </div>

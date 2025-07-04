@@ -1,5 +1,8 @@
+// src/Seguridad/Protegidos.js
 import React, { useEffect, useRef, useCallback } from 'react';
-import { Navigate, Outlet, useNavigate } from 'react-router-dom';
+import { Navigate, Outlet, useNavigate, useLocation } from 'react-router-dom';
+// NO importes showConsoleWarning aquí, lo llamaremos desde App.js una sola vez.
+
 
 /**
  * Componente de Ruta Protegida.
@@ -14,10 +17,10 @@ import { Navigate, Outlet, useNavigate } from 'react-router-dom';
  */
 export const Protegida = ({ user, setUser, allowedRoles, children }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const logoutTimer = useRef(null);
-  const INACTIVITY_TIMEOUT = 5 * 60 * 1000; // 5 minutos en milisegundos 
+  const INACTIVITY_TIMEOUT = 5 * 60 * 1000; // 5 minutos en milisegundos
 
-  // Obtener el usuario del localStorage como respaldo si no viene por props (ej. al recargar la página)
   let currentUser = user;
   if (!currentUser) {
     const storedUser = localStorage.getItem('user');
@@ -25,12 +28,12 @@ export const Protegida = ({ user, setUser, allowedRoles, children }) => {
     if (storedUser && storedToken) {
       try {
         currentUser = JSON.parse(storedUser);
-        // Asegurarse de que el token también esté presente si se recupera de localStorage
         if (!currentUser.token) {
           currentUser.token = storedToken;
         }
       } catch (error) {
-        console.error("Error al parsear el usuario del localStorage:", error);
+        // Este console.error será suprimido en producción por la lógica en index.js
+        console.error("Error al parsear el usuario del localStorage en Protegida.js:", error);
         localStorage.removeItem('user');
         localStorage.removeItem('token');
         currentUser = null;
@@ -38,80 +41,74 @@ export const Protegida = ({ user, setUser, allowedRoles, children }) => {
     }
   }
 
-  // Función para cerrar sesión y limpiar el estado
   const logout = useCallback(() => {
-    console.log("Cerrando sesión debido a inactividad o acceso no autorizado.");
+    // console.log se suprime globalmente en producción
+    // console.log("Cerrando sesión debido a inactividad o acceso no autorizado.");
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     if (setUser) {
-      setUser(null); // Limpia el estado global del usuario
+      setUser(null);
     }
     navigate('/login', { replace: true });
   }, [navigate, setUser]);
 
-  // Función para reiniciar el temporizador de inactividad
   const resetTimer = useCallback(() => {
     if (logoutTimer.current) {
       clearTimeout(logoutTimer.current);
     }
-    if (currentUser && currentUser.token) { // Solo si hay un usuario logueado
+    if (currentUser && currentUser.token) {
       logoutTimer.current = setTimeout(logout, INACTIVITY_TIMEOUT);
     }
   }, [logout, currentUser, INACTIVITY_TIMEOUT]);
 
-  // Efecto para iniciar y reiniciar el temporizador de inactividad
   useEffect(() => {
-    resetTimer(); // Inicia el temporizador al montar el componente o cuando cambian las dependencias
+    resetTimer();
 
-    // Event listeners para actividad del usuario
     const events = ['mousemove', 'keypress', 'scroll', 'click'];
     events.forEach(event => window.addEventListener(event, resetTimer));
 
     return () => {
-      // Limpiar el temporizador y los event listeners al desmontar
       if (logoutTimer.current) {
         clearTimeout(logoutTimer.current);
       }
       events.forEach(event => window.removeEventListener(event, resetTimer));
     };
-  }, [resetTimer]); // Dependencia clave: resetTimer (para asegurar que se reinicia correctamente)
+  }, [resetTimer]);
 
-
-  // Efecto para manejar el historial del navegador (retroceso/avance)
   useEffect(() => {
     const handlePopState = () => {
-      // Si el usuario intenta navegar hacia atrás o adelante
-      // y no está autenticado o no tiene el rol correcto, redirigir al login.
-      // Esto también cubre el caso donde la sesión ya expiró por inactividad.
-      if (!currentUser || (allowedRoles && !allowedRoles.includes(currentUser.role))) {
-        console.log("Protegida: Navegación del navegador detectada sin credenciales válidas o rol. Redirigiendo a /login.");
-        logout(); // Cerrar sesión explícitamente y redirigir
+      if (currentUser && allowedRoles && allowedRoles.includes(currentUser.role)) {
+        // console.log se suprime globalmente en producción
+        // console.log("Protegida: Navegación del historial detectada en una ruta protegida. Invalidando sesión.");
+        logout();
+      } else if (!currentUser || (allowedRoles && !allowedRoles.includes(currentUser.role))) {
+        // console.log se suprime globalmente en producción
+        // console.log("Protegida: Navegación del navegador detectada sin credenciales válidas o rol. Redirigiendo a /login.");
+        logout();
       }
     };
 
     window.addEventListener('popstate', handlePopState);
 
-    // Limpiar el event listener al desmontar el componente
     return () => {
       window.removeEventListener('popstate', handlePopState);
     };
-  }, [currentUser, allowedRoles, logout]);
+  }, [currentUser, allowedRoles, logout, location.pathname]);
 
-  // 1. Si no hay usuario autenticado (ni en props ni en localStorage), redirigir al login
   if (!currentUser || !currentUser.token) {
-    console.log("Protegida: No hay usuario autenticado o token. Redirigiendo a /login.");
+    // console.log se suprime globalmente en producción
+    // console.log("Protegida: No hay usuario autenticado o token. Redirigiendo a /login.");
     return <Navigate to="/login" replace />;
   }
 
-  // 2. Si el usuario está autenticado pero su rol no está permitido para esta ruta, redirigir al login
-  // Opcional: Podrías redirigir a una página de "Acceso Denegado" o a la página de inicio.
   if (allowedRoles && !allowedRoles.includes(currentUser.role)) {
-    console.log(`Protegida: Rol ${currentUser.role} no permitido para esta ruta. Redirigiendo a /login.`);
-    logout(); // Cerrar sesión y redirigir al login
-    return null; // No renderizar nada mientras se redirige
+    // console.log se suprime globalmente en producción
+    // console.log(`Protegida: Rol ${currentUser.role} no permitido para esta ruta. Redirigiendo a /login.`);
+    logout();
+    return null;
   }
 
-  // 3. Si el usuario está autenticado y tiene el rol permitido, renderizar los hijos o el Outlet
-  console.log(`Protegida: Acceso permitido para el rol ${currentUser.role}.`);
+  // console.log se suprime globalmente en producción
+  // console.log(`Protegida: Acceso permitido para el rol ${currentUser.role}.`);
   return children ? children : <Outlet />;
 };

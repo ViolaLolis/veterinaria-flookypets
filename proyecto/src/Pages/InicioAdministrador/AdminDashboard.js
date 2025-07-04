@@ -58,10 +58,12 @@ function AdminDashboard({ user, setUser, handleLogout }) {
             'nuevo usuario registrado',
             'nueva mascota agregada',
             'cita cancelada',
-            'registro de pago'
-            // Agrega más palabras clave relevantes para el admin
+            'registro de pago',
+            'cita reagendada' // Ejemplo adicional de palabra clave
+            // Agrega más palabras clave relevantes para el admin aquí
         ];
-        return adminKeywords.some(keyword => notif.mensaje.toLowerCase().includes(keyword));
+        // Comprueba si el mensaje de la notificación contiene alguna de las palabras clave (insensible a mayúsculas/minúsculas)
+        return adminKeywords.some(keyword => notif.mensaje.toLowerCase().includes(keyword.toLowerCase()));
     });
 
     return (
@@ -194,8 +196,13 @@ function AdminDashboard({ user, setUser, handleLogout }) {
                             )}
                         </div>
 
+                        {/* Información de usuario y foto de perfil */}
                         <div className="user-info">
-                            <FaUserCircle className="user-avatar-icon" />
+                            {user?.imagen_url ? (
+                                <img src={user.imagen_url} alt="Avatar de Usuario" className="user-avatar" />
+                            ) : (
+                                <FaUserCircle className="user-avatar-icon" />
+                            )}
                             <span>{user?.nombre}</span>
                         </div>
                     </div>

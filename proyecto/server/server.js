@@ -241,6 +241,7 @@ const isOwnerOrAdmin = async (req, res, next) => {
                 const resourceClientId = rows[0].id_cliente;
                 const resourceVetId = rows[0].id_veterinario;
 
+                // If user is neither client nor assigned vet, deny access
                 if (resourceClientId !== userIdFromToken && resourceVetId !== userIdFromToken) {
                     console.log(`[isOwnerOrAdmin - /citas/:id] Denegado: Usuario ${userIdFromToken} intentó acceder a cita de cliente ${resourceClientId} o veterinario ${resourceVetId}.`);
                     return res.status(403).json({ success: false, message: "Acceso denegado. No tienes permisos para ver/modificar esta cita." });
@@ -273,20 +274,26 @@ const isOwnerOrAdmin = async (req, res, next) => {
             console.log(`[isOwnerOrAdmin - /usuarios] Denegado: Usuario ${userIdFromToken} intentó acceder al perfil de ${targetUserId}.`);
             return res.status(403).json({ success: false, message: "Acceso denegado. Solo puedes ver/modificar tu propio perfil." });
 
-        } else if (req.originalUrl.startsWith('/notifications')) {
-            const notificationId = parseInt(req.params.id);
+        } else if (req.originalUrl.startsWith('/api/notifications')) { // Updated to match the new path
+            const notificationId = parseInt(req.params.notificationId); // Use notificationId from params
             if (isNaN(notificationId)) {
-                console.log("[isOwnerOrAdmin - /notifications] ID de notificación inválido.");
+                // This case handles /api/notifications/veterinarian/:veterinarianId
+                // The check for /api/notifications/veterinarian/:veterinarianId is done within the route itself.
+                // For other notification paths that might have an ID in params, this will apply.
+                if (req.originalUrl.includes('/veterinarian/')) {
+                    return next(); // Let the specific veterinarian route handle its own ID validation
+                }
+                console.log("[isOwnerOrAdmin - /api/notifications] ID de notificación inválido.");
                 return res.status(400).json({ success: false, message: "ID de notificación no válido." });
             }
-            const [rows] = await pool.query("SELECT id_usuario FROM notificaciones WHERE id_notificacion = ?", [notificationId]);
+            const [rows] = await pool.query("SELECT id_usuario FROM notificaciones WHERE id_notificacion = ?", [notificationId]); // Changed table name here
             if (rows.length === 0) {
-                console.log(`[isOwnerOrAdmin - /notifications] Notificación con ID ${notificationId} no encontrada.`);
+                console.log(`[isOwnerOrAdmin - /api/notifications] Notificación con ID ${notificationId} no encontrada.`);
                 return res.status(404).json({ success: false, message: "Notificación no encontrada." });
             }
             const resourceOwnerId = rows[0].id_usuario;
             if (resourceOwnerId !== userIdFromToken) {
-                console.log(`[isOwnerOrAdmin - /notifications] Denegado: Usuario ${userIdFromToken} intentó acceder a notificación de ${resourceOwnerId}.`);
+                console.log(`[isOwnerOrAdmin - /api/notifications] Denegado: Usuario ${userIdFromToken} intentó acceder a notificación de ${resourceOwnerId}.`);
                 return res.status(403).json({ success: false, message: "Acceso denegado. Solo puedes ver/modificar tus propias notificaciones." });
             }
             return next();
@@ -1102,7 +1109,7 @@ app.put("/usuarios/veterinarios/:id", authenticateToken, isAdmin, async (req, re
 
     } catch (error) {
         console.error("Error al actualizar veterinario:", error);
-        res.status(500).json({ success: false, message: "Error al actualizar veterinario", error: process.NODE_ENV === 'development' ? error.stack : error.message });
+        res.status(500).json({ success: false, message: "Error al actualizar veterinario", error: process.env.NODE_ENV === 'development' ? error.stack : error.message });
     }
 });
 
@@ -1595,7 +1602,6 @@ app.put("/mascotas/:id", authenticateToken, isOwnerOrAdmin, async (req, res) => 
         if (sexo !== undefined) { fields.push('sexo = UPPER(TRIM(?))'); values.push(sexo); } // Aplicar UPPER y TRIM
         if (color !== undefined) { fields.push('color = UPPER(TRIM(?))'); values.push(color); } // Aplicar UPPER y TRIM
         if (microchip !== undefined) { fields.push('microchip = UPPER(TRIM(?))'); values.push(microchip); } // Aplicar UPPER y TRIM
-        if (id_propietario !== undefined) { fields.push('id_propietario = ?'); values.push(id_propietario); }
         if (imagen_url !== undefined) { fields.push('imagen_url = ?'); values.push(imagen_url); }
 
         if (fields.length === 0) {
@@ -1698,11 +1704,11 @@ app.get("/historial_medico", authenticateToken, async (req, res) => { // Removed
         res.json({ success: true, data: historiales });
     } catch (error) {
         console.error("Error al obtener historiales médicos:", error);
-        res.status(500).json({ success: false, message: "Error al obtener historiales médicos", error: process.env.NODE_ENV === 'development' ? error.stack : error.message });
+        res.status(500).json({ success: false, message: "Error al obtener historiales médicos.", error: process.env.NODE_ENV === 'development' ? error.stack : error.message });
     }
 });
 
-// Obtener un historial médico por ID (para propietarios, veterinarios y administradores)
+// Obtener un historial médico por ID (propietario o admin/vet)
 app.get("/historial_medico/:id", authenticateToken, isOwnerOrAdmin, async (req, res) => {
     const { id } = req.params;
     try {
@@ -1864,7 +1870,7 @@ app.get("/veterinario/citas/ultimas", authenticateToken, isVetOrAdmin, async (re
              JOIN servicios s ON c.id_servicio = s.id_servicio
              JOIN usuarios u_cli ON c.id_cliente = u_cli.id
              JOIN mascotas m ON c.id_mascota = m.id_mascota
-             WHERE c.id_veterinario = ?
+             WHERE c.id_veterinario = ? AND c.estado = 'PENDIENTE' -- Solo citas pendientes para el dashboard
              ORDER BY c.fecha DESC
              LIMIT 5`, // Últimas 5 citas
             [veterinarioId]
@@ -1892,10 +1898,10 @@ app.get("/veterinario/citas/completadas/count", authenticateToken, isVetOrAdmin,
 });
 
 
-// Obtener todas las citas (MODIFICADA para aceptar parámetro de fecha)
+// Obtener todas las citas (MODIFICADA para aceptar parámetro de fecha Y estado)
 app.get("/citas", authenticateToken, async (req, res) => {
     try {
-        const { fecha } = req.query; // Obtener el parámetro de fecha
+        const { fecha, estado } = req.query; // Obtener el parámetro de fecha Y estado
         let query = `SELECT c.id_cita, DATE_FORMAT(c.fecha, '%Y-%m-%d %H:%i') as fecha_cita, c.estado, c.servicios as notas_adicionales,
                             s.nombre as servicio_nombre, s.precio,
                             CONCAT(u_cli.nombre, ' ', u_cli.apellido) as propietario_nombre,
@@ -1932,6 +1938,12 @@ app.get("/citas", authenticateToken, async (req, res) => {
         if (fecha) {
             conditions.push(`DATE(c.fecha) = ?`);
             queryParams.push(fecha);
+        }
+
+        // Filtrar por estado si se proporciona
+        if (estado) {
+            conditions.push(`c.estado = ?`);
+            queryParams.push(estado.toUpperCase()); // Asegurarse de que el estado se filtre en mayúsculas
         }
 
         if (conditions.length > 0) {
@@ -1979,7 +1991,7 @@ app.get("/citas/:id", authenticateToken, isOwnerOrAdmin, async (req, res) => {
 });
 
 // Registrar nueva cita (para usuarios y admins/vets)
-app.post("/citas", authenticateToken, async (req, res) => { // express.json() ya es global. Changed from /citas/agendar to /citas
+app.post("/citas", authenticateToken, async (req, res) => {
     let requestBody = req.body;
 
     // WORKAROUND: If express.json() failed to parse (because it received a double-stringified JSON),
@@ -2016,17 +2028,24 @@ app.post("/citas", authenticateToken, async (req, res) => { // express.json() ya
     }
 
     const { fecha_cita, notas_adicionales, id_servicio, id_cliente, id_veterinario, id_mascota } = requestBody;
-    let estado = req.body.estado ? req.body.estado.toUpperCase() : 'PENDIENTE'; // Asegurar que el estado inicial sea PENDIENTE en mayúsculas
+    const userRole = req.user.role;
+    const userIdFromToken = req.user.id;
+
+    // Default state for new appointments is PENDIENTE
+    let estado = 'PENDIENTE';
 
     if (!fecha_cita || !id_servicio || !id_cliente || !id_mascota) {
         return res.status(400).json({ success: false, message: "Fecha, servicio, cliente y mascota son requeridos para la cita." });
     }
 
-    if (req.user.role === 'usuario' && req.user.id !== id_cliente) {
+    // A client can only create appointments for themselves
+    if (userRole === 'usuario' && userIdFromToken !== id_cliente) {
         return res.status(403).json({ success: false, message: "Acceso denegado. No puedes crear citas para otros usuarios." });
     }
-    console.log("[CREATE_APPOINTMENT] Received data:", requestBody); // Debugging log
 
+    // A vet/admin can create appointments for any client, but they still start as PENDIENTE
+    // If a vet/admin explicitly sends a state, it will be overridden to PENDIENTE here.
+    console.log("[CREATE_APPOINTMENT] Received data:", requestBody); // Debugging log
 
     let assignedVetId = id_veterinario;
 
@@ -2050,6 +2069,7 @@ app.post("/citas", authenticateToken, async (req, res) => { // express.json() ya
         }
         const mascota_nombre = mascota[0].nombre;
 
+        // If no vet is assigned, auto-assign one randomly
         if (!assignedVetId) {
             const [vets] = await pool.query("SELECT id FROM usuarios WHERE role = 'veterinario' AND active = 1");
             if (vets.length === 0) {
@@ -2057,8 +2077,8 @@ app.post("/citas", authenticateToken, async (req, res) => { // express.json() ya
             }
             const randomIndex = Math.floor(Math.random() * vets.length);
             assignedVetId = vets[randomIndex].id;
-            estado = 'PENDIENTE'; // Si se asigna automáticamente, el estado es pendiente
         } else {
+            // Validate if the provided vet ID is actually a veterinarian
             const [vet] = await pool.query("SELECT id FROM usuarios WHERE id = ? AND role = 'veterinario'", [assignedVetId]);
             if (vet.length === 0) {
                 return res.status(400).json({ success: false, message: "ID de veterinario no válido o no es un veterinario." });
@@ -2074,49 +2094,33 @@ app.post("/citas", authenticateToken, async (req, res) => { // express.json() ya
         const newCitaId = result.insertId;
         const [newCita] = await pool.query("SELECT * FROM citas WHERE id_cita = ?", [newCitaId]);
 
-        if (req.user.role === 'usuario') {
-            const [assignedVet] = await pool.query("SELECT nombre, apellido, email FROM usuarios WHERE id = ?", [assignedVetId]);
-            const vetName = assignedVet.length > 0 ? `${assignedVet[0].nombre} ${assignedVet[0].apellido}` : 'Veterinario asignado';
-            const vetEmail = assignedVet.length > 0 ? assignedVet[0].email : null;
+        // Notifications logic for new appointment (always PENDIENTE)
+        const [assignedVet] = await pool.query("SELECT nombre, apellido, email FROM usuarios WHERE id = ?", [assignedVetId]);
+        const vetName = assignedVet.length > 0 ? `${assignedVet[0].nombre} ${assignedVet[0].apellido}` : 'Veterinario asignado';
+        const vetEmail = assignedVet.length > 0 ? assignedVet[0].email : null;
 
-            await pool.query(
-                `INSERT INTO notificaciones (id_usuario, tipo, mensaje, referencia_id) VALUES (?, ?, ?, ?)`,
-                [assignedVetId, 'cita_creada_vet', `Nueva cita PENDIENTE de ${cliente_nombre} para ${mascota_nombre} (${servicio_nombre}) el ${fecha_cita}.`, newCitaId]
+        // Notify the assigned veterinarian about the new PENDING appointment
+        await pool.query(
+            `INSERT INTO notificaciones (id_usuario, tipo, mensaje, referencia_id) VALUES (?, ?, ?, ?)`,
+            [assignedVetId, 'cita_creada_vet', `Nueva cita PENDIENTE de ${cliente_nombre} para ${mascota_nombre} (${servicio_nombre}) el ${fecha_cita}.`, newCitaId]
+        );
+        if (vetEmail) {
+            simulateSendEmail(
+                vetEmail,
+                `Nueva Cita Pendiente - Flooky Pets`,
+                `Hola Dr./Dra. ${vetName},\n\nSe ha solicitado una nueva cita pendiente:\n\nCliente: ${cliente_nombre}\nMascota: ${mascota_nombre}\nServicio: ${servicio_nombre}\nFecha y Hora: ${fecha_cita}\n\nPor favor, revisa tu panel para ACEPTAR o RECHAZAR esta cita.\n\nSaludos,\nEl equipo de Flooky Pets`
             );
-
-            if (vetEmail) {
-                simulateSendEmail(
-                    vetEmail,
-                    `Nueva Cita Pendiente - Flooky Pets`,
-                    `Hola Dr./Dra. ${vetName},\n\nSe ha solicitado una nueva cita pendiente:\n\nCliente: ${cliente_nombre}\nMascota: ${mascota_nombre}\nServicio: ${servicio_nombre}\nFecha y Hora: ${fecha_cita}\n\nPor favor, revisa tu panel para ACEPTAR o RECHAZAR esta cita.\n\nSaludos,\nEl equipo de Flooky Pets`
-                );
-            }
-
-            await pool.query(
-                `INSERT INTO notificaciones (id_usuario, tipo, mensaje, referencia_id) VALUES (?, ?, ?, ?)`,
-                [id_cliente, 'cita_registrada_user', `Tu cita para ${mascota_nombre} (${servicio_nombre}) el ${fecha_cita} ha sido registrada y está PENDIENTE de confirmación.`, newCitaId]
-            );
-
-        }
-        else if (req.user.role !== 'usuario') {
-            await pool.query(
-                `INSERT INTO notificaciones (id_usuario, tipo, mensaje, referencia_id) VALUES (?, ?, ?, ?)`,
-                [id_cliente, 'cita_creada_admin_vet', `Se ha registrado una cita para ${mascota_nombre} (${servicio_nombre}) el ${fecha_cita}. Estado: ${estado}.`, newCitaId]
-            );
-
-            if (estado === 'ACEPTADA') { // Cambiado a mayúsculas
-                const [vetInfo] = await pool.query("SELECT nombre, apellido, email, direccion FROM usuarios WHERE id = ?", [assignedVetId]);
-                const vetDetails = vetInfo.length > 0 ? vetInfo[0] : {};
-                simulateSendEmail(
-                    cliente_email,
-                    `Confirmación de Cita Aceptada - Flooky Pets`,
-                    `Hola ${cliente_nombre},\n\nTu cita para el servicio de ${servicio_nombre} para ${mascota_nombre} ha sido ACEPTADA.\n\nDetalles de la cita:\nFecha y Hora: ${fecha_cita}\nVeterinario: ${vetDetails.nombre || ''} ${vetDetails.apellido || ''}\nUbicación: ${vetDetails.direccion || 'No especificada'}\n\n¡Te esperamos!\n\nSaludos,\nEl equipo de Flooky Pets`
-                );
-            }
         }
 
-        res.status(201).json({ success: true, message: "Cita registrada correctamente.", data: newCita[0] });
-        console.log("[CREATE_APPOINTMENT] Appointment created successfully:", newCitaId); // Debugging log
+        // Notify the client that their appointment is PENDING
+        await pool.query(
+            `INSERT INTO notificaciones (id_usuario, tipo, mensaje, referencia_id) VALUES (?, ?, ?, ?)`,
+            [id_cliente, 'cita_registrada_user', `Tu cita para ${mascota_nombre} (${servicio_nombre}) el ${fecha_cita} ha sido registrada y está PENDIENTE de confirmación.`, newCitaId]
+        );
+
+
+        res.status(201).json({ success: true, message: "Cita registrada correctamente y en estado PENDIENTE.", data: newCita[0] });
+        console.log("[CREATE_APPOINTMENT] Appointment created successfully and is PENDING:", newCitaId); // Debugging log
 
     } catch (error) {
         console.error("Error al registrar cita:", error);
@@ -2125,10 +2129,10 @@ app.post("/citas", authenticateToken, async (req, res) => { // express.json() ya
 });
 
 // Actualizar cita (admin/vet/owner for cancel)
-app.put("/citas/:id", authenticateToken, async (req, res) => { // express.json() ya es global
+app.put("/citas/:id", authenticateToken, async (req, res) => {
     const { id } = req.params;
     let { fecha_cita, estado, notas_adicionales, id_servicio, id_cliente, id_veterinario, id_mascota } = req.body;
-    console.log("[UPDATE_APPOINTMENT] Received data:", req.body, "for ID:", id); // Debugging log
+    console.log("[UPDATE_APPOINTMENT] Received data:", req.body, "for ID:", id);
 
     try {
         const userIdFromToken = req.user.id;
@@ -2140,24 +2144,30 @@ app.put("/citas/:id", authenticateToken, async (req, res) => { // express.json()
         }
         const existingCita = citaResult[0];
         const oldEstado = existingCita.estado;
+        const newEstadoUpper = estado ? estado.toUpperCase() : null; // Ensure new state is uppercase for comparison
 
         let isAuthorized = false;
 
         if (userRole === 'admin') {
+            // Admin can do anything
             isAuthorized = true;
         } else if (userRole === 'usuario') {
-            // Un usuario solo puede cancelar su propia cita si es el cliente y el estado es 'cancelada'
-            if (userIdFromToken === existingCita.id_cliente && estado.toUpperCase() === 'CANCELADA') { // Convertir a mayúsculas
+            // A regular user can only cancel their own appointments
+            if (userIdFromToken === existingCita.id_cliente && newEstadoUpper === 'CANCELADA') {
                 isAuthorized = true;
+            } else {
+                return res.status(403).json({ success: false, message: "Acceso denegado. Los usuarios solo pueden cancelar sus propias citas." });
             }
-            // Un usuario NO puede cambiar el estado de pendiente a aceptada/rechazada. Esto es para veterinarios/admins.
-            // if (userIdFromToken === existingCita.id_cliente && existingCita.estado === 'pendiente' && (estado === 'aceptada' || estado === 'rechazada')) {
-            //     isAuthorized = true;
-            // }
         } else if (userRole === 'veterinario') {
-            // Un veterinario puede cambiar el estado de sus citas
+            // A veterinarian can accept, reject, complete, or cancel their assigned appointments
             if (userIdFromToken === existingCita.id_veterinario) {
-                isAuthorized = true;
+                if (['ACEPTADA', 'RECHAZADA', 'COMPLETA', 'CANCELADA'].includes(newEstadoUpper)) {
+                    isAuthorized = true;
+                } else {
+                    return res.status(403).json({ success: false, message: "Acceso denegado. Los veterinarios solo pueden aceptar, rechazar, completar o cancelar sus citas asignadas." });
+                }
+            } else {
+                return res.status(403).json({ success: false, message: "Acceso denegado. No eres el veterinario asignado a esta cita." });
             }
         }
 
@@ -2170,8 +2180,8 @@ app.put("/citas/:id", authenticateToken, async (req, res) => { // express.json()
 
         if (fecha_cita !== undefined) { fields.push('fecha = ?'); values.push(fecha_cita); }
 
-        if (estado !== undefined) {
-            fields.push('estado = ?'); values.push(estado.toUpperCase()); // Asegurar que el estado se guarde en mayúsculas
+        if (newEstadoUpper !== null) {
+            fields.push('estado = ?'); values.push(newEstadoUpper); // Save state in uppercase
         }
 
         if (notas_adicionales !== undefined) { fields.push('servicios = ?'); values.push(notas_adicionales); }
@@ -2245,7 +2255,7 @@ app.put("/citas/:id", authenticateToken, async (req, res) => { // express.json()
         const updatedCita = updatedCitaRows[0];
 
         // Lógica de notificaciones solo si el estado ha cambiado
-        if (estado.toUpperCase() !== oldEstado.toUpperCase()) { // Comparar en mayúsculas
+        if (newEstadoUpper !== oldEstado.toUpperCase()) {
             const clienteEmail = updatedCita.propietario_email;
             const clienteId = updatedCita.id_cliente;
             const servicioNombre = updatedCita.servicio_nombre;
@@ -2256,7 +2266,7 @@ app.put("/citas/:id", authenticateToken, async (req, res) => { // express.json()
             const mascotaNombre = updatedCita.mascota_nombre;
 
 
-            if (estado.toUpperCase() === 'ACEPTADA') {
+            if (newEstadoUpper === 'ACEPTADA') {
                 await pool.query(
                     `INSERT INTO notificaciones (id_usuario, tipo, mensaje, referencia_id) VALUES (?, ?, ?, ?)`,
                     [clienteId, 'cita_aceptada_user', `Tu cita para ${mascotaNombre} (${servicioNombre}) el ${citaFecha} ha sido ACEPTADA por ${veterinarioNombre}.`, id]
@@ -2266,25 +2276,27 @@ app.put("/citas/:id", authenticateToken, async (req, res) => { // express.json()
                     `Confirmación de Cita Aceptada - Flooky Pets`,
                     `Hola ${updatedCita.propietario_nombre},\n\nTu cita para el servicio de ${servicioNombre} para ${mascotaNombre} ha sido ACEPTADA.\n\nDetalles de la cita:\nFecha y Hora: ${citaFecha}\nVeterinario: ${veterinarioNombre}\nUbicación: ${updatedCita.veterinario_direccion || 'No especificada'}\n\n¡Te esperamos!\n\nSaludos,\nEl equipo de Flooky Pets`
                 );
-            } else if (estado.toUpperCase() === 'RECHAZADA') {
+            } else if (newEstadoUpper === 'RECHAZADA') {
                 await pool.query(
                     `INSERT INTO notificaciones (id_usuario, tipo, mensaje, referencia_id) VALUES (?, ?, ?, ?)`,
                     [clienteId, 'cita_rechazada_user', `Tu cita para ${mascotaNombre} (${servicioNombre}) el ${citaFecha} ha sido RECHAZADA por ${veterinarioNombre}. Por favor, reagenda o contacta al veterinario.`, id]
                 );
-            } else if (estado.toUpperCase() === 'CANCELADA') {
+            } else if (newEstadoUpper === 'CANCELADA') {
+                // Determine who cancelled to send appropriate notification
                 if (userRole === 'usuario' && userIdFromToken === clienteId) {
+                    // Client cancelled
                     await pool.query(
                         `INSERT INTO notificaciones (id_usuario, tipo, mensaje, referencia_id) VALUES (?, ?, ?, ?)`,
                         [veterinarioId, 'cita_cancelada_vet', `La cita de ${updatedCita.propietario_nombre} para ${mascotaNombre} el ${citaFecha} ha sido CANCELADA por el cliente.`, id]
                     );
-                }
-                else if (userRole === 'veterinario' && userIdFromToken === veterinarioId) {
+                } else if (userRole === 'veterinario' && userIdFromToken === veterinarioId) {
+                    // Veterinarian cancelled
                     await pool.query(
                         `INSERT INTO notificaciones (id_usuario, tipo, mensaje, referencia_id) VALUES (?, ?, ?, ?)`,
                         [clienteId, 'cita_cancelada_user', `Tu cita para ${mascotaNombre} (${servicioNombre}) el ${citaFecha} ha sido CANCELADA por el veterinario ${veterinarioNombre}.`, id]
                     );
-                }
-                else if (userRole === 'admin') {
+                } else if (userRole === 'admin') {
+                    // Admin cancelled
                     await pool.query(
                         `INSERT INTO notificaciones (id_usuario, tipo, mensaje, referencia_id) VALUES (?, ?, ?, ?)`,
                         [clienteId, 'cita_cancelada_admin', `Tu cita para ${mascotaNombre} (${servicioNombre}) el ${citaFecha} ha sido CANCELADA por un administrador.`, id]
@@ -2296,11 +2308,17 @@ app.put("/citas/:id", authenticateToken, async (req, res) => { // express.json()
                         );
                     }
                 }
+            } else if (newEstadoUpper === 'COMPLETA') {
+                // Only vet or admin can mark as complete, notify client
+                await pool.query(
+                    `INSERT INTO notificaciones (id_usuario, tipo, mensaje, referencia_id) VALUES (?, ?, ?, ?)`,
+                    [clienteId, 'cita_completada_user', `Tu cita para ${mascotaNombre} (${servicioNombre}) el ${citaFecha} ha sido marcada como COMPLETADA por ${veterinarioNombre}.`, id]
+                );
             }
         }
 
         res.json({ success: true, message: "Cita actualizada correctamente.", data: updatedCita });
-        console.log("[UPDATE_APPOINTMENT] Appointment updated successfully:", id); // Debugging log
+        console.log("[UPDATE_APPOINTMENT] Appointment updated successfully:", id);
 
     } catch (error) {
         console.error("Error al actualizar cita:", error);
@@ -2333,72 +2351,133 @@ app.delete("/citas/:id", authenticateToken, isAdmin, async (req, res) => {
 // =============================================
 
 // Obtener notificaciones para un usuario específico (cliente o veterinario)
-app.get("/notifications/user/:id", authenticateToken, async (req, res) => {
-    const { id } = req.params;
-    if (req.user.id !== parseInt(id) && req.user.role !== 'admin') {
-        return res.status(403).json({ success: false, message: "Acceso denegado. No tienes permisos para ver estas notificaciones." });
+app.get("/api/notifications/veterinarian/:veterinarianId", authenticateToken, async (req, res) => { // Changed path to match frontend
+    const { veterinarianId } = req.params;
+    const { role } = req.user; // Rol del usuario autenticado, obtenido del token
+
+    // Validar que el usuario solo pueda ver sus propias notificaciones
+    if (req.user.id !== parseInt(veterinarianId) && role !== 'admin') {
+        return res.status(403).json({ success: false, message: 'Acceso denegado. No tienes permisos para ver estas notificaciones.' });
     }
+
     try {
-        const [notifications] = await pool.query(
-            `SELECT id_notificacion, id_usuario, tipo, mensaje, leida, fecha_creacion, referencia_id
-             FROM notificaciones
-             WHERE id_usuario = ?
-             ORDER BY fecha_creacion DESC`,
-            [id]
-        );
+        let query = `
+            SELECT id_notificacion, id_usuario, tipo, mensaje, leida, fecha_creacion, referencia_id
+            FROM notificaciones
+            WHERE id_usuario = ?
+            ORDER BY fecha_creacion DESC;
+        `;
+        const [notifications] = await pool.query(query, [veterinarianId]);
         res.json({ success: true, data: notifications });
     } catch (error) {
-        console.error("Error al obtener notificaciones:", error);
-        res.status(500).json({ success: false, message: "Error al obtener notificaciones.", error: process.env.NODE_ENV === 'development' ? error.stack : error.message });
+        console.error("Error al obtener notificaciones del veterinario:", error);
+        // Enviar un mensaje de error más específico en desarrollo
+        res.status(500).json({ success: false, message: "Error al obtener notificaciones del veterinario.", error: process.env.NODE_ENV === 'development' ? error.message : "Error interno del servidor." });
     }
 });
 
-// Marcar notificación como leída
-app.put("/notifications/:id/read", authenticateToken, async (req, res) => {
-    const { id } = req.params;
+// Marcar una notificación como leída
+app.put("/api/notifications/mark-read/:notificationId", authenticateToken, async (req, res) => { // Changed path to match frontend
+    const { notificationId } = req.params;
+    const userIdFromToken = req.user.id;
+    const { leida } = req.body; // Expecting 'leida' (boolean) in the request body
+
+    if (typeof leida === 'undefined') {
+        return res.status(400).json({ success: false, message: 'El estado "leida" es requerido.' });
+    }
+
     try {
-        const [notification] = await pool.query("SELECT id_usuario FROM notificaciones WHERE id_notificacion = ?", [id]);
-        if (notification.length === 0) {
-            return res.status(404).json({ success: false, message: "Notificación no encontrada." });
+        // Primero, verificar que la notificación pertenece al usuario autenticado
+        const [notificationCheck] = await pool.query(
+            `SELECT id_usuario FROM notificaciones WHERE id_notificacion = ?`, // Changed to 'notificaciones'
+            [notificationId]
+        );
+
+        if (notificationCheck.length === 0) {
+            return res.status(404).json({ success: false, message: 'Notificación no encontrada.' });
         }
-        if (req.user.id !== notification[0].id_usuario && req.user.role !== 'admin') {
-            return res.status(403).json({ success: false, message: "Acceso denegado. No tienes permisos para modificar esta notificación." });
+
+        if (notificationCheck[0].id_usuario !== userIdFromToken && req.user.role !== 'admin') {
+            return res.status(403).json({ success: false, message: 'No tienes permiso para marcar esta notificación como leída.' });
         }
 
         const [result] = await pool.query(
-            "UPDATE notificaciones SET leida = TRUE WHERE id_notificacion = ?",
-            [id]
+            `UPDATE notificaciones SET leida = ? WHERE id_notificacion = ?`, // Changed to 'notificaciones'
+            [leida, notificationId]
         );
+
         if (result.affectedRows === 0) {
-            return res.status(404).json({ success: false, message: "Notificación no encontrada o ya estaba leída." });
+            return res.status(404).json({ success: false, message: 'Notificación no encontrada o ya estaba en el estado solicitado.' });
         }
-        res.json({ success: true, message: "Notificación marcada como leída." });
+        res.json({ success: true, message: 'Notificación actualizada exitosamente.' });
     } catch (error) {
         console.error("Error al marcar notificación como leída:", error);
         res.status(500).json({ success: false, message: "Error al marcar notificación como leída.", error: process.env.NODE_ENV === 'development' ? error.stack : error.message });
     }
 });
 
-// Eliminar notificación
-app.delete("/notifications/:id", authenticateToken, async (req, res) => {
-    const { id } = req.params;
+// Eliminar una notificación
+app.delete("/api/notifications/:notificationId", authenticateToken, async (req, res) => { // Changed path to match frontend
+    const { notificationId } = req.params;
+    const userIdFromToken = req.user.id;
+    const userRoleFromToken = req.user.role;
+
     try {
-        const [notification] = await pool.query("SELECT id_usuario FROM notificaciones WHERE id_notificacion = ?", [id]);
-        if (notification.length === 0) {
-            return res.status(404).json({ success: false, message: "Notificación no encontrada." });
-        }
-        if (req.user.id !== notification[0].id_usuario && req.user.role !== 'admin') {
-            return res.status(403).json({ success: false, message: "Acceso denegado. No tienes permisos para eliminar esta notificación." });
+        // Primero, verificar que la notificación pertenece al usuario autenticado o es admin
+        const [notificationCheck] = await pool.query(
+            `SELECT id_usuario FROM notificaciones WHERE id_notificacion = ?`, // Changed to 'notificaciones'
+            [notificationId]
+        );
+
+        if (notificationCheck.length === 0) {
+            return res.status(404).json({ success: false, message: 'Notificación no encontrada.' });
         }
 
-        const [result] = await pool.query("DELETE FROM notificaciones WHERE id_notificacion = ?", [id]);
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ success: false, message: "Notificación no encontrada." });
+        if (notificationCheck[0].id_usuario !== userIdFromToken && userRoleFromToken !== 'admin') {
+            return res.status(403).json({ success: false, message: 'No tienes permiso para eliminar esta notificación.' });
         }
-        res.json({ success: true, message: "Notificación eliminada correctamente." });
+
+        const [result] = await pool.query(
+            `DELETE FROM notificaciones WHERE id_notificacion = ?`, // Changed to 'notificaciones'
+            [notificationId]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ success: false, message: 'Notificación no encontrada.' });
+        }
+        res.json({ success: true, message: 'Notificación eliminada exitosamente.' });
     } catch (error) {
         console.error("Error al eliminar notificación:", error);
         res.status(500).json({ success: false, message: "Error al eliminar notificación.", error: process.env.NODE_ENV === 'development' ? error.stack : error.message });
+    }
+});
+
+// Ruta para crear una notificación (ej. para uso interno del backend al agendar/cancelar citas)
+// Esta ruta podría ser invocada por otras funciones del backend, no necesariamente desde el frontend directamente
+app.post('/api/notifications', authenticateToken, async (req, res) => { // Changed path to match frontend
+    const { id_usuario, tipo, mensaje, referencia_id } = req.body;
+    const creatorIdFromToken = req.user.id;
+    const creatorRoleFromToken = req.user.role;
+
+    // Solo un administrador o el sistema (representado por un veterinario/admin creando para sí mismo)
+    // puede crear notificaciones para otros usuarios.
+    if (creatorRoleFromToken !== 'admin' && creatorIdFromToken !== id_usuario) {
+        return res.status(403).json({ success: false, message: 'No tienes permiso para crear notificaciones para otros usuarios.' });
+    }
+
+    if (!id_usuario || !tipo || !mensaje) {
+        return res.status(400).json({ success: false, message: 'Faltan campos requeridos: id_usuario, tipo, mensaje.' });
+    }
+
+    try {
+        const [result] = await pool.query(
+            `INSERT INTO notificaciones (id_usuario, tipo, mensaje, referencia_id) VALUES (?, ?, ?, ?)`, // Changed to 'notificaciones'
+            [id_usuario, tipo, mensaje, referencia_id || null]
+        );
+        res.status(201).json({ success: true, message: 'Notificación creada exitosamente.', id: result.insertId });
+    } catch (error) {
+        console.error("Error al crear notificación:", error);
+        res.status(500).json({ success: false, message: "Error al crear notificación.", error: process.env.NODE_ENV === 'development' ? error.stack : error.message });
     }
 });
 
@@ -2453,8 +2532,8 @@ app.get("/admin/historiales", authenticateToken, isAdmin, async (req, res) => {
             m.nombre as mascota, m.especie, m.raza,
             CONCAT(p.nombre, ' ', p.apellido) as propietario,
             CONCAT(v.nombre, ' ', v.apellido) as veterinario,
-            h.veterinario as veterinario_id, -- Añadido para el frontend
-            h.id_mascota -- Añadido para el frontend
+            h.veterinario as veterinario_id, // Añadido para el frontend
+            h.id_mascota // Añadido para el frontend
             FROM historial_medico h
             JOIN mascotas m ON h.id_mascota = m.id_mascota
             JOIN usuarios p ON m.id_propietario = p.id

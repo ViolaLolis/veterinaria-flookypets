@@ -5,7 +5,7 @@ import { send } from '@emailjs/browser';
 import '../Styles/OlvidarContraseña.css';
 
 const serviceId = 'Flooky Pets';
-const templateId = 'template_z3izl33';
+const templateId = 'template_z3izl33'; // Este ID corresponde al template HTML que proporcionaste
 const publicKey = 'Glz70TavlG0ANcvrb';
 
 function OlvideContraseña() {
@@ -18,16 +18,16 @@ function OlvideContraseña() {
   const [successMessage, setSuccessMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [previousPasswords, setPreviousPasswords] = useState([]);
-  
-  const { 
-    register, 
-    handleSubmit, 
-    formState: { errors }, 
-    getValues, 
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    getValues,
     watch,
     reset
   } = useForm();
-  
+
   const navigate = useNavigate();
 
   // Temporizador mejorado
@@ -72,36 +72,37 @@ function OlvideContraseña() {
       setSuccessMessage('Código de verificación enviado a tu correo');
       return true;
     } catch (err) {
-      console.error('Error al enviar correo:', err);
+      console.error('Error al enviar correo:', err); // Este console.error será suprimido en producción
       let errorMsg = 'Error al enviar el código. Intenta nuevamente.';
-      
+
       if (err.text?.includes("recipient's address is corrupted")) {
         errorMsg = 'Correo electrónico inválido';
       } else if (err.status === 429) {
         errorMsg = 'Has excedido el límite de envíos. Espera unos minutos.';
       }
-      
+
       setError(errorMsg);
       return false;
     }
   };
+
   const handleEnviarCodigo = async () => {
     setError('');
     setSuccessMessage('');
     setIsSubmitting(true);
-  
+
     try {
       const email = getValues('correo');
-  
+
       if (!email) {
         throw new Error('El correo es obligatorio');
       }
-  
+
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
         throw new Error('Correo electrónico inválido');
       }
-  
+
       const response = await fetch('http://localhost:5000/forgot-password', {
         method: 'POST',
         headers: {
@@ -109,51 +110,45 @@ function OlvideContraseña() {
         },
         body: JSON.stringify({ email })
       });
-  
+
       const data = await response.json();
-  
+
       if (!response.ok) {
         throw new Error(data.message || 'Error al verificar el correo');
       }
-  
+
       if (data.previousPasswords) {
         setPreviousPasswords(data.previousPasswords);
       }
-  
+
       const codigo = data.resetToken || generarCodigo();
-      // 👇 Línea agregada para mostrar el código en consola (solo para pruebas)
-      console.log( `Codigo de verificación para ${email}: ${codigo}`);
-      console.log(`🔐 Código de verificación para ${email}: ${codigo}`);
-      // 👇 Línea agregada para mostrar el código en consola (solo para pruebas) HEAD
-      console.log( `Codigo de verificación para ${email}: ${codigo}`);
+      // Las líneas de console.log para depuración del código han sido eliminadas aquí.
 
-      console.log(`🔐 Código de verificación para ${email}: ${codigo}`);
-
-  
       const emailEnviado = await enviarCodigoPorCorreo(codigo, email);
-  
+
       if (emailEnviado) {
         setCodigoGenerado(codigo);
       }
-  
+
     } catch (error) {
       setError(error.message);
     } finally {
       setIsSubmitting(false);
     }
   };
+
   const handleVerificarCodigo = async () => {
-    const codigoIngresado = getValues('codigoVerificacion')?.replace(/\D/g,'');
+    const codigoIngresado = getValues('codigoVerificacion')?.replace(/\D/g, '');
     const email = getValues('correo')?.trim();
-    
+
     if (!codigoIngresado || codigoIngresado.length !== 6) {
       setError('Ingresa un código de 6 dígitos');
       return;
     }
-    
+
     setIsSubmitting(true);
     setError('');
-    
+
     try {
       const response = await fetch('http://localhost:5000/verify-reset-code', {
         method: 'POST',
@@ -167,14 +162,14 @@ function OlvideContraseña() {
       });
 
       const data = await response.json();
-    
+
       if (!response.ok) {
         throw new Error(data.message || 'Error al verificar el código');
       }
-    
+
       setCodigoVerificado(true);
       setSuccessMessage(data.message || 'Código verificado correctamente');
-      
+
       setTimeout(() => {
         setStep(2);
         setSuccessMessage('');
@@ -185,7 +180,7 @@ function OlvideContraseña() {
           confirmarContraseña: ''
         });
       }, 1500);
-    
+
     } catch (error) {
       setError(error.message || 'Error al verificar el código');
     } finally {
@@ -195,51 +190,51 @@ function OlvideContraseña() {
 
   const validatePassword = (value) => {
     const nuevaContraseña = value;
-    
+
     if (previousPasswords.includes(nuevaContraseña)) {
       return 'No puedes usar una contraseña anterior';
     }
-    
+
     if (nuevaContraseña.length < 8) {
       return 'Mínimo 8 caracteres';
     }
-    
+
     if (!/[A-Z]/.test(nuevaContraseña)) {
       return 'Debe incluir al menos una mayúscula';
     }
-    
+
     if (!/[a-z]/.test(nuevaContraseña)) {
       return 'Debe incluir al menos una minúscula';
     }
-    
+
     if (!/\d/.test(nuevaContraseña)) {
       return 'Debe incluir al menos un número';
     }
-    
+
     if (!/[@$!%*?&]/.test(nuevaContraseña)) {
       return 'Debe incluir al menos un carácter especial (@$!%*?&)';
     }
-    
+
     return true;
   };
 
   const handleCambiarContraseña = async () => {
     const { nuevaContraseña, confirmarContraseña } = getValues();
     const email = getValues('correo');
-    
+
     if (nuevaContraseña !== confirmarContraseña) {
       setError('Las contraseñas no coinciden');
       return;
     }
-    
+
     if (previousPasswords.includes(nuevaContraseña)) {
       setError('No puedes usar una contraseña anterior');
       return;
     }
-    
+
     setIsSubmitting(true);
     setError('');
-    
+
     try {
       const response = await fetch('http://localhost:5000/reset-password', {
         method: 'POST',
@@ -262,7 +257,7 @@ function OlvideContraseña() {
       reset();
       setSuccessMessage('¡Contraseña cambiada con éxito!');
       setTimeout(() => navigate('/login'), 2000);
-      
+
     } catch (error) {
       setError(error.message);
     } finally {
@@ -272,15 +267,15 @@ function OlvideContraseña() {
 
   const handleReenviarCodigo = async () => {
     if (tiempoRestante > 0) return;
-    
+
     setError('');
     setIsSubmitting(true);
-    
+
     try {
       const email = getValues('correo');
       const codigo = generarCodigo();
       const emailEnviado = await enviarCodigoPorCorreo(codigo, email);
-      
+
       if (emailEnviado) {
         setCodigoGenerado(codigo);
       }
@@ -309,14 +304,14 @@ function OlvideContraseña() {
       <div className="olv-reset-wrapper">
         <div className="olv-reset-box">
           <div className="olv-reset-info-section">
-            <h1 style={{textAlign: 'center', marginBottom: '1rem'}}>Flooky Pets</h1>
-            <h2 style={{textAlign: 'center', marginBottom: '1rem'}}>Recupera tu contraseña</h2>
-            <p style={{textAlign: 'center'}}>Ingresa tu correo electrónico y sigue las instrucciones para restablecer tu contraseña.</p>
+            <h1 style={{ textAlign: 'center', marginBottom: '1rem' }}>Flooky Pets</h1>
+            <h2 style={{ textAlign: 'center', marginBottom: '1rem' }}>Recupera tu contraseña</h2>
+            <p style={{ textAlign: 'center' }}>Ingresa tu correo electrónico y sigue las instrucciones para restablecer tu contraseña.</p>
           </div>
-          
+
           <div className="olv-reset-form-section">
             <h2 className="olv-title">Recuperar Contraseña</h2>
-            
+
             {/* Barra de progreso mejorada */}
             <div className="olv-progress-container">
               <div className={`olv-progress-step ${step >= 1 ? 'active' : ''}`}>
@@ -399,8 +394,8 @@ function OlvideContraseña() {
                   className={`olv-primary-btn ${isSubmitting ? 'is-submitting' : ''}`}
                   disabled={isSubmitting || (codigoEnviado && !!errors.codigoVerificacion)}
                 >
-                  {isSubmitting ? 'Procesando...' : 
-                  codigoEnviado ? 'Verificar Código' : 'Enviar Código de Verificación'}
+                  {isSubmitting ? 'Procesando...' :
+                    codigoEnviado ? 'Verificar Código' : 'Enviar Código de Verificación'}
                 </button>
               </form>
             )}
@@ -441,7 +436,7 @@ function OlvideContraseña() {
                     placeholder="Confirma tu nueva contraseña"
                     {...register('confirmarContraseña', {
                       required: 'Debes confirmar la contraseña',
-                      validate: value => 
+                      validate: value =>
                         value === watch('nuevaContraseña') || 'Las contraseñas no coinciden'
                     })}
                   />
