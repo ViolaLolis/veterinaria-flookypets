@@ -6,7 +6,7 @@ import {
   faMars, faVenus, faWeight, faStethoscope
 } from '@fortawesome/free-solid-svg-icons';
 import { motion } from 'framer-motion';
-import './Styles/TarjetaMascota.module.css'; // Importar el CSS sin .module
+import styles from './Styles/TarjetaMascota.module.css'; // ¡Importante: Aquí se importa como 'styles'!
 
 const TarjetaMascota = ({ mascota }) => {
   const navigate = useNavigate();
@@ -48,37 +48,37 @@ const TarjetaMascota = ({ mascota }) => {
   return (
     <motion.div
       key={mascota.id_mascota}
-      className="pet-card"
+      className={styles.petCard} // Usamos styles.petCard
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.3 }}
       whileHover={{ scale: 1.02, boxShadow: '0 12px 30px var(--shadow-strong)' }}
     >
-      <div className="pet-image-container">
+      <div className={styles.petImageContainer}> {/* Usamos styles.petImageContainer */}
         <img
           src={mascota.imagen_url || `https://api.dicebear.com/7.x/initials/svg?seed=${mascota.nombre?.charAt(0) || 'P'}&backgroundType=gradientLinear&colorful=true`}
           alt={`Foto de ${mascota.nombre}`}
-          className="pet-image"
+          className={styles.petImage} // Usamos styles.petImage
           onError={(e) => {
             e.target.onerror = null;
             e.target.src = `https://api.dicebear.com/7.x/initials/svg?seed=${mascota.nombre?.charAt(0) || 'P'}&backgroundType=gradientLinear&colorful=true`;
           }}
         />
-        <div className="pet-species-and-sex-badges">
-          <span className={`badge species-badge`}>
+        <div className={styles.petSpeciesAndSexBadges}> {/* Usamos styles.petSpeciesAndSexBadges */}
+          <span className={`${styles.badge} ${styles.speciesBadge}`}> {/* Combinación de clases */}
             <FontAwesomeIcon icon={getEspecieIcon(mascota.especie)} /> {mascota.especie}
           </span>
           {getSexoIcon(mascota.sexo) && (
-            <span className={`badge sex-badge ${mascota.sexo.toLowerCase() === 'macho' ? 'male' : 'female'}`}>
+            <span className={`${styles.badge} ${styles.sexBadge} ${mascota.sexo?.toLowerCase() === 'macho' ? styles.male : styles.female}`}> {/* Combinación y condicional */}
               <FontAwesomeIcon icon={getSexoIcon(mascota.sexo)} /> {mascota.sexo}
             </span>
           )}
         </div>
       </div>
 
-      <div className="pet-info">
-        <h3 className="pet-name">{mascota.nombre}</h3>
-        <div className="pet-detail-grid">
+      <div className={styles.petInfo}> {/* Usamos styles.petInfo */}
+        <h3 className={styles.petName}>{mascota.nombre}</h3> {/* Usamos styles.petName */}
+        <div className={styles.petDetailGrid}> {/* Usamos styles.petDetailGrid */}
           <p><FontAwesomeIcon icon={faPaw} /> <strong>Raza:</strong> {mascota.raza || 'N/A'}</p>
           <p><FontAwesomeIcon icon={faCalendarAlt} /> <strong>Edad:</strong> {mascota.edad ? `${mascota.edad} años` : 'N/A'}</p>
           <p><FontAwesomeIcon icon={faWeight} /> <strong>Peso:</strong> {mascota.peso ? `${mascota.peso} kg` : 'N/A'}</p>
@@ -87,10 +87,10 @@ const TarjetaMascota = ({ mascota }) => {
         </div>
       </div>
 
-      <div className="pet-actions">
+      <div className={styles.petActions}> {/* Usamos styles.petActions */}
         <motion.button
           onClick={() => navigate(`/usuario/mascotas/editar/${mascota.id_mascota}`)}
-          className="pet-card-button"
+          className={styles.petCardButton} // Usamos styles.petCardButton
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
@@ -98,7 +98,7 @@ const TarjetaMascota = ({ mascota }) => {
         </motion.button>
         <motion.button
           onClick={() => navigate(`/usuario/historial/${mascota.id_mascota}`)}
-          className="pet-card-button"
+          className={styles.petCardButton} // Usamos styles.petCardButton
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >

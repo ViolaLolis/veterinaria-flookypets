@@ -1,42 +1,39 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useOutletContext } from 'react-router-dom'; // Importa useOutletContext
+import { useNavigate, useOutletContext } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import styles from './Styles/CitasUsuario.module.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-    faCalendarAlt, faShoppingCart, faPaw, faUserCog, faClipboardList,
-    faChevronDown, faChevronUp, faTimesCircle
+    faCalendarAlt, faShoppingCart, faPaw, faUser, faClipboardList,
+    faChevronDown, faChevronUp, faTimesCircle, faPlusCircle
 } from '@fortawesome/free-solid-svg-icons';
 import { FaSpinner } from 'react-icons/fa';
-import { authFetch } from '../../utils/api'; // Importar la función authFetch
+import { authFetch } from '../../utils/api';
 
 // Componente de leer más / menos
-const ReadMoreLessText = ({ text, maxLength = 100 }) => {
+const ReadMoreLessText = ({ text, maxLength = 120 }) => {
     const [isExpanded, setIsExpanded] = useState(false);
 
-    // Si el texto es nulo, indefinido o vacío, no renderiza nada o un placeholder
     if (!text || text.trim() === 'N/A' || text.trim() === '') {
         return <span className={styles.noDetailText}>No hay detalles adicionales.</span>;
     }
 
-    // Si la longitud del texto es menor o igual al máximo, lo muestra completo sin botón
     if (text.length <= maxLength) {
         return <span>{text}</span>;
     }
 
-    // Si es más largo, muestra truncado o completo con el botón
     const displayedText = isExpanded ? text : `${text.substring(0, maxLength)}...`;
 
     return (
-        <div>
-            <span>{displayedText}</span>
+        <div className={styles.readMoreContainer}>
+            <span id="cita-detalle-texto">{displayedText}</span>
             <motion.button
                 onClick={() => setIsExpanded(!isExpanded)}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className={styles.readMoreButton}
-                aria-expanded={isExpanded} // Para accesibilidad
-                aria-controls="cita-detalle-texto" // Si el span tuviera un ID, vincularlo
+                aria-expanded={isExpanded}
+                aria-controls="cita-detalle-texto"
             >
                 {isExpanded ? (
                     <>Leer menos <FontAwesomeIcon icon={faChevronUp} /></>
@@ -50,14 +47,13 @@ const ReadMoreLessText = ({ text, maxLength = 100 }) => {
 
 const CitasUsuario = () => {
     const navigate = useNavigate();
-    const { user, showNotification } = useOutletContext(); // Obtener user y showNotification del contexto
+    const { user, showNotification } = useOutletContext();
     const [userAppointments, setUserAppointments] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isManagingAppointment, setIsManagingAppointment] = useState(false);
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [appointmentToManage, setAppointmentToManage] = useState(null);
 
-    // Función para obtener las citas del usuario
     const fetchUserAppointments = async () => {
         setIsLoading(true);
         if (!user?.id) {
@@ -66,21 +62,27 @@ const CitasUsuario = () => {
             return;
         }
         try {
-            // Se asume que la API de citas puede filtrar por id_cliente
             const response = await authFetch(`/citas?id_cliente=${user.id}`);
             if (response.success) {
-                // Mapear los datos para que coincidan con la estructura esperada por el frontend
                 const mappedAppointments = response.data.map(cita => ({
                     id_cita: cita.id_cita,
                     fecha: cita.fecha,
-                    servicio_nombre: cita.servicio_nombre, // Asumiendo que el backend retorna el nombre del servicio
-                    mascota_nombre: cita.mascota_nombre,   // Asumiendo que el backend retorna el nombre de la mascota
-                    mascota_especie: cita.mascota_especie, // Asumiendo que el backend retorna la especie de la mascota
-                    veterinario_nombre: cita.veterinario_nombre || 'Sin asignar', // Asumiendo nombre del veterinario
+                    servicio_nombre: cita.servicio_nombre || 'Servicio Desconocido',
+                    mascota_nombre: cita.mascota_nombre || 'Mascota Desconocida',
+                    mascota_especie: cita.mascota_especie || 'N/A',
+                    veterinario_nombre: cita.veterinario_nombre || 'Sin asignar',
                     estado: cita.estado,
                     detalle: cita.servicios || 'No hay observaciones adicionales para esta cita en particular.'
                 }));
-                setUserAppointments(mappedAppointments);
+                // Ordenar las citas: primero pendientes/aceptadas, luego completadas/canceladas, por fecha.
+                const sortedAppointments = mappedAppointments.sort((a, b) => {
+                    const statusOrder = { 'pendiente': 1, 'aceptada': 2, 'completa': 3, 'cancelada': 4, 'rechazada': 5 };
+                    if (statusOrder[a.estado] !== statusOrder[b.estado]) {
+                        return statusOrder[a.estado] - statusOrder[b.estado];
+                    }
+                    return new Date(a.fecha) - new Date(b.fecha);
+                });
+                setUserAppointments(sortedAppointments);
             } else {
                 showNotification(response.message || 'Error al cargar tus citas.', 'error');
             }
@@ -94,7 +96,7 @@ const CitasUsuario = () => {
 
     useEffect(() => {
         fetchUserAppointments();
-    }, [user]); // Depende del objeto user para recargar cuando esté disponible
+    }, [user?.id]); // Depende específicamente de user.id para evitar recargas innecesarias
 
     const openConfirmModal = (appointment) => {
         setAppointmentToManage(appointment);
@@ -106,25 +108,29 @@ const CitasUsuario = () => {
         setAppointmentToManage(null);
     };
 
-    const handleAppointmentAction = async () => {
+    const handleCancelAppointment = async () => {
         if (!appointmentToManage) return;
 
         setIsManagingAppointment(true);
         try {
-            // Llamada a la API para cancelar la cita
             const response = await authFetch(`/citas/${appointmentToManage.id_cita}`, {
                 method: 'PUT',
-                body: { estado: 'cancelada' } // Actualizar el estado a 'cancelada'
+                body: { estado: 'cancelada' }
             });
 
             if (response.success) {
-                // Actualizar el estado local de las citas
                 setUserAppointments(prev =>
                     prev.map(cita =>
                         cita.id_cita === appointmentToManage.id_cita
                             ? { ...cita, estado: 'cancelada' }
                             : cita
-                    )
+                    ).sort((a, b) => { // Re-ordenar después de la actualización
+                        const statusOrder = { 'pendiente': 1, 'aceptada': 2, 'completa': 3, 'cancelada': 4, 'rechazada': 5 };
+                        if (statusOrder[a.estado] !== statusOrder[b.estado]) {
+                            return statusOrder[a.estado] - statusOrder[b.estado];
+                        }
+                        return new Date(a.fecha) - new Date(b.fecha);
+                    })
                 );
                 showNotification(`Cita para ${appointmentToManage.mascota_nombre} ha sido cancelada.`, 'success');
             } else {
@@ -170,6 +176,17 @@ const CitasUsuario = () => {
                 <h3>Mis Citas</h3>
             </div>
 
+            <div className={styles.actionsTop}>
+                <motion.button
+                    className={styles.agendarCitaButton}
+                    onClick={() => navigate('/usuario/servicios')}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                >
+                    <FontAwesomeIcon icon={faPlusCircle} /> Agendar Nueva Cita
+                </motion.button>
+            </div>
+
             {userAppointments.length > 0 ? (
                 <ul className={styles.listaCitas}>
                     <AnimatePresence>
@@ -180,32 +197,35 @@ const CitasUsuario = () => {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, x: -50 }}
-                                whileHover={{ scale: 1.02 }}
+                                whileHover={{ scale: 1.01 }} // Ligeramente menos escala para no ser demasiado intrusivo
+                                transition={{ duration: 0.2, ease: "easeOut" }}
                             >
-                                <div className={styles.citaInfo}>
-                                    <div><FontAwesomeIcon icon={faCalendarAlt} /> {formatDateTime(cita.fecha)}</div>
-                                    <div><FontAwesomeIcon icon={faShoppingCart} /> {cita.servicio_nombre}</div>
-                                    <div><FontAwesomeIcon icon={faPaw} /> {cita.mascota_nombre} ({cita.mascota_especie})</div>
-                                    <div><FontAwesomeIcon icon={faUserCog} /> {cita.veterinario_nombre}</div>
-                                    <div className={`${styles.statusBadge} ${styles[cita.estado]}`}>{cita.estado}</div>
+                                <div className={styles.citaInfoGrid}>
+                                    <div className={styles.infoRow}><FontAwesomeIcon icon={faCalendarAlt} className={styles.infoIcon} /> <span className={styles.infoLabel}>Fecha:</span> {formatDateTime(cita.fecha)}</div>
+                                    <div className={styles.infoRow}><FontAwesomeIcon icon={faShoppingCart} className={styles.infoIcon} /> <span className={styles.infoLabel}>Servicio:</span> {cita.servicio_nombre}</div>
+                                    <div className={styles.infoRow}><FontAwesomeIcon icon={faPaw} className={styles.infoIcon} /> <span className={styles.infoLabel}>Mascota:</span> {cita.mascota_nombre} ({cita.mascota_especie})</div>
+                                    <div className={styles.infoRow}><FontAwesomeIcon icon={faUser} className={styles.infoIcon} /> <span className={styles.infoLabel}>Veterinario:</span> {cita.veterinario_nombre}</div>
+                                    <div className={`${styles.statusBadge} ${styles[cita.estado.toLowerCase()]}`}>{cita.estado}</div>
                                 </div>
 
-                                <div className={styles.citaObservacionContainer}>
-                                    <FontAwesomeIcon icon={faClipboardList} className={styles.observacionIcon} />
-                                    <strong>Observación:</strong>
-                                    <ReadMoreLessText text={cita.detalle} maxLength={100} />
+                                <div className={styles.citaDetailSection}>
+                                    <div className={styles.citaObservacionContainer}>
+                                        <FontAwesomeIcon icon={faClipboardList} className={styles.observacionIcon} />
+                                        <strong>Detalles de la Cita:</strong>
+                                    </div>
+                                    <ReadMoreLessText text={cita.detalle} />
                                 </div>
 
                                 <div className={styles.citaActions}>
                                     {(cita.estado === 'pendiente' || cita.estado === 'aceptada') && (
                                         <motion.button
-                                            className={styles.accionBtnSecondary}
+                                            className={styles.accionBtnDanger} // Usar Danger para cancelar
                                             onClick={() => openConfirmModal(cita)}
                                             whileHover={{ scale: 1.05 }}
                                             whileTap={{ scale: 0.95 }}
                                             disabled={isManagingAppointment}
                                         >
-                                            <FontAwesomeIcon icon={faTimesCircle} /> Cancelar Cita
+                                            {isManagingAppointment ? <FaSpinner className={styles.buttonSpinner} /> : <><FontAwesomeIcon icon={faTimesCircle} /> Cancelar Cita</>}
                                         </motion.button>
                                     )}
                                 </div>
@@ -214,18 +234,24 @@ const CitasUsuario = () => {
                     </AnimatePresence>
                 </ul>
             ) : (
-                <div className={styles.noCitas}>
-                    <FontAwesomeIcon icon={faCalendarAlt} />
-                    <p>No tienes citas programadas.</p>
+                <motion.div
+                    className={styles.noCitas}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                >
+                    <FontAwesomeIcon icon={faCalendarAlt} className={styles.noCitasIcon} />
+                    <h4>¡Parece que no tienes citas programadas!</h4>
+                    <p>Es un buen momento para agendar una nueva cita para tu mascota.</p>
                     <motion.button
                         className={styles.accionBtnPrimary}
                         onClick={() => navigate('/usuario/servicios')}
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                     >
-                        Agendar Nueva Cita
+                        <FontAwesomeIcon icon={faPlusCircle} /> Agendar Nueva Cita
                     </motion.button>
-                </div>
+                </motion.div>
             )}
 
             <AnimatePresence>
@@ -244,14 +270,17 @@ const CitasUsuario = () => {
                             exit={{ scale: 0.8, opacity: 0 }}
                             onClick={(e) => e.stopPropagation()}
                         >
+                            <button className={styles.modalCloseButton} onClick={closeModal} aria-label="Cerrar modal">
+                                <FontAwesomeIcon icon={faTimesCircle} />
+                            </button>
                             <h3>¿Cancelar cita?</h3>
-                            <p>¿Estás seguro de cancelar la cita para <strong>{appointmentToManage.mascota_nombre}</strong> el <strong>{formatDateTime(appointmentToManage.fecha)}</strong>?</p>
-                            <p className={styles.penalizacionWarning}>* Podría implicar penalización o pérdida de cupo.</p>
+                            <p>Estás a punto de cancelar la cita para <strong>{appointmentToManage.mascota_nombre}</strong> el <strong>{formatDateTime(appointmentToManage.fecha)}</strong>.</p>
+                            <p className={styles.penalizacionWarning}>* La cancelación podría implicar una penalización o la pérdida del cupo.</p>
 
                             <div className={styles.modalActions}>
                                 <motion.button
-                                    className={styles.confirmButton}
-                                    onClick={handleAppointmentAction}
+                                    className={styles.modalButtonDanger} // Botón de confirmación de cancelación en rojo
+                                    onClick={handleCancelAppointment}
                                     disabled={isManagingAppointment}
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
@@ -259,7 +288,7 @@ const CitasUsuario = () => {
                                     {isManagingAppointment ? <FaSpinner className={styles.buttonSpinner} /> : 'Sí, cancelar'}
                                 </motion.button>
                                 <motion.button
-                                    className={styles.cancelButton}
+                                    className={styles.modalButtonSecondary}
                                     onClick={closeModal}
                                     disabled={isManagingAppointment}
                                     whileHover={{ scale: 1.05 }}

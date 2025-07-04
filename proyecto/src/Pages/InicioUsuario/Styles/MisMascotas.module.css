@@ -1,307 +1,285 @@
-/* src/Pages/InicioUsuario/Styles/MisMascotas.module.css */
+/* MisMascotas.module.css */
 
-/* --- Importar las variables de color globales para consistencia --- */
-@import './InicioDashboard.css';
+/* Variables de Color (asegúrate de que estas estén definidas globalmente, por ejemplo, en un archivo base.css o app.css) */
+/*
+:root {
+    --primary-color: #00acc1;
+    --primary-light: #4dd0e1;
+    --primary-dark: #007c91;
+    --primary-gradient-start: #00bcd4;
+    --primary-gradient-end: #00acc1;
+    --primary-glow: rgba(0, 172, 193, 0.4);
+    --primary-border-subtle: rgba(0, 188, 212, 0.15);
+}
+*/
 
-/* --- Sección General Contenedora de la Vista --- */
 .section {
-    padding: 1.5rem 2.5rem;
+    padding: 2.5rem 1.5rem;
     max-width: 1200px;
-    margin: 20px auto;
-    background-color: var(--background-light);
-    border-radius: 15px;
-    box-shadow: 0 10px 30px var(--shadow-medium);
-    font-family: 'Roboto', sans-serif;
-    color: var(--text-dark);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2rem; /* Espacio entre los principales bloques de la sección */
+    margin: 0 auto;
+    background-color: #ffffff; /* Fondo blanco para la sección principal */
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .sectionTitle {
-    font-size: 2.2em;
-    color: var(--primary-dark);
+    font-size: 2.5rem;
+    color: var(--primary-dark); /* Título principal en azul cian oscuro */
     text-align: center;
-    margin-bottom: 0.5rem;
+    margin-bottom: 2rem;
     display: flex;
     align-items: center;
-    gap: 0.8rem;
+    justify-content: center;
+    gap: 1rem;
     font-weight: 700;
+    letter-spacing: -0.5px;
 }
 
 .sectionIcon {
-    font-size: 1.1em;
-    color: var(--primary-color);
+    font-size: 2.8rem;
+    color: var(--primary-color); /* Icono del título en azul cian vibrante */
+    animation: bounceIn 0.8s ease-out;
 }
 
-/* --- Estado de Carga y Error / No Content --- */
-.loadingContainer, .errorMessage, .noContent {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 250px; /* Un poco más compacto */
-    text-align: center;
-    padding: 2rem;
-    border-radius: 12px;
-    background-color: var(--card-background);
-    box-shadow: 0 3px 15px var(--shadow-light);
-    margin-top: 1rem; /* Menos margen superior */
-    width: 100%;
-    max-width: 600px;
+@keyframes bounceIn {
+    0% { transform: scale(0.5); opacity: 0; }
+    70% { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(1); }
 }
 
-.spinnerIcon {
-    font-size: 2.5rem;
-    color: var(--primary-color);
-    animation: spin 1.5s linear infinite;
-    margin-bottom: 1rem;
-}
-
-@keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-}
-
-.errorMessage {
-    color: var(--error-color);
-}
-
-.errorIcon {
-    font-size: 2.5rem;
-    color: var(--error-color);
-    margin-bottom: 1rem;
-}
-
-.loadingContainer p, .errorMessage p, .noContent p {
-    font-size: 1.05rem;
-    color: var(--text-medium);
-    margin-bottom: 1.2rem;
-}
-
-.errorMessage p {
-    color: var(--error-color);
-}
-
-.noContent .infoIcon {
-    font-size: 3rem;
-    color: var(--warning-color);
-    margin-bottom: 1.5rem;
-}
-
-.noContent p {
-    font-weight: 500;
-    color: var(--text-light);
-}
-
-/* --- Info Box / Consejo --- */
+/* Info Box */
 .infoBox {
-    background-color: var(--background-medium);
-    border-radius: 10px;
+    background-color: var(--primary-border-subtle); /* Fondo sutil para el cuadro de información */
+    border-left: 5px solid var(--primary-light); /* Borde izquierdo en azul cian claro */
     padding: 1.2rem 1.5rem;
+    margin-bottom: 2rem;
+    border-radius: 8px;
     display: flex;
     align-items: flex-start;
-    gap: 0.8rem;
-    box-shadow: 0 2px 8px var(--shadow-light);
-    max-width: 800px;
-    width: 100%;
-    border-left: 5px solid var(--primary-color);
-    color: var(--text-medium);
+    gap: 1rem;
+    color: #333;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .infoBoxIcon {
+    color: var(--primary-dark); /* Icono del cuadro de información en azul cian oscuro */
     font-size: 1.8rem;
-    color: var(--info-color);
     flex-shrink: 0;
     margin-top: 0.2rem;
 }
 
-.infoBox p {
-    margin: 0;
-    font-size: 0.98rem;
-    line-height: 1.6;
-    color: var(--text-dark);
-}
-
 .infoBoxTitle {
-    font-weight: 600;
-    color: var(--primary-dark);
+    font-weight: 700;
+    color: var(--primary-dark); /* Título dentro del cuadro de información */
     margin-right: 0.3rem;
 }
 
-/* --- Search Bar / Filtro de Búsqueda MEJORADO --- */
+/* Search and Filter Container */
 .searchFilterContainer {
     display: flex;
-    /* Usar gap para espacio, y flex-wrap para responsividad */
-    flex-wrap: wrap; /* Permite que los elementos salten de línea */
-    align-items: center; /* Centra verticalmente */
-    justify-content: center; /* Centra horizontalmente si hay espacio */
-    width: 100%;
-    max-width: 900px; /* Aumenta el ancho máximo para acomodar el botón */
-    gap: 1.5rem; /* Espacio entre la barra de búsqueda y el botón */
-    margin-bottom: 2rem;
-    padding: 0 1rem; /* Añade un poco de padding horizontal */
+    justify-content: center; /* Centra el input */
+    margin-bottom: 2.5rem;
+    padding: 1rem;
+    background-color: #f9f9f9; /* Un fondo ligeramente gris para el contenedor de búsqueda */
+    border-radius: 10px;
+    box-shadow: inset 0 1px 5px rgba(0, 0, 0, 0.05);
 }
 
 .searchInputWrapper {
-    flex-grow: 1; /* Permite que la barra de búsqueda crezca para ocupar espacio */
-    min-width: 280px; /* Ancho mínimo para que no se comprima demasiado */
-    display: flex;
-    align-items: center;
-    background-color: var(--card-background);
-    border: 1px solid var(--border-color);
-    border-radius: 10px;
-    padding: 0.8rem 1.5rem;
-    box-shadow: 0 4px 15px var(--shadow-light);
-    transition: box-shadow 0.3s ease, border-color 0.3s ease;
-}
-
-.searchInputWrapper:focus-within {
-    border-color: var(--primary-color);
-    box-shadow: 0 6px 20px var(--primary-glow);
+    position: relative;
+    width: 100%;
+    max-width: 600px; /* Limita el ancho del campo de búsqueda */
 }
 
 .searchIcon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--primary-dark); /* Color del icono de búsqueda */
     font-size: 1.2rem;
-    color: var(--text-light);
-    margin-right: 1.2rem;
 }
 
 .searchInput {
-    flex-grow: 1;
-    border: none;
-    outline: none;
-    padding: 0;
-    font-size: 1.05rem;
-    color: var(--text-dark);
-    background-color: transparent;
-    transition: width 0.3s ease;
+    width: 100%;
+    padding: 12px 12px 12px 45px; /* Ajusta el padding para el icono */
+    border: 1px solid var(--primary-border-subtle); /* Borde sutil */
+    border-radius: 25px;
+    font-size: 1rem;
+    color: #333;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .searchInput::placeholder {
-    color: var(--text-light);
-    opacity: 0.8;
+    color: #888;
 }
 
-/* Contenedor de la Cuadrícula de Mascotas */
-.petsGridContainer {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 2.5rem;
-    width: 100%;
-    max-width: 1200px;
-    padding-bottom: 1.5rem; /* Menos padding abajo, el botón ya no está aquí */
-    justify-items: center;
+.searchInput:focus {
+    outline: none;
+    border-color: var(--primary-light); /* Borde claro al enfocar */
+    box-shadow: 0 0 0 4px var(--primary-glow); /* Efecto de brillo al enfocar */
 }
 
-/* --- Botones principales de acción (e.g., "Añadir Mascota") --- */
-.primaryButton {
-    background-color: var(--primary-color);
-    color: white;
-    border: none;
-    padding: 0.8rem 1.8rem;
+/* Loading, Error, No Content States */
+.loadingContainer,
+.errorMessage,
+.noContent {
+    text-align: center;
+    padding: 3rem 1.5rem;
     border-radius: 10px;
-    cursor: pointer;
-    font-size: 1rem;
-    font-weight: 700;
+    margin-top: 2rem;
+    background-color: #f0f8ff; /* Un azul muy claro para los estados */
+    color: #555;
+    font-size: 1.1rem;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 0.8rem;
-    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
-    box-shadow: 0 4px 12px var(--primary-glow);
-    /* margin-top: 2.5rem;  Eliminado este margin-top para el botón que está dentro del searchFilterContainer */
+    justify-content: center;
+    gap: 1.2rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+}
+
+.spinnerIcon,
+.errorIcon,
+.infoIcon {
+    font-size: 4rem;
+    color: var(--primary-color); /* Iconos grandes en color primario */
+    animation: pulse 1.5s infinite ease-in-out;
+}
+
+.errorMessage .errorIcon {
+    color: #e74c3c; /* Rojo para el icono de error */
+}
+
+.loadingContainer .spinnerIcon {
+    animation: spin 1.5s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+    0% { transform: scale(0.9); opacity: 0.7; }
+    50% { transform: scale(1.05); opacity: 1; }
+    100% { transform: scale(0.9); opacity: 0.7; }
+}
+
+.noContent .infoIcon {
+    color: var(--primary-light); /* Azul claro para el icono de no contenido */
+}
+
+/* Botones */
+.primaryButton {
+    background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
+    color: #ffffff;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 30px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 15px rgba(0, 172, 193, 0.3);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none; /* Asegura que no tenga subrayado si se usa en un Link */
 }
 
 .primaryButton:hover {
-    background-color: var(--primary-dark);
     transform: translateY(-3px);
-    box-shadow: 0 6px 15px var(--primary-glow);
+    box-shadow: 0 8px 20px rgba(0, 172, 193, 0.4);
+    background: linear-gradient(135deg, var(--primary-light), var(--primary-color));
 }
 
 .primaryButton:active {
-    transform: scale(0.97);
-    box-shadow: 0 2px 5px var(--primary-glow);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0, 172, 193, 0.2);
 }
 
-/* --- Media Queries para Responsividad --- */
-@media (max-width: 1024px) {
-    .section {
-        padding: 1.2rem 2rem;
-        gap: 1.5rem;
-    }
+/* Pets Grid Container */
+.petsGridContainer {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Columnas responsivas */
+    gap: 2rem;
+    padding: 1rem;
+    margin-top: 2rem;
+}
+
+/* Media Queries para responsividad */
+@media (max-width: 768px) {
     .sectionTitle {
-        font-size: 2em;
+        font-size: 2rem;
     }
-    .searchFilterContainer {
-        max-width: 100%; /* Permite que ocupe todo el ancho disponible */
-        justify-content: space-around; /* Distribuye elementos si hay espacio */
-        padding: 0 1rem;
+
+    .sectionIcon {
+        font-size: 2.2rem;
     }
-    .searchInputWrapper {
-        padding: 0.7rem 1.2rem;
-        min-width: unset; /* Reinicia el min-width para que flex-grow funcione mejor */
+
+    .infoBox {
+        flex-direction: column;
+        text-align: center;
     }
+
+    .infoBoxIcon {
+        margin-bottom: 0.5rem;
+    }
+
     .searchInput {
+        font-size: 0.9rem;
+        padding-left: 40px;
+    }
+
+    .searchIcon {
+        left: 12px;
+        font-size: 1.1rem;
+    }
+
+    .loadingContainer,
+    .errorMessage,
+    .noContent {
+        padding: 2rem 1rem;
         font-size: 1rem;
     }
-    .petsGridContainer {
-        gap: 2rem;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    }
-    .primaryButton {
-        padding: 0.7rem 1.5rem;
-        font-size: 0.95rem;
-    }
-}
 
-@media (max-width: 768px) {
-    .section {
-        padding: 1rem 1.5rem;
-        gap: 1.2rem;
-        margin: 15px auto;
+    .spinnerIcon,
+    .errorIcon,
+    .infoIcon {
+        font-size: 3rem;
     }
-    .sectionTitle {
-        font-size: 1.8em;
-    }
-    .searchFilterContainer {
-        flex-direction: column; /* Apila la barra de búsqueda y el botón */
-        align-items: stretch; /* Estira ambos elementos para ocupar el ancho completo */
-        gap: 1rem; /* Espacio entre ellos */
-        margin-bottom: 1.5rem;
-    }
-    .searchInputWrapper {
-        padding: 0.6rem 1rem;
-    }
-    .searchInput {
-        font-size: 0.95rem;
-    }
-    .petsGridContainer {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
-    }
-    .noContent {
-        padding: 1.5rem;
-    }
+
     .primaryButton {
-        width: 100%; /* El botón ocupa todo el ancho */
-        justify-content: center; /* Centra el contenido del botón */
+        font-size: 1rem;
+        padding: 10px 20px;
+    }
+
+    .petsGridContainer {
+        grid-template-columns: 1fr; /* Una columna en pantallas pequeñas */
+        gap: 1.5rem;
     }
 }
 
 @media (max-width: 480px) {
     .section {
-        padding: 0.8rem 1rem;
-        margin: 10px auto;
-        gap: 1rem;
+        padding: 1.5rem 1rem;
     }
+
     .sectionTitle {
-        font-size: 1.6em;
+        font-size: 1.8rem;
     }
-    .primaryButton {
-        padding: 0.6rem 1.2rem;
-        font-size: 0.85rem;
-        gap: 0.5rem;
-        /* margin-top: 2rem;  Este margen ya no es necesario aquí si se apila */
+
+    .sectionIcon {
+        font-size: 2rem;
     }
 }

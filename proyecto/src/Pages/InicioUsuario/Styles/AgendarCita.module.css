@@ -1,60 +1,160 @@
+/* AgendarCita.module.css */
+
+/* --- Importación de Variables de Color del tema global (asumiendo que se cargan globalmente o se importan) --- */
+/* Si estas variables no están disponibles globalmente (e.g., en un archivo CSS global como app.css o index.css),
+   deberás copiarlas y pegarlas aquí, o usar un sistema de importación CSS si tu configuración lo permite. */
+/* Por ahora, asumimos que están definidas en un :root accesible o en el mismo archivo para que funcione. */
+:root {
+  --primary-color: #00acc1; /* Azul cian vibrante (principal) */
+  --primary-light: #4dd0e1; /* Azul cian más claro para acentos y hover */
+  --primary-semi-dark: #0093a6; /* Nuevo: Un tono ligeramente más oscuro que primary-color para contrasts sutiles */
+  --primary-gradient-start: #00bcd4; /* Azul brillante para gradientes */
+  --primary-gradient-end: #00acc1; /* Cian más oscuro para gradientes */
+  --primary-glow: rgba(0, 172, 193, 0.4); /* Efecto de brillo para enfoque y sombras */
+
+  /* Colores de soporte/complementarios */
+  --text-dark: #333333; /* Texto principal oscuro */
+  --text-medium: #555555; /* Texto secundario, descripciones */
+  --text-light: #777777; /* Texto terciario, menos prominente */
+  --background-light: #f8f9fa; /* Fondo general del dashboard */
+  --background-medium: #e9ecef; /* Fondo para elementos interactivos o secciones */
+  --border-color: #e0e0e0; /* Borde general, más suave */
+  --divider-color: #eeeeee; /* Líneas divisorias, muy suaves */
+
+  /* Colores de estado semántico */
+  --success-color: #4CAF50; /* Verde para éxito/aceptado */
+  --success-light: #E8F5E9; /* Fondo claro para éxito */
+  --success-dark: #388E3C; /* Texto oscuro para éxito */
+
+  --error-color: #f44336; /* Rojo para error/cancelado/rechazado */
+  --error-light: #FFEBEE; /* Fondo claro para error */
+  --error-dark: #d32f2f; /* Texto oscuro para error / hover de peligro */
+
+  --warning-color: #ff9800; /* Naranja para advertencia/pendiente */
+  --info-color: #2196f3; /* Azul para información */
+
+  /* Variables de sombra para consistencia */
+  --shadow-light: rgba(0, 0, 0, 0.05); /* Sombra muy sutil */
+  --shadow-medium: rgba(0, 0, 0, 0.1); /* Sombra estándar para elementos levantados */
+  --shadow-strong: rgba(0, 0, 0, 0.15); /* Sombra para hover/activo */
+  --shadow-deep: rgba(0, 0, 0, 0.2); /* Sombra más profunda */
+
+  /* Espaciado */
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 0.8rem;
+  --spacing-md: 1.2rem;
+  --spacing-lg: 1.8rem;
+  --spacing-xl: 2.5rem;
+}
+
+
 .container {
   max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f5fbfc;
+  margin: var(--spacing-md) auto; /* Usar variable de espaciado */
+  padding: var(--spacing-md);
+  font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--background-light); /* Usar variable de fondo claro */
+  border-radius: 15px;
+  box-shadow: 0 10px 30px var(--shadow-light); /* Usar variable de sombra */
 }
 
 .header {
-  background: linear-gradient(135deg, #00acc1, #00838f);
+  background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end)); /* Usar variables de gradiente */
   color: white;
-  padding: 25px;
-  border-radius: 12px;
-  margin-bottom: 30px;
+  padding: var(--spacing-xl); /* Usar variable de espaciado */
+  border-radius: 15px;
+  margin-bottom: var(--spacing-xl); /* Usar variable de espaciado */
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 5px 20px rgba(0, 172, 193, 0.2);
+  box-shadow: 0 8px 25px var(--primary-glow); /* Usar variable de glow */
+  position: relative;
+  overflow: hidden;
 }
+
+/* --- Added subtle background pattern/effect for header --- */
+.header::before {
+  content: '';
+  position: absolute;
+  top: -50px;
+  left: -50px;
+  width: 200px;
+  height: 200px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  filter: blur(40px);
+  transform: rotate(20deg);
+}
+.header::after {
+  content: '';
+  position: absolute;
+  bottom: -30px;
+  right: -30px;
+  width: 120px;
+  height: 120px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  filter: blur(30px);
+  transform: rotate(-30deg);
+}
+/* --- End of header enhancements --- */
 
 .headerContent {
   flex: 1;
+  display: flex;
+  align-items: center; /* Alinea el icono y el grupo de texto en el centro vertical */
+  gap: var(--spacing-md); /* Espacio entre el icono y el bloque de texto */
+}
+
+/* Contenedor para el h2 y p dentro de headerContent */
+.headerTextGroup {
+  display: flex;
+  flex-direction: column; /* Apila el h2 y el p */
+  align-items: flex-start; /* Alinea el texto a la izquierda dentro de su grupo */
 }
 
 .header h2 {
-  margin: 0;
-  font-size: 1.8rem;
+  margin: 0; /* Elimina márgenes predeterminados */
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: white; /* Asegura que el título sea blanco */
 }
 
 .header p {
-  margin: 5px 0 0;
-  opacity: 0.9;
-  font-size: 1rem;
+  margin: 0; /* Elimina márgenes predeterminados */
+  margin-top: 5px; /* Espacio entre el h2 y el p */
+  opacity: 0.95;
+  font-size: 1.1rem;
+  max-width: 80%; /* Para que el texto no sea demasiado largo */
+  color: white; /* Texto blanco */
+  line-height: 1.4;
+  font-weight: 400; /* Asegura que no sea demasiado negrita, es una descripción */
 }
 
 .headerIcon {
-  font-size: 2rem;
-  margin-right: 15px;
-  color: #e0f7fa;
+  font-size: 2.5rem;
+  color: white; /* Icono blanco */
 }
 
 .backButton {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.25);
   border: none;
   color: white;
-  padding: 10px 20px;
+  padding: var(--spacing-sm) var(--spacing-lg); /* Usar variables de espaciado */
   border-radius: 30px;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-weight: 500;
-  transition: all 0.3s;
+  gap: var(--spacing-xs); /* Usar variable de espaciado */
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  box-shadow: 0 2px 8px var(--shadow-light); /* Usar variable de sombra */
 }
 
 .backButton:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px var(--shadow-medium); /* Usar variable de sombra */
 }
 
 .loadingContainer, .errorContainer {
@@ -62,275 +162,521 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100vh;
+  min-height: 80vh;
   text-align: center;
+  padding: var(--spacing-md);
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 5px 20px var(--shadow-light); /* Usar variable de sombra */
 }
 
 .spinner {
-  font-size: 3rem;
-  color: #00acc1;
-  margin-bottom: 20px;
+  font-size: 4rem;
+  color: var(--primary-color); /* Usar variable de color */
+  margin-bottom: var(--spacing-md); /* Usar variable de espaciado */
+  animation: spin 1.5s linear infinite;
 }
 
-.errorContainer {
-  color: #e53935;
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loadingContainer p, .errorContainer p {
+  font-size: 1.2rem;
+  color: var(--text-medium); /* Usar variable de color */
+  margin-bottom: var(--spacing-lg); /* Usar variable de espaciado */
+}
+
+.errorIcon {
+  font-size: 4rem;
+  color: var(--error-color); /* Usar variable de color */
+  margin-bottom: var(--spacing-md); /* Usar variable de espaciado */
+}
+
+.errorContainer .backButton {
+  background-color: var(--error-color); /* Usar variable de color */
+  color: white;
+  box-shadow: 0 2px 8px var(--shadow-light); /* Usar variable de sombra */
+}
+.errorContainer .backButton:hover {
+  background-color: var(--error-dark); /* Usar variable de color */
 }
 
 .serviceCard {
   background: white;
-  border-radius: 12px;
-  padding: 20px;
-  margin-bottom: 30px;
-  box-shadow: 0 3px 15px rgba(0, 0, 0, 0.05);
+  border-radius: 15px;
+  padding: var(--spacing-md); /* Usar variable de espaciado */
+  margin-bottom: var(--spacing-xl); /* Usar variable de espaciado */
+  box-shadow: 0 5px 20px var(--shadow-medium); /* Usar variable de sombra */
+  border: 1px solid var(--primary-light); /* Usar variable de color */
 }
 
 .serviceHeader {
   display: flex;
   align-items: center;
-  margin-bottom: 15px;
-  border-bottom: 2px solid #e0f7fa;
-  padding-bottom: 10px;
+  margin-bottom: var(--spacing-md); /* Usar variable de espaciado */
+  border-bottom: 2px solid var(--primary-light); /* Usar variable de color */
+  padding-bottom: var(--spacing-sm); /* Usar variable de espaciado */
 }
 
 .serviceIcon {
-  color: #00acc1;
-  font-size: 1.5rem;
-  margin-right: 10px;
+  color: var(--primary-color); /* Usar variable de color */
+  font-size: 1.8rem;
+  margin-right: var(--spacing-sm); /* Usar variable de espaciado */
 }
 
 .serviceHeader h3 {
   margin: 0;
-  color: #00796b;
+  color: var(--primary-semi-dark); /* Usar variable de color */
+  font-size: 1.4rem;
+  font-weight: 600;
 }
 
 .serviceDetails h4 {
-  margin: 0 0 10px;
-  color: #333;
+  margin: 0 0 12px;
+  color: var(--text-dark); /* Usar variable de color */
+  font-size: 1.5rem;
+  font-weight: 700;
 }
 
 .serviceDetails p {
-  margin: 0 0 15px;
-  color: #666;
+  margin: 0 0 20px;
+  color: var(--text-medium); /* Usar variable de color */
+  line-height: 1.6;
 }
 
 .servicePrice {
-  background: #e0f7fa;
+  background: none; /* Eliminar fondo azul */
   display: inline-block;
-  padding: 5px 15px;
-  border-radius: 20px;
+  padding: 0; /* Eliminar padding para que no ocupe espacio el fondo */
+  border-radius: 0; /* Eliminar border-radius */
   font-weight: bold;
-  color: #00796b;
-}
-
-.servicePrice span {
-  font-size: 1.2rem;
+  color: var(--primary-semi-dark); /* Color del texto del precio */
+  font-size: 1.3rem;
+  box-shadow: none; /* Eliminar sombra */
 }
 
 .formContainer {
   display: flex;
-  gap: 30px;
-  margin-bottom: 30px;
+  gap: var(--spacing-xl); /* Usar variable de espaciado */
+  margin-bottom: var(--spacing-xl); /* Usar variable de espaciado */
 }
 
-.formSection {
+.formSection, .scheduleSection {
   flex: 1;
   background: white;
-  border-radius: 12px;
-  padding: 25px;
-  box-shadow: 0 3px 15px rgba(0, 0, 0, 0.05);
+  border-radius: 15px;
+  padding: var(--spacing-lg); /* Usar variable de espaciado */
+  box-shadow: 0 5px 20px var(--shadow-medium); /* Usar variable de sombra */
+  border: 1px solid var(--primary-light); /* Usar variable de color */
 }
 
 .scheduleSection {
   flex: 2;
-  background: white;
-  border-radius: 12px;
-  padding: 25px;
-  box-shadow: 0 3px 15px rgba(0, 0, 0, 0.05);
 }
 
 .formGroup {
-  margin-bottom: 20px;
+  margin-bottom: var(--spacing-md); /* Usar variable de espaciado */
 }
 
 .formLabel {
   display: block;
-  margin-bottom: 8px;
-  font-weight: 500;
-  color: #00796b;
+  margin-bottom: var(--spacing-xs); /* Usar variable de espaciado */
+  font-weight: 600;
+  color: var(--primary-semi-dark); /* Usar variable de color */
   display: flex;
   align-items: center;
+  font-size: 1.1rem;
 }
 
 .inputIcon {
-  color: #00acc1;
-  margin-right: 10px;
-  font-size: 1rem;
+  color: var(--primary-color); /* Usar variable de color */
+  margin-right: var(--spacing-xs); /* Usar variable de espaciado */
+  font-size: 1.2rem;
 }
 
 .selectInput {
   width: 100%;
-  padding: 12px 15px;
-  border: 1px solid #e0f7fa;
-  border-radius: 8px;
+  padding: var(--spacing-sm) var(--spacing-md); /* Usar variables de espaciado */
+  border: 1px solid var(--primary-light); /* Usar variable de color */
+  border-radius: 10px;
   font-size: 1rem;
-  background: #f5fbfc;
-  transition: all 0.3s;
+  background: #fdfefe;
+  transition: all 0.3s ease-in-out;
+  box-shadow: inset 0 1px 3px var(--shadow-light); /* Usar variable de sombra */
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2300ACC1'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E"); /* Asegúrate de que el fill sea var(--primary-color) en su valor hex */
+  background-repeat: no-repeat;
+  background-position: right 15px center;
+  background-size: 20px;
 }
 
 .selectInput:focus {
-  border-color: #00acc1;
+  border-color: var(--primary-color); /* Usar variable de color */
   outline: none;
-  box-shadow: 0 0 0 3px rgba(0, 172, 193, 0.1);
+  box-shadow: 0 0 0 4px var(--primary-glow); /* Usar variable de glow */
+}
+
+.formHint {
+  margin-top: var(--spacing-xs); /* Usar variable de espaciado */
+  font-size: 0.95rem;
+  color: var(--text-light); /* Usar variable de color */
+}
+
+.formHint a {
+  color: var(--primary-color); /* Usar variable de color */
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.formHint a:hover {
+  text-decoration: underline;
 }
 
 .sectionHeader {
   display: flex;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: var(--spacing-md); /* Usar variable de espaciado */
+  border-bottom: 2px solid var(--primary-light); /* Usar variable de color */
+  padding-bottom: var(--spacing-sm); /* Usar variable de espaciado */
 }
 
 .sectionIcon {
-  color: #00acc1;
-  font-size: 1.5rem;
-  margin-right: 10px;
+  color: var(--primary-color); /* Usar variable de color */
+  font-size: 1.8rem;
+  margin-right: var(--spacing-sm); /* Usar variable de espaciado */
 }
 
 .sectionHeader h3 {
   margin: 0;
-  color: #00796b;
+  color: var(--primary-semi-dark); /* Usar variable de color */
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+.calendarContainer {
+  margin-bottom: var(--spacing-lg); /* Usar variable de espaciado */
 }
 
 .calendar {
   width: 100%;
   border: none;
   font-family: inherit;
+  background-color: white;
+  box-shadow: 0 2px 10px var(--shadow-light); /* Usar variable de sombra */
+}
+
+/* Specific styles for react-calendar to fit your theme */
+.react-calendar {
+  border: 1px solid var(--primary-light) !important; /* Usar variable de color */
+  border-radius: 10px !important;
+  box-shadow: none !important;
+}
+.react-calendar__navigation button {
+  color: var(--primary-color) !important; /* Usar variable de color */
+  font-size: 1.2rem !important;
+}
+.react-calendar__navigation button:enabled:hover,
+.react-calendar__navigation button:enabled:focus {
+  background-color: var(--background-medium) !important; /* Usar variable de color */
+  border-radius: 8px;
+}
+.react-calendar__month-view__weekdays__weekday {
+  color: var(--primary-semi-dark) !important; /* Usar variable de color */
+  font-weight: 600 !important;
+  text-transform: uppercase;
+  font-size: 0.9rem !important;
+  padding-bottom: 10px;
+}
+.react-calendar__tile {
+  padding: 12px 0px !important;
+  font-size: 1rem !important;
+  border-radius: 6px !important;
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+.react-calendar__tile--now {
+  background: var(--primary-light) !important; /* Usar variable de color */
+  color: var(--primary-semi-dark) !important; /* Usar variable de color */
+  font-weight: 600;
+}
+.react-calendar__tile--now:enabled:hover,
+.react-calendar__tile--now:enabled:focus {
+  background: var(--primary-semi-dark) !important; /* Usar variable de color */
+}
+.react-calendar__tile--active {
+  background: var(--primary-color) !important; /* Usar variable de color */
+  color: white !important;
+  font-weight: 700 !important;
+  box-shadow: 0 2px 8px var(--primary-glow); /* Usar variable de glow */
+}
+.react-calendar__tile--active:enabled:hover,
+.react-calendar__tile--active:enabled:focus {
+  background: var(--primary-semi-dark) !important; /* Usar variable de color */
+}
+.react-calendar__tile:enabled:hover,
+.react-calendar__tile:enabled:focus {
+  background-color: var(--background-medium) !important; /* Usar variable de color */
+}
+/* Ensure selected time and date are clearly distinguishable */
+.react-calendar__tile--hasActive:enabled:hover,
+.react-calendar__tile--hasActive:enabled:focus {
+  background-color: var(--primary-semi-dark) !important; /* Maintain darker background for selected on hover/focus */
 }
 
 
+.timeContainer {
+  margin-top: var(--spacing-lg); /* Usar variable de espaciado */
+}
 
 .timeSlots {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: var(--spacing-sm); /* Usar variable de espaciado */
 }
 
 .timeSlot {
-  background: #e0f7fa;
+  background: var(--primary-light); /* Usar variable de color */
   border: none;
-  padding: 12px;
-  border-radius: 8px;
+  padding: var(--spacing-sm); /* Usar variable de espaciado */
+  border-radius: 10px;
   cursor: pointer;
-  font-size: 1rem;
-  transition: all 0.3s;
+  font-size: 1.1rem;
+  font-weight: 500;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   text-align: center;
+  box-shadow: 0 1px 3px var(--shadow-light); /* Usar variable de sombra */
 }
 
-.timeSlot:hover {
-  background: #b2ebf2;
+.timeSlot:hover:not(.selectedTime) {
+  background: var(--primary-semi-dark); /* Usar variable de color */
+  color: white; /* Añadido para mejor contraste en hover */
+  transform: translateY(-2px);
+  box-shadow: 0 3px 8px var(--shadow-medium); /* Usar variable de sombra */
 }
 
 .selectedTime {
-  background: #00acc1;
+  background: var(--primary-color); /* Usar variable de color */
   color: white;
+  box-shadow: 0 3px 10px var(--primary-glow); /* Usar variable de glow */
+  transform: scale(1.02);
+  border: 2px solid var(--primary-semi-dark); /* Usar variable de color */
 }
 
-.errorMessage {
-  background: #ffebee;
-  color: #e53935;
-  padding: 15px;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  text-align: center;
-}
-
-.successMessage {
-  background: #e8f5e9;
-  color: #2e7d32;
-  padding: 15px;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  text-align: center;
+.errorMessage, .successMessage {
+  padding: var(--spacing-md); /* Usar variable de espaciado */
+  border-radius: 10px;
+  margin-bottom: var(--spacing-lg); /* Usar variable de espaciado */
+  font-size: 1.1rem;
+  font-weight: 500;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: var(--spacing-xs); /* Usar variable de espaciado */
+  animation: fadeInScale 0.4s ease-out;
+}
+
+.errorMessage {
+  background: var(--error-light); /* Usar variable de color */
+  color: var(--error-dark); /* Usar variable de color */
+  border: 1px solid var(--error-color); /* Usar variable de color */
+}
+
+.successMessage {
+  background: var(--success-light); /* Usar variable de color */
+  color: var(--success-dark); /* Usar variable de color */
+  border: 1px solid var(--success-color); /* Usar variable de color */
+}
+
+@keyframes fadeInScale {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 .actions {
   display: flex;
   justify-content: center;
-  margin-bottom: 30px;
+  margin-bottom: var(--spacing-xl); /* Usar variable de espaciado */
 }
 
 .submitButton {
-  background: #00acc1;
+  background: var(--primary-color); /* Usar variable de color */
   color: white;
   border: none;
-  padding: 15px 40px;
-  border-radius: 30px;
-  font-size: 1.1rem;
-  font-weight: 500;
+  padding: 12px 30px; /* **CAMBIO: Padding más pequeño** */
+  border-radius: 35px;
+  font-size: 1rem; /* **CAMBIO: Fuente más pequeña** */
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--spacing-xs); /* Usar variable de espaciado */
+  box-shadow: 0 5px 15px var(--primary-glow); /* Usar variable de glow */
 }
 
 .submitButton:disabled {
-  background: #b2ebf2;
+  background: var(--background-medium); /* Un color neutro para deshabilitado */
+  color: var(--text-light); /* Texto más claro para deshabilitado */
   cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+  border: 1px solid var(--border-color); /* Borde sutil para deshabilitado */
 }
 
 .submitButton:hover:not(:disabled) {
-  background: #00838f;
-  transform: translateY(-2px);
-  box-shadow: 0 3px 10px rgba(0, 140, 158, 0.3);
+  background: var(--primary-semi-dark); /* Usar variable de color */
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px var(--primary-glow); /* Usar variable de glow */
 }
 
 .additionalInfo {
-  background: #e0f7fa;
-  border-radius: 12px;
-  padding: 20px;
+  background: var(--background-medium); /* Usar variable de color */
+  border-radius: 15px;
+  padding: var(--spacing-lg); /* Usar variable de espaciado */
   text-align: center;
+  box-shadow: 0 3px 15px var(--shadow-light); /* Usar variable de sombra */
+  border: 1px solid var(--border-color); /* Usar variable de color */
 }
 
 .additionalInfo h3 {
-  color: #00796b;
+  color: var(--primary-semi-dark); /* Usar variable de color */
   margin-top: 0;
+  font-size: 1.6rem;
+  margin-bottom: var(--spacing-sm); /* Usar variable de espaciado */
+}
+
+.additionalInfo p {
+  color: var(--text-medium); /* Usar variable de color */
+  line-height: 1.6;
+  font-size: 1rem;
 }
 
 .contactInfo {
   background: white;
-  padding: 15px;
-  border-radius: 8px;
+  padding: var(--spacing-md); /* Usar variable de espaciado */
+  border-radius: 10px;
   display: inline-block;
-  margin-top: 10px;
+  margin-top: var(--spacing-md); /* Usar variable de espaciado */
+  box-shadow: 0 2px 8px var(--shadow-light); /* Usar variable de sombra */
+  border: 1px solid var(--border-color); /* Usar variable de color */
 }
 
+.contactInfo strong {
+  color: var(--primary-semi-dark); /* Usar variable de color */
+}
+
+/* --- Responsive Adjustments --- */
 @media (max-width: 992px) {
   .formContainer {
-    flex-direction: column;
+      flex-direction: column;
+      gap: var(--spacing-lg); /* Reducir gap en pantallas más pequeñas */
   }
-  
-  .timeSlots {
-    grid-template-columns: repeat(2, 1fr);
+
+  .scheduleSection {
+      flex: auto;
+  }
+
+  .header {
+      padding: var(--spacing-lg); /* Ajustar padding */
+  }
+  .header h2 {
+      font-size: 1.8rem;
+  }
+  .header p {
+      font-size: 1rem;
+  }
+  .headerIcon {
+      font-size: 2rem;
+  }
+
+  .serviceCard, .formSection, .scheduleSection, .additionalInfo {
+      padding: var(--spacing-lg);
   }
 }
 
-@media (max-width: 576px) {
-  .header {
-    flex-direction: column;
-    text-align: center;
-    gap: 15px;
+@media (max-width: 768px) {
+  .container {
+      padding: var(--spacing-sm);
+      margin: var(--spacing-sm) auto;
   }
-  
+  .headerContent {
+      flex-direction: column; /* Cambiar a columna para apilar icono y texto */
+      align-items: center; /* Centrar elementos en dispositivos pequeños */
+      text-align: center; /* Centrar texto */
+  }
+  .headerIcon {
+      margin-right: 0;
+      margin-bottom: var(--spacing-xs);
+  }
+  .header h2 {
+      font-size: 1.6rem;
+  }
+  .header p {
+      font-size: 0.95rem;
+  }
   .backButton {
-    width: 100%;
-    justify-content: center;
+      padding: var(--spacing-xs) var(--spacing-md);
+      font-size: 0.9rem;
   }
-  
+  .serviceHeader h3, .sectionHeader h3 {
+      font-size: 1.2rem;
+  }
+  .serviceDetails h4 {
+      font-size: 1.3rem;
+  }
+  .servicePrice span {
+      font-size: 1.1rem;
+  }
+  .formLabel {
+      font-size: 1rem;
+  }
+  .selectInput, .timeSlot {
+      padding: var(--spacing-xs);
+      font-size: 0.95rem;
+  }
   .timeSlots {
-    grid-template-columns: 1fr;
+      grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+      gap: var(--spacing-xs);
+  }
+  .errorMessage, .successMessage {
+      font-size: 1rem;
+      padding: var(--spacing-sm);
+  }
+  .submitButton {
+      padding: var(--spacing-sm) var(--spacing-lg);
+      font-size: 1.1rem;
+  }
+  .additionalInfo h3 {
+      font-size: 1.4rem;
+  }
+  .contactInfo {
+      padding: var(--spacing-sm);
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: var(--spacing-md);
+  }
+  .headerContent {
+      align-items: center;
+  }
+  .header p {
+      text-align: center;
+      max-width: 100%;
+  }
+  .backButton {
+      width: 80%;
+      justify-content: center;
+  }
+  .timeSlots {
+      grid-template-columns: 1fr;
+  }
+  .submitButton {
+      width: 90%;
   }
 }
