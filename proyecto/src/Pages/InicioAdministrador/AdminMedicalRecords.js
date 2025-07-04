@@ -1,10 +1,9 @@
-// src/Pages/InicioAdministrador/AdminMedicalRecords.js
 import React, { useState, useEffect, useCallback } from 'react';
 import { FaFileMedical, FaPlus, FaSearch, FaTimes, FaEdit, FaTrash, FaInfoCircle, FaSpinner } from 'react-icons/fa';
 import AdminMedicalRecordForm from './AdminMedicalRecordForm'; // Asegúrate de que la ruta sea correcta
 import Modal from '../../Components/Modal'; // Asegúrate de que la ruta sea correcta
 import Notification from '../../Components/Notification'; // Asegúrate de que la ruta sea correcta
-import './Styles/AdminStyles.css';
+import './Styles/AdminMedicalrecords.css';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
@@ -13,10 +12,10 @@ const AdminMedicalRecords = ({ user }) => {
     const [filteredRecords, setFilteredRecords] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState('');
+    const [error, setError] = useState(''); // Estado para errores de carga o eliminación
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [currentRecord, setCurrentRecord] = useState(null);
-    const [notification, setNotification] = useState(null);
+    const [notification, setNotification] = useState(null); // Estado para notificaciones de éxito/info
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [recordToDelete, setRecordToDelete] = useState(null);
 
@@ -45,8 +44,18 @@ const AdminMedicalRecords = ({ user }) => {
         });
 
         if (response.status === 401 || response.status === 403) {
+            // Limpiar token si la sesión ha expirado y redirigir
+            localStorage.removeItem('token');
             setError('Sesión expirada o no autorizado. Por favor, inicia sesión de nuevo.');
+            // Opcional: Redirigir a la página de login
+            // window.location.href = '/login'; 
             throw new Error('No autorizado');
+        }
+
+        // Mejora: Capturar mensajes de error específicos del backend para otros códigos de estado no exitosos
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || `Error del servidor: ${response.status}`);
         }
 
         return response;
@@ -54,19 +63,21 @@ const AdminMedicalRecords = ({ user }) => {
 
     const fetchMedicalRecords = useCallback(async () => {
         setIsLoading(true);
-        setError('');
+        setError(''); // Limpiar errores anteriores de carga
+        setNotification(null); // Limpiar notificaciones anteriores
         try {
             const response = await authFetch(`${API_BASE_URL}/admin/historiales`);
             const data = await response.json();
             if (data.success) {
                 setMedicalRecords(data.data);
-                setFilteredRecords(data.data);
+                setFilteredRecords(data.data); // Asegurar que los filtrados se actualicen con los nuevos datos
             } else {
                 setError(data.message || 'Error al cargar historiales médicos.');
             }
         } catch (err) {
             console.error('Error fetching medical records:', err);
-            setError('Error al conectar con el servidor para cargar historiales médicos.');
+            // El error ya se setea en authFetch, pero si hay un error de red, lo capturamos aquí
+            setError(prev => prev || `Error al conectar con el servidor: ${err.message || 'Verifica tu conexión.'}`);
         } finally {
             setIsLoading(false);
         }
@@ -81,8 +92,9 @@ const AdminMedicalRecords = ({ user }) => {
         const filtered = medicalRecords.filter(record =>
             record.mascota.toLowerCase().includes(lowercasedFilter) ||
             record.propietario.toLowerCase().includes(lowercasedFilter) ||
-            record.veterinario.toLowerCase().includes(lowercasedFilter) ||
-            record.diagnostico.toLowerCase().includes(lowercasedFilter)
+            (record.veterinario && record.veterinario.toLowerCase().includes(lowercasedFilter)) || // Asegurarse que veterinario exista
+            record.diagnostico.toLowerCase().includes(lowercasedFilter) ||
+            record.id_historial.toString().includes(lowercasedFilter) // Permite buscar por ID
         );
         setFilteredRecords(filtered);
     }, [searchTerm, medicalRecords]);
@@ -90,21 +102,28 @@ const AdminMedicalRecords = ({ user }) => {
     const handleAddNew = () => {
         setCurrentRecord(null);
         setIsFormOpen(true);
+        setError(''); // Limpiar errores al abrir el formulario
+        setNotification(null); // Limpiar notificaciones al abrir el formulario
     };
 
     const handleEdit = (record) => {
         setCurrentRecord(record);
         setIsFormOpen(true);
+        setError(''); // Limpiar errores al abrir el formulario
+        setNotification(null); // Limpiar notificaciones al abrir el formulario
     };
 
     const handleDeleteConfirm = (record) => {
         setRecordToDelete(record);
         setShowDeleteConfirm(true);
+        setError(''); // Limpiar errores al abrir la confirmación
+        setNotification(null); // Limpiar notificaciones al abrir la confirmación
     };
 
     const handleDelete = async () => {
         setIsLoading(true); // Bloquear UI durante la eliminación
-        setNotification(null);
+        setNotification(null); // Limpiar notificaciones anteriores
+        setError(''); // Limpiar errores anteriores
         try {
             const response = await authFetch(`${API_BASE_URL}/historial_medico/${recordToDelete.id_historial}`, {
                 method: 'DELETE',
@@ -115,15 +134,29 @@ const AdminMedicalRecords = ({ user }) => {
                 setNotification({ message: data.message, type: 'success' });
                 fetchMedicalRecords(); // Recargar la lista
             } else {
-                setError(data.message || 'Error al eliminar el historial médico.');
+                setError(data.message || 'Error al eliminar el historial médico. Intenta de nuevo.');
             }
         } catch (err) {
             console.error('Error deleting medical record:', err);
-            setError('Error al conectar con el servidor para eliminar el historial médico.');
+            setError(prev => prev || `Error al conectar con el servidor: ${err.message || 'Verifica tu conexión.'}`);
         } finally {
             setIsLoading(false);
             setShowDeleteConfirm(false);
             setRecordToDelete(null);
+        }
+    };
+
+    // Función para formatear la fecha
+    const formatDateTime = (isoString) => {
+        if (!isoString) return 'N/A';
+        try {
+            const date = new Date(isoString);
+            // Ajustar para la zona horaria de Bogotá (GMT-5)
+            const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'America/Bogota' };
+            return date.toLocaleString('es-CO', options);
+        } catch (e) {
+            console.error("Error formatting date:", e);
+            return isoString; // Retorna el string original si falla el formato
         }
     };
 
@@ -145,10 +178,11 @@ const AdminMedicalRecords = ({ user }) => {
                     <FaSearch className="search-icon" />
                     <input
                         type="text"
-                        placeholder="Buscar por mascota, propietario, veterinario o diagnóstico..."
+                        placeholder="Buscar por mascota, propietario, veterinario, diagnóstico o ID..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="search-input"
+                        disabled={isLoading} // Deshabilitar búsqueda mientras se carga
                     />
                     {searchTerm && (
                         <FaTimes className="clear-search" onClick={() => setSearchTerm('')} />
@@ -167,7 +201,7 @@ const AdminMedicalRecords = ({ user }) => {
                 <div className="table-responsive">
                     <table className="admin-table">
                         <thead>
-                            <tr>{/* No whitespace here */}
+                            <tr>
                                 <th>ID Historial</th>
                                 <th>Fecha Consulta</th>
                                 <th>Mascota</th>
@@ -175,13 +209,13 @@ const AdminMedicalRecords = ({ user }) => {
                                 <th>Veterinario</th>
                                 <th>Diagnóstico</th>
                                 <th>Acciones</th>
-                            </tr>{/* No whitespace here */}
+                            </tr>
                         </thead>
                         <tbody>
                             {filteredRecords.map((record) => (
-                                <tr key={record.id_historial}>{/* No whitespace here */}
+                                <tr key={record.id_historial}>
                                     <td>{record.id_historial}</td>
-                                    <td>{record.fecha_consulta}</td>
+                                    <td>{formatDateTime(record.fecha_consulta)}</td> {/* Formatear fecha */}
                                     <td>{record.mascota} ({record.especie})</td>
                                     <td>{record.propietario}</td>
                                     <td>{record.veterinario || 'N/A'}</td>
@@ -214,7 +248,7 @@ const AdminMedicalRecords = ({ user }) => {
                     <FaInfoCircle className="info-icon" />
                     {searchTerm ?
                         'No se encontraron historiales médicos que coincidan con la búsqueda.' :
-                        'No hay historiales médicos registrados.'}
+                        'No hay historiales médicos registrados. ¡Comienza agregando uno nuevo!'}
                     <button
                         className="add-btn"
                         onClick={handleAddNew}
@@ -237,12 +271,12 @@ const AdminMedicalRecords = ({ user }) => {
 
             <Modal isOpen={showDeleteConfirm} onClose={() => setShowDeleteConfirm(false)} title="Confirmar Eliminación">
                 <div className="modal-content-delete">
-                    <p>¿Estás seguro de que quieres eliminar el historial médico de <strong>{recordToDelete?.mascota}</strong> ({recordToDelete?.propietario}) con fecha <strong>{recordToDelete?.fecha_consulta}</strong>?</p>
+                    <p>¿Estás seguro de que quieres eliminar el historial médico de <strong>{recordToDelete?.mascota}</strong> ({recordToDelete?.propietario}) con fecha <strong>{formatDateTime(recordToDelete?.fecha_consulta)}</strong>?</p>
                     <div className="form-actions">
                         <button className="btn-delete" onClick={handleDelete} disabled={isLoading}>
                             {isLoading ? <FaSpinner className="spinner" /> : <FaTrash />} Eliminar
                         </button>
-                        <button className="btn-secondary" onClick={() => setShowDeleteConfirm(false)} disabled={isLoading}>
+                        <button className="btn-secondary" onClick={() => setShowDeleteConfirm(false)} disabled={isLoading}> {/* Deshabilitar durante carga */}
                             <FaTimes /> Cancelar
                         </button>
                     </div>

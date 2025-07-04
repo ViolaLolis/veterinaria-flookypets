@@ -1,4 +1,3 @@
-// src/Pages/InicioAdministrador/AdminAppointments.js
 import React, { useState, useEffect, useCallback } from 'react';
 import {
     FaCalendarAlt, FaSearch, FaUser, FaNotesMedical,
@@ -7,7 +6,6 @@ import {
 } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 import { authFetch } from '../../utils/api'; // Ruta ajustada
-// Importamos el componente AdminAppointmentForm
 import AdminAppointmentForm from './AdminAppointmentForm';
 import Modal from '../../Components/Modal'; // Para el modal de confirmación de eliminación
 import { useNotifications } from '../../Notifications/NotificationContext';

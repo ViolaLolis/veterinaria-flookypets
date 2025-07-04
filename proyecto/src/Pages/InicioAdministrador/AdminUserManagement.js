@@ -4,7 +4,7 @@ import { FaUser, FaPlus, FaSearch, FaTimes, FaSave, FaSpinner, FaEdit, FaTrash, 
 import { validateField } from '../../utils/validation'; // Importar la función de validación
 import Modal from '../../Components/Modal';
 import Notification from '../../Components/Notification';
-import './Styles/AdminStyles.css'; // Asegúrate de que los estilos sean adecuados
+import './Styles/AdminUserManagement.css'; // Asegúrate de que los estilos sean adecuados
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 

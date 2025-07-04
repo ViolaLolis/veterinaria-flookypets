@@ -3,11 +3,10 @@ import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import {
     FaTachometerAlt, FaUsers, FaStethoscope, FaUserShield, FaBriefcaseMedical,
     FaCalendarAlt, FaNotesMedical, FaCog, FaSignOutAlt, FaUserCircle,
-    FaBars, FaTimes // Se eliminaron FaBell y FaCheckCircle ya que no se usan en el código activo
+    FaBars, FaTimes 
 } from 'react-icons/fa';
 import './Styles/AdminDashboard.css';
-// Se eliminó la importación de useNotifications, ya que las notificaciones en el header están comentadas
-// import { useNotifications } from '../../Notifications/NotificationContext';
+
 
 function AdminDashboard({ user, setUser, handleLogout }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);

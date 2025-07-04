@@ -1,303 +1,397 @@
-/* AdminMedicalRecords.css - Diseño Profesional Mejorado */
-
-:root {
-  --primary: #00acc1;
-  --primary-light: rgba(0, 172, 193, 0.1);
-  --primary-dark: #008c9e;
-  --primary-glow: rgba(0, 172, 193, 0.3);
-  --secondary: #ecf0f1;
-  --secondary-dark: #dfe6e9;
-  --text-dark: #2c3e50;
-  --text-light: #7f8c8d;
-  --white: #ffffff;
-  --success: #1dd1a1;
-  --warning: #ff9f43;
-  --danger: #ff6b6b;
-  --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  --transition: all 0.3s ease;
+/* Estilos Generales del Contenedor de Administración */
+.admin-container {
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    margin: 20px auto;
+    max-width: 1200px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #333;
 }
 
-/* Estructura Principal */
-.admin-content-container {
-  background-color: var(--white);
-  border-radius: 8px;
-  box-shadow: var(--shadow);
-  padding: 2rem;
-  margin: 1.5rem;
-  border: 1px solid rgba(0, 172, 193, 0.1);
-  position: relative;
-  overflow: hidden;
+.admin-title {
+    font-size: 2.2em;
+    color: #00acc1;
+    margin-bottom: 25px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
 }
 
-.admin-content-container::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    135deg,
-    rgba(0, 172, 193, 0.03) 0%,
-    rgba(255, 255, 255, 0) 60%
-  );
-  pointer-events: none;
+/* Acciones y Barra de Búsqueda */
+.admin-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+    gap: 15px;
 }
 
-/* Encabezado */
-.admin-content-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
-  padding-bottom: 1.5rem;
-  border-bottom: 1px solid var(--secondary-dark);
-  flex-wrap: wrap;
-  gap: 1.5rem;
+.search-bar {
+    position: relative;
+    flex-grow: 1;
+    max-width: 400px;
 }
 
-.admin-content-header h2 {
-  color: var(--text-dark);
-  font-size: 1.8rem;
-  font-weight: 600;
-  margin: 0;
-  display: flex;
-  align-items: center;
+.search-input {
+    width: 100%;
+    padding: 10px 10px 10px 40px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1em;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.08);
+    transition: border-color 0.3s ease;
 }
 
-.header-icon {
-  color: var(--primary);
-  margin-right: 1rem;
-  font-size: 1.5rem;
-  transition: var(--transition);
-}
-
-.admin-content-header:hover .header-icon {
-  transform: rotate(15deg);
-}
-
-/* Barra de Búsqueda */
-.search-box {
-  position: relative;
-  flex-grow: 1;
-  min-width: 300px;
-  max-width: 500px;
-}
-
-.search-box input {
-  width: 100%;
-  padding: 0.8rem 1rem 0.8rem 3rem;
-  border: 1px solid var(--secondary-dark);
-  border-radius: 6px;
-  font-size: 0.95rem;
-  transition: var(--transition);
-  background-color: var(--white);
-}
-
-.search-box input:focus {
-  outline: none;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(0, 172, 193, 0.2);
+.search-input:focus {
+    border-color: #00acc1;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
 }
 
 .search-icon {
-  position: absolute;
-  left: 1rem;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--primary);
-  font-size: 1rem;
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #888;
 }
 
-/* Tabla */
-.admin-table-container {
-  overflow-x: auto;
-  background-color: var(--white);
-  border-radius: 8px;
-  box-shadow: var(--shadow);
-  margin-top: 1.5rem;
+.clear-search {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #888;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.clear-search:hover {
+    color: #555;
+}
+
+/* Botones de Acción */
+.add-btn,
+.btn-edit,
+.btn-delete,
+.btn-secondary {
+    padding: 8px 15px; /* Ajustado el padding para hacerlos un poco más compactos */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9em; /* Ligeramente más pequeños */
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px; /* Reducido el espacio entre icono y texto */
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    white-space: nowrap;
+}
+
+.add-btn {
+    background-color: #28a745;
+    color: rgb(255, 255, 255);
+}
+
+.add-btn:hover {
+    background-color: #218838;
+    box-shadow: 0 2px 5px rgba(40, 167, 69, 0.3);
+}
+
+.btn-edit {
+    background-color: #00acc1;
+    color: white;
+}
+
+.btn-edit:hover {
+    background-color: #00acc1;
+    box-shadow: 0 2px 5px rgba(0, 123, 255, 0.3);
+}
+
+/* **NUEVO ROJO MÁS SUAVE** */
+.btn-delete {
+    background-color: #663636; /* Un rojo más suave y pastel */
+    color: white;
+}
+
+.btn-delete:hover {
+    background-color: #ffffff; /* Un poco más oscuro al pasar el mouse */
+    box-shadow: 0 2px 5px rgba(255, 140, 140, 0.3);
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+    box-shadow: 0 2px 5px rgba(108, 117, 125, 0.3);
+}
+
+.add-btn:disabled,
+.btn-edit:disabled,
+.btn-delete:disabled,
+.btn-secondary:disabled,
+.search-input:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* Tabla de Registros Médicos */
+.table-responsive {
+    overflow-x: auto; /* Mantenemos el scroll si es absolutamente necesario */
+    -webkit-overflow-scrolling: touch; /* Para un scroll más suave en iOS */
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.03);
 }
 
 .admin-table {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 1200px;
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background-color: #fff;
+    /* Quita table-layout: fixed; para que las columnas se ajusten al contenido naturalmente */
+    /* table-layout: fixed; */
+}
+
+.admin-table th,
+.admin-table td {
+    padding: 10px 12px; /* Ligeramente reducido para ganar espacio */
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
+    white-space: normal; /* Permitir que el texto se envuelva */
+    word-wrap: break-word; /* Asegurar que palabras largas se rompan */
+    vertical-align: middle; /* Alineación vertical para el contenido */
 }
 
 .admin-table th {
-  background-color: var(--primary);
-  color: var(--white);
-  padding: 1.2rem 1.5rem;
-  text-align: left;
-  font-weight: 500;
-  font-size: 0.9rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  position: sticky;
-  top: 0;
+    background-color: #e9ecef;
+    color: #495057;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.88em; /* Un poco más pequeño para cabeceras */
 }
 
-.admin-table td {
-  padding: 1.2rem 1.5rem;
-  border-bottom: 1px solid var(--secondary);
-  color: var(--text-dark);
-  font-size: 0.95rem;
-  transition: var(--transition);
+.admin-table tbody tr:hover {
+    background-color: #f5f5f5;
 }
 
-.admin-table tr:last-child td {
-  border-bottom: none;
+.admin-table tbody tr:last-child td {
+    border-bottom: none;
 }
 
-.admin-table tr:hover td {
-  background-color: var(--primary-light);
+/* **COLUMNA DE ACCIONES MEJORADA** */
+.actions-column {
+    display: flex;
+    flex-wrap: wrap; /* Permite que los botones se envuelvan a la siguiente línea */
+    gap: 5px; /* Espacio entre los botones */
+    justify-content: flex-start; /* Alinear al inicio */
+    align-items: center; /* Centrar verticalmente los botones en la línea */
+    min-width: 120px; /* Asegura un ancho mínimo para la columna de acciones */
+    padding-top: 5px; /* Pequeño ajuste de padding */
+    padding-bottom: 5px;
 }
 
-/* Iconos en la tabla */
-.icon {
-  margin-right: 0.6rem;
-  color: var(--primary);
-  font-size: 1rem;
-  vertical-align: middle;
+/* Asegurar que los botones individuales en la columna de acciones no se encogen demasiado */
+.actions-column .btn-edit,
+.actions-column .btn-delete {
+    flex-shrink: 0; /* Evita que los botones se encojan */
+    font-size: 0.85em; /* Tamaño de fuente para botones en acciones */
+    padding: 6px 10px; /* Padding para botones de acción */
+    /* Si tienes más botones, podrías necesitar un ancho mínimo o flex-basis: 48%; para 2 en fila */
 }
 
-/* Botón de Acciones */
-.actions-cell {
-  white-space: nowrap;
-}
 
-.btn-primary {
-  padding: 0.7rem 1.2rem;
-  border-radius: 6px;
-  font-weight: 500;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: var(--transition);
-  background-color: var(--primary);
-  color: var(--white);
-  border: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.btn-primary:hover {
-  background-color: var(--primary-dark);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 172, 193, 0.2);
-}
-
-.btn-primary:disabled {
-  background-color: var(--secondary-dark);
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-}
-
-/* Mensajes de Estado */
+/* Indicadores de Estado */
+.loading-indicator,
+.error-message,
 .no-results {
-  text-align: center;
-  padding: 2.5rem;
-  color: var(--text-light);
-  font-size: 1.1rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.8rem;
+    text-align: center;
+    padding: 30px;
+    font-size: 1.1em;
+    color: #555;
+    background-color: #050000;
+    border-radius: 8px;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.03);
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
 }
 
-.info-icon {
-  color: var(--primary);
-  font-size: 1.5rem;
-}
-
-.loading-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 3rem;
-  gap: 1.5rem;
-}
-
-.spinner-icon {
-  font-size: 2.5rem;
-  color: var(--primary);
-  animation: spin 1.5s linear infinite;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+.loading-indicator {
+    color: #00acc1;
 }
 
 .error-message {
-  background-color: rgba(255, 107, 107, 0.1);
-  color: var(--danger);
-  padding: 1.5rem;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  border-left: 4px solid var(--danger);
-  margin: 1.5rem;
+    color: #ff0019;
+    border: 1px solid #ffffff;
+    background-color: #f8d7da;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    font-weight: 500;
 }
 
-.error-message .icon {
-  font-size: 1.5rem;
-  color: var(--danger);
+.spinner {
+    animation: spin 1s linear infinite;
+    font-size: 1.5em;
 }
 
-/* Responsive */
-@media (max-width: 1200px) {
-  .admin-content-container {
-    padding: 1.5rem;
-    margin: 1rem;
-  }
-  
-  .admin-content-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  
-  .search-box {
-    width: 100%;
-    max-width: 100%;
-  }
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
-@media (max-width: 768px) {
-  .admin-content-container {
-    padding: 1.2rem;
-    margin: 0.5rem;
-  }
-  
-  .admin-table th, 
-  .admin-table td {
-    padding: 1rem;
-  }
-  
-  .admin-content-header h2 {
-    font-size: 1.6rem;
-  }
+.no-results .info-icon {
+    font-size: 2em;
+    color: #6c757d;
 }
 
-@media (max-width: 576px) {
-  .search-box input {
-    padding: 0.7rem 0.9rem 0.7rem 2.8rem;
-  }
-  
-  .search-icon {
-    left: 0.9rem;
-  }
-  
-  .btn-primary {
-    padding: 0.6rem 1rem;
-    font-size: 0.85rem;
-  }
-  
-  .no-results, 
-  .loading-container {
-    padding: 2rem;
-  }
+.no-results .add-btn {
+    margin-top: 20px;
+}
+
+/* Estilos para el Modal de Confirmación de Eliminación */
+/* Asumo que el Modal.js ya tiene estilos base, estos son para el contenido específico */
+.modal-content-delete {
+    padding: 20px;
+    text-align: center;
+}
+
+.modal-content-delete p {
+    font-size: 1.1em;
+    margin-bottom: 25px;
+    line-height: 1.5;
+}
+
+.modal-content-delete .form-actions {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+/* Media Queries para Responsividad */
+@media (max-width: 992px) { /* Tablets grandes y desktops pequeños */
+    .admin-table th,
+    .admin-table td {
+        padding: 8px 10px; /* Reducir padding */
+        font-size: 0.85em; /* Reducir tamaño de fuente de la tabla */
+    }
+    .actions-column {
+        min-width: 100px; /* Ajustar ancho mínimo de acciones */
+    }
+    .actions-column .btn-edit,
+    .actions-column .btn-delete {
+        font-size: 0.8em; /* Ajustar tamaño de fuente de botones de acción */
+        padding: 5px 8px;
+    }
+}
+
+@media (max-width: 768px) { /* Tablets pequeños y móviles */
+    .admin-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .search-bar {
+        max-width: 100%;
+    }
+
+    /* **Manejo de Tabla en Móviles: Apilar filas** */
+    .table-responsive {
+        overflow-x: auto; /* Vuelve a permitir scroll si es necesario */
+    }
+
+    .admin-table {
+        /* No uses table-layout: fixed aquí, deja que se comporte normalmente con overflow */
+        /* Si quieres el modo "card" para filas, aquí va: */
+        display: block; /* La tabla se comporta como un bloque */
+        width: 100%;
+    }
+
+    .admin-table thead {
+        /* Oculta el thead en móvil para la vista de tarjeta */
+        display: none;
+    }
+
+    .admin-table tbody, .admin-table tr, .admin-table td {
+        display: block; /* Hace que tbody, tr y td sean bloques */
+        width: 100%; /* Cada fila y celda ocupa el 100% */
+    }
+
+    .admin-table tr {
+        margin-bottom: 15px; /* Espacio entre "tarjetas" de fila */
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        overflow: hidden; /* Asegura que el border-radius se vea bien */
+    }
+
+    .admin-table td {
+        border-bottom: 1px solid #eee; /* Borde entre celdas en la "tarjeta" */
+        text-align: right; /* Alinea el valor a la derecha */
+        padding-left: 50%; /* Espacio para la etiqueta */
+        position: relative;
+        white-space: normal; /* Asegura que el texto se envuelva */
+    }
+
+    .admin-table td:last-child {
+        border-bottom: none; /* No hay borde en la última celda de la "tarjeta" */
+    }
+
+    .admin-table td::before {
+        content: attr(data-label); /* Usa el data-label como la etiqueta */
+        position: absolute;
+        left: 10px;
+        width: 45%;
+        text-align: left;
+        font-weight: bold;
+        text-transform: uppercase;
+        color: #666;
+        font-size: 0.8em; /* Tamaño de etiqueta más pequeño */
+    }
+
+    /* La columna de acciones en la vista de tarjeta puede volver a una fila */
+    .actions-column {
+        flex-direction: row; /* Vuelve a poner en fila los botones de acción en móvil */
+        justify-content: center; /* Centra los botones */
+        padding: 10px;
+        background-color: #f0f0f0; /* Fondo para la sección de acciones de la tarjeta */
+        border-top: 1px solid #eee;
+        flex-wrap: wrap; /* Permitir que los botones se envuelvan si hay muchos */
+    }
+    .actions-column .btn-edit,
+    .actions-column .btn-delete {
+        flex-basis: auto; /* Deja que el tamaño se ajuste al contenido */
+        flex-grow: 1; /* Permite que crezcan para llenar el espacio */
+        max-width: none; /* No limitar el ancho máximo si hay espacio */
+        width: auto; /* No forzar 100% */
+        font-size: 0.9em; /* Restaurar tamaño para mejor clicabilidad */
+        padding: 8px 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .admin-title {
+        font-size: 1.8em;
+    }
+
+    .admin-container {
+        padding: 15px;
+    }
+
+    .admin-table td::before {
+        font-size: 0.75em; /* Etiquetas un poco más pequeñas en móviles muy pequeños */
+    }
 }

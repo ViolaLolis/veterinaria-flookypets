@@ -1,59 +1,84 @@
-/* src/Pages/InicioAdministrador/Styles/UserProfile.css */
+/* Styles/UserProfile.css */
 
-/* Valores de color directos para consistencia, sin usar :root */
-/* Azul vibrante */
-/* Verde para éxito */
-/* Naranja para advertencias/énfasis */
-/* Rojo para errores/eliminación */
-/* Texto oscuro principal */
-/* Texto claro (para fondos oscuros) */
-/* Fondo claro general */
-/* Fondo oscuro para sidebar/header */
-/* Color de borde sutil */
-/* Sombras */
-/* Velocidad de transición */
+/* Importar las variables de color globales si no están ya importadas en un archivo CSS global */
+/* Si ya tienes un archivo global como 'base.css' con :root, no necesitas este @import */
+/* @import './base.css'; */
 
-/* Contenedor principal de la página de perfil del usuario */
-.admin-user-profile {
-    background-color: #f8f9fa; /* Fondo claro general */
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    padding: 30px;
-    margin-bottom: 30px;
-    font-family: 'Inter', sans-serif; /* Asegura la fuente para este componente */
+/* Variables de color (asegúrate de que estas estén definidas globalmente o aquí) */
+:root {
+    --primary-color: #00acc1; /* Teal - para acentos, botones, iconos principales */
+    --primary-dark: #007c91; /* Darker Teal */
+    --primary-light: #80deea; /* Light Teal - añadido para fondos claros o acentos sutiles */
+    --secondary-color: #2196F3; /* Blue (para éxito, o botones secundarios) */
+    --secondary-dark: #1976D2; /* Darker Blue - añadido para hover o texto sobre secondary */
+    --accent-color: #FFC107; /* Amarillo (para advertencias o acentos visuales) */
+    --accent-dark: #FFA000; /* Darker Yellow - añadido para hover o texto sobre accent */
+    --danger-color: #F44336; /* Rojo - para errores o acciones destructivas */
+    --danger-dark: #D32F2F; /* Darker Red */
+
+    /* Colores neutrales y de texto */
+    --text-color-dark: #333333;
+    --text-color-medium: #555555;
+    --text-color-light: #777777;
+    --background-light: #f8f9fa; /* Fondo muy claro */
+    --background-medium: #eceff1; /* Fondo ligeramente gris */
+    --card-background: #ffffff;
+    --border-color: #e0e0e0;
+    --shadow-light: rgba(0, 0, 0, 0.08);
+    --shadow-medium: rgba(0, 0, 0, 0.15);
 }
 
-/* Encabezado de la página de perfil */
-.admin-user-profile .admin-content-header {
+
+/* Contenedor principal de la administración (reutilizado del AdminUserManagement) */
+.admin-content-container {
+    padding: 30px;
+    background-color: var(--background-light);
+    min-height: calc(100vh - 60px); /* Ajusta si tienes un header/footer fijo */
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    font-family: 'Roboto', sans-serif;
+    color: var(--text-color-dark);
+}
+
+/* Contenedor específico para el perfil de usuario */
+.admin-user-profile {
+    max-width: 900px; /* Limita el ancho para mejor legibilidad */
+    margin: 20px auto; /* Centra el contenedor */
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    background-color: var(--card-background);
+    padding: 30px;
+}
+
+/* Encabezado del perfil (reutilizado del AdminUserManagement) */
+.admin-content-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 25px;
-    padding-bottom: 15px;
-    border-bottom: 1px solid #e0e0e0; /* Color de borde sutil */
     flex-wrap: wrap;
     gap: 15px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 25px;
 }
 
-/* Título del encabezado */
-.admin-user-profile .admin-content-header h2 {
-    font-size: 1.8rem;
-    color: #2c3e50; /* Texto oscuro principal */
-    margin: 0;
+.admin-content-header h2 {
+    font-size: 2em;
+    color: var(--primary-dark);
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
+    margin: 0;
     font-weight: 700;
 }
 
-/* Icono del título */
-.admin-user-profile .admin-content-header .header-icon {
-    font-size: 2rem;
-    color: #3498db; /* Azul vibrante */
+.admin-content-header .header-icon {
+    font-size: 2.2em;
+    color: var(--primary-color);
 }
 
-/* Acciones del encabezado (botones de editar/guardar/cancelar) */
-.admin-user-profile .admin-content-header .header-actions {
+.header-actions {
     display: flex;
     gap: 15px;
     flex-wrap: wrap;
@@ -61,112 +86,98 @@
 }
 
 /* Botones de acción en el encabezado */
-.admin-user-profile .edit-btn,
-.admin-user-profile .save-btn,
-.admin-user-profile .cancel-btn {
-    padding: 12px 25px;
-    border-radius: 8px;
+.edit-btn, .save-btn, .cancel-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 25px; /* Pill shape */
     cursor: pointer;
-    font-size: 1rem;
+    font-size: 0.95em;
     font-weight: 600;
     display: flex;
     align-items: center;
     gap: 8px;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
 }
 
-.admin-user-profile .edit-btn {
-    background: linear-gradient(135deg, #12f3d5, #22e6cc); /* Naranja para advertencias/énfasis */
+.edit-btn {
+    background-color: var(--primary-color);
     color: white;
-    border: none;
-    height: 45px; /* Altura consistente */
-    width: 120px; /* Ancho fijo para consistencia */
+    box-shadow: 0 4px 8px rgba(0, 172, 193, 0.2);
 }
 
-.admin-user-profile .edit-btn:hover {
-    background: linear-gradient(135deg, #22d9e6, #12d9f3);
+.edit-btn:hover {
+    background-color: var(--primary-dark);
     transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(243, 156, 18, 0.3);
+    box-shadow: 0 6px 12px rgba(0, 172, 193, 0.3);
 }
 
-.admin-user-profile .save-btn {
-    background: linear-gradient(135deg, #2ecc71, #27ae60); /* Verde para éxito */
+.save-btn {
+    background-color: var(--secondary-color);
     color: white;
-    border: none;
+    box-shadow: 0 4px 8px rgba(76, 175, 80, 0.2);
 }
 
-.admin-user-profile .save-btn:hover {
-    background: linear-gradient(135deg, #27ae60, #2ecc71);
+.save-btn:hover {
+    background-color: var(--secondary-dark);
     transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(46, 204, 113, 0.3);
+    box-shadow: 0 6px 12px rgba(76, 175, 80, 0.3);
 }
 
-.admin-user-profile .cancel-btn {
-    background-color: #ecf0f1; /* Fondo claro general */
-    color: #2c3e50; /* Texto oscuro principal */
-    border: 1px solid #bdc3c7;
+.cancel-btn {
+    background-color: var(--background-medium);
+    color: var(--text-color-dark);
+    border: 1px solid var(--border-color);
 }
 
-.admin-user-profile .cancel-btn:hover {
-    background-color: #dbe4e9;
+.cancel-btn:hover {
+    background-color: #cfd8dc; /* Ligeramente más oscuro que background-medium */
     transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(189, 195, 199, 0.3);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.admin-user-profile .edit-btn:disabled,
-.admin-user-profile .save-btn:disabled,
-.admin-user-profile .cancel-btn:disabled {
+.save-btn:disabled, .cancel-btn:disabled {
     opacity: 0.6;
     cursor: not-allowed;
     box-shadow: none;
-    transform: none;
 }
 
-/* Tarjeta principal del perfil */
-.admin-user-profile .profile-card {
-    background-color: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    padding: 30px;
-    margin-top: 30px;
+.spinner-icon {
+    animation: spin 1s linear infinite;
+}
+
+/* Tarjeta de perfil */
+.profile-card {
     display: flex;
-    flex-direction: column; /* Apilado en móvil por defecto */
+    flex-direction: column;
     align-items: center;
-    gap: 30px; /* Espacio entre la imagen y el formulario */
+    gap: 30px;
 }
 
-/* Sección de la imagen de perfil */
-.admin-user-profile .profile-image-section {
+.profile-image-section {
     position: relative;
     width: 180px;
     height: 180px;
     border-radius: 50%;
     overflow: hidden;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
-    border: 5px solid #3498db; /* Azul vibrante */
-    flex-shrink: 0;
+    border: 5px solid var(--primary-color);
+    box-shadow: 0 0 0 5px rgba(0, 172, 193, 0.2); /* Anillo de luz */
+    flex-shrink: 0; /* Evita que la imagen se encoja */
 }
 
-.admin-user-profile .profile-image {
+.profile-image {
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
-    transition: transform 0.3s ease;
 }
 
-.admin-user-profile .profile-image-section:hover .profile-image {
-    transform: scale(1.05);
-}
-
-.admin-user-profile .image-upload-overlay {
+.image-upload-overlay {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0.5); /* Oscurece la imagen para el icono */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -175,248 +186,223 @@
     cursor: pointer;
 }
 
-.admin-user-profile .profile-image-section:hover .image-upload-overlay {
+.profile-image-section:hover .image-upload-overlay {
     opacity: 1;
 }
 
-.admin-user-profile .upload-icon {
+.upload-icon {
     color: white;
-    font-size: 2.5rem;
+    font-size: 2.5em;
     cursor: pointer;
-    transition: transform 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
 }
-
-.admin-user-profile .upload-icon:hover {
-    transform: scale(1.1);
-}
-
-/* Mensaje de error para la imagen */
-.admin-user-profile .profile-image-section .error-message-inline {
-    position: absolute;
-    bottom: -25px; /* Debajo de la imagen */
-    left: 50%;
-    transform: translateX(-50%);
-    width: 150%; /* Puede ser más ancho que la imagen */
-    font-size: 0.8rem;
-    color: #e74c3c; /* Rojo para errores/eliminación */
-    white-space: nowrap; /* Evita que el texto se rompa */
-}
-
 
 /* Formulario de perfil */
-.admin-user-profile .profile-form {
-    flex-grow: 1;
+.profile-form {
     width: 100%;
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 20px;
 }
 
-.admin-user-profile .profile-form .form-group {
-    display: flex;
-    flex-direction: column;
+.form-group {
+    margin-bottom: 0; /* Manejado por el gap del grid */
 }
 
-.admin-user-profile .profile-form .form-group label {
+.form-group label {
+    display: block;
     margin-bottom: 8px;
     font-weight: 600;
-    color: #2c3e50; /* Texto oscuro principal */
-    font-size: 0.95rem;
+    color: var(--text-color-dark);
+    font-size: 0.95em;
 }
 
-/* Estilos para campos no editables */
-.admin-user-profile .profile-form .form-group p {
-    background-color: #f0f4f8;
-    padding: 10px 12px;
+.form-group p {
+    background-color: var(--background-medium);
+    padding: 12px;
     border-radius: 8px;
-    font-size: 0.9rem;
-    color: #2c3e50; /* Texto oscuro principal */
-    border: 1px solid #e0e0e0; /* Color de borde sutil */
-    min-height: 40px; /* Altura mínima para consistencia */
+    color: var(--text-color-dark);
+    font-size: 1em;
+    min-height: 48px; /* Altura consistente con los inputs */
     display: flex;
     align-items: center;
+    word-break: break-word; /* Permite que el texto largo se rompa */
 }
 
-/* Estilos para campos editables */
-.admin-user-profile .profile-form .form-group input[type="text"],
-.admin-user-profile .profile-form .form-group input[type="email"],
-.admin-user-profile .profile-form .form-group input[type="date"],
-.admin-user-profile .profile-form .form-group select {
-    padding: 10px 12px;
-    border: 1px solid #e0e0e0; /* Color de borde sutil */
-    border-radius: 8px;
-    font-size: 0.9rem;
-    color: #2c3e50; /* Texto oscuro principal */
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="date"],
+.form-group select {
     width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1em;
+    color: var(--text-color-dark);
+    background-color: var(--card-background);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    box-sizing: border-box;
 }
 
-.admin-user-profile .profile-form .form-group input:focus,
-.admin-user-profile .profile-form .form-group select:focus {
-    border-color: #3498db; /* Azul vibrante */
-    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+.form-group input:focus,
+.form-group select:focus {
+    border-color: var(--primary-color);
     outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 172, 193, 0.2);
 }
 
-/* Estilos de error para campos */
-.admin-user-profile .profile-form .form-group input.input-error,
-.admin-user-profile .profile-form .form-group select.input-error {
-    border-color: #e74c3c; /* Rojo para errores/eliminación */
+.form-group .input-error {
+    border-color: var(--danger-color);
 }
 
-.admin-user-profile .profile-form .form-group .error-message-inline {
-    color: #e74c3c; /* Rojo para errores/eliminación */
-    font-size: 0.8rem;
+.error-message-inline {
+    color: var(--danger-color);
+    font-size: 0.85em;
     margin-top: 5px;
+    display: block;
 }
 
-/* Estilo para checkbox (activo/inactivo) */
-.admin-user-profile .profile-form .form-group input[type="checkbox"] {
-    width: auto;
-    margin-right: 10px;
-    transform: scale(1.2);
-}
-
-/* Mensajes de carga y error */
-.admin-user-profile .admin-loading,
-.admin-user-profile .error-message,
-.admin-user-profile .no-results {
+.error-message-inline.text-center {
     text-align: center;
-    padding: 40px;
-    font-size: 1.1rem;
-    color: #555;
-    background-color: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    margin-top: 30px;
+}
+
+/* Mensajes de carga y error (reutilizados) */
+.admin-loading,
+.error-message,
+.no-results {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 15px;
+    min-height: 300px;
+    text-align: center;
+    padding: 20px;
+    background-color: var(--background-light);
+    color: var(--text-color-dark);
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    margin: 20px auto;
+    max-width: 600px;
 }
 
-.admin-user-profile .loading-spinner .spinner-icon {
-    font-size: 3rem;
-    color: #3498db; /* Azul vibrante */
+.admin-loading .loading-spinner .spinner-icon {
+    font-size: 3.5em;
+    color: var(--primary-color);
     animation: spin 1.5s linear infinite;
+    margin-bottom: 20px;
 }
 
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+.admin-loading p {
+    font-size: 1.3em;
+    color: var(--text-color-medium);
 }
 
-.admin-user-profile .error-message {
-    color: #e74c3c; /* Rojo para errores/eliminación */
+.error-message {
+    color: var(--danger-dark);
+    border: 1px solid var(--danger-color);
+    background-color: #ffebee; /* light red background */
 }
 
-.admin-user-profile .error-message .info-icon,
-.admin-user-profile .no-results .info-icon {
-    font-size: 3rem;
-    color: #e74c3c; /* Rojo para errores/eliminación */
+.error-message .info-icon {
+    font-size: 3em;
+    color: var(--danger-color);
+    margin-bottom: 20px;
 }
 
-.admin-user-profile .no-results {
-    color: #7f8c8d;
+.error-message p:first-of-type {
+    font-size: 1.2em;
+    font-weight: 500;
+    margin-bottom: 10px;
 }
 
-.admin-user-profile .no-results .info-icon {
-    color: #7f8c8d;
+.error-message p:last-of-type {
+    font-size: 0.95em;
+    color: var(--danger-dark);
+    opacity: 0.8;
 }
 
-/* Responsive Design */
-@media (min-width: 769px) {
-    .admin-user-profile .profile-card {
-        flex-direction: row; /* En fila para pantallas grandes */
-        align-items: flex-start; /* Alinea al inicio */
-    }
+.no-results .info-icon {
+    font-size: 3em;
+    color: var(--accent-color);
+    margin-bottom: 20px;
 }
 
+/* Media Queries para responsividad */
 @media (max-width: 768px) {
-    .admin-user-profile .admin-content-header .header-actions {
-        justify-content: center; /* Centra los botones en pantallas pequeñas */
-    }
-    .admin-user-profile .profile-card {
+    .admin-user-profile {
         padding: 20px;
+        margin: 15px;
     }
-    .admin-user-profile .profile-image-section {
+
+    .admin-content-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .admin-content-header h2 {
+        font-size: 1.8em;
+    }
+
+    .header-actions {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .edit-btn, .save-btn, .cancel-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .profile-card {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .profile-image-section {
         width: 150px;
         height: 150px;
+        border-width: 4px;
+        box-shadow: 0 0 0 4px rgba(0, 172, 193, 0.2);
     }
-    .admin-user-profile .upload-icon {
-        font-size: 2rem;
-    }
-    .admin-user-profile .profile-form {
+
+    .profile-form {
         grid-template-columns: 1fr; /* Una columna en pantallas pequeñas */
     }
-    .admin-user-profile .edit-btn,
-    .admin-user-profile .save-btn,
-    .admin-user-profile .cancel-btn {
-        width: 100%; /* Ocupa todo el ancho */
-        justify-content: center;
+
+    .form-group p {
+        padding: 10px;
+        min-height: 44px;
+    }
+
+    .form-group input,
+    .form-group select {
+        padding: 10px;
     }
 }
 
 @media (max-width: 480px) {
-    .admin-user-profile .profile-card {
+    .admin-user-profile {
         padding: 15px;
+        margin: 10px;
     }
-    .admin-user-profile .profile-image-section {
+
+    .admin-content-header h2 {
+        font-size: 1.6em;
+    }
+
+    .profile-image-section {
         width: 120px;
         height: 120px;
         border-width: 3px;
+        box-shadow: 0 0 0 3px rgba(0, 172, 193, 0.2);
     }
-    .admin-user-profile .upload-icon {
-        font-size: 1.8rem;
-    }
-    .admin-user-profile .profile-form .form-group label {
-        font-size: 0.9rem;
-    }
-    .admin-user-profile .profile-form .form-group p,
-    .admin-user-profile .profile-form .form-group input,
-    .admin-user-profile .profile-form .form-group select {
-        padding: 8px 10px;
-        font-size: 0.85rem;
-    }
-    .admin-user-profile .edit-btn,
-    .admin-user-profile .save-btn,
-    .admin-user-profile .cancel-btn {
-        padding: 10px 20px;
-        font-size: 0.9rem;
+
+    .upload-icon {
+        font-size: 2em;
     }
 }
-
-/* Estilos para pantallas grandes (27" y TV) */
-@media (min-width: 1920px) {
-    .admin-user-profile .profile-card {
-        padding: 40px;
-    }
-    .admin-user-profile .profile-image-section {
-        width: 220px;
-        height: 220px;
-        border-width: 6px;
-    }
-    .admin-user-profile .upload-icon {
-        font-size: 3rem;
-    }
-    .admin-user-profile .profile-form {
-        gap: 30px;
-    }
-    .admin-user-profile .profile-form .form-group label {
-        font-size: 1.05rem;
-    }
-    .admin-user-profile .profile-form .form-group p,
-    .admin-user-profile .profile-form .form-group input,
-    .admin-user-profile .profile-form .form-group select {
-        padding: 12px 15px;
-        font-size: 1rem;
-    }
-    .admin-user-profile .edit-btn,
-    .admin-user-profile .save-btn,
-    .admin-user-profile .cancel-btn {
-        padding: 15px 30px;
-        font-size: 1.1rem;
-    }
-}
-
