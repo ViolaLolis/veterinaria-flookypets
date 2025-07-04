@@ -61,8 +61,8 @@ export const NotificationProvider = ({ children }) => {
     // No necesitamos getToken() aquí directamente porque authFetch ya lo maneja.
     // authFetch lanzará un error si no hay token o es inválido.
     try {
-      // Usamos authFetch para que maneje la autenticación automáticamente
-      const result = await authFetch(`/notifications/user/${userId}`);
+      // CAMBIO CLAVE: Se agregó '/api' a la ruta para que coincida con el backend
+      const result = await authFetch(`/api/notifications/user/${userId}`);
 
       if (result.success && Array.isArray(result.data)) {
         // Filtra solo las notificaciones no leídas para mostrarlas
@@ -116,8 +116,10 @@ export const NotificationProvider = ({ children }) => {
 
     if (notificationToMark && notificationToMark.id_notificacion) { // Verifica si tiene un ID de BD
       try {
-        const response = await authFetch(`/notifications/${notificationToMark.id_notificacion}/read`, {
-          method: 'PUT'
+        // CAMBIO CLAVE: Se cambió la ruta para marcar como leída
+        const response = await authFetch(`/api/notifications/mark-read/${notificationToMark.id_notificacion}`, {
+          method: 'PUT',
+          body: JSON.stringify({ leida: true }) // Enviar el estado 'leida'
         });
         if (response.success) {
           // Actualiza el estado local para reflejar que está leída
@@ -144,7 +146,8 @@ export const NotificationProvider = ({ children }) => {
 
     if (notificationToRemove && notificationToRemove.id_notificacion) { // Si tiene ID de BD, intenta eliminar del backend
       try {
-        const response = await authFetch(`/notifications/${notificationToRemove.id_notificacion}`, {
+        // CAMBIO CLAVE: Se cambió la ruta para eliminar notificación
+        const response = await authFetch(`/api/notifications/${notificationToRemove.id_notificacion}`, {
           method: 'DELETE'
         });
         if (response.success) {

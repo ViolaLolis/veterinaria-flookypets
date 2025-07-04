@@ -54,11 +54,21 @@ const AdminAppointmentForm = ({ isOpen, onClose, appointment, onSaveSuccess }) =
         });
 
         if (response.status === 401 || response.status === 403) {
-            setNotification({ message: 'Sesión expirada o no autorizado. Por favor, inicia sesión de nuevo.', type: 'error' });
-            throw new Error('No autorizado');
+            const errorData = await response.json().catch(() => ({ message: 'Error de autenticación/autorización.' }));
+            setNotification({ message: errorData.message || 'Sesión expirada o no autorizado. Por favor, inicia sesión de nuevo.', type: 'error' });
+            throw new Error(errorData.message || 'No autorizado');
         }
 
-        return response;
+        // Manejo de errores de respuesta no JSON
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.indexOf("application/json") !== -1) {
+            return response; // Si es JSON, retorna la respuesta para que se parsee más adelante
+        } else {
+            const text = await response.text();
+            console.error("Response was not JSON:", text);
+            setNotification({ message: `Error del servidor: Respuesta inesperada. Estado: ${response.status}`, type: 'error' });
+            throw new Error("Respuesta del servidor no es JSON");
+        }
     }, []);
 
     // Load appointment data if in edit mode
@@ -244,7 +254,8 @@ const AdminAppointmentForm = ({ isOpen, onClose, appointment, onSaveSuccess }) =
                 });
             } else {
                 // Create new appointment
-                response = await authFetch(`${API_BASE_URL}/citas/agendar`, {
+                // CAMBIO CLAVE: Cambiado de `/citas/agendar` a `/citas`
+                response = await authFetch(`${API_BASE_URL}/citas`, {
                     method: 'POST',
                     body: JSON.stringify(dataToSend),
                 });
@@ -314,13 +325,13 @@ const AdminAppointmentForm = ({ isOpen, onClose, appointment, onSaveSuccess }) =
                         <label htmlFor="id_cliente">Cliente:</label>
                         {/* In edit mode, display client name as plain text input, disabled */}
                         {appointment ? (
-                             <input
-                                type="text"
-                                id="cliente_display"
-                                value={getClientDisplay(formData.id_cliente)}
-                                className="input-disabled"
-                                disabled
-                            />
+                               <input
+                                 type="text"
+                                 id="cliente_display"
+                                 value={getClientDisplay(formData.id_cliente)}
+                                 className="input-disabled"
+                                 disabled
+                               />
                         ) : (
                             // In creation mode, allow selecting the client
                             <select

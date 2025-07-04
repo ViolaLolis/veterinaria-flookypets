@@ -11,7 +11,7 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import es from 'date-fns/locale/es';
 import { registerLocale } from 'react-datepicker';
-import { authFetch } from './api';
+import { authFetch } from './api'; // Asegúrate de que esta importación sea correcta
 
 // Importa el archivo CSS correctamente
 import './Style/CrearCitaVeterinario.css';
@@ -205,29 +205,28 @@ const CrearCitaVeterinario = () => {
       setLoading(true);
       setError(null);
       try {
-        const [clientesResponse, serviciosResponse] = await Promise.all([
-          authFetch('/usuarios?role=usuario'),
-          authFetch('/servicios')
-        ]);
+        // Ahora authFetch devuelve directamente el objeto con success/data/message
+        const clientesResult = await authFetch('/usuarios?role=usuario');
+        const serviciosResult = await authFetch('/servicios');
 
-        if (clientesResponse.success) {
-          setClientes(clientesResponse.data);
-          setFilteredClientes(clientesResponse.data);
+        if (clientesResult.success) {
+          setClientes(clientesResult.data);
+          setFilteredClientes(clientesResult.data);
         } else {
-          setError(clientesResponse.message || 'Error al cargar los clientes.');
-          showNotification(clientesResponse.message || 'Error al cargar los clientes.', 'error');
+          setError(clientesResult.message || 'Error al cargar los clientes.');
+          showNotification(clientesResult.message || 'Error al cargar los clientes.', 'error');
         }
 
-        if (serviciosResponse.success) {
-          setServicios(serviciosResponse.data);
+        if (serviciosResult.success) {
+          setServicios(serviciosResult.data);
         } else {
-          setError(prev => prev || serviciosResponse.message || 'Error al cargar los servicios.');
-          showNotification(serviciosResponse.message || 'Error al cargar los servicios.', 'error');
+          setError(prev => prev || serviciosResult.message || 'Error al cargar los servicios.');
+          showNotification(serviciosResult.message || 'Error al cargar los servicios.', 'error');
         }
 
         const serviceFromUrl = searchParams.get('servicio');
         if (serviceFromUrl) {
-          const foundService = serviciosResponse.data.find(s => s.nombre.toLowerCase() === serviceFromUrl.toLowerCase());
+          const foundService = serviciosResult.data.find(s => s.nombre.toLowerCase() === serviceFromUrl.toLowerCase());
           if (foundService) {
             setSelectedServicio(foundService.id_servicio.toString());
           }
@@ -260,12 +259,13 @@ const CrearCitaVeterinario = () => {
     };
 
     fetchData();
-  }, [searchParams, showNotification]);
+  }, [searchParams, showNotification, authFetch]);
 
   useEffect(() => {
     const fetchMascotas = async () => {
       if (selectedCliente) {
         try {
+          // Ahora authFetch devuelve directamente el objeto con success/data/message
           const response = await authFetch(`/mascotas?id_propietario=${selectedCliente}`);
           if (response.success) {
             setMascotasCliente(response.data);
@@ -287,7 +287,7 @@ const CrearCitaVeterinario = () => {
       }
     };
     fetchMascotas();
-  }, [selectedCliente, showNotification]);
+  }, [selectedCliente, showNotification, authFetch]);
 
   // Filtrar clientes por búsqueda
   useEffect(() => {
@@ -368,7 +368,8 @@ const CrearCitaVeterinario = () => {
     console.log("Intentando agendar cita:", newCita);
 
     try {
-      const response = await authFetch('/citas/agendar', {
+      // Ahora authFetch devuelve directamente el objeto con success/data/message
+      const response = await authFetch('/citas', { // Ruta corregida a /citas
         method: 'POST',
         body: JSON.stringify(newCita),
       });
