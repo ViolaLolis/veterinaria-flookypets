@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
-import styles from './Styles/AgendarCita.module.css';
+import styles from './Styles/AgendarCita.module.css'; // <-- ¡Importación Correcta!
 import { useNavigate, useLocation, Link, useOutletContext } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -16,8 +16,8 @@ import {
   faSpinner,
   faTimesCircle
 } from '@fortawesome/free-solid-svg-icons';
-import { authFetch } from '../../utils/api'; // Importar la función authFetch
-import { validateField } from '../../utils/validation'; // Importar la función de validación
+import { authFetch } from '../../utils/api';
+import { validateField } from '../../utils/validation';
 
 const AgendarCita = () => {
   const { user, showNotification } = useOutletContext();
@@ -36,13 +36,11 @@ const AgendarCita = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Horarios disponibles, asumiendo que el backend podría devolver un subconjunto
   const horariosDisponibles = [
     '09:00', '10:00', '11:00', '12:00', '13:00',
     '14:00', '15:00', '16:00', '17:00'
   ];
 
-  // Función para obtener los datos iniciales (mascotas, veterinarios, servicio)
   const fetchInitialData = useCallback(async () => {
     setLoading(true);
     setErrorSeleccion(null);
@@ -54,9 +52,8 @@ const AgendarCita = () => {
     }
 
     try {
-      const servicioId = location.state?.servicioId; // Obtener el ID del servicio de la navegación
+      const servicioId = location.state?.servicioId;
 
-      // 1. Obtener el servicio seleccionado
       let fetchedServicio = null;
       if (servicioId) {
         try {
@@ -73,13 +70,11 @@ const AgendarCita = () => {
           setErrorSeleccion('Error de conexión al cargar el servicio.');
         }
       } else {
-        // Si no hay servicioId en el estado, se podría redirigir o mostrar un error
         setErrorSeleccion('No se ha seleccionado un servicio para agendar.');
         setLoading(false);
         return;
       }
 
-      // 2. Obtener las mascotas del usuario
       const mascotasResponse = await authFetch(`/mascotas?id_propietario=${user.id}`);
       let fetchedMascotas = [];
       if (mascotasResponse.success) {
@@ -88,7 +83,6 @@ const AgendarCita = () => {
         showNotification(mascotasResponse.message || 'Error al cargar tus mascotas.', 'error');
       }
 
-      // 3. Obtener los veterinarios
       const veterinariosResponse = await authFetch('/usuarios/veterinarios');
       let fetchedVeterinarios = [];
       if (veterinariosResponse.success) {
@@ -126,7 +120,6 @@ const AgendarCita = () => {
   };
 
   const handleSubmit = async () => {
-    // Validaciones de frontend
     const mascotaError = validateField('id_mascota_cita', selectedMascota);
     const servicioError = validateField('id_servicio_cita', servicio?.id_servicio);
     const fechaHoraError = validateField('fecha_cita', date && selectedTime ? `${date.toISOString().split('T')[0]} ${selectedTime}` : '');
@@ -153,7 +146,7 @@ const AgendarCita = () => {
         id_mascota: parseInt(selectedMascota),
         fecha_cita: fechaHora.toISOString().slice(0, 19).replace('T', ' '),
         notas_adicionales: servicio.nombre,
-        estado: 'PENDIENTE' // Siempre se envía como PENDIENTE
+        estado: 'PENDIENTE'
       };
 
       const response = await authFetch('/citas', {
@@ -239,7 +232,6 @@ const AgendarCita = () => {
             <h4>{servicio.nombre}</h4>
             <p>{servicio.descripcion}</p>
             <div className={styles.servicePrice}>
-              {/* Asegúrate de que el precio se muestre correctamente si es un número */}
               <span>${typeof servicio.precio === 'number' ? servicio.precio.toLocaleString('es-CO') : servicio.precio}</span>
             </div>
           </div>
