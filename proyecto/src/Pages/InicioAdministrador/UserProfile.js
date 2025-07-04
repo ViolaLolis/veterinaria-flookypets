@@ -196,7 +196,7 @@ function UserProfile({ user, setUser }) {
 
     if (error) {
         return (
-            <div className="error-message">
+            <div className="error-message" style={{ backgroundColor: "var(--danger-color)", color: "#fff" }}>
                 <FaInfoCircle className="info-icon" />
                 {error}
                 <p>Asegúrate de que el backend esté corriendo y los endpoints de API estén accesibles y funcionando correctamente.</p>
@@ -207,7 +207,7 @@ function UserProfile({ user, setUser }) {
     if (!userData) {
         return (
             <div className="no-results">
-                <FaInfoCircle className="info-icon" />
+                <FaInfoCircle className="info-icon" style={{ color: "var(--accent-color)" }} />
                 No se encontraron datos de perfil.
             </div>
         );
@@ -217,20 +217,20 @@ function UserProfile({ user, setUser }) {
         <div className="admin-content-container admin-user-profile">
             <div className="admin-content-header">
                 <h2>
-                    <FaUserCircle className="header-icon" />
+                    <FaUserCircle className="header-icon" style={{ color: "var(--primary-dark)" }} />
                     Mi Perfil (Administrador)
                 </h2>
                 <div className="header-actions">
                     {!isEditing ? (
-                        <button className="edit-btn" onClick={() => setIsEditing(true)}>
+                        <button className="edit-btn" onClick={() => setIsEditing(true)} style={{ backgroundColor: "var(--primary-color)", color: "#fff" }}>
                             <FaEdit /> Editar Perfil
                         </button>
                     ) : (
                         <>
-                            <button className="save-btn" onClick={handleSave} disabled={isSubmitting}>
+                            <button className="save-btn" onClick={handleSave} disabled={isSubmitting} style={{ backgroundColor: "var(--primary-dark)", color: "#fff" }}>
                                 {isSubmitting ? <FaSpinner className="spinner-icon" /> : <FaSave />} Guardar Cambios
                             </button>
-                            <button className="cancel-btn" onClick={() => { setIsEditing(false); setFormErrors({}); setSelectedImage(null); fetchUserData(); }} disabled={isSubmitting}>
+                            <button className="cancel-btn" onClick={() => { setIsEditing(false); setFormErrors({}); setSelectedImage(null); fetchUserData(); }} disabled={isSubmitting} style={{ backgroundColor: "var(--secondary-dark)", color: "#fff" }}>
                                 <FaTimes /> Cancelar
                             </button>
                         </>
@@ -241,10 +241,10 @@ function UserProfile({ user, setUser }) {
             <div className="profile-card">
                 <div className="profile-image-section">
                     <img
-                        src={selectedImage ? URL.createObjectURL(selectedImage) : (userData.imagen_url || 'https://placehold.co/180x180/00BCD4/ffffff?text=No+Image')}
+                        src={selectedImage ? URL.createObjectURL(selectedImage) : (userData.imagen_url || 'https://placehold.co/180x180/00acc1/ffffff?text=No+Image')}
                         alt="Foto de Perfil"
                         className="profile-image"
-                        onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/180x180/00BCD4/ffffff?text=No+Image'; }}
+                        onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/180x180/00acc1/ffffff?text=No+Image'; }}
                     />
                     {isEditing && (
                         <div className="image-upload-overlay">
@@ -261,7 +261,7 @@ function UserProfile({ user, setUser }) {
                             </label>
                         </div>
                     )}
-                    {formErrors.imagen_url && <p className="error-message-inline text-center">{formErrors.imagen_url}</p>}
+                    {formErrors.imagen_url && <p className="error-message-inline text-center" style={{ color: "var(--danger-color)" }}>{formErrors.imagen_url}</p>}
                 </div>
 
                 <form className="profile-form" onSubmit={handleSave}>
@@ -272,7 +272,7 @@ function UserProfile({ user, setUser }) {
                         ) : (
                             <p>{userData.nombre}</p>
                         )}
-                        {isEditing && formErrors.nombre && <p className="error-message-inline">{formErrors.nombre}</p>}
+                        {isEditing && formErrors.nombre && <p className="error-message-inline" style={{ color: "var(--danger-color)" }}>{formErrors.nombre}</p>}
                     </div>
                     <div className="form-group">
                         <label>Apellido:</label>
@@ -281,7 +281,7 @@ function UserProfile({ user, setUser }) {
                         ) : (
                             <p>{userData.apellido}</p>
                         )}
-                        {isEditing && formErrors.apellido && <p className="error-message-inline">{formErrors.apellido}</p>}
+                        {isEditing && formErrors.apellido && <p className="error-message-inline" style={{ color: "var(--danger-color)" }}>{formErrors.apellido}</p>}
                     </div>
                     <div className="form-group">
                         <label>Email:</label>
@@ -290,7 +290,7 @@ function UserProfile({ user, setUser }) {
                         ) : (
                             <p>{userData.email}</p>
                         )}
-                        {isEditing && formErrors.email && <p className="error-message-inline">{formErrors.email}</p>}
+                        {isEditing && formErrors.email && <p className="error-message-inline" style={{ color: "var(--danger-color)" }}>{formErrors.email}</p>}
                     </div>
                     <div className="form-group">
                         <label>Teléfono:</label>
@@ -299,7 +299,7 @@ function UserProfile({ user, setUser }) {
                         ) : (
                             <p>{userData.telefono}</p>
                         )}
-                        {isEditing && formErrors.telefono && <p className="error-message-inline">{formErrors.telefono}</p>}
+                        {isEditing && formErrors.telefono && <p className="error-message-inline" style={{ color: "var(--danger-color)" }}>{formErrors.telefono}</p>}
                     </div>
                     <div className="form-group">
                         <label>Dirección:</label>
@@ -308,7 +308,7 @@ function UserProfile({ user, setUser }) {
                         ) : (
                             <p>{userData.direccion || 'N/A'}</p>
                         )}
-                        {isEditing && formErrors.direccion && <p className="error-message-inline">{formErrors.direccion}</p>}
+                        {isEditing && formErrors.direccion && <p className="error-message-inline" style={{ color: "var(--danger-color)" }}>{formErrors.direccion}</p>}
                     </div>
                     <div className="form-group">
                         <label>Tipo de Documento:</label>
@@ -324,7 +324,7 @@ function UserProfile({ user, setUser }) {
                         ) : (
                             <p>{userData.tipo_documento || 'N/A'}</p>
                         )}
-                        {isEditing && formErrors.tipo_documento && <p className="error-message-inline">{formErrors.tipo_documento}</p>}
+                        {isEditing && formErrors.tipo_documento && <p className="error-message-inline" style={{ color: "var(--danger-color)" }}>{formErrors.tipo_documento}</p>}
                     </div>
                     <div className="form-group">
                         <label>Número de Documento:</label>
@@ -333,7 +333,7 @@ function UserProfile({ user, setUser }) {
                         ) : (
                             <p>{userData.numero_documento || 'N/A'}</p>
                         )}
-                        {isEditing && formErrors.numero_documento && <p className="error-message-inline">{formErrors.numero_documento}</p>}
+                        {isEditing && formErrors.numero_documento && <p className="error-message-inline" style={{ color: "var(--danger-color)" }}>{formErrors.numero_documento}</p>}
                     </div>
                     <div className="form-group">
                         <label>Fecha de Nacimiento:</label>
@@ -342,7 +342,7 @@ function UserProfile({ user, setUser }) {
                         ) : (
                             <p>{userData.fecha_nacimiento || 'N/A'}</p>
                         )}
-                        {isEditing && formErrors.fecha_nacimiento && <p className="error-message-inline">{formErrors.fecha_nacimiento}</p>}
+                        {isEditing && formErrors.fecha_nacimiento && <p className="error-message-inline" style={{ color: "var(--danger-color)" }}>{formErrors.fecha_nacimiento}</p>}
                     </div>
                     <div className="form-group">
                         <label>Rol:</label>

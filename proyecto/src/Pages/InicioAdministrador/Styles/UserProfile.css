@@ -1,66 +1,40 @@
-/* Styles/UserProfile.css */
+/* src/Pages/InicioAdministrador/Styles/UserProfile.css */
 
-/* Importar las variables de color globales si no están ya importadas en un archivo CSS global */
-/* Si ya tienes un archivo global como 'base.css' con :root, no necesitas este @import */
-/* @import './base.css'; */
-
-/* Variables de color (asegúrate de que estas estén definidas globalmente o aquí) */
+/* Variables de color (asegúrate de que estén definidas en un archivo global o aquí) */
 :root {
-    --primary-color: #00acc1; /* Teal - para acentos, botones, iconos principales */
-    --primary-dark: #007c91; /* Darker Teal */
-    --primary-light: #80deea; /* Light Teal - añadido para fondos claros o acentos sutiles */
-    --secondary-color: #2196F3; /* Blue (para éxito, o botones secundarios) */
-    --secondary-dark: #1976D2; /* Darker Blue - añadido para hover o texto sobre secondary */
-    --accent-color: #FFC107; /* Amarillo (para advertencias o acentos visuales) */
-    --accent-dark: #FFA000; /* Darker Yellow - añadido para hover o texto sobre accent */
-    --danger-color: #F44336; /* Rojo - para errores o acciones destructivas */
-    --danger-dark: #D32F2F; /* Darker Red */
+    --primary-color: #00acc1; /* Azul verdoso vibrante */
+    --primary-dark: #007c91;  /* Tono más oscuro */
+    --primary-light: #80deea; /* Tono más claro */
+    --secondary-color: #2196F3; /* Azul estándar */
+    --secondary-dark: #1976D2; /* Azul oscuro */
+    --accent-color: #FFC107; /* Amarillo para advertencias/otros */
+    --danger-color: #F44336; /* Rojo para acciones peligrosas */
+    --danger-dark: #D32F2F; /* Rojo oscuro */
 
-    /* Colores neutrales y de texto */
-    --text-color-dark: #333333;
-    --text-color-medium: #555555;
-    --text-color-light: #777777;
-    --background-light: #f8f9fa; /* Fondo muy claro */
-    --background-medium: #eceff1; /* Fondo ligeramente gris */
+    --text-color-dark: #333;
+    --text-color-light: #fff;
+    --background-light: #f4f7f6;
     --card-background: #ffffff;
     --border-color: #e0e0e0;
-    --shadow-light: rgba(0, 0, 0, 0.08);
-    --shadow-medium: rgba(0, 0, 0, 0.15);
+    --shadow-light: rgba(0, 0, 0, 0.1);
 }
 
-
-/* Contenedor principal de la administración (reutilizado del AdminUserManagement) */
 .admin-content-container {
-    padding: 30px;
+    padding: 20px;
     background-color: var(--background-light);
-    min-height: calc(100vh - 60px); /* Ajusta si tienes un header/footer fijo */
-    display: flex;
-    flex-direction: column;
-    gap: 25px;
-    font-family: 'Roboto', sans-serif;
-    color: var(--text-color-dark);
+    min-height: calc(100vh - 60px); /* Ajusta según la altura de tu header/footer */
+    border-radius: 8px;
+    box-shadow: 0 4px 12px var(--shadow-light);
+    margin-bottom: 20px;
 }
 
-/* Contenedor específico para el perfil de usuario */
-.admin-user-profile {
-    max-width: 900px; /* Limita el ancho para mejor legibilidad */
-    margin: 20px auto; /* Centra el contenedor */
-    border-radius: 12px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-    background-color: var(--card-background);
-    padding: 30px;
-}
-
-/* Encabezado del perfil (reutilizado del AdminUserManagement) */
 .admin-content-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    flex-wrap: wrap;
-    gap: 15px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid var(--border-color);
-    margin-bottom: 25px;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid var(--primary-light);
 }
 
 .admin-content-header h2 {
@@ -68,116 +42,113 @@
     color: var(--primary-dark);
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     margin: 0;
-    font-weight: 700;
 }
 
 .admin-content-header .header-icon {
-    font-size: 2.2em;
+    font-size: 1.2em;
     color: var(--primary-color);
 }
 
-.header-actions {
-    display: flex;
-    gap: 15px;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-}
-
-/* Botones de acción en el encabezado */
-.edit-btn, .save-btn, .cancel-btn {
+.header-actions button {
     padding: 10px 20px;
     border: none;
-    border-radius: 25px; /* Pill shape */
+    border-radius: 25px;
     cursor: pointer;
     font-size: 0.95em;
     font-weight: 600;
-    display: flex;
+    transition: all 0.3s ease;
+    display: inline-flex;
     align-items: center;
     gap: 8px;
-    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    box-shadow: 0 2px 5px var(--shadow-light);
+}
+
+.header-actions button:not(:last-child) {
+    margin-right: 15px;
 }
 
 .edit-btn {
     background-color: var(--primary-color);
-    color: white;
-    box-shadow: 0 4px 8px rgba(0, 172, 193, 0.2);
+    color: var(--text-color-light);
 }
 
 .edit-btn:hover {
     background-color: var(--primary-dark);
     transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(0, 172, 193, 0.3);
 }
 
 .save-btn {
-    background-color: var(--secondary-color);
-    color: white;
-    box-shadow: 0 4px 8px rgba(76, 175, 80, 0.2);
+    background-color: var(--primary-dark);
+    color: var(--text-color-light);
 }
 
 .save-btn:hover {
-    background-color: var(--secondary-dark);
+    background-color: #006a7a; /* Un poco más oscuro que primary-dark */
     transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(76, 175, 80, 0.3);
 }
 
 .cancel-btn {
-    background-color: var(--background-medium);
-    color: var(--text-color-dark);
-    border: 1px solid var(--border-color);
+    background-color: var(--secondary-dark);
+    color: var(--text-color-light);
 }
 
 .cancel-btn:hover {
-    background-color: #cfd8dc; /* Ligeramente más oscuro que background-medium */
+    background-color: #1565C0; /* Un poco más oscuro que secondary-dark */
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.save-btn:disabled, .cancel-btn:disabled {
-    opacity: 0.6;
+.save-btn:disabled, .cancel-btn:disabled, .edit-btn:disabled {
+    opacity: 0.7;
     cursor: not-allowed;
     box-shadow: none;
+    transform: none;
 }
 
-.spinner-icon {
-    animation: spin 1s linear infinite;
-}
-
-/* Tarjeta de perfil */
+/* Profile Card */
 .profile-card {
+    background-color: var(--card-background);
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    padding: 30px;
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 30px;
+    flex-wrap: wrap; /* Permite que los elementos se envuelvan en pantallas pequeñas */
+    gap: 40px;
+    align-items: flex-start;
 }
 
 .profile-image-section {
+    flex: 0 0 200px; /* Ancho fijo para la imagen */
     position: relative;
-    width: 180px;
-    height: 180px;
-    border-radius: 50%;
-    overflow: hidden;
-    border: 5px solid var(--primary-color);
-    box-shadow: 0 0 0 5px rgba(0, 172, 193, 0.2); /* Anillo de luz */
-    flex-shrink: 0; /* Evita que la imagen se encoja */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    border: 2px dashed var(--primary-light);
+    border-radius: 10px;
+    background-color: #fcfcfc;
 }
 
 .profile-image {
-    width: 100%;
-    height: 100%;
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
     object-fit: cover;
-    display: block;
+    border: 4px solid var(--primary-color);
+    box-shadow: 0 0 15px rgba(0, 172, 193, 0.3); /* Sombra con el color primario */
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .image-upload-overlay {
     position: absolute;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); /* Oscurece la imagen para el icono */
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    border-radius: 50%;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -191,218 +162,180 @@
 }
 
 .upload-icon {
-    color: white;
+    color: var(--text-color-light);
     font-size: 2.5em;
     cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
 }
 
-/* Formulario de perfil */
+/* Form Styling */
 .profile-form {
-    width: 100%;
+    flex-grow: 1; /* Ocupa el espacio restante */
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Columnas responsivas */
+    gap: 20px 30px; /* Espacio entre filas y columnas */
 }
 
 .form-group {
-    margin-bottom: 0; /* Manejado por el gap del grid */
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px; /* Espacio entre grupos de formulario */
 }
 
 .form-group label {
-    display: block;
-    margin-bottom: 8px;
     font-weight: 600;
+    margin-bottom: 8px;
     color: var(--text-color-dark);
     font-size: 0.95em;
 }
 
 .form-group p {
-    background-color: var(--background-medium);
-    padding: 12px;
+    background-color: #f0f0f0;
+    border: 1px solid var(--border-color);
     border-radius: 8px;
+    padding: 10px 15px;
     color: var(--text-color-dark);
     font-size: 1em;
-    min-height: 48px; /* Altura consistente con los inputs */
+    min-height: 42px; /* Alinea con la altura de los inputs */
     display: flex;
     align-items: center;
-    word-break: break-word; /* Permite que el texto largo se rompa */
 }
 
 .form-group input[type="text"],
 .form-group input[type="email"],
 .form-group input[type="date"],
 .form-group select {
-    width: 100%;
-    padding: 12px;
+    padding: 10px 15px;
     border: 1px solid var(--border-color);
     border-radius: 8px;
     font-size: 1em;
     color: var(--text-color-dark);
-    background-color: var(--card-background);
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
-    box-sizing: border-box;
+    background-color: var(--card-background);
 }
 
-.form-group input:focus,
+.form-group input[type="text"]:focus,
+.form-group input[type="email"]:focus,
+.form-group input[type="date"]:focus,
 .form-group select:focus {
     border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px var(--primary-light);
     outline: none;
-    box-shadow: 0 0 0 3px rgba(0, 172, 193, 0.2);
 }
 
-.form-group .input-error {
+.form-group input.input-error,
+.form-group select.input-error {
     border-color: var(--danger-color);
+    box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.2);
+}
+
+.form-group input[type="checkbox"] {
+    width: auto;
+    margin-top: 5px;
+    transform: scale(1.2);
+    accent-color: var(--primary-color); /* Color del checkbox */
 }
 
 .error-message-inline {
     color: var(--danger-color);
     font-size: 0.85em;
     margin-top: 5px;
-    display: block;
 }
 
-.error-message-inline.text-center {
-    text-align: center;
-}
-
-/* Mensajes de carga y error (reutilizados) */
-.admin-loading,
-.error-message,
-.no-results {
+/* Loading and Error States */
+.admin-loading, .error-message, .no-results {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-height: 300px;
+    padding: 40px;
+    background-color: var(--card-background);
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
     text-align: center;
-    padding: 20px;
-    background-color: var(--background-light);
-    color: var(--text-color-dark);
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-    margin: 20px auto;
-    max-width: 600px;
+    margin-top: 30px;
 }
 
-.admin-loading .loading-spinner .spinner-icon {
-    font-size: 3.5em;
+.loading-spinner .spinner-icon {
+    font-size: 3em;
     color: var(--primary-color);
-    animation: spin 1.5s linear infinite;
-    margin-bottom: 20px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 15px;
 }
 
 .admin-loading p {
-    font-size: 1.3em;
-    color: var(--text-color-medium);
+    font-size: 1.1em;
+    color: var(--text-color-dark);
 }
 
 .error-message {
-    color: var(--danger-dark);
-    border: 1px solid var(--danger-color);
-    background-color: #ffebee; /* light red background */
+    background-color: var(--danger-color);
+    color: var(--text-color-light);
+    font-weight: 500;
 }
 
 .error-message .info-icon {
-    font-size: 3em;
-    color: var(--danger-color);
-    margin-bottom: 20px;
+    font-size: 2em;
+    color: var(--text-color-light);
+    margin-bottom: 15px;
 }
 
-.error-message p:first-of-type {
-    font-size: 1.2em;
-    font-weight: 500;
-    margin-bottom: 10px;
+.error-message p {
+    font-size: 0.9em;
+    margin-top: 10px;
+    color: rgba(255, 255, 255, 0.9);
 }
 
-.error-message p:last-of-type {
-    font-size: 0.95em;
-    color: var(--danger-dark);
-    opacity: 0.8;
+.no-results {
+    background-color: #fff3e0; /* Un tono suave de naranja/amarillo */
+    color: var(--text-color-dark);
+    border: 1px solid var(--accent-color);
 }
 
 .no-results .info-icon {
-    font-size: 3em;
+    font-size: 2em;
     color: var(--accent-color);
-    margin-bottom: 20px;
+    margin-bottom: 15px;
 }
 
-/* Media Queries para responsividad */
-@media (max-width: 768px) {
-    .admin-user-profile {
-        padding: 20px;
-        margin: 15px;
-    }
+/* Keyframes para el spinner */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
 
+/* Responsive Adjustments */
+@media (max-width: 768px) {
     .admin-content-header {
         flex-direction: column;
         align-items: flex-start;
         gap: 15px;
     }
 
-    .admin-content-header h2 {
-        font-size: 1.8em;
-    }
-
     .header-actions {
         width: 100%;
-        justify-content: center;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
     }
 
-    .edit-btn, .save-btn, .cancel-btn {
+    .header-actions button {
         width: 100%;
-        justify-content: center;
+        margin-right: 0 !important;
     }
 
     .profile-card {
         flex-direction: column;
-        gap: 20px;
+        align-items: center;
+        gap: 30px;
     }
 
     .profile-image-section {
-        width: 150px;
-        height: 150px;
-        border-width: 4px;
-        box-shadow: 0 0 0 4px rgba(0, 172, 193, 0.2);
+        flex: none;
+        width: 100%;
+        max-width: 200px;
     }
 
     .profile-form {
-        grid-template-columns: 1fr; /* Una columna en pantallas pequeñas */
-    }
-
-    .form-group p {
-        padding: 10px;
-        min-height: 44px;
-    }
-
-    .form-group input,
-    .form-group select {
-        padding: 10px;
-    }
-}
-
-@media (max-width: 480px) {
-    .admin-user-profile {
-        padding: 15px;
-        margin: 10px;
-    }
-
-    .admin-content-header h2 {
-        font-size: 1.6em;
-    }
-
-    .profile-image-section {
-        width: 120px;
-        height: 120px;
-        border-width: 3px;
-        box-shadow: 0 0 0 3px rgba(0, 172, 193, 0.2);
-    }
-
-    .upload-icon {
-        font-size: 2em;
+        grid-template-columns: 1fr; /* Una sola columna en móvil */
     }
 }
