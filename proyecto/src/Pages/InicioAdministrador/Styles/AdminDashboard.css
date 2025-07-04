@@ -691,7 +691,6 @@ html, body, #root {
     background: var(--primary-color); /* Color al pasar el ratón */
 }
 
-<<<<<<< HEAD
     .admin-header {
         padding: var(--spacing-lg) var(--spacing-xxl);
     }
@@ -739,7 +738,7 @@ html, body, #root {
     .admin-content-area {
         padding: var(--spacing-xxl);
     }
-}
+
 /* En Styles/AdminDashboard.css */
 .user-avatar {
     width: 40px; /* O el tamaño que prefieras */
@@ -866,10 +865,9 @@ html, body, #root {
 
 .clear-all-notifications-button:hover {
     background-color: darken(var(--primary-color), 10%);
-=======
+}
 /* Para navegadores que no son Webkit */
 body {
     scrollbar-width: thin;
     scrollbar-color: var(--text-medium) var(--background-light);
->>>>>>> b52706bdbf5afa1c9dd8a3d71e2cbc06e3c93b05
 }

@@ -16,16 +16,16 @@ const NavegacionVeterinario = () => {
   const navigate = useNavigate();
   const { user, showNotification } = useOutletContext(); // Obtener user y showNotification del contexto
 
-    const getVetDashGreeting = useCallback(() => {
-        const hour = new Date().getHours();
-        if (hour < 12) return 'Buenos días';
-        if (hour < 18) return 'Buenas tardes';
-        return 'Buenas noches';
-    }, []);
+  const getVetDashGreeting = useCallback(() => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Buenos días';
+    if (hour < 18) return 'Buenas tardes';
+    return 'Buenas noches';
+  }, []);
 
-    const [vetDashGreeting, setVetDashGreeting] = useState(getVetDashGreeting());
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState(null);
+  const [vetDashGreeting, setVetDashGreeting] = useState(getVetDashGreeting());
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const [vetDashStats, setVetDashStats] = useState({
     totalCitasHoy: 0,
@@ -36,7 +36,7 @@ const NavegacionVeterinario = () => {
     recordatoriosActivos: 0
   });
 
-    const [vetDashPendingAppointments, setVetDashPendingAppointments] = useState([]);
+  const [vetDashPendingAppointments, setVetDashPendingAppointments] = useState([]);
 
   // Actualizar el saludo cada hora
   useEffect(() => {
@@ -69,15 +69,15 @@ const NavegacionVeterinario = () => {
         setError(appointmentsResponse.message || 'Error al cargar citas pendientes.');
       }
 
-            // 2. Fetch completed appointments count for today
-            const completedCountResponse = await authFetch(`/veterinario/citas/completadas/count`);
-            let completedTodayCount = 0;
-            if (completedCountResponse.success) {
-                completedTodayCount = completedCountResponse.count;
-            } else {
-                showNotification(completedCountResponse.message || 'Error al cargar citas completadas.', 'error');
-                setError(prev => prev ? prev + ' ' + completedCountResponse.message : completedCountResponse.message);
-            }
+      // 2. Fetch completed appointments count for today
+      const completedCountResponse = await authFetch(`/veterinario/citas/completadas/count`);
+      let completedTodayCount = 0;
+      if (completedCountResponse.success) {
+        completedTodayCount = completedCountResponse.count;
+      } else {
+        showNotification(completedCountResponse.message || 'Error al cargar citas completadas.', 'error');
+        setError(prev => prev ? prev + ' ' + completedCountResponse.message : completedCountResponse.message);
+      }
 
       // 3. Fetch unread notifications
       const notificationsResponse = await authFetch(`/notifications/user/${user.id}`);
@@ -110,126 +110,129 @@ const NavegacionVeterinario = () => {
         recordatoriosActivos: unreadNotificationsCount
       }));
 
-        } catch (err) {
-            console.error("Error fetching vet dashboard data:", err);
-            setError('Error de conexión al servidor.');
-            showNotification('Error de conexión al servidor al cargar el dashboard.', 'error');
-        } finally {
-            setIsLoading(false);
-        }
-    }, [user, showNotification]);
+    } catch (err) {
+      console.error("Error fetching vet dashboard data:", err);
+      setError('Error de conexión al servidor.');
+      showNotification('Error de conexión al servidor al cargar el dashboard.', 'error');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user, showNotification]);
 
-    useEffect(() => {
-        fetchVetDashboardData();
-    }, [fetchVetDashboardData]);
+  useEffect(() => {
+    fetchVetDashboardData();
+  }, [fetchVetDashboardData]);
 
   // Manejar el marcado de cita como completada
   const handleCompleteVetAppointment = useCallback(async (id) => {
+    // Define newStatus here
+    const newStatus = "completado";
+
     // Optimistic UI update
     setVetDashPendingAppointments(prevCitas =>
       prevCitas.map(cita =>
-        cita.id === id ? { ...cita, estado: "completado" } : cita
+        cita.id === id ? { ...cita, estado: newStatus } : cita
       )
     );
 
-        try {
-            const response = await authFetch(`/citas/${id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ estado: newStatus.toUpperCase() })
-            });
+    try {
+      const response = await authFetch(`/citas/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ estado: newStatus.toUpperCase() })
+      });
 
-            if (response.success) {
-                showNotification(`Cita marcada como ${newStatus.toLowerCase()}.`, 'success');
-                // Re-fetch data to ensure stats are accurate after status change
-                fetchVetDashboardData();
-            } else {
-                showNotification(response.message || `Error al marcar cita como ${newStatus.toLowerCase()}.`, 'error');
-                // Revert optimistic update if API call fails (re-fetch will handle this)
-                fetchVetDashboardData();
-            }
-        } catch (err) {
-            console.error(`Error updating appointment to ${newStatus}:`, err);
-            showNotification(`Error de conexión al servidor al actualizar cita a ${newStatus}.`, 'error');
-            // Revert optimistic update on network error (re-fetch will handle this)
-            fetchVetDashboardData();
-        }
-    }, [showNotification, fetchVetDashboardData]);
-
-
-    const vetDashQuickActions = [
-        { name: "Registrar Mascota", icon: faPaw, path: "/veterinario/mascotas/registrar", color: "#00bcd4" },
-        { name: "Registrar Propietario", icon: faUserPlus, path: "/veterinario/propietarios/registrar", color: "#ff7043" },
-        { name: "Ver Historiales Clínicos", icon: faClipboardList, path: "/veterinario/historiales", color: "#4CAF50" },
-        { name: "Ver Todas las Citas", icon: faCalendarAlt, path: "/veterinario/citas", color: "#9c27b0" },
-    ];
-
-    const vetDashCardVariants = {
-        hidden: { opacity: 0, scale: 0.8 },
-        visible: { opacity: 1, scale: 1, transition: { duration: 0.5, ease: "easeOut" } },
-    };
-
-    const vetDashAppointmentItemVariants = {
-        hidden: { opacity: 0, y: 20 },
-        visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } },
-        exit: { opacity: 0, x: -50, transition: { duration: 0.3, ease: "easeIn" } },
-        completed: { opacity: 0, x: -100, transition: { duration: 0.3, ease: "easeIn" } }
-    };
-
-    if (isLoading) {
-        return (
-            <div className={styles.loadingContainer}>
-                <FontAwesomeIcon icon={faSpinner} spin size="3x" color="#00acc1" />
-                <p>Cargando datos del dashboard...</p>
-            </div>
-        );
+      if (response.success) {
+        showNotification(`Cita marcada como ${newStatus.toLowerCase()}.`, 'success');
+        // Re-fetch data to ensure stats are accurate after status change
+        fetchVetDashboardData();
+      } else {
+        showNotification(response.message || `Error al marcar cita como ${newStatus.toLowerCase()}.`, 'error');
+        // Revert optimistic update if API call fails (re-fetch will handle this)
+        fetchVetDashboardData();
+      }
+    } catch (err) {
+      console.error(`Error updating appointment to ${newStatus}:`, err);
+      showNotification(`Error de conexión al servidor al actualizar cita a ${newStatus}.`, 'error');
+      // Revert optimistic update on network error (re-fetch will handle this)
+      fetchVetDashboardData();
     }
+  }, [showNotification, fetchVetDashboardData]);
 
-    if (error) {
-        return (
-            <div className={styles.errorContainer}>
-                <FontAwesomeIcon icon={faExclamationTriangle} size="3x" color="#FF5252" />
-                <p>Error al cargar el dashboard: {error}</p>
-                <button onClick={fetchVetDashboardData} className={styles.retryButton}>Reintentar</button>
-            </div>
-        );
-    }
 
+  const vetDashQuickActions = [
+    { name: "Registrar Mascota", icon: faPaw, path: "/veterinario/mascotas/registrar", color: "#00bcd4" },
+    { name: "Registrar Propietario", icon: faUserPlus, path: "/veterinario/propietarios/registrar", color: "#ff7043" },
+    { name: "Ver Historiales Clínicos", icon: faClipboardList, path: "/veterinario/historiales", color: "#4CAF50" },
+    { name: "Ver Todas las Citas", icon: faCalendarAlt, path: "/veterinario/citas", color: "#9c27b0" },
+  ];
+
+  const vetDashCardVariants = {
+    hidden: { opacity: 0, scale: 0.8 },
+    visible: { opacity: 1, scale: 1, transition: { duration: 0.5, ease: "easeOut" } },
+  };
+
+  const vetDashAppointmentItemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } },
+    exit: { opacity: 0, x: -50, transition: { duration: 0.3, ease: "easeIn" } },
+    completed: { opacity: 0, x: -100, transition: { duration: 0.3, ease: "easeIn" } }
+  };
+
+  if (isLoading) {
     return (
-        <motion.div
-            className={styles.vetDash_mainContainer}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-        >
-            <h1 className={styles.vetDash_greetingText}>
-                {vetDashGreeting}, Dr/a. <span style={{ fontWeight: 'bold' }}>{user?.nombre || 'Veterinario'}</span>!
-            </h1>
-            <p className={styles.vetDash_subHeaderMessage}>Aquí tienes un resumen rápido de tu jornada y las acciones clave.</p>
+      <div className={styles.loadingContainer}>
+        <FontAwesomeIcon icon={faSpinner} spin size="3x" color="#00acc1" />
+        <p>Cargando datos del dashboard...</p>
+      </div>
+    );
+  }
 
-            {/* --- Sección: Acciones Rápidas (Quick Actions) --- */}
-            <div className={styles.vetDash_sectionWrapper}>
-                <h2><FontAwesomeIcon icon={faPlus} className={styles.vetDash_sectionIcon} /> Acciones Rápidas</h2>
-                <div className={styles.vetDash_quickActionsGrid}>
-                    {vetDashQuickActions.map((action, index) => (
-                        <motion.div
-                            key={index}
-                            className={styles.vetDash_quickActionCard}
-                            onClick={() => navigate(action.path)}
-                            whileHover={{ scale: 1.05, boxShadow: "0 8px 25px rgba(0,0,0,0.15)" }}
-                            whileTap={{ scale: 0.95 }}
-                            variants={vetDashCardVariants}
-                            initial="hidden"
-                            animate="visible"
-                            transition={{ delay: 0.1 * index }}
-                            style={{ '--action-color': action.color }}
-                        >
-                            <FontAwesomeIcon icon={action.icon} className={styles.vetDash_quickActionIcon} />
-                            <p className={styles.vetDash_quickActionText}>{action.name}</p>
-                        </motion.div>
-                    ))}
-                </div>
-            </div>
+  if (error) {
+    return (
+      <div className={styles.errorContainer}>
+        <FontAwesomeIcon icon={faExclamationTriangle} size="3x" color="#FF5252" />
+        <p>Error al cargar el dashboard: {error}</p>
+        <button onClick={fetchVetDashboardData} className={styles.retryButton}>Reintentar</button>
+      </div>
+    );
+  }
+
+  return (
+    <motion.div
+      className={styles.vetDash_mainContainer}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
+    >
+      <h1 className={styles.vetDash_greetingText}>
+        {vetDashGreeting}, Dr/a. <span style={{ fontWeight: 'bold' }}>{user?.nombre || 'Veterinario'}</span>!
+      </h1>
+      <p className={styles.vetDash_subHeaderMessage}>Aquí tienes un resumen rápido de tu jornada y las acciones clave.</p>
+
+      {/* --- Sección: Acciones Rápidas (Quick Actions) --- */}
+      <div className={styles.vetDash_sectionWrapper}>
+        <h2><FontAwesomeIcon icon={faPlus} className={styles.vetDash_sectionIcon} /> Acciones Rápidas</h2>
+        <div className={styles.vetDash_quickActionsGrid}>
+          {vetDashQuickActions.map((action, index) => (
+            <motion.div
+              key={index}
+              className={styles.vetDash_quickActionCard}
+              onClick={() => navigate(action.path)}
+              whileHover={{ scale: 1.05, boxShadow: "0 8px 25px rgba(0,0,0,0.15)" }}
+              whileTap={{ scale: 0.95 }}
+              variants={vetDashCardVariants}
+              initial="hidden"
+              animate="visible"
+              transition={{ delay: 0.1 * index }}
+              style={{ '--action-color': action.color }}
+            >
+              <FontAwesomeIcon icon={action.icon} className={styles.vetDash_quickActionIcon} />
+              <p className={styles.vetDash_quickActionText}>{action.name}</p>
+            </motion.div>
+          ))}
+        </div>
+      </div>
 
       {/* --- Sección: Resumen de Estadísticas (Dashboard Cards) --- */}
       <div className={styles.vetDash_sectionWrapper}>
@@ -253,23 +256,23 @@ const NavegacionVeterinario = () => {
             <span className={styles.vetDash_statFooter}>¡Concéntrate en estas!</span>
           </motion.div>
 
-                    {/* Card: Citas Completadas Hoy */}
-                    <motion.div
-                        className={styles.vetDash_statCard}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        variants={vetDashCardVariants}
-                        initial="hidden"
-                        animate="visible"
-                        transition={{ delay: 0.2 }}
-                    >
-                        <div className={styles.vetDash_statCardHeader}>
-                            <FontAwesomeIcon icon={faCheckCircle} className={styles.vetDash_statIcon} style={{ color: 'var(--color-success)' }} />
-                            <h3>Citas Completadas Hoy</h3>
-                        </div>
-                        <p className={styles.vetDash_statHighlight}>{vetDashStats.citasCompletadasHoy}</p>
-                        <span className={styles.vetDash_statFooter}>¡Excelente trabajo!</span>
-                    </motion.div>
+          {/* Card: Citas Completadas Hoy */}
+          <motion.div
+            className={styles.vetDash_statCard}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            variants={vetDashCardVariants}
+            initial="hidden"
+            animate="visible"
+            transition={{ delay: 0.2 }}
+          >
+            <div className={styles.vetDash_statCardHeader}>
+              <FontAwesomeIcon icon={faCheckCircle} className={styles.vetDash_statIcon} style={{ color: 'var(--color-success)' }} />
+              <h3>Citas Completadas Hoy</h3>
+            </div>
+            <p className={styles.vetDash_statHighlight}>{vetDashStats.citasCompletadasHoy}</p>
+            <span className={styles.vetDash_statFooter}>¡Excelente trabajo!</span>
+          </motion.div>
 
           {/* Card: Nuevos Pacientes (Semana) - DUMMY DATA */}
           <motion.div

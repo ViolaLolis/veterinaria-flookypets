@@ -3,26 +3,16 @@ import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import {
     FaTachometerAlt, FaUsers, FaStethoscope, FaUserShield, FaBriefcaseMedical,
     FaCalendarAlt, FaNotesMedical, FaCog, FaSignOutAlt, FaUserCircle,
-    FaBars, FaTimes // Se eliminaron FaBell y FaCheckCircle ya que no se usan en el código activo
+    FaBars, FaTimes
 } from 'react-icons/fa';
 import './Styles/AdminDashboard.css';
-// Se eliminó la importación de useNotifications, ya que las notificaciones en el header están comentadas
-// import { useNotifications } from '../../Notifications/NotificationContext';
 
 function AdminDashboard({ user, setUser, handleLogout }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-    // Se eliminó isNotificationsDropdownOpen, ya no se usa
-    // const [isNotificationsDropdownOpen, setIsNotificationsDropdownOpen] = useState(false);
 
     const navigate = useNavigate();
     const location = useLocation();
 
-    // Se eliminaron todas las variables relacionadas con useNotifications
-    // const { notifications, markAsRead, clearNotifications } = useNotifications();
-    // const unreadCount = notifications.filter(notif => !notif.leida).length;
-
-    // Se eliminó notificationsRef, ya no se usa
-    // const notificationsRef = useRef(null);
     const sidebarRef = useRef(null);
 
     // Redirige si el usuario no es admin o no está logueado
@@ -47,7 +37,7 @@ function AdminDashboard({ user, setUser, handleLogout }) {
         return () => {
             document.removeEventListener("mousedown", handleClickOutside);
         };
-    }, [sidebarRef, isSidebarOpen]); // notificationsRef eliminado de las dependencias
+    }, [sidebarRef, isSidebarOpen]);
 
     const handleLogoutClick = () => {
         handleLogout();
@@ -58,37 +48,8 @@ function AdminDashboard({ user, setUser, handleLogout }) {
         return location.pathname.startsWith(path) ? 'admin-nav-item active' : 'admin-nav-item';
     };
 
-    // Se eliminó toggleNotificationsDropdown, ya no se usa
-    // const toggleNotificationsDropdown = () => {
-    //     setIsNotificationsDropdownOpen(prevState => !prevState);
-    // };
-
-<<<<<<< HEAD
-    // Filtra las notificaciones para mostrar solo las relevantes para el admin
-    const adminNotifications = notifications.filter(notif => {
-        const adminKeywords = [
-            'nueva cita',
-            'nuevo usuario registrado',
-            'nueva mascota agregada',
-            'cita cancelada',
-            'registro de pago',
-            'cita reagendada' // Ejemplo adicional de palabra clave
-            // Agrega más palabras clave relevantes para el admin aquí
-        ];
-        // Comprueba si el mensaje de la notificación contiene alguna de las palabras clave (insensible a mayúsculas/minúsculas)
-        return adminKeywords.some(keyword => notif.mensaje.toLowerCase().includes(keyword.toLowerCase()));
-    });
-=======
-    // Se eliminó adminNotifications, ya no se usa
-    // const adminNotifications = notifications.filter(notif => {
-    //     const adminKeywords = [
-    //         'nueva cita', 'nuevo usuario registrado', 'nueva mascota agregada',
-    //         'cita cancelada', 'registro de pago', 'veterinario', 'servicio',
-    //         'historial', 'cliente', 'modificado', 'eliminado', 'creado'
-    //     ];
-    //     return adminKeywords.some(keyword => notif.mensaje.toLowerCase().includes(keyword));
-    // });
->>>>>>> b52706bdbf5afa1c9dd8a3d71e2cbc06e3c93b05
+    // The 'adminNotifications' constant and its filtering logic have been removed
+    // as the notification feature is currently commented out/removed.
 
     return (
         <div className="admin-dashboard-container">
@@ -255,15 +216,6 @@ function AdminDashboard({ user, setUser, handleLogout }) {
                             )}
                         </div>
 
-<<<<<<< HEAD
-                        {/* Información de usuario y foto de perfil */}
-                        <div className="user-info">
-                            {user?.imagen_url ? (
-                                <img src={user.imagen_url} alt="Avatar de Usuario" className="user-avatar" />
-                            ) : (
-                                <FaUserCircle className="user-avatar-icon" />
-                            )}
-=======
                         <div className="admin-user-profile-header">
                             <div className="admin-avatar-header">
                                 {user?.profilePicture ? (
@@ -272,7 +224,6 @@ function AdminDashboard({ user, setUser, handleLogout }) {
                                     <FaUserCircle className="admin-user-avatar-icon" />
                                 )}
                             </div>
->>>>>>> b52706bdbf5afa1c9dd8a3d71e2cbc06e3c93b05
                             <span>{user?.nombre}</span>
                         </div>
                     </div>
