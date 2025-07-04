@@ -35,21 +35,22 @@ app.use(cors({
     credentials: true
 }));
 
-// Importante: express.json() debe ir antes de fileUpload para que el body JSON sea parseado
-// antes de que fileUpload intente procesar la solicitud.
-app.use(express.json()); // Habilita el parsing de JSON en el cuerpo de las peticiones
-
+// IMPORTANTE: fileUpload DEBE ir antes de express.json() para que pueda procesar los archivos multipart/form-data
 app.use(fileUpload({
     limits: { fileSize: 5 * 1024 * 1024 }, // Límite de 5MB
     abortOnLimit: true,
     debug: true // Añadir para ver más logs de fileUpload
 }));
 
+// Ahora express.json() puede ir después de fileUpload
+app.use(express.json()); // Habilita el parsing de JSON en el cuerpo de las peticiones
+
+
 // Configuración del pool de conexiones a la base de datos
 const pool = mysql.createPool({
     host: process.env.DB_HOST || "127.0.0.1",
     user: process.env.DB_USER || "root",
-    password: process.env.DB_PASSWORD || "", // Asegúrate de que tu contraseña de MySQL sea correcta aquí o en .env
+    password: process.env.DB_PASSWORD || "12345678", // Asegúrate de que tu contraseña de MySQL sea correcta aquí o en .env
     database: process.env.DB_NAME || "veterinaria",
     waitForConnections: true,
     connectionLimit: 10,

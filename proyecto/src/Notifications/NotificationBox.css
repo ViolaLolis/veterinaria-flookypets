@@ -1,0 +1,176 @@
+/* src/Components/NotificationBox/NotificationBox.css */
+
+/* Variables CSS para consistencia de colores y espaciado */
+:root {
+    --color-success: #28a745; /* Verde */
+    --color-error: #dc3545;   /* Rojo */
+    --color-info: #007bff;    /* Azul */
+    --color-warning: #ffc107; /* Amarillo */
+    --color-text-light: #ffffff;
+    --color-text-dark: #343a40;
+    --color-shadow-light: rgba(0, 0, 0, 0.1);
+    --color-shadow-medium: rgba(0, 0, 0, 0.2);
+
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+
+    --border-radius-md: 0.5rem;
+    --border-radius-lg: 0.75rem;
+}
+
+/* Contenedor principal para todas las notificaciones */
+.notification-container {
+    position: fixed;
+    top: var(--spacing-lg);
+    z-index: 1000; /* Asegura que esté por encima de otros elementos */
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md); /* Espacio entre notificaciones */
+}
+
+/* Posiciones específicas */
+.notification-container.top-right {
+    right: var(--spacing-lg);
+}
+
+.notification-container.top-left {
+    left: var(--spacing-lg);
+}
+
+/* Estilos base para la caja de notificación */
+.notification-box {
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-radius: var(--border-radius-lg);
+    box-shadow: 0 4px 12px var(--color-shadow-medium);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-width: 280px;
+    max-width: 350px;
+    font-family: 'Inter', sans-serif; /* Usar Inter como se sugiere */
+    transition: transform 0.3s ease-out, opacity 0.3s ease-out, box-shadow 0.2s ease-in-out;
+    cursor: pointer;
+    overflow: hidden; /* Para que el contenido no se salga con animaciones */
+}
+
+.notification-box:hover {
+    transform: translateY(-3px); /* Pequeño efecto de elevación al pasar el ratón */
+    box-shadow: 0 6px 16px var(--color-shadow-light); /* Sombra más pronunciada */
+}
+
+/* Estilos por tipo de notificación */
+.notification-box.success {
+    background-color: var(--color-success);
+    color: var(--color-text-light);
+}
+
+.notification-box.error {
+    background-color: var(--color-error);
+    color: var(--color-text-light);
+}
+
+.notification-box.info {
+    background-color: var(--color-info);
+    color: var(--color-text-light);
+}
+
+.notification-box.warning {
+    background-color: var(--color-warning);
+    color: var(--color-text-dark); /* Texto oscuro para fondo claro */
+}
+
+/* Contenido del mensaje */
+.notification-message {
+    flex-grow: 1;
+    font-size: 1rem;
+    font-weight: 500;
+    line-height: 1.4;
+    margin-right: var(--spacing-md);
+}
+
+/* Botón de cerrar */
+.notification-close-btn {
+    background: none;
+    border: none;
+    color: inherit; /* Hereda el color del texto de la notificación */
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: var(--spacing-sm);
+    border-radius: 50%; /* Botón redondo */
+    transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.notification-close-btn:hover {
+    background-color: rgba(255, 255, 255, 0.2); /* Fondo ligeramente transparente al pasar el ratón */
+    transform: scale(1.1);
+}
+
+/* Animaciones de entrada */
+@keyframes fadeInRight {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Animación de salida */
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(100%); /* O -100% si es left */
+    }
+}
+
+/* Aplicar animaciones */
+.notification-enter-right {
+    animation: fadeInRight 0.5s ease-out forwards;
+}
+
+.notification-enter-left {
+    animation: fadeInLeft 0.5s ease-out forwards;
+}
+
+.notification-exit {
+    animation: fadeOut 0.5s ease-in forwards;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+    .notification-box {
+        min-width: unset; /* Permitir que el ancho se ajuste */
+        max-width: 90vw; /* Ocupar casi todo el ancho de la pantalla */
+        margin-left: auto; /* Centrar si es necesario */
+        margin-right: auto;
+    }
+
+    .notification-container.top-right,
+    .notification-container.top-left {
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100%; /* Ocupar el ancho completo para centrar mejor */
+        align-items: center; /* Centrar las cajas si hay varias */
+    }
+}

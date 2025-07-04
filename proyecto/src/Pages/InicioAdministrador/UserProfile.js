@@ -124,7 +124,7 @@ function UserProfile({ user, setUser }) {
                     body: uploadFormData,
                     // No Content-Type aquí, el navegador lo establecerá automáticamente para FormData
                     headers: {
-                        'Content-Type': undefined // Importante para que fetch no lo ponga como application/json
+                        // 'Content-Type': undefined // No es necesario establecerlo a undefined, simplemente no lo incluyas
                     }
                 });
 

@@ -1,88 +1,44 @@
 // src/Components/Notifications/NotificationDisplay.js
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useNotifications } from './NotificationContext';
+import NotificationBox from './NotificationBox'; // Importa el nuevo componente de caja de notificación
+import { AnimatePresence, motion } from 'framer-motion'; // Importa para animaciones
 
 const NotificationDisplay = () => {
-  const { notifications, removeNotification, markNotificationAsRead, userRole } = useNotifications();
+  const { notifications, removeNotification } = useNotifications();
 
-  // Función para obtener los estilos de la notificación según su tipo
-  const getNotificationStyles = (type) => {
-    switch (type) {
-      case 'success':
-      case 'cita_aceptada_user':
-        return 'bg-green-500 text-white';
-      case 'error':
-      case 'cita_rechazada_user':
-        return 'bg-red-500 text-white';
-      case 'warning':
-      case 'cita_creada_vet': // Advertencia para el veterinario de nueva cita
-      case 'cita_registrada_user': // Info para el usuario de cita pendiente
-        return 'bg-yellow-500 text-gray-800';
-      case 'info':
-      case 'cita_creada_admin_vet':
-      case 'cita_cancelada_user':
-      case 'cita_cancelada_vet':
-      case 'cita_cancelada_admin':
-        return 'bg-blue-500 text-white';
-      default:
-        return 'bg-gray-700 text-white';
-    }
-  };
-
-  // Función para obtener el mensaje formateado
-  const getFormattedMessage = (notif) => {
-    // Aquí puedes añadir lógica para formatear mensajes basados en 'tipo' y 'referencia_id'
-    // Por ejemplo, si 'referencia_id' es el ID de una cita, podrías generar un enlace.
-    // Por ahora, usaremos el mensaje tal cual de la BD.
-    return notif.mensaje;
-  };
-
-  // Marcar como leída automáticamente después de un tiempo o al hacer clic
-  const handleNotificationClick = (notifId) => {
-    // Si la notificación es efímera (no tiene id_notificacion de la BD), no la marcamos como leída en el backend
-    if (notifId) { // Solo si el ID es válido (no undefined/null)
-      markNotificationAsRead(notifId);
-    }
-    // Opcional: puedes redirigir al usuario a la página de la cita/historial si notif.referencia_id existe
-    // const navigate = useNavigate();
-    // if (notif.referencia_id && notif.tipo.includes('cita')) {
-    //   navigate(`/usuario/citas/${notif.referencia_id}`);
-    // }
-  };
+  // Define la posición global para todas las notificaciones
+  // Puedes hacer que esta posición sea configurable si lo deseas (ej. desde props de App.js)
+  const globalPosition = 'top-right'; // O 'top-left'
 
   return (
-    <div className="fixed top-4 right-4 z-50 space-y-2">
-      {notifications.map((notif) => (
-        // Solo muestra notificaciones no leídas
-        !notif.leida && (
-          <div
-            // *** CORRECCIÓN DE LA ADVERTENCIA "key" ***
-            // Usa id_notificacion si existe (para notificaciones de la BD), de lo contrario usa id (para notificaciones efímeras)
-            key={notif.id_notificacion || notif.id} 
-            className={`p-4 rounded-lg shadow-lg flex items-center justify-between cursor-pointer animate-fade-in-down ${getNotificationStyles(notif.tipo)}`}
-            role="alert"
-            // *** CORRECCIÓN PARA EL CLICK ***
-            // Pasa el ID correcto a la función de manejo de clic
-            onClick={() => handleNotificationClick(notif.id_notificacion || notif.id)}
+    // El contenedor principal que define la posición y el espaciado entre notificaciones
+    <div className={`notification-container ${globalPosition}`}>
+      <AnimatePresence>
+        {notifications.map((notif) => (
+          <motion.div
+            key={notif.id_notificacion || notif.id} // Usa el ID de la BD o el ID temporal
+            // Las animaciones de entrada y salida se definen en NotificationBox.css
+            // AnimatePresence maneja la eliminación del DOM después de la animación de salida
+            initial={globalPosition === 'top-right' ? { opacity: 0, x: '100%' } : { opacity: 0, x: '-100%' }}
+            animate={{ opacity: 1, x: '0%' }}
+            exit={globalPosition === 'top-right' ? { opacity: 0, x: '100%' } : { opacity: 0, x: '-100%' }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            layout // Para animar los cambios de posición de las notificaciones cuando se añaden/eliminan
           >
-            <p className="text-sm font-medium">{getFormattedMessage(notif)}</p>
-            <button
-              onClick={(e) => {
-                e.stopPropagation(); // Evitar que el clic en el botón cierre la notificación y la marque como leída al mismo tiempo
-                // *** CORRECCIÓN PARA ELIMINAR ***
-                // Pasa el ID correcto a la función de eliminación
-                removeNotification(notif.id_notificacion || notif.id);
-              }}
-              className="ml-4 text-white hover:text-gray-200 focus:outline-none"
-              aria-label="Cerrar notificación"
-            >
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-        )
-      ))}
+            <NotificationBox
+              id={notif.id_notificacion || notif.id} // Pasa el ID al componente de la caja
+              type={notif.type}
+              message={notif.message}
+              // No pasamos 'duration' a NotificationBox para auto-cerrado,
+              // ya que NotificationContext ya maneja la lógica de temporización para eliminar del estado.
+              // NotificationBox solo se encarga de la animación de salida cuando es removido del DOM por AnimatePresence.
+              position={globalPosition} // Pasa la posición para que NotificationBox aplique la animación correcta
+              onClose={() => removeNotification(notif.id_notificacion || notif.id)} // Llama a la función del contexto para eliminar
+            />
+          </motion.div>
+        ))}
+      </AnimatePresence>
     </div>
   );
 };

@@ -31,7 +31,18 @@
     --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.15);
 }
 
-/* Contenedor principal del perfil, usa estilos de AdminStyles.css */
+/* Animaciones */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Contenedor principal del perfil */
 .admin-user-profile {
     max-width: 900px; /* Ancho máximo para la tarjeta de perfil */
     margin: var(--spacing-xl) auto; /* Centrar en la página */
@@ -41,6 +52,36 @@
     box-shadow: var(--shadow-lg);
     animation: fadeIn 0.6s ease-out;
 }
+
+/* Encabezado de la sección (reusa estilos de AdminStyles si existen) */
+.admin-content-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-xl);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 1px solid var(--color-border-light);
+}
+
+.admin-content-header h2 {
+    font-size: 1.8rem;
+    color: var(--color-dark-cyan);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.admin-content-header .header-icon {
+    font-size: 2rem;
+    color: var(--color-primary-cyan);
+}
+
+.admin-content-header .header-actions {
+    display: flex;
+    gap: var(--spacing-md);
+}
+
 
 /* Tarjeta de perfil */
 .profile-card {
@@ -182,18 +223,7 @@
     margin-left: 0.2rem;
 }
 
-/* Acciones del formulario */
-.profile-actions {
-    grid-column: 1 / -1; /* Ocupar todo el ancho de la cuadrícula */
-    display: flex;
-    justify-content: flex-end;
-    gap: var(--spacing-md);
-    padding-top: var(--spacing-lg);
-    border-top: 1px solid var(--color-border-light);
-    margin-top: var(--spacing-lg);
-}
-
-/* Botones (usando clases de AdminStyles.css) */
+/* Acciones del formulario (botones) */
 .edit-btn, .save-btn, .cancel-btn {
     padding: 0.75rem 1.5rem;
     border: none;
@@ -207,42 +237,43 @@
     transition: all 0.3s ease;
     text-transform: uppercase;
     letter-spacing: 0.05em;
+    box-shadow: var(--shadow-sm); /* Sombra base para todos los botones */
 }
 
 .edit-btn {
     background-color: var(--color-primary-cyan);
     color: var(--color-background-white);
-    box-shadow: 0 3px 6px rgba(0, 188, 212, 0.3);
+    box-shadow: 0 4px 10px rgba(0, 188, 212, 0.3); /* Sombra más pronunciada */
 }
 
 .edit-btn:hover {
     background-color: var(--color-dark-cyan);
-    transform: translateY(-2px);
-    box-shadow: 0 5px 10px rgba(0, 188, 212, 0.4);
+    transform: translateY(-3px); /* Efecto 3D sutil */
+    box-shadow: 0 6px 15px rgba(0, 188, 212, 0.4); /* Sombra al hacer hover */
 }
 
 .save-btn {
-    background: linear-gradient(135deg, var(--color-accent-green) 0%, #218838 100%);
+    background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%); /* Verde más vibrante */
     color: var(--color-background-white);
-    box-shadow: 0 4px 10px rgba(40, 167, 69, 0.4);
+    box-shadow: 0 4px 10px rgba(76, 175, 80, 0.4);
 }
 
 .save-btn:hover {
-    background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
+    background: linear-gradient(135deg, #388E3C 0%, #2E7D32 100%);
     transform: translateY(-3px);
-    box-shadow: 0 6px 15px rgba(40, 167, 69, 0.5);
+    box-shadow: 0 6px 15px rgba(76, 175, 80, 0.5);
 }
 
 .cancel-btn {
-    background-color: var(--color-text-light);
+    background-color: #EF5350; /* Rojo más suave */
     color: var(--color-background-white);
-    box-shadow: 0 3px 6px rgba(108, 117, 125, 0.3);
+    box-shadow: 0 4px 10px rgba(239, 83, 80, 0.3);
 }
 
 .cancel-btn:hover {
-    background-color: #5a6268;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 10px rgba(108, 117, 125, 0.4);
+    background-color: #D32F2F; /* Rojo más oscuro */
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(239, 83, 80, 0.4);
 }
 
 .edit-btn:disabled, .save-btn:disabled, .cancel-btn:disabled {
@@ -250,10 +281,45 @@
     cursor: not-allowed;
     box-shadow: none;
     transform: none;
+    opacity: 0.7;
 }
 
 .spinner-icon {
     animation: spin 1s linear infinite;
+}
+
+/* Mensajes de carga y error (reusan estilos de AdminDashboard.css o generales) */
+.admin-loading, .error-message, .no-results {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-xl);
+    border-radius: var(--border-radius-md);
+    background-color: var(--color-background-white);
+    box-shadow: var(--shadow-md);
+    margin: var(--spacing-xl) auto;
+    max-width: 600px;
+    text-align: center;
+    color: var(--color-text-medium);
+}
+
+.admin-loading .loading-spinner .spinner-icon {
+    font-size: 3rem;
+    color: var(--color-primary-cyan);
+    margin-bottom: var(--spacing-md);
+}
+
+.error-message .info-icon, .no-results .info-icon {
+    font-size: 2.5rem;
+    color: var(--color-accent-red);
+    margin-bottom: var(--spacing-md);
+}
+
+.error-message p, .no-results p {
+    margin-top: var(--spacing-sm);
+    font-size: 0.95rem;
+    color: var(--color-text-light);
 }
 
 /* Responsive Adjustments */
@@ -274,6 +340,27 @@
 }
 
 @media (max-width: 767px) {
+    .admin-user-profile {
+        margin: var(--spacing-lg) auto;
+        padding: var(--spacing-lg);
+    }
+
+    .admin-content-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-md);
+    }
+
+    .admin-content-header h2 {
+        font-size: 1.5rem;
+    }
+
+    .admin-content-header .header-actions {
+        flex-direction: column;
+        width: 100%;
+        gap: var(--spacing-sm);
+    }
+
     .profile-card {
         padding: var(--spacing-md);
     }
@@ -303,11 +390,6 @@
         font-size: 0.9rem;
     }
 
-    .profile-actions {
-        flex-direction: column;
-        gap: var(--spacing-sm);
-    }
-
     .edit-btn, .save-btn, .cancel-btn {
         width: 100%;
         justify-content: center;
@@ -326,9 +408,5 @@
 
     .upload-icon {
         font-size: 2rem;
-    }
-
-    .sidebar-header h3 {
-        font-size: 1.2rem;
     }
 }
