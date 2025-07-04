@@ -1,34 +1,68 @@
-// src/Pages/InicioAdministrador/AdminDashboard.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react'; // Importa useRef
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
-import { FaTachometerAlt, FaUsers, FaStethoscope, FaUserShield, FaBriefcaseMedical, FaCalendarAlt, FaNotesMedical, FaCog, FaSignOutAlt, FaUserCircle, FaBars, FaTimes } from 'react-icons/fa';
-import './Styles/AdminDashboard.css'; // Ruta relativa al CSS
-import { useNotifications } from '../../Notifications/NotificationContext'; // Ruta ajustada
+import {
+    FaTachometerAlt, FaUsers, FaStethoscope, FaUserShield, FaBriefcaseMedical,
+    FaCalendarAlt, FaNotesMedical, FaCog, FaSignOutAlt, FaUserCircle,
+    FaBars, FaTimes, FaBell, FaCheckCircle // Importa FaBell y FaCheckCircle
+} from 'react-icons/fa';
+import './Styles/AdminDashboard.css';
+import { useNotifications } from '../../Notifications/NotificationContext';
 
 function AdminDashboard({ user, setUser, handleLogout }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [isNotificationsDropdownOpen, setIsNotificationsDropdownOpen] = useState(false); // Estado para el dropdown
     const navigate = useNavigate();
     const location = useLocation();
-    const { notifications } = useNotifications(); // Solo necesitamos 'notifications' para el contador
+    const { notifications, markAsRead, clearNotifications } = useNotifications(); // Usa funciones del contexto
     const unreadCount = notifications.filter(notif => !notif.leida).length;
 
+    // Ref para detectar clics fuera del dropdown de notificaciones
+    const notificationsRef = useRef(null);
+
     useEffect(() => {
-        // Redirigir si el usuario no es admin o no está logueado
-        // Esta lógica también está en Protegida.js, pero es una buena capa de seguridad adicional
         if (!user || user.role !== 'admin') {
             navigate('/login', { replace: true });
         }
     }, [user, navigate]);
 
+    // Maneja clics fuera del dropdown para cerrarlo
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (notificationsRef.current && !notificationsRef.current.contains(event.target)) {
+                setIsNotificationsDropdownOpen(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [notificationsRef]);
+
     const handleLogoutClick = () => {
-        handleLogout(); // Llama a la función de logout pasada desde App.js
+        handleLogout();
         navigate('/login', { replace: true });
     };
 
-    // Función para obtener la clase CSS activa para el enlace de navegación
     const getNavLinkClass = (path) => {
         return location.pathname.startsWith(path) ? 'active' : '';
     };
+
+    const toggleNotificationsDropdown = () => {
+        setIsNotificationsDropdownOpen(prevState => !prevState);
+    };
+
+    // Filtra las notificaciones para mostrar solo las relevantes para el admin
+    const adminNotifications = notifications.filter(notif => {
+        const adminKeywords = [
+            'nueva cita',
+            'nuevo usuario registrado',
+            'nueva mascota agregada',
+            'cita cancelada',
+            'registro de pago'
+            // Agrega más palabras clave relevantes para el admin
+        ];
+        return adminKeywords.some(keyword => notif.mensaje.toLowerCase().includes(keyword));
+    });
 
     return (
         <div className="admin-dashboard-container">
@@ -103,19 +137,63 @@ function AdminDashboard({ user, setUser, handleLogout }) {
                     <h1>Bienvenido, {user?.nombre}</h1>
                     <div className="header-right">
                         {/* Notificaciones */}
-                        <div className="relative">
+                        <div className="notification-container" ref={notificationsRef}> {/* Usa la ref aquí */}
                             <button
                                 className="notification-bell-btn"
-                                onClick={() => navigate('/admin/notifications')} // Podrías tener una ruta específica para ver todas las notificaciones
+                                onClick={toggleNotificationsDropdown}
                                 title="Ver Notificaciones"
                             >
-                                <FaCalendarAlt className="nav-icon" /> {/* Icono de campana o similar */}
+                                <FaBell className="nav-icon" /> {/* Icono de campana */}
                                 {unreadCount > 0 && (
                                     <span className="notification-badge">{unreadCount}</span>
                                 )}
                             </button>
-                            {/* Aquí podrías integrar un panel desplegable de notificaciones si no tienes una página dedicada */}
+
+                            {/* Menú desplegable de notificaciones */}
+                            {isNotificationsDropdownOpen && (
+                                <div className="admin-notifications-dropdown">
+                                    <h3>Notificaciones ({unreadCount} no leídas)</h3>
+                                    {adminNotifications.length > 0 ? (
+                                        <>
+                                            <ul>
+                                                {adminNotifications
+                                                    .sort((a, b) => new Date(b.fecha) - new Date(a.fecha)) // Opcional: ordenar por fecha
+                                                    .map((notif) => (
+                                                        <li key={notif.id} className={notif.leida ? 'read' : 'unread'}>
+                                                            <div className="notification-content">
+                                                                <p className="notification-message">{notif.mensaje}</p>
+                                                                <span className="notification-date">
+                                                                    {new Date(notif.fecha).toLocaleString()}
+                                                                </span>
+                                                            </div>
+                                                            {!notif.leida && (
+                                                                <button
+                                                                    className="mark-as-read-button"
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation(); // Evita que se cierre el dropdown
+                                                                        markAsRead(notif.id);
+                                                                    }}
+                                                                    title="Marcar como leída"
+                                                                >
+                                                                    <FaCheckCircle />
+                                                                </button>
+                                                            )}
+                                                        </li>
+                                                    ))}
+                                            </ul>
+                                            {unreadCount > 0 && (
+                                                <button onClick={clearNotifications} className="clear-all-notifications-button">
+                                                    Marcar todas como leídas
+                                                </button>
+                                            )}
+                                        </>
+                                    ) : (
+                                        <p>No hay notificaciones para mostrar.</p>
+                                    )}
+                                </div>
+                            )}
                         </div>
+
                         <div className="user-info">
                             <FaUserCircle className="user-avatar-icon" />
                             <span>{user?.nombre}</span>
@@ -124,8 +202,7 @@ function AdminDashboard({ user, setUser, handleLogout }) {
                 </header>
 
                 <div className="admin-content-area">
-                    {/* El Outlet renderiza los componentes de ruta anidados */}
-                    <Outlet context={{ user, setUser, handleLogout }} /> {/* Pasa user y setUser a los componentes anidados */}
+                    <Outlet context={{ user, setUser, handleLogout }} />
                 </div>
             </main>
         </div>
