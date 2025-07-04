@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams, useOutletContext } from 'react-router-dom';
-import veteStyles from './Style/DetalleCitaVeterinarioStyles.module.css';
+import veteStyles from './Style/DetalleCitaVeterinarioStyles.module.css'; // Asegúrate de que esta ruta sea correcta
 import { motion } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -11,8 +11,8 @@ import {
   faPaw,
   faStethoscope,
   faNotesMedical,
-  faSpinner, // Añadido para loading state
-  faExclamationTriangle // Añadido para error state
+  faSpinner,
+  faExclamationTriangle
 } from '@fortawesome/free-solid-svg-icons';
 import { authFetch } from './api'; // Importa authFetch
 
@@ -51,7 +51,7 @@ const cardVariants = {
 const DetalleCitaVeterinario = () => {
   const navigate = useNavigate();
   const { id } = useParams();
-  const { showNotification } = useOutletContext(); // Para mostrar notificaciones
+  const { showNotification } = useOutletContext();
   const [cita, setCita] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -60,7 +60,7 @@ const DetalleCitaVeterinario = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await authFetch(`/citas/${id}`); // Endpoint para obtener detalles de una cita por ID
+      const response = await authFetch(`/citas/${id}`);
       if (response.success) {
         setCita(response.data);
       } else {

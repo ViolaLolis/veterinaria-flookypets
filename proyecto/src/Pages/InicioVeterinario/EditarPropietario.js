@@ -1,18 +1,39 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useParams, useOutletContext } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faArrowLeft, faSave, faSpinner, faTimesCircle,
-  faUser, faEnvelope, faPhone, faMapMarkerAlt, faCamera, faCheckCircle
+  faArrowLeft, faSave, faSpinner, faTimesCircle, faCheckCircle,
+  faUser, faEnvelope, faPhone, faMapMarkerAlt, faCamera, faExclamationTriangle, faSync
 } from '@fortawesome/free-solid-svg-icons';
 import { authFetch } from './api'; // Asegúrate de que la ruta sea correcta
-import styles from './Style/EditarPropietarioStyles.module.css'; // Crear este archivo CSS
+import styles from './Style/EditarPropietarioStyles.module.css'; // Crear/Actualizar este archivo CSS
+
+// Variantes de Framer Motion para consistencia con EditarMascota
+const containerVariants = {
+  hidden: { opacity: 0, x: '-100vw' },
+  visible: { opacity: 1, x: 0, transition: { type: 'spring', delay: 0.2, damping: 20, stiffness: 100 } },
+  exit: { x: '100vw', transition: { ease: 'easeInOut' } },
+};
+
+const buttonVariants = {
+  hover: { scale: 1.05, boxShadow: '0 5px 15px rgba(0, 172, 193, 0.2)' },
+  tap: { scale: 0.95 },
+};
+
+const inputVariants = {
+  focus: {
+    scale: 1.005,
+    boxShadow: "0 0 0 3px rgba(0, 172, 193, 0.2)",
+    borderColor: "#00acc1"
+  }
+};
 
 const EditarPropietario = () => {
   const { id } = useParams(); // Obtener el ID del propietario de la URL
   const navigate = useNavigate();
-  const { showNotification } = useOutletContext();
+  // Asumiendo que showNotification se pasa a través de un OutletContext o un contexto global
+  const { showNotification } = useOutletContext(); 
 
   const [formData, setFormData] = useState({
     nombre: '',
@@ -31,12 +52,67 @@ const EditarPropietario = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
+  // error ahora es un objeto para manejar errores por campo
+  const [error, setError] = useState({}); 
+  // successMessage ahora es un objeto para consistencia con mascotas
+  const [successMessage, setSuccessMessage] = useState(null);
+
+  // Función de validación de campos, adaptada para propietario
+  const validateField = useCallback((name, value) => {
+    let fieldError = '';
+    switch (name) {
+      case 'nombre':
+        if (!value.trim()) fieldError = 'El nombre es obligatorio.';
+        else if (value.length < 2 || value.length > 100) fieldError = 'Mínimo 2, máximo 100 caracteres.';
+        else if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(value)) fieldError = 'Solo letras y espacios.';
+        break;
+      case 'apellido':
+        if (!value.trim()) fieldError = 'El apellido es obligatorio.';
+        else if (value.length < 2 || value.length > 100) fieldError = 'Mínimo 2, máximo 100 caracteres.';
+        else if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(value)) fieldError = 'Solo letras y espacios.';
+        break;
+      case 'email':
+        if (!value.trim()) fieldError = 'El correo electrónico es obligatorio.';
+        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) fieldError = 'Formato de correo inválido.';
+        else if (value.length > 150) fieldError = 'Máximo 150 caracteres.';
+        break;
+      case 'telefono':
+        if (!value.trim()) fieldError = 'El teléfono es obligatorio.';
+        else if (!/^\d{10}$/.test(value)) fieldError = 'El teléfono debe tener 10 dígitos numéricos.'; // Ajustar según el formato de teléfono esperado
+        break;
+      case 'direccion':
+        if (!value.trim()) fieldError = 'La dirección es obligatoria.';
+        else if (value.length < 5 || value.length > 200) fieldError = 'Mínimo 5, máximo 200 caracteres.';
+        break;
+      case 'tipo_documento':
+        if (!value) fieldError = 'Debe seleccionar un tipo de documento.';
+        break;
+      case 'numero_documento':
+        if (!value.trim()) fieldError = 'El número de documento es obligatorio.';
+        else if (!/^[a-zA-Z0-9]{5,20}$/.test(value)) fieldError = 'Mínimo 5, máximo 20 caracteres alfanuméricos.'; // Ajustar regex si es solo números, etc.
+        break;
+      case 'fecha_nacimiento':
+        if (!value) fieldError = 'La fecha de nacimiento es obligatoria.';
+        else if (new Date(value) >= new Date()) fieldError = 'La fecha no puede ser hoy o en el futuro.';
+        break;
+      case 'new_password':
+        if (value.trim() && value.length < 8) fieldError = 'La contraseña debe tener al menos 8 caracteres.';
+        // Puedes añadir más validaciones de complejidad de contraseña aquí (mayúsculas, números, símbolos)
+        break;
+      case 'confirm_password':
+        // La validación de coincidencia se hace en handleSubmit, pero aquí puedes pre-validar
+        if (formData.new_password && value !== formData.new_password) fieldError = 'Las contraseñas no coinciden.';
+        break;
+      default:
+        break;
+    }
+    return fieldError;
+  }, [formData.new_password]); // Dependencia para validar confirm_password
 
   const loadPropietarioData = useCallback(async () => {
     setLoading(true);
-    setError('');
+    setError({}); // Limpiar errores al cargar
+    setSuccessMessage(null); // Limpiar mensajes
     try {
       const response = await authFetch(`/usuarios/${id}`);
       if (response.success) {
@@ -49,19 +125,18 @@ const EditarPropietario = () => {
           direccion: userData.direccion || '',
           tipo_documento: userData.tipo_documento || '',
           numero_documento: userData.numero_documento || '',
-          // Formatear fecha de nacimiento a YYYY-MM-DD para input type="date"
           fecha_nacimiento: userData.fecha_nacimiento ? new Date(userData.fecha_nacimiento).toISOString().split('T')[0] : '',
           imagen_url: userData.imagen_url || '',
           new_password: '',
           confirm_password: ''
         });
       } else {
-        setError(response.message || 'Error al cargar los datos del propietario.');
+        setError({ fetch: response.message || 'Error al cargar los datos del propietario.' });
         if (showNotification) showNotification(response.message || 'Error al cargar los datos del propietario.', 'error');
       }
     } catch (err) {
       console.error("Error fetching propietario:", err);
-      setError('Error de conexión al servidor al cargar el propietario.');
+      setError({ fetch: 'Error de conexión al servidor al cargar el propietario.' });
       if (showNotification) showNotification('Error de conexión al servidor al cargar el propietario.', 'error');
     } finally {
       setLoading(false);
@@ -74,11 +149,12 @@ const EditarPropietario = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    // Convertir a mayúsculas si no es el campo de email, fecha o contraseña
     const newValue = (name !== 'email' && name !== 'fecha_nacimiento' && name !== 'new_password' && name !== 'confirm_password')
       ? value.toUpperCase()
       : value;
     setFormData(prev => ({ ...prev, [name]: newValue }));
+    setError(prevErrors => ({ ...prevErrors, [name]: validateField(name, newValue) })); // Validar en cada cambio
+    setSuccessMessage(null); // Limpiar mensajes de éxito/error al cambiar un campo
   };
 
   const handleFileChange = (e) => {
@@ -87,12 +163,8 @@ const EditarPropietario = () => {
 
   const handleUploadImage = async () => {
     if (!selectedFile) {
-      return null;
+      return formData.imagen_url; // Si no hay nuevo archivo, retorna la URL existente
     }
-
-    setIsSubmitting(true);
-    setError('');
-    setSuccessMessage('');
 
     const imageData = new FormData();
     imageData.append('image', selectedFile);
@@ -107,43 +179,67 @@ const EditarPropietario = () => {
       });
 
       if (response.success) {
-        showNotification('Imagen de perfil subida exitosamente.', 'success');
+        if (showNotification) showNotification('Imagen de perfil subida exitosamente.', 'success');
         setFormData(prev => ({ ...prev, imagen_url: response.imageUrl }));
         setSelectedFile(null); // Limpiar el archivo seleccionado
         return response.imageUrl;
       } else {
-        setError(response.message || 'Error al subir la imagen.');
+        setError(prev => ({ ...prev, image: response.message || 'Error al subir la imagen.' }));
         if (showNotification) showNotification(response.message || 'Error al subir la imagen.', 'error');
         return null;
       }
     } catch (err) {
       console.error("Error uploading image:", err);
-      setError(err.message || 'Error de conexión al servidor al subir imagen.');
+      setError(prev => ({ ...prev, image: err.message || 'Error de conexión al servidor al subir imagen.' }));
       if (showNotification) showNotification(err.message || 'Error de conexión al servidor al subir imagen.', 'error');
       return null;
-    } finally {
-      // No establecer isSubmitting a false aquí, ya que la subida de imagen es parte del submit general
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setError('');
-    setSuccessMessage('');
+    setSuccessMessage(null);
+    setError({}); // Limpiar todos los errores al inicio del envío
 
-    if (formData.new_password && formData.new_password !== formData.confirm_password) {
-      setError('Las nuevas contraseñas no coinciden.');
+    let currentErrors = {};
+    // Validar todos los campos antes de enviar
+    Object.keys(formData).forEach(key => {
+      // Excluir new_password y confirm_password de la validación inicial si no se están cambiando
+      if ((key === 'new_password' || key === 'confirm_password') && !formData.new_password.trim()) {
+        return; 
+      }
+      const fieldError = validateField(key, formData[key]);
+      if (fieldError) {
+        currentErrors[key] = fieldError;
+      }
+    });
+
+    // Validación específica para contraseñas si se están cambiando
+    if (formData.new_password.trim() || formData.confirm_password.trim()) {
+      if (formData.new_password !== formData.confirm_password) {
+        currentErrors.confirm_password = 'Las nuevas contraseñas no coinciden.';
+      }
+      if (formData.new_password.length < 8) {
+        currentErrors.new_password = 'La contraseña debe tener al menos 8 caracteres.';
+      }
+    }
+
+    setError(currentErrors);
+    const hasErrors = Object.values(currentErrors).some(errorMsg => errorMsg !== '');
+
+    if (hasErrors) {
+      setSuccessMessage({ texto: 'Por favor, corrige los errores en el formulario antes de enviar.', tipo: 'error' });
       setIsSubmitting(false);
       return;
     }
 
     let updatedImageUrl = formData.imagen_url;
     if (selectedFile) {
-      updatedImageUrl = await handleUploadImage(); // Sube la imagen primero
-      if (!updatedImageUrl) {
+      updatedImageUrl = await handleUploadImage();
+      if (updatedImageUrl === null) { // Si la subida de imagen falla
         setIsSubmitting(false);
-        return; // Si la subida falla, detener el proceso
+        return;
       }
     }
 
@@ -159,7 +255,6 @@ const EditarPropietario = () => {
       imagen_url: updatedImageUrl, // Usar la URL actualizada
     };
 
-    // Añadir la contraseña solo si se ha introducido una nueva
     if (formData.new_password) {
       dataToUpdate.password = formData.new_password;
     }
@@ -173,80 +268,89 @@ const EditarPropietario = () => {
       });
 
       if (response.success) {
-        setSuccessMessage('Propietario actualizado exitosamente.');
+        setSuccessMessage({ texto: 'Propietario actualizado exitosamente.', tipo: 'exito' });
         if (showNotification) showNotification('Propietario actualizado exitosamente.', 'success');
-        // Recargar los datos del propietario para asegurar que todo esté sincronizado
-        loadPropietarioData();
-        // Limpiar campos de contraseña después de un cambio exitoso
-        setFormData(prev => ({ ...prev, new_password: '', confirm_password: '' }));
+        
+        // Recargar los datos para asegurar que la UI refleje los cambios guardados
+        // y limpiar campos de contraseña
+        loadPropietarioData(); 
       } else {
-        setError(response.message || 'Error al actualizar el propietario.');
+        setSuccessMessage({ texto: response.message || 'Error al actualizar el propietario. Inténtalo de nuevo.', tipo: 'error' });
         if (showNotification) showNotification(response.message || 'Error al actualizar el propietario.', 'error');
       }
     } catch (err) {
       console.error("Error updating propietario:", err);
-      setError(err.message || 'Error de conexión al servidor al actualizar propietario.');
+      setSuccessMessage({ texto: err.message || 'Error de conexión al servidor al actualizar propietario.', tipo: 'error' });
       if (showNotification) showNotification(err.message || 'Error de conexión al servidor al actualizar propietario.', 'error');
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const handleVolver = () => {
+    navigate(-1);
+  };
+
+  // URL de previsualización de la imagen
+  const previewImageUrl = useMemo(() => {
+    if (selectedFile) {
+      return URL.createObjectURL(selectedFile);
+    }
+    return formData.imagen_url || `https://placehold.co/150x150/00acc1/ffffff?text=${formData.nombre?.charAt(0) || 'P'}`;
+  }, [selectedFile, formData.imagen_url, formData.nombre]);
+
+
   if (loading) {
     return (
-      <div className={styles.loadingContainer}>
+      <div className={styles.veteLoadingContainer}>
         <FontAwesomeIcon icon={faSpinner} spin size="3x" color="#00acc1" />
         <p>Cargando datos del propietario...</p>
       </div>
     );
   }
 
-  // URL de previsualización de la imagen
-  const previewImageUrl = selectedFile
-    ? URL.createObjectURL(selectedFile)
-    : (formData.imagen_url || `https://placehold.co/150x150/00acc1/ffffff?text=${formData.nombre?.charAt(0) || 'P'}`);
+  // Si hay un error de carga inicial, mostrar un mensaje y botón de reintento
+  if (error.fetch) { 
+    return (
+      <div className={styles.veteErrorContainer}>
+        <FontAwesomeIcon icon={faExclamationTriangle} size="3x" color="#dc3545" />
+        <p>Error al cargar: {error.fetch}</p>
+        <motion.button
+          onClick={loadPropietarioData}
+          className={styles.veteVolverBtn} // Reutilizando el estilo del botón
+          variants={buttonVariants}
+          whileHover="hover"
+          whileTap="tap"
+        >
+          <FontAwesomeIcon icon={faSync} /> Reintentar
+        </motion.button>
+      </div>
+    );
+  }
 
   return (
     <motion.div
-      className={styles.editPropietarioContainer}
-      initial={{ opacity: 0, y: 50 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -50 }}
-      transition={{ duration: 0.3 }}
+      className={styles.veteEditarContainer} // Usar el estilo consistente
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      exit="exit"
     >
-      <div className={styles.header}>
+      <div className={styles.veteHeader}>
         <motion.button
-          onClick={() => navigate(-1)}
-          className={styles.backButton}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+          onClick={handleVolver}
+          className={styles.veteVolverBtn}
+          variants={buttonVariants}
+          whileHover="hover"
+          whileTap="tap"
         >
           <FontAwesomeIcon icon={faArrowLeft} /> Volver
         </motion.button>
         <h2><FontAwesomeIcon icon={faUser} /> Editar Propietario</h2>
       </div>
 
-      {error && (
-        <motion.div
-          className={styles.errorMessage}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-        >
-          <FontAwesomeIcon icon={faTimesCircle} /> {error}
-        </motion.div>
-      )}
-
-      {successMessage && (
-        <motion.div
-          className={styles.successMessage}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-        >
-          <FontAwesomeIcon icon={faCheckCircle} /> {successMessage}
-        </motion.div>
-      )}
-
-      <form onSubmit={handleSubmit} className={styles.form}>
+      <form onSubmit={handleSubmit} className={styles.veteFormulario}> {/* Usar estilo consistente */}
+        {/* Sección de Imagen de Perfil */}
         <div className={styles.profileImageSection}>
           <img
             src={previewImageUrl}
@@ -271,159 +375,239 @@ const EditarPropietario = () => {
           {selectedFile && (
             <p className={styles.fileName}>Archivo seleccionado: {selectedFile.name}</p>
           )}
+          {error?.image && <span className={styles.errorMessageField}>{error.image}</span>}
         </div>
 
-        <div className={styles.formGroup}>
-          <label htmlFor="nombre"><FontAwesomeIcon icon={faUser} /> Nombre:</label>
-          <input
-            type="text"
-            id="nombre"
-            name="nombre"
-            value={formData.nombre}
-            onChange={handleChange}
-            className={styles.inputField}
-            required
-            disabled={isSubmitting}
-          />
+        {/* Sección de Datos Personales */}
+        <div className={styles.veteFormSection}>
+          <h3>Datos Personales</h3>
+          <div className={styles.veteFormRow}>
+            <div className={styles.veteFormGroup}>
+              <label htmlFor="nombre">Nombre:</label>
+              <motion.input
+                type="text"
+                id="nombre"
+                name="nombre"
+                value={formData.nombre}
+                onChange={handleChange}
+                required
+                className={`${styles.uppercaseInput} ${error?.nombre ? styles.inputError : ''}`}
+                variants={inputVariants}
+                whileFocus="focus"
+                disabled={isSubmitting}
+              />
+              {error?.nombre && <span className={styles.errorMessageField}>{error.nombre}</span>}
+            </div>
+            <div className={styles.veteFormGroup}>
+              <label htmlFor="apellido">Apellido:</label>
+              <motion.input
+                type="text"
+                id="apellido"
+                name="apellido"
+                value={formData.apellido}
+                onChange={handleChange}
+                required
+                className={`${styles.uppercaseInput} ${error?.apellido ? styles.inputError : ''}`}
+                variants={inputVariants}
+                whileFocus="focus"
+                disabled={isSubmitting}
+              />
+              {error?.apellido && <span className={styles.errorMessageField}>{error.apellido}</span>}
+            </div>
+          </div>
+
+          <div className={styles.veteFormRow}>
+            <div className={styles.veteFormGroup}>
+              <label htmlFor="tipo_documento">Tipo de Documento:</label>
+              <motion.select
+                id="tipo_documento"
+                name="tipo_documento"
+                value={formData.tipo_documento}
+                onChange={handleChange}
+                required
+                className={`${styles.selectInput} ${error?.tipo_documento ? styles.inputError : ''}`}
+                variants={inputVariants}
+                whileFocus="focus"
+                disabled={isSubmitting}
+              >
+                <option value="">Seleccione un tipo</option>
+                <option value="CEDULA DE CIUDADANIA">Cédula de Ciudadanía</option>
+                <option value="CEDULA DE EXTRANJERIA">Cédula de Extranjería</option>
+                <option value="PASAPORTE">Pasaporte</option>
+              </motion.select>
+              {error?.tipo_documento && <span className={styles.errorMessageField}>{error.tipo_documento}</span>}
+            </div>
+            <div className={styles.veteFormGroup}>
+              <label htmlFor="numero_documento">Número de Documento:</label>
+              <motion.input
+                type="text"
+                id="numero_documento"
+                name="numero_documento"
+                value={formData.numero_documento}
+                onChange={handleChange}
+                required
+                className={error?.numero_documento ? styles.inputError : ''}
+                variants={inputVariants}
+                whileFocus="focus"
+                disabled={isSubmitting}
+              />
+              {error?.numero_documento && <span className={styles.errorMessageField}>{error.numero_documento}</span>}
+            </div>
+          </div>
+
+          <div className={styles.veteFormRow}>
+            <div className={styles.veteFormGroup}>
+              <label htmlFor="fecha_nacimiento">Fecha de Nacimiento:</label>
+              <motion.input
+                type="date"
+                id="fecha_nacimiento"
+                name="fecha_nacimiento"
+                value={formData.fecha_nacimiento}
+                onChange={handleChange}
+                required
+                className={error?.fecha_nacimiento ? styles.inputError : ''}
+                variants={inputVariants}
+                whileFocus="focus"
+                disabled={isSubmitting}
+              />
+              {error?.fecha_nacimiento && <span className={styles.errorMessageField}>{error.fecha_nacimiento}</span>}
+            </div>
+          </div>
         </div>
-        <div className={styles.formGroup}>
-          <label htmlFor="apellido">Apellido:</label>
-          <input
-            type="text"
-            id="apellido"
-            name="apellido"
-            value={formData.apellido}
-            onChange={handleChange}
-            className={styles.inputField}
-            required
-            disabled={isSubmitting}
-          />
+
+        {/* Sección de Contacto */}
+        <div className={styles.veteFormSection}>
+          <h3>Información de Contacto</h3>
+          <div className={styles.veteFormRow}>
+            <div className={styles.veteFormGroup}>
+              <label htmlFor="email">Email:</label>
+              <motion.input
+                type="email"
+                id="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+                className={error?.email ? styles.inputError : ''}
+                variants={inputVariants}
+                whileFocus="focus"
+                disabled={isSubmitting}
+              />
+              {error?.email && <span className={styles.errorMessageField}>{error.email}</span>}
+            </div>
+            <div className={styles.veteFormGroup}>
+              <label htmlFor="telefono">Teléfono:</label>
+              <motion.input
+                type="text"
+                id="telefono"
+                name="telefono"
+                value={formData.telefono}
+                onChange={handleChange}
+                required
+                className={error?.telefono ? styles.inputError : ''}
+                variants={inputVariants}
+                whileFocus="focus"
+                disabled={isSubmitting}
+              />
+              {error?.telefono && <span className={styles.errorMessageField}>{error.telefono}</span>}
+            </div>
+          </div>
+          <div className={styles.veteFormGroup}>
+            <label htmlFor="direccion">Dirección:</label>
+            <motion.input
+              type="text"
+              id="direccion"
+              name="direccion"
+              value={formData.direccion}
+              onChange={handleChange}
+              className={error?.direccion ? styles.inputError : ''}
+              variants={inputVariants}
+              whileFocus="focus"
+              disabled={isSubmitting}
+            />
+            {error?.direccion && <span className={styles.errorMessageField}>{error.direccion}</span>}
+          </div>
         </div>
-        <div className={styles.formGroup}>
-          <label htmlFor="email"><FontAwesomeIcon icon={faEnvelope} /> Email:</label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            className={styles.inputField}
-            required
-            disabled={isSubmitting}
-          />
+
+        {/* Sección de Cambio de Contraseña */}
+        <div className={styles.veteFormSection}>
+          <h3>Cambiar Contraseña (Opcional)</h3>
+          <div className={styles.veteFormGroup}>
+            <label htmlFor="new_password">Nueva Contraseña:</label>
+            <motion.input
+              type="password"
+              id="new_password"
+              name="new_password"
+              value={formData.new_password}
+              onChange={handleChange}
+              className={error?.new_password ? styles.inputError : ''}
+              variants={inputVariants}
+              whileFocus="focus"
+              disabled={isSubmitting}
+            />
+            {error?.new_password && <span className={styles.errorMessageField}>{error.new_password}</span>}
+          </div>
+          <div className={styles.veteFormGroup}>
+            <label htmlFor="confirm_password">Confirmar Nueva Contraseña:</label>
+            <motion.input
+              type="password"
+              id="confirm_password"
+              name="confirm_password"
+              value={formData.confirm_password}
+              onChange={handleChange}
+              className={error?.confirm_password ? styles.inputError : ''}
+              variants={inputVariants}
+              whileFocus="focus"
+              disabled={isSubmitting}
+            />
+            {error?.confirm_password && <span className={styles.errorMessageField}>{error.confirm_password}</span>}
+          </div>
         </div>
-        <div className={styles.formGroup}>
-          <label htmlFor="telefono"><FontAwesomeIcon icon={faPhone} /> Teléfono:</label>
-          <input
-            type="text"
-            id="telefono"
-            name="telefono"
-            value={formData.telefono}
-            onChange={handleChange}
-            className={styles.inputField}
-            required
-            disabled={isSubmitting}
-          />
-        </div>
-        <div className={styles.formGroup}>
-          <label htmlFor="direccion"><FontAwesomeIcon icon={faMapMarkerAlt} /> Dirección:</label>
-          <input
-            type="text"
-            id="direccion"
-            name="direccion"
-            value={formData.direccion}
-            onChange={handleChange}
-            className={styles.inputField}
-            disabled={isSubmitting}
-          />
-        </div>
-        <div className={styles.formGroup}>
-          <label htmlFor="tipo_documento">Tipo de Documento:</label>
-          <select
-            id="tipo_documento"
-            name="tipo_documento"
-            value={formData.tipo_documento}
-            onChange={handleChange}
-            className={styles.inputField}
-            required
+
+        {/* Mensajes de éxito/error generales del formulario */}
+        {successMessage && (
+          <AnimatePresence>
+            <motion.div
+              className={`${styles.message} ${
+                successMessage.tipo === 'exito' ? styles.successMessage : styles.errorMessage
+              }`}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+            >
+              <FontAwesomeIcon icon={successMessage.tipo === 'exito' ? faCheckCircle : faExclamationTriangle} />
+              <span>{successMessage.texto}</span>
+            </motion.div>
+          </AnimatePresence>
+        )}
+
+        <div className={styles.veteFormActions}>
+          <motion.button
+            type="submit"
+            className={styles.veteGuardarBtn}
+            variants={buttonVariants}
+            whileHover="hover"
+            whileTap="tap"
             disabled={isSubmitting}
           >
-            <option value="">Seleccione un tipo</option>
-            <option value="CEDULA DE CIUDADANIA">Cédula de Ciudadanía</option>
-            <option value="CEDULA DE EXTRANJERIA">Cédula de Extranjería</option>
-            <option value="PASAPORTE">Pasaporte</option>
-          </select>
-        </div>
-        <div className={styles.formGroup}>
-          <label htmlFor="numero_documento">Número de Documento:</label>
-          <input
-            type="text"
-            id="numero_documento"
-            name="numero_documento"
-            value={formData.numero_documento}
-            onChange={handleChange}
-            className={styles.inputField}
-            required
+            {isSubmitting ? (
+              <><FontAwesomeIcon icon={faSpinner} spin /> Guardando...</>
+            ) : (
+              'Guardar Cambios'
+            )}
+          </motion.button>
+          <motion.button
+            type="button"
+            onClick={() => navigate('/veterinario/propietarios')}
+            className={styles.veteCancelarBtn}
+            variants={buttonVariants}
+            whileHover="hover"
+            whileTap="tap"
             disabled={isSubmitting}
-          />
+          >
+            Cancelar
+          </motion.button>
         </div>
-        <div className={styles.formGroup}>
-          <label htmlFor="fecha_nacimiento">Fecha de Nacimiento:</label>
-          <input
-            type="date"
-            id="fecha_nacimiento"
-            name="fecha_nacimiento"
-            value={formData.fecha_nacimiento}
-            onChange={handleChange}
-            className={styles.inputField}
-            required
-            disabled={isSubmitting}
-          />
-        </div>
-
-        <h3 className={styles.sectionTitle}>Cambiar Contraseña (Opcional)</h3>
-        <div className={styles.formGroup}>
-          <label htmlFor="new_password">Nueva Contraseña:</label>
-          <input
-            type="password"
-            id="new_password"
-            name="new_password"
-            value={formData.new_password}
-            onChange={handleChange}
-            className={styles.inputField}
-            disabled={isSubmitting}
-          />
-        </div>
-        <div className={styles.formGroup}>
-          <label htmlFor="confirm_password">Confirmar Nueva Contraseña:</label>
-          <input
-            type="password"
-            id="confirm_password"
-            name="confirm_password"
-            value={formData.confirm_password}
-            onChange={handleChange}
-            className={styles.inputField}
-            disabled={isSubmitting}
-          />
-        </div>
-
-        <motion.button
-          type="submit"
-          className={styles.submitButton}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? (
-            <>
-              <FontAwesomeIcon icon={faSpinner} spin /> Guardando...
-            </>
-          ) : (
-            <>
-              <FontAwesomeIcon icon={faSave} /> Guardar Cambios
-            </>
-          )}
-        </motion.button>
       </form>
     </motion.div>
   );

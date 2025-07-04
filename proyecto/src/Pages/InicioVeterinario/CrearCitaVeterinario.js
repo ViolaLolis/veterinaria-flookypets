@@ -5,17 +5,21 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faCalendarAlt, faPaw, faUser,
   faSpinner, faSearch, faClock,
-  faCheckCircle, faExclamationCircle, faTimes, faChevronDown, faConciergeBell
+  faCheckCircle, faExclamationCircle, faTimes, faChevronDown, faConciergeBell, faInfoCircle
 } from '@fortawesome/free-solid-svg-icons';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import es from 'date-fns/locale/es';
-import { authFetch } from './api'; // Importa authFetch
+import { registerLocale } from 'react-datepicker';
+import { authFetch } from './api';
 
 // Importa el archivo CSS correctamente
-import './Style/CrearCitaVeterinario.css'; // Asegúrate de que este archivo CSS exista
+import './Style/CrearCitaVeterinario.css';
 
-// Variantes de Framer Motion (mantengo las que ya tenías)
+// Registrar el locale de español
+registerLocale('es', es);
+
+// Variantes de Framer Motion
 const containerVariants = {
   hidden: { opacity: 0, y: 20 },
   visible: {
@@ -143,6 +147,58 @@ const CrearCitaVeterinario = () => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
+  const [validationErrors, setValidationErrors] = useState({}); // Nuevo estado para errores de validación por campo
+
+  const validateForm = useCallback(() => {
+    let errors = {};
+    let isValid = true;
+
+    if (!selectedCliente) {
+      errors.selectedCliente = 'Debe seleccionar un cliente.';
+      isValid = false;
+    }
+    if (!selectedMascota) {
+      errors.selectedMascota = 'Debe seleccionar una mascota.';
+      isValid = false;
+    }
+    if (!selectedServicio) {
+      errors.selectedServicio = 'Debe seleccionar un servicio.';
+      isValid = false;
+    }
+    if (!selectedDate) {
+      errors.selectedDate = 'Debe seleccionar una fecha.';
+      isValid = false;
+    } else {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const selectedDay = new Date(selectedDate);
+        selectedDay.setHours(0, 0, 0, 0);
+
+        if (selectedDay < today) {
+            errors.selectedDate = 'La fecha no puede ser en el pasado.';
+            isValid = false;
+        }
+    }
+    if (!selectedTime) {
+      errors.selectedTime = 'Debe seleccionar una hora.';
+      isValid = false;
+    } else {
+        // Validar que la hora no sea en el pasado si la fecha es hoy
+        const now = new Date();
+        if (selectedDate && selectedDate.toDateString() === now.toDateString()) {
+            const selectedDateTime = new Date(selectedDate);
+            selectedDateTime.setHours(selectedTime.getHours(), selectedTime.getMinutes(), 0, 0);
+            if (selectedDateTime < now) {
+                errors.selectedTime = 'La hora no puede ser en el pasado para la fecha actual.';
+                isValid = false;
+            }
+        }
+    }
+
+    setValidationErrors(errors);
+    return isValid;
+  }, [selectedCliente, selectedMascota, selectedServicio, selectedDate, selectedTime]);
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -150,7 +206,7 @@ const CrearCitaVeterinario = () => {
       setError(null);
       try {
         const [clientesResponse, serviciosResponse] = await Promise.all([
-          authFetch('/usuarios?role=usuario'), // Obtener solo usuarios con rol 'usuario'
+          authFetch('/usuarios?role=usuario'),
           authFetch('/servicios')
         ]);
 
@@ -165,14 +221,13 @@ const CrearCitaVeterinario = () => {
         if (serviciosResponse.success) {
           setServicios(serviciosResponse.data);
         } else {
-          setError(prev => prev || serviciosResponse.message || 'Error al cargar los servicios.'); // Mantener error si ya existe
+          setError(prev => prev || serviciosResponse.message || 'Error al cargar los servicios.');
           showNotification(serviciosResponse.message || 'Error al cargar los servicios.', 'error');
         }
 
-        // Procesar parámetros de URL (ej. para agendar servicio desde la lista de servicios)
         const serviceFromUrl = searchParams.get('servicio');
         if (serviceFromUrl) {
-          const foundService = serviciosResponse.data.find(s => s.nombre === serviceFromUrl);
+          const foundService = serviciosResponse.data.find(s => s.nombre.toLowerCase() === serviceFromUrl.toLowerCase());
           if (foundService) {
             setSelectedServicio(foundService.id_servicio.toString());
           }
@@ -180,19 +235,19 @@ const CrearCitaVeterinario = () => {
 
         const dateFromUrl = searchParams.get('fecha');
         if (dateFromUrl) {
-            try {
-                const parsedDate = new Date(dateFromUrl);
-                if (!isNaN(parsedDate.getTime())) {
-                    setSelectedDate(parsedDate);
-                } else {
-                    setSelectedDate(new Date());
-                }
-            } catch (e) {
-                console.error("Error al parsear la fecha de la URL:", e);
-                setSelectedDate(new Date());
+          try {
+            const parsedDate = new Date(dateFromUrl);
+            if (!isNaN(parsedDate.getTime())) {
+              setSelectedDate(parsedDate);
+            } else {
+              setSelectedDate(new Date());
             }
-        } else {
+          } catch (e) {
+            console.error("Error al parsear la fecha de la URL:", e);
             setSelectedDate(new Date());
+          }
+        } else {
+          setSelectedDate(new Date());
         }
 
       } catch (err) {
@@ -207,7 +262,6 @@ const CrearCitaVeterinario = () => {
     fetchData();
   }, [searchParams, showNotification]);
 
-  // Cargar mascotas del cliente seleccionado
   useEffect(() => {
     const fetchMascotas = async () => {
       if (selectedCliente) {
@@ -249,14 +303,42 @@ const CrearCitaVeterinario = () => {
     );
   }, [clientSearchQuery, clientes]);
 
+  const handleClienteChange = (e) => {
+    setSelectedCliente(e.target.value);
+    setValidationErrors(prev => ({ ...prev, selectedCliente: '' })); // Limpiar error al cambiar
+  };
+
+  const handleMascotaChange = (e) => {
+    setSelectedMascota(e.target.value);
+    setValidationErrors(prev => ({ ...prev, selectedMascota: '' })); // Limpiar error al cambiar
+  };
+
+  const handleServicioChange = (e) => {
+    setSelectedServicio(e.target.value);
+    setValidationErrors(prev => ({ ...prev, selectedServicio: '' })); // Limpiar error al cambiar
+  };
+
+  const handleDateChange = (date) => {
+    setSelectedDate(date);
+    setValidationErrors(prev => ({ ...prev, selectedDate: '' })); // Limpiar error al cambiar
+    // Opcional: Si se selecciona una nueva fecha, resetear la hora para forzar una nueva selección válida
+    setSelectedTime(null);
+  };
+
+  const handleTimeChange = (time) => {
+    setSelectedTime(time);
+    setValidationErrors(prev => ({ ...prev, selectedTime: '' })); // Limpiar error al cambiar
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
     setError(null);
     setSuccessMessage(null);
 
-    if (!selectedCliente || !selectedMascota || !selectedServicio || !selectedDate || !selectedTime) {
-      setError('Por favor, complete todos los campos requeridos (Cliente, Mascota, Servicio, Hora).');
+    if (!validateForm()) {
+      setError('Por favor, corrige los errores en el formulario antes de agendar la cita.');
+      showNotification('Por favor, complete todos los campos requeridos y revise las fechas/horas.', 'error');
       setSubmitting(false);
       return;
     }
@@ -299,10 +381,12 @@ const CrearCitaVeterinario = () => {
         setSelectedCliente('');
         setSelectedMascota('');
         setSelectedServicio('');
+        setSelectedDate(new Date()); // Volver a la fecha actual
         setSelectedTime(null);
         setClientSearchQuery('');
-        setMascotasCliente([]); // Limpiar mascotas del cliente
-        // Opcional: Redirigir al listado de citas después de un tiempo
+        setMascotasCliente([]);
+        setValidationErrors({}); // Limpiar errores de validación
+
         setTimeout(() => navigate('/veterinario/citas'), 1500);
 
       } else {
@@ -332,27 +416,28 @@ const CrearCitaVeterinario = () => {
     );
   }
 
-  if (!loading && error && !successMessage) {
-      return (
-          <motion.div
-              className="error-container"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.3 }}
-          >
-              <FontAwesomeIcon icon={faExclamationCircle} className="error-icon" />
-              <p>{error}</p>
-              <motion.button
-                  onClick={() => navigate('/veterinario/citas')}
-                  className="secondary-button"
-                  variants={buttonVariants}
-                  whileHover="hover"
-                  whileTap="tap"
-              >
-                  Volver al listado de Citas
-              </motion.button>
-          </motion.div>
-      );
+  // Si hay un error al cargar datos iniciales y no se está enviando, mostrar un mensaje de error y opción para volver
+  if (!loading && error && !submitting && !successMessage) {
+    return (
+      <motion.div
+        className="error-container"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3 }}
+      >
+        <FontAwesomeIcon icon={faExclamationCircle} className="error-icon" />
+        <p>{error}</p>
+        <motion.button
+          onClick={() => navigate('/veterinario/citas')}
+          className="secondary-button"
+          variants={buttonVariants}
+          whileHover="hover"
+          whileTap="tap"
+        >
+          Volver al listado de Citas
+        </motion.button>
+      </motion.div>
+    );
   }
 
   return (
@@ -372,11 +457,11 @@ const CrearCitaVeterinario = () => {
         <FontAwesomeIcon icon={faCalendarAlt} className="header-icon" />
         <h2>Agendar Nueva Cita Veterinaria</h2>
         <p className="help-text">
-            Fecha de la cita: <strong>{selectedDate ? selectedDate.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : 'No definida'}</strong>
+          Fecha de la cita: <strong>{selectedDate ? selectedDate.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : 'No definida'}</strong>
         </p>
         {user && (
           <p className="help-text">
-              Asignado a: <strong>{user.nombre} {user.apellido}</strong>
+            Asignado a: <strong>{user.nombre} {user.apellido}</strong>
           </p>
         )}
       </motion.div>
@@ -390,30 +475,30 @@ const CrearCitaVeterinario = () => {
           </h3>
 
           <motion.div className="input-group" variants={inputFieldVariants}>
-              <label htmlFor="searchCliente" className="label">Buscar Cliente:</label>
-              <div className="input-with-icon">
-                <motion.input
-                    type="text"
-                    id="searchCliente"
-                    className="input-field"
-                    value={clientSearchQuery}
-                    onChange={(e) => setClientSearchQuery(e.target.value)}
-                    placeholder="Buscar por nombre o teléfono..."
-                    whileFocus="focus"
-                    variants={inputFieldVariants}
-                />
-                <FontAwesomeIcon icon={faSearch} className="input-icon" />
-              </div>
+            <label htmlFor="searchCliente" className="label">Buscar Cliente:</label>
+            <div className="input-with-icon">
+              <motion.input
+                type="text"
+                id="searchCliente"
+                className={`input-field ${validationErrors.clientSearchQuery ? 'input-error' : ''}`}
+                value={clientSearchQuery}
+                onChange={(e) => setClientSearchQuery(e.target.value)}
+                placeholder="Buscar por nombre o teléfono..."
+                whileFocus="focus"
+                variants={inputFieldVariants}
+              />
+              <FontAwesomeIcon icon={faSearch} className="input-icon" />
+            </div>
           </motion.div>
 
           <motion.div className="input-group" variants={inputFieldVariants}>
             <label htmlFor="cliente" className="label">Seleccionar Cliente:</label>
-            <div className="select-container">
+            <div className={`select-container ${validationErrors.selectedCliente ? 'select-error' : ''}`}>
               <motion.select
                 id="cliente"
                 className="select-field"
                 value={selectedCliente}
-                onChange={(e) => setSelectedCliente(e.target.value)}
+                onChange={handleClienteChange}
                 required
                 whileFocus="focus"
                 variants={inputFieldVariants}
@@ -426,22 +511,23 @@ const CrearCitaVeterinario = () => {
                     </option>
                   ))
                 ) : (
-                    <option value="" disabled>No se encontraron clientes para "{clientSearchQuery}"</option>
+                  <option value="" disabled>No se encontraron clientes para "{clientSearchQuery}"</option>
                 )}
               </motion.select>
               <FontAwesomeIcon icon={faChevronDown} className="select-arrow" />
             </div>
+            {validationErrors.selectedCliente && <p className="validation-error">{validationErrors.selectedCliente}</p>}
           </motion.div>
 
           {selectedCliente && (
             <motion.div className="input-group" variants={inputFieldVariants}>
               <label htmlFor="mascota" className="label">Mascota:</label>
-              <div className="select-container">
+              <div className={`select-container ${validationErrors.selectedMascota ? 'select-error' : ''}`}>
                 <motion.select
                   id="mascota"
                   className="select-field"
                   value={selectedMascota}
-                  onChange={(e) => setSelectedMascota(e.target.value)}
+                  onChange={handleMascotaChange}
                   required
                   whileFocus="focus"
                   variants={inputFieldVariants}
@@ -459,9 +545,10 @@ const CrearCitaVeterinario = () => {
                 </motion.select>
                 <FontAwesomeIcon icon={faPaw} className="select-arrow" />
               </div>
+              {validationErrors.selectedMascota && <p className="validation-error">{validationErrors.selectedMascota}</p>}
               {mascotasCliente.length === 0 && selectedCliente && (
                 <p className="help-text">
-                  Este cliente no tiene mascotas registradas.
+                  <FontAwesomeIcon icon={faInfoCircle} /> Este cliente no tiene mascotas registradas.
                   Puedes <Link to="/veterinario/mascotas/registrar" className="inline-link">registrar una aquí</Link>.
                 </p>
               )}
@@ -476,12 +563,12 @@ const CrearCitaVeterinario = () => {
           </h3>
           <motion.div className="input-group" variants={inputFieldVariants}>
             <label htmlFor="servicio" className="label">Servicio:</label>
-            <div className="select-container">
+            <div className={`select-container ${validationErrors.selectedServicio ? 'select-error' : ''}`}>
               <motion.select
                 id="servicio"
                 className="select-field"
                 value={selectedServicio}
-                onChange={(e) => setSelectedServicio(e.target.value)}
+                onChange={handleServicioChange}
                 required
                 whileFocus="focus"
                 variants={inputFieldVariants}
@@ -489,36 +576,61 @@ const CrearCitaVeterinario = () => {
                 <option value="">Seleccione un servicio</option>
                 {servicios.map(servicio => (
                   <option key={servicio.id_servicio} value={servicio.id_servicio}>
-                    {servicio.nombre} - {servicio.precio}
+                    {servicio.nombre} - ${servicio.precio}
                   </option>
                 ))}
               </motion.select>
               <FontAwesomeIcon icon={faConciergeBell} className="select-arrow" />
             </div>
+            {validationErrors.selectedServicio && <p className="validation-error">{validationErrors.selectedServicio}</p>}
           </motion.div>
 
           <p className="info-text">
-              Esta cita se asignará automáticamente a usted.
+            <FontAwesomeIcon icon={faInfoCircle} /> Esta cita se asignará automáticamente a usted ({user?.nombre} {user?.apellido}).
           </p>
 
           <motion.div className="input-group" variants={inputFieldVariants}>
+            <label htmlFor="fecha" className="label">Fecha de la Cita:</label>
+            <div className={`date-picker-container ${validationErrors.selectedDate ? 'input-error' : ''}`}>
+              <DatePicker
+                selected={selectedDate}
+                onChange={handleDateChange}
+                dateFormat="dd/MM/yyyy"
+                locale="es"
+                minDate={new Date()} // No permitir fechas pasadas
+                className="date-picker-input"
+                placeholderText="Seleccione la fecha"
+                required
+                showDisabledMonthNavigation // Permite navegar por meses deshabilitados si minDate está en el futuro
+              />
+              <FontAwesomeIcon icon={faCalendarAlt} className="date-icon" />
+            </div>
+            {validationErrors.selectedDate && <p className="validation-error">{validationErrors.selectedDate}</p>}
+          </motion.div>
+
+          <motion.div className="input-group" variants={inputFieldVariants}>
             <label htmlFor="hora" className="label">Hora de la Cita:</label>
-            <div className="time-picker-container">
+            <div className={`time-picker-container ${validationErrors.selectedTime ? 'input-error' : ''}`}>
               <DatePicker
                 selected={selectedTime}
-                onChange={setSelectedTime}
+                onChange={handleTimeChange}
                 showTimeSelect
                 showTimeSelectOnly
                 timeIntervals={15}
                 timeCaption="Hora"
                 dateFormat="h:mm aa"
-                locale={es}
+                locale="es"
                 className="time-picker-input"
                 placeholderText="Seleccione la hora"
                 required
               />
               <FontAwesomeIcon icon={faClock} className="time-icon" />
             </div>
+            {validationErrors.selectedTime && <p className="validation-error">{validationErrors.selectedTime}</p>}
+            <p className="help-text">
+                <FontAwesomeIcon icon={faInfoCircle} /> Por favor, seleccione una hora dentro de su horario de atención.
+                (La validación de disponibilidad de horarios se realiza en el backend).
+            </p>
           </motion.div>
 
         </motion.div>
@@ -559,48 +671,48 @@ const CrearCitaVeterinario = () => {
 
       {/* MENSAJES DE ERROR/ÉXITO - FUERA DEL FORMULARIO PERO DENTRO DEL CONTENEDOR PRINCIPAL */}
       <AnimatePresence>
-          {error && (
-            <motion.div
-              className="message error-message"
-              variants={messageVariants}
-              initial="initial"
-              animate="animate"
-              exit="exit"
+        {error && (
+          <motion.div
+            className="message error-message"
+            variants={messageVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+          >
+            <FontAwesomeIcon icon={faExclamationCircle} /> {error}
+            <motion.button
+              type="button"
+              onClick={() => setError(null)}
+              className="close-message-button"
+              variants={buttonVariants}
+              whileHover="hover"
+              whileTap="tap"
             >
-              <FontAwesomeIcon icon={faExclamationCircle} /> {error}
-              <motion.button
-                type="button"
-                onClick={() => setError(null)}
-                className="close-message-button"
-                variants={buttonVariants}
-                whileHover="hover"
-                whileTap="tap"
-              >
-                <FontAwesomeIcon icon={faTimes} />
-              </motion.button>
-            </motion.div>
-          )}
-          {successMessage && (
-            <motion.div
-              className="message success-message"
-              variants={messageVariants}
-              initial="initial"
-              animate="animate"
-              exit="exit"
+              <FontAwesomeIcon icon={faTimes} />
+            </motion.button>
+          </motion.div>
+        )}
+        {successMessage && (
+          <motion.div
+            className="message success-message"
+            variants={messageVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+          >
+            <FontAwesomeIcon icon={faCheckCircle} /> {successMessage}
+            <motion.button
+              type="button"
+              onClick={() => setSuccessMessage(null)}
+              className="close-message-button"
+              variants={buttonVariants}
+              whileHover="hover"
+              whileTap="tap"
             >
-              <FontAwesomeIcon icon={faCheckCircle} /> {successMessage}
-              <motion.button
-                type="button"
-                onClick={() => setSuccessMessage(null)}
-                className="close-message-button"
-                variants={buttonVariants}
-                whileHover="hover"
-                whileTap="tap"
-              >
-                <FontAwesomeIcon icon={faTimes} />
-              </motion.button>
-            </motion.div>
-          )}
+              <FontAwesomeIcon icon={faTimes} />
+            </motion.button>
+          </motion.div>
+        )}
       </AnimatePresence>
     </motion.div>
   );

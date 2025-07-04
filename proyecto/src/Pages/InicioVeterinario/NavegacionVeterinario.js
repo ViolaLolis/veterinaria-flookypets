@@ -2,19 +2,19 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import styles from './Style/NavegacionVeterinarioStyles.module.css';
 import { motion, AnimatePresence } from 'framer-motion';
-import { authFetch } from './api'; // Asegúrate de que la ruta sea correcta
+import { authFetch } from './api';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faPaw, faUser, faCalendarAlt,
   faNotesMedical, faCheckCircle, faClock,
   faStar, faPlus, faUserPlus, faClipboardList, faChevronRight,
-  faSpinner, faExclamationTriangle // Añadidos para carga y error
+  faSpinner, faExclamationTriangle
 } from '@fortawesome/free-solid-svg-icons';
 
 const NavegacionVeterinario = () => {
   const navigate = useNavigate();
-  const { user, showNotification } = useOutletContext(); // Obtener user y showNotification del contexto
+  const { user, showNotification } = useOutletContext();
 
   const getVetDashGreeting = useCallback(() => {
     const hour = new Date().getHours();
@@ -30,15 +30,12 @@ const NavegacionVeterinario = () => {
   const [vetDashStats, setVetDashStats] = useState({
     totalCitasHoy: 0,
     citasCompletadasHoy: 0,
-    pacientesNuevosSemana: 0, // Dummy data for now, requires specific backend logic
-    mascotasAtendidasTotal: 0, // Dummy data for now, requires specific backend logic
-    ratingPromedio: 4.8, // Dummy data for now, requires a rating system
-    recordatoriosActivos: 0
+    pacientesNuevosSemana: 0,
+    // Las estadísticas eliminadas ya no necesitan estar aquí
   });
 
   const [vetDashPendingAppointments, setVetDashPendingAppointments] = useState([]);
 
-  // Actualizar el saludo cada hora
   useEffect(() => {
     const interval = setInterval(() => {
       setVetDashGreeting(getVetDashGreeting());
@@ -46,7 +43,6 @@ const NavegacionVeterinario = () => {
     return () => clearInterval(interval);
   }, [getVetDashGreeting]);
 
-  // Función para cargar los datos del dashboard
   const fetchVetDashboardData = useCallback(async () => {
     if (!user?.id) {
       setIsLoading(false);
@@ -55,19 +51,37 @@ const NavegacionVeterinario = () => {
     setIsLoading(true);
     setError(null);
     try {
-      // 1. Fetch pending appointments for today
-      const today = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
-      const appointmentsResponse = await authFetch(`/citas?fecha=${today}`);
-      let pendingToday = [];
-      if (appointmentsResponse.success) {
-        // Filter appointments for the logged-in veterinarian and 'pendiente' status
-        pendingToday = appointmentsResponse.data.filter(
-          cita => cita.id_veterinario === user.id && cita.estado === 'pendiente'
+      const now = new Date();
+      const today = now.toISOString().split('T')[0]; // YYYY-MM-DD
+
+      // 1. Fetch ALL appointments for the veterinarian
+      // Assuming /citas endpoint can return all appointments if no date is specified,
+      // or you might need a specific endpoint like /citas/veterinario/{id}
+      const allAppointmentsResponse = await authFetch(`/citas`);
+      let allVetAppointments = [];
+      if (allAppointmentsResponse.success) {
+        allVetAppointments = allAppointmentsResponse.data.filter(
+          cita => cita.id_veterinario === user.id
         );
       } else {
-        showNotification(appointmentsResponse.message || 'Error al cargar citas pendientes.', 'error');
-        setError(appointmentsResponse.message || 'Error al cargar citas pendientes.');
+        showNotification(allAppointmentsResponse.message || 'Error al cargar todas las citas.', 'error');
+        setError(allAppointmentsResponse.message || 'Error al cargar todas las citas.');
       }
+
+      // Filter for future appointments and sort them
+      const futureAppointments = allVetAppointments
+        .filter(cita => {
+          const citaDateTime = new Date(cita.fecha_cita);
+          return citaDateTime >= now && cita.estado === 'pendiente'; // Only future and pending
+        })
+        .sort((a, b) => new Date(a.fecha_cita) - new Date(b.fecha_cita)); // Sort by date/time ascending
+
+      // Filter for today's appointments (total and pending)
+      const todayAppointments = allVetAppointments.filter(
+        cita => cita.fecha_cita.startsWith(today) && cita.id_veterinario === user.id
+      );
+      const pendingTodayCount = todayAppointments.filter(cita => cita.estado === 'pendiente').length;
+
 
       // 2. Fetch completed appointments count for today
       const completedCountResponse = await authFetch(`/veterinario/citas/completadas/count`);
@@ -79,7 +93,7 @@ const NavegacionVeterinario = () => {
         setError(prev => prev ? prev + ' ' + completedCountResponse.message : completedCountResponse.message);
       }
 
-      // 3. Fetch unread notifications
+      // 3. Fetch unread notifications (reintroducido) - Keep this if notifications are still needed
       const notificationsResponse = await authFetch(`/notifications/user/${user.id}`);
       let unreadNotificationsCount = 0;
       if (notificationsResponse.success) {
@@ -90,24 +104,25 @@ const NavegacionVeterinario = () => {
       }
 
       // Update pending appointments state
-      setVetDashPendingAppointments(pendingToday.map(cita => ({
+      setVetDashPendingAppointments(futureAppointments.map(cita => ({
         id: cita.id_cita,
-        time: cita.fecha_cita.substring(11, 16), // Extract HH:MM from "YYYY-MM-DD HH:MM"
+        time: cita.fecha_cita.substring(11, 16), // Extract HH:MM
         mascota: cita.mascota_nombre,
         propietario: cita.propietario_nombre,
         servicio: cita.servicio_nombre,
         estado: cita.estado,
         icon: faPaw, // Default icon, consider dynamic based on service type
-        color: "#00acc1", // Default color, consider dynamic
+        color: "#00acc1", // Default color
         avatar: cita.mascota_imagen_url || `https://placehold.co/40x40/cccccc/ffffff?text=${cita.mascota_nombre?.charAt(0) || 'M'}`
       })));
 
       // Update stats state
       setVetDashStats(prevStats => ({
         ...prevStats,
-        totalCitasHoy: pendingToday.length,
+        totalCitasHoy: pendingTodayCount, // Ahora es solo las pendientes de hoy para la tarjeta
         citasCompletadasHoy: completedTodayCount,
-        recordatoriosActivos: unreadNotificationsCount
+        recordatoriosActivos: unreadNotificationsCount, // Keep this if notifications are still needed
+        // Removed: ratingPromedio, mascotasAtendidasTotal
       }));
 
     } catch (err) {
@@ -123,7 +138,7 @@ const NavegacionVeterinario = () => {
     fetchVetDashboardData();
   }, [fetchVetDashboardData]);
 
-  // Manejar el marcado de cita como completada
+  // Manejar el marcado de cita como completada (reintroducido)
   const handleCompleteVetAppointment = useCallback(async (id) => {
     // Optimistic UI update
     setVetDashPendingAppointments(prevCitas =>
@@ -252,7 +267,7 @@ const NavegacionVeterinario = () => {
       <div className={styles.vetDash_sectionWrapper}>
         <h2><FontAwesomeIcon icon={faCalendarAlt} className={styles.vetDash_sectionIcon} /> Estadísticas Clave</h2>
         <div className={styles.vetDash_statsGrid}>
-          {/* Card: Citas Pendientes Hoy */}
+          {/* Card: Citas Pendientes Hoy (reajustado para ser solo pendientes de hoy) */}
           <motion.div
             className={styles.vetDash_statCard}
             whileHover={{ scale: 1.02 }}
@@ -305,69 +320,13 @@ const NavegacionVeterinario = () => {
             <p className={styles.vetDash_statHighlight}>{vetDashStats.pacientesNuevosSemana}</p>
             <span className={styles.vetDash_statFooter}>¡Bienvenida la nueva familia!</span>
           </motion.div>
-
-          {/* Card: Mascotas Atendidas (Total) - DUMMY DATA */}
-          <motion.div
-            className={styles.vetDash_statCard}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            variants={vetDashCardVariants}
-            initial="hidden"
-            animate="visible"
-            transition={{ delay: 0.4 }}
-          >
-            <div className={styles.vetDash_statCardHeader}>
-              <FontAwesomeIcon icon={faPaw} className={styles.vetDash_statIcon} style={{ color: 'var(--color-info)' }} />
-              <h3>Mascotas Atendidas (Total)</h3>
-            </div>
-            <p className={styles.vetDash_statHighlight}>{vetDashStats.mascotasAtendidasTotal}</p>
-            <span className={styles.vetDash_statFooter}>¡Impacto en muchas vidas!</span>
-          </motion.div>
-
-          {/* Card: Tu Rating Promedio - DUMMY DATA */}
-          <motion.div
-            className={styles.vetDash_statCard}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            variants={vetDashCardVariants}
-            initial="hidden"
-            animate="visible"
-            transition={{ delay: 0.5 }}
-          >
-            <div className={styles.vetDash_statCardHeader}>
-              <FontAwesomeIcon icon={faStar} className={styles.vetDash_statIcon} style={{ color: 'var(--color-gold)' }} />
-              <h3>Tu Rating Promedio</h3>
-            </div>
-            <p className={`${styles.vetDash_statHighlight} ${styles.vetDash_statSmallText}`}>
-              <strong>{vetDashStats.ratingPromedio}</strong> / 5.0
-            </p>
-            <span className={styles.vetDash_statFooter}>¡Mantén el excelente servicio!</span>
-          </motion.div>
-
-          {/* Card: Recordatorios Activos */}
-          <motion.div
-            className={styles.vetDash_statCard}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            variants={vetDashCardVariants}
-            initial="hidden"
-            animate="visible"
-            transition={{ delay: 0.6 }}
-          >
-            <div className={styles.vetDash_statCardHeader}>
-              <FontAwesomeIcon icon={faNotesMedical} className={styles.vetDash_statIcon} style={{ color: 'var(--color-purple)' }} />
-              <h3>Recordatorios Activos</h3>
-            </div>
-            <p className={styles.vetDash_statHighlight}>{vetDashStats.recordatoriosActivos}</p>
-            <span className={styles.vetDash_statFooter}>¡No te pierdas nada importante!</span>
-          </motion.div>
         </div>
       </div>
 
-      {/* --- Sección: Próximas Citas --- */}
+      {/* --- Sección: Próximas Citas (Reintroducida) --- */}
       <div className={styles.vetDash_appointmentsSection}>
         <div className={styles.vetDash_sectionHeader}>
-          <h2><FontAwesomeIcon icon={faClock} className={styles.vetDash_sectionIcon} /> Próximas Citas del Día</h2>
+          <h2><FontAwesomeIcon icon={faClock} className={styles.vetDash_sectionIcon} /> Próximas Citas</h2>
           <motion.button
             className={styles.vetDash_viewAllButton}
             onClick={() => navigate('/veterinario/citas')}
@@ -440,7 +399,7 @@ const NavegacionVeterinario = () => {
                 transition={{ duration: 0.5, delay: 0.2 }}
               >
                 <FontAwesomeIcon icon={faCheckCircle} className={styles.vetDash_noAppointmentsIcon} />
-                <p>¡Felicitaciones! Todas tus citas pendientes están al día por ahora.</p>
+                <p>No hay citas pendientes próximas. ¡Disfruta tu día!</p>
                 <motion.button
                   className={styles.vetDash_scheduleNewButton}
                   onClick={() => navigate('/veterinario/citas/agendar')}

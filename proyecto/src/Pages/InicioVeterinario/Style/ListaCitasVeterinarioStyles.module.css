@@ -83,86 +83,6 @@
   font-size: 1.1em;
 }
 
-/* Calendar Styling */
-.veteCalendarContainer {
-  background-color: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-  overflow: hidden; /* Ensures no bleed on border-radius */
-  transition: all 0.3s ease;
-  flex-shrink: 0; /* Prevents calendar from shrinking */
-}
-
-.veteCalendarContainer:hover {
-  box-shadow: 0 8px 25px rgba(0, 172, 193, 0.2);
-}
-
-.veteCalendar {
-  border: none !important; /* Override default react-calendar border */
-  border-radius: 12px;
-  font-family: 'Poppins', sans-serif;
-}
-
-/* Calendar specific overrides */
-.veteCalendar .react-calendar__navigation button {
-  color: #00acc1; /* Teal for navigation arrows */
-  font-weight: 600;
-  transition: background-color 0.2s;
-}
-.veteCalendar .react-calendar__navigation button:enabled:hover,
-.veteCalendar .react-calendar__navigation button:enabled:focus {
-  background-color: #e0f7fa; /* Light blue on hover */
-}
-
-.veteCalendar .react-calendar__month-view__days__day {
-  color: #555;
-}
-
-.veteCalendar .react-calendar__tile {
-  padding: 8px 4px; /* Adjust padding for better spacing */
-  border-radius: 8px; /* Slightly rounded tiles */
-  transition: all 0.2s ease;
-}
-
-.veteCalendar .react-calendar__tile--now { /* Today's date */
-  background-color: #b2ebf2; /* Lighter teal for today */
-  color: #333;
-  font-weight: 600;
-}
-.veteCalendar .react-calendar__tile--now:enabled:hover,
-.veteCalendar .react-calendar__tile--now:enabled:focus {
-  background-color: #80deea;
-}
-
-.veteCalendar .react-calendar__tile--active { /* Selected date */
-  background-color: #00acc1 !important; /* Teal for selected */
-  color: white !important;
-  border-radius: 8px;
-}
-.veteCalendar .react-calendar__tile--active:enabled:hover,
-.veteCalendar .react-calendar__tile--active:enabled:focus {
-  background-color: #008fa7 !important; /* Darker teal on hover */
-}
-
-.veteCalendar .react-calendar__tile:enabled:hover,
-.veteCalendar .react-calendar__tile:enabled:focus {
-  background-color: #e0f7fa; /* Light blue on hover for other dates */
-}
-
-.veteCalendarDot { /* Dot for days with appointments */
-  background-color: #ffc107; /* Amber dot */
-  height: 6px;
-  width: 6px;
-  border-radius: 50%;
-  margin: 0 auto;
-  margin-top: 5px;
-  transition: transform 0.2s;
-}
-
-.veteCalendarDot[data-hover="hover"] { /* framer motion hover for dot */
-  transform: scale(1.5);
-}
-
 /* Appointments List */
 .veteLista {
   list-style: none;
@@ -437,10 +357,6 @@
       padding-top: 10px;
       padding-bottom: 10px;
   }
-  .veteCalendarContainer {
-      width: 100%; /* Calendar takes full width */
-      max-width: 300px; /* Optional: limit calendar width to not be too huge */
-  }
   .veteListItem, .veteServicioItem {
       padding: 20px;
   }
@@ -497,4 +413,41 @@
   .veteServicioItem p {
       font-size: 0.9em;
   }
+}
+
+/* In your ListaCitasVeterinarioStyles.module.css */
+
+.veteRefreshButton {
+  background-color: #00acc1; /* Example: A shade of blue/cyan for refresh */
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+  margin-top: 20px; /* Add some space above the button */
+  width: fit-content; /* Adjust width as needed */
+  align-self: flex-end; /* Align to the right if in a flex container */
+}
+
+.veteRefreshButton:hover {
+  background-color: #008fa7; /* Darker shade on hover */
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 172, 193, 0.2);
+}
+
+.veteRefreshButton:active {
+  transform: translateY(0);
+}
+
+.veteRefreshButton:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+  box-shadow: none;
 }
