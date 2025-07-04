@@ -1,434 +1,470 @@
-/* Colores y Variables (opcional, para mantener consistencia) */
-:root {
-  --primary-color: #007bff; /* Azul vibrante */
-  --secondary-color: #6c757d; /* Gris para botones secundarios */
-  --success-color: #28a745; /* Verde para éxito */
-  --danger-color: #dc3545; /* Rojo para errores */
-  --warning-color: #ffc107; /* Amarillo para advertencias */
-  --info-color: #17a2b8; /* Azul claro para información */
-  --light-bg: #f8f9fa; /* Fondo claro */
-  --dark-text: #343a40; /* Texto oscuro */
-  --border-color: #ced4da; /* Color de borde de inputs */
-  --box-shadow-light: rgba(0, 0, 0, 0.1); /* Sombra suave */
-}
+/* ./Style/CrearCitaVeterinario.css */
 
-body {
-  background-color: #f0f2f5; /* Un fondo gris claro para la página */
-  margin: 0;
-  padding: 0;
-}
-
-/* Contenedor principal de la página */
+/* Contenedor principal de la página de crear cita */
 .crear-cita-container {
-  max-width: 800px;
-  margin: 40px auto; /* Centrar y dar espacio arriba/abajo */
-  padding: 30px;
-  background-color: #fff;
-  border-radius: 12px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); /* Sombra más pronunciada */
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: var(--dark-text);
-  display: flex; /* Añadir display flex al contenedor principal */
-  flex-direction: column; /* Apilar sus hijos verticalmente */
-  gap: 30px; /* Espacio entre el header, el form y los mensajes */
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 30px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #333;
+    animation: fadeIn 0.8s ease-out;
+    /* Asegurarse de que el contenedor pueda expandirse y no corte los elementos */
+    overflow: visible; /* Importante para que los DatePickers no se corten */
+    position: relative; /* Para que el z-index de los DatePickers funcione correctamente en relación a este */
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 /* Encabezado */
-.header {
-  background-color: #00bcd4; /* Color de fondo del encabezado */
-  color: white;
-  padding: 25px 30px;
-  border-radius: 10px;
-  /* margin-bottom: 30px; /* Ya no es necesario con 'gap' en el contenedor principal */
-  text-align: center;
-  position: relative; /* Mantener por si hay algún pseudo-elemento o efecto */
-  overflow: hidden;
-  display: flex; /* Usar flexbox */
-  flex-direction: column; /* Apilar elementos verticalmente */
-  align-items: center; /* Centrar horizontalmente */
-  justify-content: center; /* Centrar verticalmente si hay espacio extra */
-  gap: 8px; /* Espacio entre los elementos del header */
-  box-shadow: 0 4px 10px rgba(0, 188, 212, 0.2); /* Sombra para el header */
+.crear-cita-container .header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 20px; /* Aumenta el padding para que el contenido tenga más espacio */
+    border-radius: 10px 10px 0 0; /* Bordes redondeados solo arriba */
+    /* Colores corregidos para el encabezado */
+    background-color: #00acc1; /* Fondo turquesa */
+    color: #ffffff; /* Texto general del encabezado en blanco */
+    /* Asegurarse de que el encabezado no tenga un alto fijo que lo corte */
+    height: auto; /* Remover cualquier altura fija */
+    overflow: hidden; /* Oculta el overflow del propio header para evitar scrollbars internos */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
-.header h2 {
-  margin: 0;
-  font-size: 1.8em;
-  font-weight: 600;
+.crear-cita-container .header h2 {
+    font-size: 2.2em;
+    margin-bottom: 10px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    /* Asegurarse de que el texto no se corte y sea blanco */
+    white-space: normal; /* Permitir que el texto salte de línea */
+    word-wrap: break-word; /* Romper palabras largas */
+    color: #ffffff; /* Título principal en blanco */
 }
 
-.header-icon {
-  font-size: 2.2em;
-  margin-bottom: 10px;
+.crear-cita-container .header .header-icon {
+    font-size: 1.2em;
+    color: #ffffff; /* Icono en blanco */
 }
 
-.help-text {
-  font-size: 0.95em;
-  margin: 0;
-  line-height: 1.4;
-  opacity: 0.9;
+.crear-cita-container .header .help-text {
+    font-size: 0.95em;
+    color: #e0f7fa; /* Un blanco azulado muy claro para los textos de ayuda */
+    margin-top: 5px;
+    line-height: 1.4; /* Mejora la legibilidad */
+    white-space: normal; /* Asegura el salto de línea para info larga */
+    word-wrap: break-word;
 }
 
-/* Mensajes de carga */
-.loading-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 200px;
-  font-size: 1.2em;
-  color: var(--primary-color);
-  text-align: center;
-  margin-top: 50px;
-}
-
-.loading-container .spinner {
-  font-size: 3em;
-  margin-bottom: 15px;
-}
-
-/* Contenedor de error inicial (si no se pueden cargar los datos) */
-.error-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 200px;
-  font-size: 1.2em;
-  color: var(--danger-color);
-  text-align: center;
-  margin-top: 50px;
-  padding: 20px;
-  border: 1px solid var(--danger-color);
-  border-radius: 8px;
-  background-color: #ffebe9;
-}
-
-.error-container .error-icon {
-  font-size: 3em;
-  margin-bottom: 15px;
-}
-
-/* Estilos del formulario */
+/* Formulario */
 .cita-form {
-  display: flex;
-  flex-direction: column;
-  gap: 25px; /* Espacio entre secciones del formulario */
-  /* Removido margin-bottom aquí ya que el 'gap' del padre lo maneja */
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
 }
 
+/* Secciones del formulario */
 .form-section {
-  background-color: var(--light-bg);
-  padding: 25px;
-  border-radius: 10px;
-  border: 1px solid #e0e0e0;
+    background-color: #f9f9f9;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 25px;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .section-title {
-  color: var(--primary-color);
-  font-size: 1.4em;
-  margin-top: 0;
-  margin-bottom: 20px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #e9ecef;
+    font-size: 1.6em;
+    color: #00acc1; /* Corregido: Usa el turquesa principal para los títulos de sección */
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid #dcdcdc;
+    padding-bottom: 10px;
 }
 
+.section-title .svg-inline--fa {
+    color: #00acc1; /* Asegura que el icono también sea turquesa */
+    font-size: 1em;
+}
+
+/* Grupos de input (label + input/select) */
 .input-group {
-  margin-bottom: 20px;
+    margin-bottom: 20px;
 }
 
-.label {
-  display: block;
-  margin-bottom: 8px;
-  font-weight: 600;
-  color: var(--dark-text);
-  font-size: 0.95em;
+.input-group .label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #555;
+    font-size: 1em;
 }
 
-.input-with-icon {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
+/* Estilo general para inputs y selects */
 .input-field,
 .select-field,
+.date-picker-input,
 .time-picker-input {
-  width: 100%;
-  padding: 12px 15px;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  font-size: 1em;
-  color: var(--dark-text);
-  box-sizing: border-box;
-  transition: border-color 0.3s, box-shadow 0.3s;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1em;
+    color: #333;
+    box-sizing: border-box;
+    transition: all 0.3s ease;
+    background-color: #fff;
 }
 
 .input-field:focus,
 .select-field:focus,
+.date-picker-input:focus,
 .time-picker-input:focus {
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-  outline: none;
+    border-color: #00acc1;
+    box-shadow: 0 0 0 3px rgba(0, 172, 193, 0.1);
+    outline: none;
 }
 
-.input-icon {
-  position: absolute;
-  right: 15px;
-  color: var(--secondary-color);
-  pointer-events: none;
+/* Input con icono */
+.input-with-icon {
+    position: relative;
 }
 
+.input-with-icon .input-field {
+    padding-right: 40px; /* Espacio para el icono */
+}
+
+.input-with-icon .input-icon {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #999;
+}
+
+/* Select con flecha */
 .select-container {
-  position: relative;
-  width: 100%;
+    position: relative;
 }
 
 .select-container .select-field {
-  padding-right: 40px;
+    appearance: none; /* Elimina la flecha predeterminada del select */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    padding-right: 40px; /* Espacio para la flecha personalizada */
+    background-image: none; /* Asegura que no haya imágenes de fondo adicionales */
 }
 
-.select-arrow {
-  position: absolute;
-  right: 15px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--secondary-color);
-  pointer-events: none;
+.select-container .select-arrow {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #999;
+    pointer-events: none; /* Asegura que la flecha no interfiera con el click en el select */
 }
 
-/* Estilos específicos del DatePicker (Hora) */
+/* Date and Time Pickers */
+.date-picker-container,
 .time-picker-container {
-  position: relative;
-  width: 100%;
+    position: relative;
+    display: flex; /* Para alinear el input y el icono */
+    align-items: center;
 }
 
+.date-picker-input,
 .time-picker-input {
-  padding-right: 40px;
+    flex-grow: 1; /* Ocupa el espacio restante */
+    padding-right: 40px; /* Espacio para el icono */
 }
 
-.time-icon {
-  position: absolute;
-  right: 15px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--secondary-color);
-  pointer-events: none;
+.date-picker-container .date-icon,
+.time-picker-container .time-icon {
+    position: absolute;
+    right: 15px;
+    color: #999;
+    pointer-events: none;
 }
 
-/* Mensajes de información */
-.info-text {
-  font-size: 0.9em;
-  color: var(--secondary-color);
-  margin-top: -10px;
-  margin-bottom: 20px;
-  padding-left: 5px;
-}
-
-.inline-link {
-  color: var(--primary-color);
-  text-decoration: none;
-  font-weight: bold;
-}
-
-.inline-link:hover {
-  text-decoration: underline;
-}
-
-/* Botones de acción */
-.action-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 15px;
-  margin-top: 30px; /* Aún dejamos un margen superior explícito aquí */
-  padding-top: 20px;
-  border-top: 1px solid #e9ecef;
-}
-
-.primary-button,
-.secondary-button {
-  padding: 12px 25px;
-  border: none;
-  border-radius: 8px;
-  font-size: 1.05em;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.primary-button {
-  background-color: var(--primary-color);
-  color: white;
-  box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
-}
-
-.primary-button:hover:not(:disabled) {
-  background-color: #0056b3;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 15px rgba(0, 123, 255, 0.3);
-}
-
-.primary-button:disabled {
-  background-color: #a0cbed;
-  cursor: not-allowed;
-  box-shadow: none;
-}
-
-.secondary-button {
-  background-color: var(--secondary-color);
-  color: white;
-  box-shadow: 0 4px 10px rgba(108, 117, 125, 0.2);
-}
-
-.secondary-button:hover:not(:disabled) {
-  background-color: #5a6268;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 15px rgba(108, 117, 125, 0.3);
-}
-
-/* Mensajes de alerta (éxito, error) */
-.message {
-  padding: 15px 20px;
-  border-radius: 8px;
-  /* margin-top: 25px; /* Comentado porque el 'gap' del contenedor padre lo maneja */
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 0.95em;
-  font-weight: 500;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  position: relative;
-  /* Asegurarse de que esté en un nuevo contexto de apilamiento si hay problemas de z-index */
-  z-index: 10; 
-}
-
-.success-message {
-  background-color: #e6ffed;
-  color: var(--success-color);
-  border: 1px solid var(--success-color);
-}
-
-.error-message {
-  background-color: #ffe6e6;
-  color: var(--danger-color);
-  border: 1px solid var(--danger-color);
-}
-
-.message .close-message-button {
-  background: none;
-  border: none;
-  color: inherit;
-  font-size: 1.2em;
-  cursor: pointer;
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  padding: 5px;
-  line-height: 1;
-  transition: color 0.2s ease;
-}
-
-.message .close-message-button:hover {
-  color: #333;
-}
-
-/* Estilos para el DatePicker (pop-up del calendario y horas) */
+/* Estilos para el DatePicker */
 .react-datepicker-wrapper {
-  width: 100%;
+    width: 100%; /* Asegura que el wrapper ocupe todo el ancho disponible */
 }
 
+/* Asegurarse de que el calendario de DatePicker no se corte */
 .react-datepicker {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    border: 1px solid #ddd;
+    z-index: 1000; /* Asegurar que esté por encima de otros elementos */
 }
 
 .react-datepicker__header {
-  background-color: var(--primary-color);
-  color: white;
-  border-bottom: none;
-  border-radius: 8px 8px 0 0;
-  padding-top: 10px;
+    background-color: #00acc1;
+    border-bottom: none;
+    padding-top: 10px;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
 }
 
 .react-datepicker__current-month,
 .react-datepicker__day-name {
-  color: white;
+    color: #fff;
 }
 
 .react-datepicker__day--selected,
 .react-datepicker__day--keyboard-selected {
-  background-color: var(--primary-color);
-  color: white;
-  border-radius: 50%;
+    background-color: #007bff;
+    color: #fff;
+    border-radius: 50%;
 }
 
-.react-datepicker__day--selected:hover,
-.react-datepicker__day--keyboard-selected:hover {
-  background-color: #0056b3;
+.react-datepicker__day--outside-month {
+    color: #ccc;
 }
 
-.react-datepicker__day:hover {
-  background-color: #e0e0e0;
-  border-radius: 50%;
+
+/* Ayuda y enlaces en línea */
+.help-text {
+    font-size: 0.85em;
+    color: #777;
+    margin-top: 5px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }
 
-/* Estilo para el contenedor de tiempo en DatePicker */
-.react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box {
-  width: 100%;
+.info-text {
+    font-size: 0.9em;
+    color: #0056b3; /* Color para información */
+    background-color: #e6f7ff;
+    border-left: 4px solid #4a90e2;
+    padding: 10px 15px;
+    border-radius: 5px;
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
-.react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list li.react-datepicker__time-list-item {
-  padding: 8px 10px;
+.inline-link {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
 }
 
-.react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list li.react-datepicker__time-list-item--selected {
-  background-color: var(--primary-color);
-  color: white;
+.inline-link:hover {
+    color: #0056b3;
+    text-decoration: underline;
 }
 
-.react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list li.react-datepicker__time-list-item:hover {
-  background-color: #e0e0e0;
-  color: var(--dark-text);
+/* Botones de acción */
+.action-buttons {
+    display: flex;
+    justify-content: flex-end; /* Alinea los botones a la derecha */
+    gap: 15px;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
 }
 
-/* Media Queries para responsividad (opcional pero recomendado) */
+.primary-button,
+.secondary-button {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
+}
+
+.primary-button {
+    background-color: #00acc1; /* Color principal */
+    color: #ffffff;
+    box-shadow: 0 4px 10px rgba(0, 172, 193, 0.2);
+}
+
+.primary-button:hover {
+    background-color: #008fa7;
+    box-shadow: 0 6px 15px rgba(0, 172, 193, 0.3);
+}
+
+.primary-button:disabled {
+    background-color: #b0e0e6;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.secondary-button {
+    background-color: #6c757d;
+    color: #ffffff;
+}
+
+.secondary-button:hover {
+    background-color: #5a6268;
+}
+
+/* Mensajes de carga, éxito y error */
+.loading-container,
+.error-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    font-size: 1.2em;
+    color: #555;
+    text-align: center;
+    margin-top: 50px;
+}
+
+.spinner {
+    font-size: 3em;
+    color: #00acc1;
+    margin-bottom: 20px;
+}
+
+.error-icon {
+    font-size: 3em;
+    color: #dc3545;
+    margin-bottom: 20px;
+}
+
+.message {
+    padding: 15px 20px;
+    border-radius: 8px;
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 500;
+    position: relative;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    /* Asegurarse de que los mensajes no se corten */
+    min-height: 50px; /* Un poco de altura mínima */
+    word-wrap: break-word; /* Romper palabras largas */
+    white-space: normal; /* Permitir que el texto salte de línea */
+}
+
+.success-message {
+    background-color: #e6ffed;
+    color: #28a745;
+    border: 1px solid #28a745;
+}
+
+.error-message {
+    background-color: #ffe6e6;
+    color: #dc3545;
+    border: 1px solid #dc3545;
+}
+
+.message .svg-inline--fa {
+    font-size: 1.2em;
+    flex-shrink: 0; /* Evita que el icono se encoja */
+}
+
+.close-message-button {
+    background: none;
+    border: none;
+    font-size: 1.2em;
+    color: inherit;
+    cursor: pointer;
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 5px;
+    transition: transform 0.2s ease;
+}
+
+.close-message-button:hover {
+    transform: translateY(-50%) scale(1.1);
+}
+
+/* Estilos de validación */
+.input-error,
+.select-error {
+    border-color: #dc3545 !important;
+    box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.2) !important;
+}
+
+.validation-error {
+    color: #dc3545;
+    font-size: 0.85em;
+    margin-top: 5px;
+    margin-bottom: 10px;
+    padding-left: 5px;
+}
+
+/* Media Queries para responsividad */
 @media (max-width: 768px) {
-  .crear-cita-container {
-      margin: 20px auto;
-      padding: 20px;
-  }
+    .crear-cita-container {
+        margin: 20px 15px;
+        padding: 20px;
+    }
 
-  .header {
-      padding: 20px;
-  }
+    .crear-cita-container .header h2 {
+        font-size: 1.8em;
+    }
 
-  .header h2 {
-      font-size: 1.5em;
-  }
+    .section-title {
+        font-size: 1.4em;
+    }
 
-  .form-section {
-      padding: 15px;
-  }
+    .action-buttons {
+        flex-direction: column;
+        gap: 10px;
+    }
 
-  .action-buttons {
-      flex-direction: column;
-      gap: 10px;
-  }
+    .primary-button,
+    .secondary-button {
+        width: 100%;
+    }
+}
 
-  .primary-button,
-  .secondary-button {
-      width: 100%;
-  }
+@media (max-width: 480px) {
+    .crear-cita-container {
+        padding: 15px;
+    }
+
+    .crear-cita-container .header h2 {
+        font-size: 1.5em;
+    }
+
+    .section-title {
+        font-size: 1.2em;
+    }
+
+    .input-field,
+    .select-field,
+    .date-picker-input,
+    .time-picker-input {
+        padding: 10px;
+        font-size: 0.9em;
+    }
+
+    .primary-button,
+    .secondary-button {
+        font-size: 1em;
+        padding: 10px 15px;
+    }
 }

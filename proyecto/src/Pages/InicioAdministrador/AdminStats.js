@@ -1,10 +1,9 @@
-// src/Pages/InicioAdministrador/AdminStats.js
 import React, { useState, useEffect, useCallback } from 'react';
 import { FaUsers, FaStethoscope, FaUserShield, FaBriefcaseMedical, FaCalendarAlt, FaChartLine, FaSpinner, FaInfoCircle } from 'react-icons/fa';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
-import { authFetch } from '../../utils/api'; // Ruta ajustada
-import './Styles/AdminStats.css'; // Ruta relativa al CSS
-import { useNotifications } from '../../Notifications/NotificationContext'; // Ruta ajustada
+import { authFetch } from '../../utils/api';
+import './Styles/AdminStats.css'; // Asegúrate de que esta sea la ruta correcta
+import { useNotifications } from '../../Notifications/NotificationContext';
 
 function AdminStats({ user }) {
     const [stats, setStats] = useState({
@@ -19,7 +18,7 @@ function AdminStats({ user }) {
     const [serviciosPopulares, setServiciosPopulares] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
-    const { addNotification } = useNotifications(); // Usa el hook de notificaciones
+    const { addNotification } = useNotifications();
 
     const fetchStats = useCallback(async () => {
         setIsLoading(true);
@@ -73,7 +72,7 @@ function AdminStats({ user }) {
 
     if (isLoading) {
         return (
-            <div className="admin-loading">
+            <div className="admin-loading-container"> {/* Renombrado para consistencia */}
                 <div className="loading-spinner">
                     <FaSpinner className="spinner-icon" />
                 </div>
@@ -84,8 +83,8 @@ function AdminStats({ user }) {
 
     if (error) {
         return (
-            <div className="error-message">
-                <FaInfoCircle className="info-icon" />
+            <div className="admin-error-message"> {/* Renombrado para consistencia */}
+                <FaInfoCircle className="admin-info-icon" /> {/* Renombrado para consistencia */}
                 {error}
                 <p>Asegúrate de que el backend esté corriendo y los endpoints de API estén accesibles y funcionando correctamente.</p>
             </div>
@@ -93,69 +92,117 @@ function AdminStats({ user }) {
     }
 
     return (
-        <div className="admin-stats-container">
-            <h2 className="stats-header">
-                <FaChartLine className="header-icon" /> Dashboard de Estadísticas
-            </h2>
+        <div className="admin-stats-main-container"> {/* Contenedor principal de la página */}
+            <p className="admin-stats-greeting-text">Hola, Administrador {user?.nombre}!</p>
+            <p className="admin-stats-subheader-message">Aquí tienes un resumen de las estadísticas clave de tu clínica veterinaria.</p>
 
-            <div className="stats-grid">
-                <div className="stat-card">
-                    <FaUsers className="stat-icon" />
-                    <h3>Clientes Registrados</h3>
-                    <p>{stats.totalUsers}</p>
-                </div>
-                <div className="stat-card">
-                    <FaStethoscope className="stat-icon" />
-                    <h3>Veterinarios Activos</h3>
-                    <p>{stats.totalVets}</p>
-                </div>
-                <div className="stat-card">
-                    <FaUserShield className="stat-icon" />
-                    <h3>Administradores</h3>
-                    <p>{stats.totalAdmins}</p>
-                </div>
-                <div className="stat-card">
-                    <FaBriefcaseMedical className="stat-icon" />
-                    <h3>Servicios Ofrecidos</h3>
-                    <p>{stats.totalServices}</p>
-                </div>
-                <div className="stat-card">
-                    <FaCalendarAlt className="stat-icon" />
-                    <h3>Citas este Mes</h3>
-                    <p>{stats.totalAppointments}</p>
-                </div>
-                <div className="stat-card">
-                    <FaChartLine className="stat-icon" />
-                    <h3>Crecimiento Mensual</h3>
-                    <p>{stats.monthlyGrowth}%</p>
+            <div className="admin-stats-section-wrapper"> {/* Contenedor para la sección de estadísticas generales */}
+                <h2 className="admin-stats-section-header">
+                    <FaChartLine className="admin-stats-section-icon" /> Estadísticas Generales
+                </h2>
+
+                <div className="admin-stats-grid">
+                    <div className="admin-stat-card">
+                        <div className="admin-stat-card-header">
+                            <FaUsers className="admin-stat-icon" style={{ color: '#00acc1' }} /> {/* Color para icono */}
+                            <h3>Clientes Registrados</h3>
+                        </div>
+                        <p className="admin-stat-highlight">{stats.totalUsers}</p>
+                        <p className="admin-stat-footer">Total de clientes activos.</p>
+                    </div>
+
+                    <div className="admin-stat-card">
+                        <div className="admin-stat-card-header">
+                            <FaStethoscope className="admin-stat-icon" style={{ color: '#4CAF50' }} /> {/* Color para icono */}
+                            <h3>Veterinarios Activos</h3>
+                        </div>
+                        <p className="admin-stat-highlight">{stats.totalVets}</p>
+                        <p className="admin-stat-footer">Número de profesionales.</p>
+                    </div>
+
+                    <div className="admin-stat-card">
+                        <div className="admin-stat-card-header">
+                            <FaUserShield className="admin-stat-icon" style={{ color: '#ffc107' }} /> {/* Color para icono */}
+                            <h3>Administradores</h3>
+                        </div>
+                        <p className="admin-stat-highlight">{stats.totalAdmins}</p>
+                        <p className="admin-stat-footer">Personal administrativo.</p>
+                    </div>
+
+                    <div className="admin-stat-card">
+                        <div className="admin-stat-card-header">
+                            <FaBriefcaseMedical className="admin-stat-icon" style={{ color: '#2196F3' }} /> {/* Color para icono */}
+                            <h3>Servicios Ofrecidos</h3>
+                        </div>
+                        <p className="admin-stat-highlight">{stats.totalServices}</p>
+                        <p className="admin-stat-footer">Número total de servicios.</p>
+                    </div>
+
+                    <div className="admin-stat-card">
+                        <div className="admin-stat-card-header">
+                            <FaCalendarAlt className="admin-stat-icon" style={{ color: '#FF5722' }} /> {/* Color para icono */}
+                            <h3>Citas este Mes</h3>
+                        </div>
+                        <p className="admin-stat-highlight">{stats.totalAppointments}</p>
+                        <p className="admin-stat-footer">Citas agendadas en el mes actual.</p>
+                    </div>
+
+                    <div className="admin-stat-card">
+                        <div className="admin-stat-card-header">
+                            <FaChartLine className="admin-stat-icon" style={{ color: '#9C27B0' }} /> {/* Color para icono */}
+                            <h3>Crecimiento Mensual</h3>
+                        </div>
+                        <p className="admin-stat-highlight">
+                            {stats.monthlyGrowth > 0 ? `+${stats.monthlyGrowth}` : stats.monthlyGrowth}%
+                        </p>
+                        <p className="admin-stat-footer">Comparado con el mes anterior.</p>
+                    </div>
                 </div>
             </div>
 
-            <div className="charts-container">
-                <div className="chart-card">
+            <div className="admin-charts-container"> {/* Contenedor para los gráficos */}
+                <div className="admin-chart-card">
                     <h3>Citas por Mes</h3>
                     <ResponsiveContainer width="100%" height={300}>
-                        <LineChart data={citasPorMes} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="mes" />
-                            <YAxis />
-                            <Tooltip />
-                            <Legend />
-                            <Line type="monotone" dataKey="cantidad" stroke="#8884d8" activeDot={{ r: 8 }} name="Número de Citas" />
+                        <LineChart data={citasPorMes} margin={{ top: 15, right: 30, left: 20, bottom: 5 }}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+                            <XAxis dataKey="mes" stroke="#7f8c8d" />
+                            <YAxis stroke="#7f8c8d" />
+                            <Tooltip
+                                contentStyle={{
+                                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                                    border: '1px solid #e0e0e0',
+                                    borderRadius: '8px',
+                                    padding: '10px'
+                                }}
+                                labelStyle={{ color: '#2c3e50', fontWeight: 'bold' }}
+                                itemStyle={{ color: '#00acc1' }}
+                            />
+                            <Legend wrapperStyle={{ paddingTop: '10px', color: '#555' }} />
+                            <Line type="monotone" dataKey="cantidad" stroke="#00acc1" strokeWidth={2} activeDot={{ r: 8, fill: '#00acc1', stroke: '#b2ebf2', strokeWidth: 2 }} name="Número de Citas" />
                         </LineChart>
                     </ResponsiveContainer>
                 </div>
 
-                <div className="chart-card">
+                <div className="admin-chart-card">
                     <h3>Servicios Más Populares</h3>
                     <ResponsiveContainer width="100%" height={300}>
-                        <BarChart data={serviciosPopulares} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="servicio" interval={0} angle={-30} textAnchor="end" height={60} />
-                            <YAxis />
-                            <Tooltip />
-                            <Legend />
-                            <Bar dataKey="cantidad" fill="#82ca9d" name="Cantidad de Citas" />
+                        <BarChart data={serviciosPopulares} margin={{ top: 15, right: 30, left: 20, bottom: 5 }}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+                            <XAxis dataKey="servicio" interval={0} angle={-30} textAnchor="end" height={80} stroke="#7f8c8d" />
+                            <YAxis stroke="#7f8c8d" />
+                            <Tooltip
+                                contentStyle={{
+                                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                                    border: '1px solid #e0e0e0',
+                                    borderRadius: '8px',
+                                    padding: '10px'
+                                }}
+                                labelStyle={{ color: '#2c3e50', fontWeight: 'bold' }}
+                                itemStyle={{ color: '#4CAF50' }}
+                            />
+                            <Legend wrapperStyle={{ paddingTop: '10px', color: '#555' }} />
+                            <Bar dataKey="cantidad" fill="#4CAF50" name="Cantidad de Citas" />
                         </BarChart>
                     </ResponsiveContainer>
                 </div>

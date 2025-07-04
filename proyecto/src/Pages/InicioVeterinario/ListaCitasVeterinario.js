@@ -16,14 +16,11 @@ import {
   faPlus,
   faSpinner,
   faExclamationTriangle,
-  faSync // Añadido para el botón de refrescar
+  faSync
 } from '@fortawesome/free-solid-svg-icons';
-import Calendar from 'react-calendar';
-import 'react-calendar/dist/Calendar.css';
-import { authFetch } from './api'; // Importa authFetch (asegúrate que la ruta sea correcta, si api.js está en la raíz de src, entonces './api' o '../api' dependiendo de la estructura)
+import { authFetch } from './api';
 
-// Las variantes de Framer Motion pueden ser reutilizadas o adaptadas
-// para mantener la coherencia en las animaciones.
+// Framer Motion variants for consistent animations
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
@@ -70,35 +67,24 @@ const buttonVariants = {
   tap: { scale: 0.95 }
 };
 
-const calendarTileVariants = {
-  hover: {
-    scale: 1.05,
-    backgroundColor: "rgba(0, 172, 193, 0.1)"
-  },
-  tap: { scale: 0.95 }
-};
-
 const ListaCitasVeterinario = () => {
-  const { user, showNotification } = useOutletContext(); // Obtener el usuario logeado y la función de notificación
+  const { user, showNotification } = useOutletContext();
   const [citas, setCitas] = useState([]);
-  const [servicios, setServicios] = useState([]); // Aunque no se usan directamente en la lista, se mantienen por si se necesitan
+  const [servicios, setServicios] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedDate, setSelectedDate] = useState(new Date());
   const [searchTerm, setSearchTerm] = useState('');
-  const [refreshing, setRefreshing] = useState(false); // Nuevo estado para el botón de refrescar
+  const [refreshing, setRefreshing] = useState(false);
   const navigate = useNavigate();
 
   const fetchCitasAndServicios = useCallback(async () => {
     setLoading(true);
     setError(null);
-    setRefreshing(true); // Activa el spinner del botón de refrescar
-    const formattedDate = selectedDate.toISOString().split('T')[0];
+    setRefreshing(true);
 
     try {
-      // *** CORRECCIÓN CLAVE AQUÍ: Cambiar la URL a /citas ***
-      // El backend ya filtra por el ID del veterinario logeado si el rol es 'veterinario'
-      const citasResponse = await authFetch(`/citas?fecha=${formattedDate}`);
+      // Fetch all appointments for the logged-in veterinarian
+      const citasResponse = await authFetch(`/citas`);
       if (citasResponse.success) {
         setCitas(citasResponse.data);
       } else {
@@ -106,13 +92,12 @@ const ListaCitasVeterinario = () => {
         showNotification(citasResponse.message || 'Error al cargar las citas.', 'error');
       }
 
-      // Endpoint para obtener servicios (si se necesitan para algo en esta vista, aunque no se usen directamente en la lista)
+      // Fetch services
       const serviciosResponse = await authFetch('/servicios');
       if (serviciosResponse.success) {
         setServicios(serviciosResponse.data);
       } else {
         console.warn("Error al cargar servicios:", serviciosResponse.message);
-        // No se establece error general si solo fallan los servicios, ya que las citas son lo principal aquí
       }
 
     } catch (err) {
@@ -121,17 +106,13 @@ const ListaCitasVeterinario = () => {
       showNotification('Error de conexión al servidor al cargar citas o servicios.', 'error');
     } finally {
       setLoading(false);
-      setRefreshing(false); // Desactiva el spinner del botón de refrescar
+      setRefreshing(false);
     }
-  }, [selectedDate, showNotification]);
+  }, [showNotification]);
 
   useEffect(() => {
     fetchCitasAndServicios();
   }, [fetchCitasAndServicios]);
-
-  const onChangeDate = (date) => {
-    setSelectedDate(date);
-  };
 
   const filteredCitas = citas.filter(cita =>
     (cita.propietario_nombre && cita.propietario_nombre.toLowerCase().includes(searchTerm.toLowerCase())) ||
@@ -139,22 +120,6 @@ const ListaCitasVeterinario = () => {
     (cita.mascota_nombre && cita.mascota_nombre.toLowerCase().includes(searchTerm.toLowerCase())) ||
     (cita.servicio_nombre && cita.servicio_nombre.toLowerCase().includes(searchTerm.toLowerCase()))
   );
-
-  const tileContent = ({ date, view }) => {
-    if (view === 'month') {
-      const dateStr = date.toISOString().split('T')[0];
-      const hasCitas = citas.some(cita => new Date(cita.fecha_cita).toISOString().split('T')[0] === dateStr);
-      return hasCitas ? (
-        <motion.div
-          className={veteStyles.veteCalendarDot}
-          variants={calendarTileVariants}
-          whileHover="hover"
-          whileTap="tap"
-        />
-      ) : null;
-    }
-    return null;
-  };
 
   const handleRefresh = () => {
     fetchCitasAndServicios();
@@ -219,7 +184,7 @@ const ListaCitasVeterinario = () => {
       >
         <div className={veteStyles.veteHeaderContent}>
           <FontAwesomeIcon icon={faCalendarAlt} className={veteStyles.veteHeaderIcon} />
-          <h2>Citas Agendadas</h2>
+          <h2>Todas las Citas Agendadas</h2>
         </div>
 
         <motion.div
@@ -238,32 +203,18 @@ const ListaCitasVeterinario = () => {
           />
         </motion.div>
 
-        <motion.div
-          className={veteStyles.veteCalendarPanel}
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.3 }}
+        <motion.button
+          onClick={handleRefresh}
+          className={veteStyles.veteRefreshButton}
+          variants={buttonVariants}
+          whileHover="hover"
+          whileTap="tap"
+          disabled={refreshing}
+          style={{ marginTop: '20px' }} // Added some top margin for spacing
         >
-          <h3><FontAwesomeIcon icon={faCalendarAlt} /> Seleccionar Fecha</h3>
-          <Calendar
-            onChange={onChangeDate}
-            value={selectedDate}
-            locale="es-CO"
-            tileContent={tileContent}
-            className={veteStyles.veteCalendar}
-          />
-          <motion.button
-            onClick={handleRefresh}
-            className={veteStyles.veteRefreshButton}
-            variants={buttonVariants}
-            whileHover="hover"
-            whileTap="tap"
-            disabled={refreshing}
-          >
-            <FontAwesomeIcon icon={faSync} spin={refreshing} />
-            {refreshing ? ' Actualizando...' : ' Actualizar Citas'}
-          </motion.button>
-        </motion.div>
+          <FontAwesomeIcon icon={faSync} spin={refreshing} />
+          {refreshing ? ' Actualizando...' : ' Actualizar Citas'}
+        </motion.button>
       </motion.div>
 
       <AnimatePresence mode="wait">
@@ -278,7 +229,7 @@ const ListaCitasVeterinario = () => {
           >
             {filteredCitas.map((cita) => (
               <motion.li
-                key={cita.id_cita} // Usa el ID de la cita de la base de datos
+                key={cita.id_cita}
                 className={veteStyles.veteListItem}
                 variants={itemVariants}
                 whileHover="hover"
@@ -289,7 +240,7 @@ const ListaCitasVeterinario = () => {
                   <div className={veteStyles.veteInfoRow}>
                     <FontAwesomeIcon icon={faClock} className={veteStyles.veteInfoIcon} />
                     <span className={veteStyles.veteFecha}>
-                      {new Date(cita.fecha_cita).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      {new Date(cita.fecha_cita).toLocaleDateString()} - {new Date(cita.fecha_cita).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
                   </div>
 
@@ -348,7 +299,7 @@ const ListaCitasVeterinario = () => {
           >
             {searchTerm ?
               'No se encontraron citas que coincidan con la búsqueda.' :
-              'No hay citas agendadas para la fecha seleccionada.'}
+              'No hay citas agendadas.'}
 
             <motion.div
               variants={buttonVariants}

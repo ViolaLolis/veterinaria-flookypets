@@ -3,41 +3,41 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams, useOutletContext } from 'react-router-dom';
 import styles from './Style/DetalleHistorialVeterinarioStyles.module.css';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
-  faArrowLeft, 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'; // <--- ASEGÚRATE DE QUE ESTA LÍNEA ESTÉ PRESENTE Y SIN COMENTAR
+import {
+  faArrowLeft,
   faFileMedicalAlt,
   faPaw,
   faCalendarDay,
   faDiagnoses,
   faNotesMedical,
-  faEdit, // Icono para editar
-  faTrash, // Icono para eliminar
-  faSpinner, // Icono para carga
-  faTimesCircle, // Icono para error
+  faEdit,
+  faTrash,
+  faSpinner,
+  faTimesCircle,
 } from '@fortawesome/free-solid-svg-icons';
-import { authFetch } from './api'; // Asegúrate de que la ruta sea correcta
+import { authFetch } from './api';
 
 const containerVariants = {
   hidden: { opacity: 0, x: '-100vw' },
-  visible: { 
-    opacity: 1, 
-    x: 0, 
-    transition: { 
-      type: 'spring', 
-      delay: 0.2, 
-      damping: 20, 
+  visible: {
+    opacity: 1,
+    x: 0,
+    transition: {
+      type: 'spring',
+      delay: 0.2,
+      damping: 20,
       stiffness: 100,
       when: "beforeChildren",
       staggerChildren: 0.1
-    } 
+    }
   },
-  exit: { 
-    x: '100vw', 
-    transition: { 
+  exit: {
+    x: '100vw',
+    transition: {
       ease: 'easeInOut',
-      duration: 0.3 
-    } 
+      duration: 0.3
+    }
   },
 };
 
@@ -46,15 +46,14 @@ const cardVariants = {
   visible: { opacity: 1, y: 0 },
   hover: {
     y: -5,
-    boxShadow: '0 10px 20px rgba(6, 66, 77, 0.2)'
+    boxShadow: '0 10px 20px rgba(0, 172, 193, 0.2)'
   }
 };
 
 const DetalleHistorialVeterinario = () => {
   const navigate = useNavigate();
-  const { id } = useParams(); // id_historial
-  // Acceso defensivo al contexto del Outlet
-  const { user, showNotification } = useOutletContext() || {}; 
+  const { id } = useParams();
+  const { user, showNotification } = useOutletContext() || {};
 
   const [historial, setHistorial] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -106,7 +105,7 @@ const DetalleHistorialVeterinario = () => {
       });
       if (response.success) {
         if (showNotification) showNotification('Historial médico eliminado exitosamente.', 'success');
-        navigate('/veterinario/historiales'); // Redirigir a la lista de historiales
+        navigate('/veterinario/historiales');
       } else {
         setError(response.message || 'Error al eliminar historial médico.');
         if (showNotification) showNotification(response.message || 'Error al eliminar historial médico.', 'error');
@@ -121,13 +120,12 @@ const DetalleHistorialVeterinario = () => {
     }
   };
 
-  // Determinar si el usuario actual tiene rol de admin para mostrar el botón de eliminar
   const canDelete = user && user.role === 'admin';
 
   if (loading) {
     return (
       <div className={styles.loadingContainer}>
-        <FontAwesomeIcon icon={faSpinner} spin size="3x" color="#FFD700" />
+        <FontAwesomeIcon icon={faSpinner} spin size="3x" className={styles.loadingSpinner} />
         <p>Cargando detalles del historial médico...</p>
       </div>
     );
@@ -136,7 +134,7 @@ const DetalleHistorialVeterinario = () => {
   if (error) {
     return (
       <div className={styles.errorContainer}>
-        <FontAwesomeIcon icon={faTimesCircle} size="2x" color="#FF0000" />
+        <FontAwesomeIcon icon={faTimesCircle} size="2x" className={styles.errorIcon} />
         <h3>Error</h3>
         <p>{error}</p>
         <motion.button
@@ -167,9 +165,8 @@ const DetalleHistorialVeterinario = () => {
     );
   }
 
-  // Formatear fechas para mostrar
-  const fechaConsultaFormatted = historial.fecha_consulta ? new Date(historial.fecha_consulta).toLocaleString() : 'N/A';
-  const proximaCitaFormatted = historial.proxima_cita ? new Date(historial.proxima_cita).toLocaleDateString() : 'No programada';
+  const fechaConsultaFormatted = historial.fecha_consulta ? new Date(historial.fecha_consulta).toLocaleString('es-ES', { dateStyle: 'full', timeStyle: 'short' }) : 'N/A';
+  const proximaCitaFormatted = historial.proxima_cita ? new Date(historial.proxima_cita).toLocaleDateString('es-ES', { dateStyle: 'full' }) : 'No programada';
 
   return (
     <motion.div
@@ -180,8 +177,8 @@ const DetalleHistorialVeterinario = () => {
       exit="exit"
     >
       <div className={styles.header}>
-        <motion.button 
-          onClick={handleVolver} 
+        <motion.button
+          onClick={handleVolver}
           className={styles.volverBtn}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
@@ -198,7 +195,7 @@ const DetalleHistorialVeterinario = () => {
           >
             <FontAwesomeIcon icon={faEdit} /> Editar
           </motion.button>
-          {canDelete && ( // Mostrar botón de eliminar solo si es admin
+          {canDelete && (
             <motion.button
               onClick={handleDeleteClick}
               className={styles.deleteBtn}
@@ -211,9 +208,9 @@ const DetalleHistorialVeterinario = () => {
           )}
         </div>
       </div>
-      
+
       <div className={styles.detalleInfo}>
-        <motion.div 
+        <motion.div
           className={styles.infoCard}
           variants={cardVariants}
           whileHover="hover"
@@ -222,8 +219,8 @@ const DetalleHistorialVeterinario = () => {
           <p>{historial.mascota_nombre} ({historial.especie}, {historial.raza})</p>
           <p><strong>Propietario:</strong> {historial.propietario_nombre}</p>
         </motion.div>
-        
-        <motion.div 
+
+        <motion.div
           className={styles.infoCard}
           variants={cardVariants}
           whileHover="hover"
@@ -232,8 +229,8 @@ const DetalleHistorialVeterinario = () => {
           <p>{fechaConsultaFormatted}</p>
           <p><strong>Próxima cita:</strong> {proximaCitaFormatted}</p>
         </motion.div>
-        
-        <motion.div 
+
+        <motion.div
           className={styles.infoCard}
           variants={cardVariants}
           whileHover="hover"
@@ -242,8 +239,8 @@ const DetalleHistorialVeterinario = () => {
           <p>{historial.diagnostico}</p>
           <p><strong>Atendió:</strong> {historial.veterinario_nombre}</p>
         </motion.div>
-        
-        <motion.div 
+
+        <motion.div
           className={styles.notasCard}
           variants={cardVariants}
           whileHover="hover"
@@ -254,44 +251,8 @@ const DetalleHistorialVeterinario = () => {
           <p><strong>Peso Actual:</strong> {historial.peso_actual !== null ? `${historial.peso_actual} kg` : 'N/A'}</p>
           <p><strong>Temperatura:</strong> {historial.temperatura !== null ? `${historial.temperatura} °C` : 'N/A'}</p>
         </motion.div>
-        
-        {/* Documentos Adjuntos - Asumiendo que historiales no tienen un campo 'documentos' directo en la DB
-            Si tuvieras un campo 'documentos_adjuntos' en la tabla historial_medico que almacena URLs,
-            o una tabla separada para documentos, esta sección se adaptaría.
-            Por ahora, se mantiene el mock o se elimina si no hay soporte en la DB.
-        */}
-        {/* historial.documentos && historial.documentos.length > 0 && (
-          <motion.div 
-            className={styles.documentosSection}
-            variants={cardVariants}
-          >
-            <h3><FontAwesomeIcon icon={faFileMedicalAlt} /> Documentos Adjuntos</h3>
-            <div className={styles.documentosGrid}>
-              {historial.documentos.map((doc, index) => (
-                <motion.div
-                  key={index}
-                  className={styles.documentoCard}
-                  whileHover={{ y: -5, boxShadow: '0 5px 15px rgba(0, 172, 193, 0.2)' }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <FontAwesomeIcon 
-                    icon={getDocumentoIcon(doc.tipo)} 
-                    size="2x" 
-                    color="#00acc1" 
-                    style={{ marginBottom: '0.5rem' }} 
-                  />
-                  <p>{doc.nombre}</p>
-                  <button className={styles.documentoBtn}>
-                    <FontAwesomeIcon icon={faPrint} /> Imprimir
-                  </button>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-        )*/}
       </div>
 
-      {/* Modal de Confirmación de Eliminación */}
       <AnimatePresence>
         {showDeleteModal && (
           <motion.div
