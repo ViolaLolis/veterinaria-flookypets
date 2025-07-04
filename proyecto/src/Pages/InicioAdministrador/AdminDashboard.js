@@ -9,10 +9,8 @@ import './Styles/AdminDashboard.css';
 
 function AdminDashboard({ user, setUser, handleLogout }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
     const navigate = useNavigate();
     const location = useLocation();
-
     const sidebarRef = useRef(null);
 
     // Redirige si el usuario no es admin o no está logueado
@@ -25,7 +23,6 @@ function AdminDashboard({ user, setUser, handleLogout }) {
     // Maneja clics fuera del sidebar para cerrarlo
     useEffect(() => {
         function handleClickOutside(event) {
-            // Cierra el sidebar en móvil si se hace clic fuera, pero no en el botón de toggle
             if (window.innerWidth <= 768 && sidebarRef.current && !sidebarRef.current.contains(event.target) && isSidebarOpen) {
                 const menuToggleBtn = document.querySelector('.menu-toggle-btn');
                 if (menuToggleBtn && !menuToggleBtn.contains(event.target)) {
@@ -40,7 +37,9 @@ function AdminDashboard({ user, setUser, handleLogout }) {
     }, [sidebarRef, isSidebarOpen]);
 
     const handleLogoutClick = () => {
-        handleLogout();
+        if (typeof handleLogout === 'function') {
+            handleLogout(); // Llama a la función proporcionada por el padre
+        }
         navigate('/login', { replace: true });
     };
 
@@ -50,7 +49,6 @@ function AdminDashboard({ user, setUser, handleLogout }) {
 
     return (
         <div className="admin-dashboard-container">
-            {/* Sidebar (barra lateral izquierda) */}
             <aside className={`admin-sidebar ${isSidebarOpen ? 'open' : ''}`} ref={sidebarRef}>
                 <div className="admin-sidebar-header">
                     <div className="admin-logo-container">
@@ -140,7 +138,6 @@ function AdminDashboard({ user, setUser, handleLogout }) {
                 </div>
             </aside>
 
-            {/* Contenido Principal */}
             <main className="admin-main-content">
                 <header className="admin-header">
                     <button className="menu-toggle-btn" onClick={() => setIsSidebarOpen(!isSidebarOpen)} aria-label="Abrir menú">
@@ -149,9 +146,8 @@ function AdminDashboard({ user, setUser, handleLogout }) {
                     <h1>Flooky Pets</h1>
                 </header>
 
-                {/* Área donde se renderizan los componentes de las rutas anidadas */}
                 <div className="admin-content-area">
-                    <Outlet context={{ user, setUser, handleLogout }} />
+                    <Outlet context={{ user, setUser }} />
                 </div>
             </main>
         </div>
