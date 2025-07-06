@@ -5,6 +5,7 @@ export const Protegida = ({ user, setUser, allowedRoles, children }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const logoutTimer = useRef(null);
+  const lastProtectedPath = useRef(null);
   const INACTIVITY_TIMEOUT = 5 * 60 * 1000; // 5 minutos en milisegundos
 
   // Intenta recuperar el usuario del localStorage si no se pasa por props
@@ -27,34 +28,32 @@ export const Protegida = ({ user, setUser, allowedRoles, children }) => {
     }
   }
 
-  // Función de logout mejorada con manejo de razones
+  // Función de logout mejorada
   const logout = useCallback((reason = '') => {
     console.log(`Cerrando sesión. Razón: ${reason || 'desconocida'}`);
     
-    // Limpiar almacenamiento local
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    
-    // Establecer banderas de sesión inválida
     sessionStorage.setItem('sessionInvalidated', 'true');
-    sessionStorage.setItem('logoutReason', reason || 'inactividad');
     
-    // Limpiar temporizador
     if (logoutTimer.current) {
       clearTimeout(logoutTimer.current);
     }
     
-    // Actualizar estado del usuario
     if (setUser) {
       setUser(null);
     }
     
-    // Redirigir al login con información del estado
+    // Guardar la última ruta protegida visitada
+    if (lastProtectedPath.current) {
+      sessionStorage.setItem('lastProtectedPath', lastProtectedPath.current);
+    }
+    
     navigate('/login', { 
       replace: true,
       state: { 
-        from: location.pathname,
-        reason: reason || 'inactividad'
+        reason: reason || 'inactividad',
+        from: location.pathname
       }
     });
   }, [navigate, setUser, location.pathname]);
@@ -77,11 +76,9 @@ export const Protegida = ({ user, setUser, allowedRoles, children }) => {
     const events = ['mousemove', 'keydown', 'scroll', 'click', 'touchstart'];
     events.forEach(event => window.addEventListener(event, resetTimer));
     
-    // Iniciar el temporizador al montar
     resetTimer();
     
     return () => {
-      // Limpiar listeners y temporizador al desmontar
       events.forEach(event => window.removeEventListener(event, resetTimer));
       if (logoutTimer.current) {
         clearTimeout(logoutTimer.current);
@@ -89,62 +86,45 @@ export const Protegida = ({ user, setUser, allowedRoles, children }) => {
     };
   }, [resetTimer]);
 
-  // Efecto para manejar navegación del navegador (atrás/adelante)
+  // Efecto principal para manejar la navegación
   useEffect(() => {
     const publicPaths = ['/', '/login', '/register', '/olvide-contraseña'];
-    const isCurrentPathPublic = publicPaths.includes(location.pathname);
+    const isPublicPath = publicPaths.includes(location.pathname);
 
     if (currentUser?.token) {
-      if (isCurrentPathPublic) {
-        // Usuario autenticado en ruta pública - marcar sesión como inválida
-        console.log("Usuario autenticado en ruta pública. Marcando sesión como inválida.");
-        sessionStorage.setItem('sessionInvalidated', 'true');
-        sessionStorage.setItem('logoutReason', 'navegación inválida');
-      } else {
-        // Usuario autenticado en ruta protegida - limpiar banderas
-        console.log("Usuario autenticado en ruta protegida. Limpiando banderas de sesión inválida.");
+      // Si estamos en una ruta protegida, guardarla
+      if (!isPublicPath) {
+        lastProtectedPath.current = location.pathname;
         sessionStorage.removeItem('sessionInvalidated');
-        sessionStorage.removeItem('logoutReason');
+      }
+      // Si estamos en una ruta pública pero autenticados, es porque venimos de atrás
+      else if (sessionStorage.getItem('lastProtectedPath')) {
+        sessionStorage.setItem('sessionInvalidated', 'true');
       }
     }
 
-    // Limpiar banderas al cerrar la pestaña/ventana
-    const handleBeforeUnload = () => {
-      sessionStorage.removeItem('sessionInvalidated');
-      sessionStorage.removeItem('logoutReason');
-    };
-    window.addEventListener('beforeunload', handleBeforeUnload);
-
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-    };
-  }, [location.pathname, currentUser]);
-
-  // Efecto para verificar sesión inválida al montar/cambiar usuario
-  useEffect(() => {
-    if (currentUser?.token && sessionStorage.getItem('sessionInvalidated') === 'true') {
-      const reason = sessionStorage.getItem('logoutReason') || 'navegación inválida';
-      console.log(`Sesión marcada como inválida. Razón: ${reason}. Forzando logout.`);
-      logout(reason);
+    // Si hay sesión inválida y estamos intentando acceder a una ruta protegida
+    if (!isPublicPath && sessionStorage.getItem('sessionInvalidated') === 'true') {
+      console.log('Intento de acceso con sesión inválida. Forzando logout.');
+      logout('navegación inválida');
+      return;
     }
-  }, [currentUser, logout]);
 
-  // --- Lógica de redirección basada en autenticación y roles ---
+    // Limpiar al desmontar
+    return () => {
+      sessionStorage.removeItem('lastProtectedPath');
+    };
+  }, [location.pathname, currentUser, logout]);
 
-  // 1. Si no hay usuario o token, redirigir a login
+  // Redirecciones basadas en autenticación y roles
   if (!currentUser || !currentUser.token) {
-    console.log("No hay usuario autenticado. Redirigiendo a /login.");
     return <Navigate to="/login" replace state={{ from: location.pathname }} />;
   }
 
-  // 2. Si el usuario no tiene un rol permitido, cerrar sesión y redirigir
   if (allowedRoles && !allowedRoles.includes(currentUser.role)) {
-    console.log(`Rol ${currentUser.role} no permitido. Cerrando sesión.`);
     logout('acceso no autorizado');
     return null;
   }
 
-  // Si todas las comprobaciones pasan, el acceso está permitido
-  console.log(`Acceso permitido para el rol ${currentUser.role}.`);
   return children ? children : <Outlet />;
 };

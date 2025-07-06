@@ -89,8 +89,8 @@ const MainVeterinario = ({ user, setUser }) => {
         }
 
         try {
-            // ESTA ES LA RUTA CORRECTA: /api/notifications/veterinarian/:id_veterinario
-            const response = await fetch(`${API_BASE_URL}/api/notifications/veterinarian/${currentVetId}`, {
+            // CORREGIDO: Cambiada la ruta a /api/notifications/user/:id para que coincida con el backend
+            const response = await fetch(`${API_BASE_URL}/api/notifications/user/${currentVetId}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }

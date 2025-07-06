@@ -1,20 +1,36 @@
+// server.txt - Backend para Flooky Pets (Completo y Corregido)
+
+// =============================================================================
+// IMPORTS Y CONFIGURACIÓN INICIAL
+// =============================================================================
+
+// Módulos de Express y middleware
 const express = require("express");
 const cors = require("cors");
-const mysql = require("mysql2/promise");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
+const fileUpload = require('express-fileupload'); // Para manejar la subida de archivos
+
+// Módulos de base de datos y autenticación
+const mysql = require("mysql2/promise"); // Cliente MySQL con soporte para promesas
+const bcrypt = require("bcryptjs");     // Para hash de contraseñas
+const jwt = require("jsonwebtoken");    // Para tokens de autenticación JWT
+
+// Configuración de Cloudinary para gestión de imágenes
 const cloudinary = require('cloudinary').v2;
-const fileUpload = require('express-fileupload');
-require('dotenv').config(); // Asegúrate de que esta línea esté al principio para cargar .env
 
+// Carga de variables de entorno desde .env
+require('dotenv').config();
+
+// Inicialización de la aplicación Express
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5000; // Puerto del servidor, por defecto 5000
 
-// Configuración de Cloudinary
-const CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME || 'dnemd9wp0'; // Corregido a dnemd8wp0
+// Configuración de Cloudinary: se obtienen las credenciales de las variables de entorno
+// Si no están definidas, se usan valores por defecto (¡cambiar en producción!)
+const CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME || 'dnemd9wp0';
 const API_KEY = process.env.CLOUDINARY_API_KEY || '418626316652541';
-const API_SECRET = process.env.CLOUDINARY_API_SECRET || 'NKTrcFgCXc-SUX_HNu61chc-f4M'; // Asegúrate de que este sea el valor completo
+const API_SECRET = process.env.CLOUDINARY_API_SECRET || 'NKTrcFgCXc-SUX_HNu61chc-f4M';
 
+// Aplica la configuración a Cloudinary
 cloudinary.config({
     cloud_name: CLOUD_NAME,
     api_key: API_KEY,
@@ -22,53 +38,73 @@ cloudinary.config({
 });
 
 // --- DEBUGGING CLOUDINARY CONFIG ---
+// Muestra la configuración de Cloudinary en la consola para depuración
 console.log("Cloudinary Configured With:");
 console.log("  Cloud Name:", CLOUD_NAME);
 console.log("  API Key:", API_KEY);
 console.log("  API Secret (first 5 chars):", API_SECRET ? API_SECRET.substring(0, 5) + '...' : 'N/A');
 // ------------------------------------
 
+// =============================================================================
+// MIDDLEWARE GLOBAL
+// =============================================================================
 
-// Middleware
+// Middleware CORS: Permite solicitudes desde el frontend
+// Configurado para aceptar solicitudes desde el URL del frontend (o localhost:3000 por defecto)
+// y permite el envío de credenciales (cookies, encabezados de autorización).
 app.use(cors({
     origin: process.env.FRONTEND_URL || 'http://localhost:3000',
     credentials: true
 }));
 
-// IMPORTANTE: fileUpload DEBE ir antes de express.json() para que pueda procesar los archivos multipart/form-data
+// Middleware para manejo de subida de archivos (express-fileupload)
+// IMPORTANTE: DEBE ir antes de express.json() para que pueda procesar los archivos multipart/form-data
+// Limita el tamaño de los archivos a 5MB y aborta la operación si se excede.
 app.use(fileUpload({
-    limits: { fileSize: 5 * 1024 * 1024 }, // Límite de 5MB
-    abortOnLimit: true,
-    debug: true // Añadir para ver más logs de fileUpload
+    limits: { fileSize: 5 * 1024 * 1024 }, // Límite de 5MB (5 * 1024 * 1024 bytes)
+    abortOnLimit: true, // Abortar si se excede el límite
+    debug: true // Habilitar logs de depuración para fileUpload
 }));
 
+// Middleware para parsear cuerpos de solicitud en formato JSON
 // Ahora express.json() puede ir después de fileUpload
 app.use(express.json()); // Habilita el parsing de JSON en el cuerpo de las peticiones
 
+// =============================================================================
+// CONFIGURACIÓN DE LA BASE DE DATOS
+// =============================================================================
 
-// Configuración del pool de conexiones a la base de datos
+// Configuración del pool de conexiones a la base de datos MySQL
+// Utiliza variables de entorno para la configuración de la base de datos.
+// Se usan valores por defecto para desarrollo local.
 const pool = mysql.createPool({
-    host: process.env.DB_HOST || "127.0.0.1",
-    user: process.env.DB_USER || "root",
-    password: process.env.DB_PASSWORD || "", // Asegúrate de que tu contraseña de MySQL sea correcta aquí o en .env
-    database: process.env.DB_NAME || "veterinaria",
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0
+    host: process.env.DB_HOST || "127.0.0.1",       // Host de la base de datos
+    user: process.env.DB_USER || "root",           // Usuario de la base de datos
+    password: process.env.DB_PASSWORD || "12345678", // Contraseña de la base de datos
+    database: process.env.DB_NAME || "veterinaria", // Nombre de la base de datos
+    waitForConnections: true,                      // Esperar si no hay conexiones disponibles
+    connectionLimit: 10,                           // Número máximo de conexiones en el pool
+    queueLimit: 0                                  // Tamaño máximo de la cola para conexiones pendientes
 });
 
-// Verificar conexión a la base de datos al inicio
+// Verificar conexión a la base de datos al inicio del servidor
+// Intenta obtener una conexión del pool para verificar que la configuración es correcta.
 pool.getConnection()
     .then(conn => {
         console.log('Conectado a la base de datos MySQL');
-        conn.release();
+        conn.release(); // Libera la conexión de vuelta al pool
     })
     .catch(err => {
         console.error('Error de conexión a la base de datos:', err);
-        process.exit(1);
+        process.exit(1); // Termina el proceso si no se puede conectar a la BD
     });
 
+// =============================================================================
+// UTILIDADES Y FUNCIONES AUXILIARES
+// =============================================================================
+
 // Función para simular envío de correo electrónico
+// En un entorno de producción, esto sería reemplazado por un servicio de envío de correos real (ej. SendGrid, Nodemailer).
 const simulateSendEmail = (toEmail, subject, body) => {
     console.log(`--- SIMULANDO ENVÍO DE CORREO ---`);
     console.log(`Para: ${toEmail}`);
@@ -77,28 +113,39 @@ const simulateSendEmail = (toEmail, subject, body) => {
     console.log(`----------------------------------`);
 };
 
+// =============================================================================
+// MIDDLEWARE DE AUTENTICACIÓN Y AUTORIZACIÓN
+// =============================================================================
+
 // Middleware de autenticación JWT
+// Verifica la validez del token JWT enviado en el encabezado 'Authorization'.
+// Si el token es válido, decodifica la información del usuario y la adjunta a `req.user`.
 const authenticateToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
+    const token = authHeader && authHeader.split(' ')[1]; // Extrae el token (Bearer <token>)
 
     if (!token) {
         console.log("Auth: No se proporcionó token.");
         return res.status(401).json({ success: false, message: "Acceso denegado. No se proporcionó token." });
     }
 
+    // Verifica el token usando la clave secreta (desde .env o por defecto)
     jwt.verify(token, process.env.JWT_SECRET || 'your_secret_key', (err, user) => {
         if (err) {
             console.error("Auth: Error de verificación JWT:", err);
+            // Si el token es inválido o ha expirado, devuelve 403 Forbidden.
             return res.status(403).json({ success: false, message: "Token inválido o expirado." });
         }
+        // Adjunta la información del usuario (id, email, role) al objeto de solicitud.
+        // Convierte el ID a entero para asegurar consistencia.
         req.user = { ...user, id: parseInt(user.id) };
         console.log("Auth: Usuario autenticado desde el token:", req.user.id, req.user.role);
-        next();
+        next(); // Pasa al siguiente middleware o manejador de ruta
     });
 };
 
 // Middleware para verificar rol de administrador
+// Solo permite el acceso si el usuario autenticado tiene el rol 'admin'.
 const isAdmin = (req, res, next) => {
     if (req.user.role !== 'admin') {
         console.log(`Auth: Acceso denegado. Rol ${req.user.role} no es administrador.`);
@@ -108,6 +155,7 @@ const isAdmin = (req, res, next) => {
 };
 
 // Middleware para verificar rol de veterinario o administrador
+// Permite el acceso si el usuario autenticado tiene el rol 'veterinario' o 'admin'.
 const isVetOrAdmin = (req, res, next) => {
     if (req.user.role !== 'veterinario' && req.user.role !== 'admin') {
         console.log(`Auth: Acceso denegado. Rol ${req.user.role} no es veterinario ni administrador.`);
@@ -117,13 +165,17 @@ const isVetOrAdmin = (req, res, next) => {
 };
 
 // Middleware para verificar si es el propietario del recurso, un veterinario o un administrador
+// Este middleware es crucial para la seguridad de los datos, asegurando que los usuarios solo
+// puedan acceder o modificar sus propios recursos, a menos que sean administradores o veterinarios
+// gestionando recursos relacionados con sus funciones.
 const isOwnerOrAdmin = async (req, res, next) => {
     const userIdFromToken = req.user.id;
     const userRole = req.user.role;
 
     console.log(`[isOwnerOrAdmin START] User ID: ${userIdFromToken}, Role: ${userRole}, Original URL: ${req.originalUrl}, Path: ${req.path}, Method: ${req.method}`);
 
-    // Admin y Veterinario siempre tienen acceso a los recursos que gestionan (excepto eliminaciones de usuarios, que son solo para admin)
+    // Administradores y Veterinarios siempre tienen acceso a los recursos que gestionan
+    // (excepto eliminaciones de usuarios, que son solo para admin).
     if (userRole === 'admin' || userRole === 'veterinario') {
         console.log(`[isOwnerOrAdmin] ${userRole} access granted. Calling next().`);
         return next();
@@ -131,9 +183,10 @@ const isOwnerOrAdmin = async (req, res, next) => {
 
     // Si el rol es 'usuario', solo puede acceder a sus propios recursos.
     try {
+        // Lógica para rutas de mascotas
         if (req.originalUrl.startsWith('/mascotas')) {
             if (req.method === 'GET') {
-                if (req.params.id) { // Specific pet by ID: /mascotas/:id
+                if (req.params.id) { // Mascota específica por ID: /mascotas/:id
                     const idMascota = parseInt(req.params.id);
                     if (isNaN(idMascota)) {
                         console.log("[isOwnerOrAdmin - /mascotas/:id GET] ID de mascota inválido.");
@@ -149,8 +202,8 @@ const isOwnerOrAdmin = async (req, res, next) => {
                         console.log(`[isOwnerOrAdmin - /mascotas/:id GET] Denegado: Usuario ${userIdFromToken} intentó acceder a mascota de ${resourceOwnerId}.`);
                         return res.status(403).json({ success: false, message: "Acceso denegado. Solo puedes ver tus propias mascotas." });
                     }
-                    return next(); // Owner can see their own pet
-                } else { // List of pets: /mascotas or /mascotas?id_propietario=X
+                    return next(); // El propietario puede ver su propia mascota
+                } else { // Lista de mascotas: /mascotas o /mascotas?id_propietario=X
                     const requestedOwnerId = parseInt(req.query.id_propietario);
                     if (userRole === 'usuario' && (isNaN(requestedOwnerId) || requestedOwnerId !== userIdFromToken)) {
                         console.log(`[isOwnerOrAdmin - /mascotas GET List] Denegado: Usuario ${userIdFromToken} intentó acceder a mascotas de ${requestedOwnerId || 'propietario no especificado/diferente'}.`);
@@ -185,7 +238,7 @@ const isOwnerOrAdmin = async (req, res, next) => {
             }
         } else if (req.originalUrl.startsWith('/historial_medico')) {
             if (req.method === 'GET') {
-                if (req.params.id) { // Specific historial record by ID: /historial_medico/:id
+                if (req.params.id) { // Registro de historial específico por ID: /historial_medico/:id
                     const idHistorial = parseInt(req.params.id);
                     if (isNaN(idHistorial)) {
                         console.log("[isOwnerOrAdmin - /historial_medico/:id GET] ID de historial médico inválido.");
@@ -206,7 +259,7 @@ const isOwnerOrAdmin = async (req, res, next) => {
                         return res.status(403).json({ success: false, message: "Acceso denegado. Solo puedes ver los historiales de tus propias mascotas." });
                     }
                     return next();
-                } else if (req.query.id_mascota) { // List of historial records for a specific pet: /historial_medico?id_mascota=X
+                } else if (req.query.id_mascota) { // Lista de historiales para una mascota específica: /historial_medico?id_mascota=X
                     const idMascota = parseInt(req.query.id_mascota);
                     if (isNaN(idMascota)) {
                         console.log("[isOwnerOrAdmin - /historial_medico?id_mascota GET] ID de mascota inválido.");
@@ -222,7 +275,7 @@ const isOwnerOrAdmin = async (req, res, next) => {
                         console.log(`[isOwnerOrAdmin - /historial_medico?id_mascota GET] Denegado: Usuario ${userIdFromToken} intentó acceder a historiales de mascota de ${resourceOwnerId}.`);
                         return res.status(403).json({ success: false, message: "Acceso denegado. Solo puedes ver los historiales de tus propias mascotas." });
                     }
-                    return next(); // Owner can see their own pet's medical records
+                    return next(); // El propietario puede ver los historiales médicos de su propia mascota
                 }
             }
         } else if (req.originalUrl.startsWith('/citas')) {
@@ -241,23 +294,24 @@ const isOwnerOrAdmin = async (req, res, next) => {
                 const resourceClientId = rows[0].id_cliente;
                 const resourceVetId = rows[0].id_veterinario;
 
-                // If user is neither client nor assigned vet, deny access
+                // Si el usuario no es ni el cliente ni el veterinario asignado, denegar el acceso.
                 if (resourceClientId !== userIdFromToken && resourceVetId !== userIdFromToken) {
                     console.log(`[isOwnerOrAdmin - /citas/:id] Denegado: Usuario ${userIdFromToken} intentó acceder a cita de cliente ${resourceClientId} o veterinario ${resourceVetId}.`);
                     return res.status(403).json({ success: false, message: "Acceso denegado. No tienes permisos para ver/modificar esta cita." });
                 }
                 return next();
             }
-            // Para POST /citas (crear cita)
+            // Para POST /citas/agendar (crear cita)
             if (req.method === 'POST') {
-                // The actual parsing of the body will happen in the route handler due to the workaround.
-                // This middleware just ensures the user is authenticated.
+                // La lógica de validación del propietario para la creación de citas
+                // se maneja directamente en la ruta POST /citas/agendar.
+                // Este middleware solo asegura que el usuario esté autenticado.
                 return next();
             }
             // Para GET /citas (listar citas)
             if (req.method === 'GET') {
-                // La lógica de filtrado por id_cliente o id_veterinario ya está en la ruta /citas
-                // Este middleware solo asegura que un usuario solo pueda ver sus propias citas si no es admin/vet
+                // La lógica de filtrado por id_cliente o id_veterinario ya está en la ruta /citas.
+                // Este middleware solo asegura que un usuario solo pueda ver sus propias citas si no es admin/vet.
                 return next();
             }
 
@@ -267,26 +321,26 @@ const isOwnerOrAdmin = async (req, res, next) => {
                 console.log("[isOwnerOrAdmin - /usuarios] ID de usuario inválido.");
                 return res.status(400).json({ success: false, message: "ID de usuario no válido." });
             }
-            // Permite al admin editar cualquier usuario, y al usuario editarse a sí mismo
+            // Permite al admin editar cualquier usuario, y al usuario editarse a sí mismo.
             if (userRole === 'admin' || targetUserId === userIdFromToken) {
                 return next();
             }
             console.log(`[isOwnerOrAdmin - /usuarios] Denegado: Usuario ${userIdFromToken} intentó acceder al perfil de ${targetUserId}.`);
             return res.status(403).json({ success: false, message: "Acceso denegado. Solo puedes ver/modificar tu propio perfil." });
 
-        } else if (req.originalUrl.startsWith('/api/notifications')) { // Updated to match the new path
-            const notificationId = parseInt(req.params.notificationId); // Use notificationId from params
+        } else if (req.originalUrl.startsWith('/api/notifications')) { // Actualizado para coincidir con la nueva ruta
+            const notificationId = parseInt(req.params.notificationId); // Usa notificationId de los parámetros
             if (isNaN(notificationId)) {
-                // This case handles /api/notifications/veterinarian/:veterinarianId
-                // The check for /api/notifications/veterinarian/:veterinarianId is done within the route itself.
-                // For other notification paths that might have an ID in params, this will apply.
+                // Este caso maneja /api/notifications/veterinarian/:veterinarianId
+                // La verificación para /api/notifications/veterinarian/:veterinarianId se realiza dentro de la propia ruta.
+                // Para otras rutas de notificación que puedan tener un ID en los parámetros, esto se aplicará.
                 if (req.originalUrl.includes('/veterinarian/')) {
-                    return next(); // Let the specific veterinarian route handle its own ID validation
+                    return next(); // Deja que la ruta específica del veterinario maneje su propia validación de ID
                 }
                 console.log("[isOwnerOrAdmin - /api/notifications] ID de notificación inválido.");
                 return res.status(400).json({ success: false, message: "ID de notificación no válido." });
             }
-            const [rows] = await pool.query("SELECT id_usuario FROM notificaciones WHERE id_notificacion = ?", [notificationId]); // Changed table name here
+            const [rows] = await pool.query("SELECT id_usuario FROM notificaciones WHERE id_notificacion = ?", [notificationId]); // Cambiado el nombre de la tabla aquí
             if (rows.length === 0) {
                 console.log(`[isOwnerOrAdmin - /api/notifications] Notificación con ID ${notificationId} no encontrada.`);
                 return res.status(404).json({ success: false, message: "Notificación no encontrada." });
@@ -310,41 +364,47 @@ const isOwnerOrAdmin = async (req, res, next) => {
 };
 
 
-// Ruta de prueba
+// =============================================================================
+// RUTAS DE PRUEBA
+// =============================================================================
+
+// Ruta de prueba simple para verificar que el servidor está funcionando
 app.get("/", (req, res) => {
     res.send("Servidor de veterinaria funcionando correctamente");
 });
 
-// =============================================
+// =============================================================================
 // RUTAS DE AUTENTICACIÓN
-// =============================================
+// =============================================================================
 
-// Aplicar express.json() solo a las rutas que lo necesitan
-app.post("/login", async (req, res) => { // express.json() ya es global
+// Ruta para el inicio de sesión de usuarios
+app.post("/login", async (req, res) => {
     const { email, password } = req.body;
-    console.log("Received login request for email:", email); // LOG DE DEPURACIÓN
+    console.log("Received login request for email:", email); // Log de depuración
 
     try {
+        // Busca al usuario por email en la base de datos
         const [users] = await pool.query("SELECT * FROM usuarios WHERE email = ?", [email]);
 
         if (users.length === 0) {
-            console.log("Login failed: User not found for email:", email); // LOG DE DEPURACIÓN
+            console.log("Login failed: User not found for email:", email); // Log de depuración
             return res.status(401).json({ message: "Credenciales incorrectas" });
         }
 
         const user = users[0];
+        // Compara la contraseña proporcionada con la contraseña hasheada en la BD
         const isMatch = await bcrypt.compare(password, user.password);
 
         if (!isMatch) {
-            console.log("Login failed: Password mismatch for email:", email); // LOG DE DEPURACIÓN
+            console.log("Login failed: Password mismatch for email:", email); // Log de depuración
             return res.status(401).json({ message: "Credenciales incorrectas" });
         }
 
-        // Crear token JWT con el ID, email y rol del usuario
+        // Si las credenciales son correctas, crea un token JWT
         const token = jwt.sign(
             { id: user.id, email: user.email, role: user.role },
-            process.env.JWT_SECRET || 'your_secret_key',
-            { expiresIn: '24h' }
+            process.env.JWT_SECRET || 'your_secret_key', // Clave secreta para firmar el token
+            { expiresIn: '24h' } // El token expira en 24 horas
         );
 
         // Envía los datos del usuario y el token como respuesta
@@ -357,7 +417,7 @@ app.post("/login", async (req, res) => { // express.json() ya es global
             imagen_url: user.imagen_url,
             token
         });
-        console.log("Login successful for user:", user.email); // LOG DE DEPURACIÓN
+        console.log("Login successful for user:", user.email); // Log de depuración
 
     } catch (error) {
         console.error("Error en login:", error);
@@ -365,8 +425,8 @@ app.post("/login", async (req, res) => { // express.json() ya es global
     }
 });
 
-// Ruta de registro para usuarios normales (rol 'usuario')
-app.post("/register", async (req, res) => { // express.json() ya es global
+// Ruta de registro para usuarios normales (rol 'usuario' por defecto)
+app.post("/register", async (req, res) => {
     const { nombre, apellido, email, password, telefono, direccion, tipo_documento, numero_documento, fecha_nacimiento } = req.body;
 
     // Validación básica de campos requeridos
@@ -374,16 +434,16 @@ app.post("/register", async (req, res) => { // express.json() ya es global
         return res.status(400).json({ message: "Datos incompletos" });
     }
 
-    console.log("[REGISTER] Received data:", req.body); // Debugging log
+    console.log("[REGISTER] Received data:", req.body); // Log de depuración
 
     try {
-        // Verificar si el usuario ya existe por email
+        // Verificar si el usuario ya existe por email para evitar duplicados
         const [existingUsers] = await pool.query("SELECT id FROM usuarios WHERE email = ?", [email]);
         if (existingUsers.length > 0) {
-            return res.status(409).json({ message: "El email ya está registrado" }); // Mensaje específico
+            return res.status(409).json({ message: "El email ya está registrado" }); // Mensaje específico para conflicto
         }
 
-        // Hash de la contraseña antes de guardarla
+        // Hash de la contraseña antes de guardarla en la base de datos
         const hashedPassword = await bcrypt.hash(password, 10);
 
         // Insertar nuevo usuario con rol 'usuario' por defecto
@@ -394,6 +454,7 @@ app.post("/register", async (req, res) => { // express.json() ya es global
             [email, hashedPassword, nombre, apellido, telefono, direccion, tipo_documento, numero_documento, fecha_nacimiento]
         );
 
+        // Responde con los datos del nuevo usuario (sin la contraseña)
         res.status(201).json({
             id: result.insertId,
             email,
@@ -401,7 +462,7 @@ app.post("/register", async (req, res) => { // express.json() ya es global
             apellido,
             role: 'usuario'
         });
-        console.log("[REGISTER] User registered successfully:", email); // Debugging log
+        console.log("[REGISTER] User registered successfully:", email); // Log de depuración
 
     } catch (error) {
         console.error("Error en registro:", error);
@@ -409,15 +470,16 @@ app.post("/register", async (req, res) => { // express.json() ya es global
     }
 });
 
-// Ruta para recuperación de contraseña (generación de token)
-app.post("/forgot-password", async (req, res) => { // express.json() ya es global
+// Ruta para recuperación de contraseña (generación de token de un solo uso)
+app.post("/forgot-password", async (req, res) => {
     const { email } = req.body;
-    console.log("Received forgot-password request for email:", email); // LOG DE DEPURACIÓN
+    console.log("Received forgot-password request for email:", email); // Log de depuración
 
     try {
+        // Busca al usuario por email
         const [users] = await pool.query("SELECT * FROM usuarios WHERE email = ?", [email]);
         if (users.length === 0) {
-            console.log("Forgot password failed: User not found for email:", email); // LOG DE DEPURACIÓN
+            console.log("Forgot password failed: User not found for email:", email); // Log de depuración
             return res.status(404).json({
                 success: false,
                 message: "Usuario no encontrado"
@@ -426,8 +488,9 @@ app.post("/forgot-password", async (req, res) => { // express.json() ya es globa
 
         // Generar un token de recuperación numérico de 6 dígitos
         const resetToken = Math.floor(100000 + Math.random() * 900000).toString();
-        const resetTokenExpires = new Date(Date.now() + 3600000); // Token expira en 1 hora
+        const resetTokenExpires = new Date(Date.now() + 3600000); // Token expira en 1 hora (3600000 ms)
 
+        // Almacena el token y su fecha de expiración en la base de datos
         await pool.query(
             "UPDATE usuarios SET reset_token = ?, reset_token_expires = ? WHERE email = ?",
             [resetToken, resetTokenExpires, email]
@@ -436,9 +499,9 @@ app.post("/forgot-password", async (req, res) => { // express.json() ya es globa
         res.json({
             success: true,
             message: "Token de recuperación generado",
-            resetToken: resetToken
+            resetToken: resetToken // En un entorno real, este token se enviaría por correo electrónico.
         });
-        console.log("Forgot password successful for email:", email, "Token:", resetToken); // LOG DE DEPURACIÓN
+        console.log("Forgot password successful for email:", email, "Token:", resetToken); // Log de depuración
 
     } catch (error) {
         console.error("Error en forgot-password:", error);
@@ -450,8 +513,8 @@ app.post("/forgot-password", async (req, res) => { // express.json() ya es globa
     }
 });
 
-// Ruta para verificar el código de recuperación
-app.post("/verify-reset-code", async (req, res) => { // express.json() ya es global
+// Ruta para verificar el código de recuperación de contraseña
+app.post("/verify-reset-code", async (req, res) => {
     const { email, token } = req.body;
 
     if (!email || !token) {
@@ -462,6 +525,7 @@ app.post("/verify-reset-code", async (req, res) => { // express.json() ya es glo
     }
 
     try {
+        // Busca al usuario por email
         const [users] = await pool.query(
             "SELECT * FROM usuarios WHERE email = ?",
             [email]
@@ -476,7 +540,7 @@ app.post("/verify-reset-code", async (req, res) => { // express.json() ya es glo
 
         const user = users[0];
 
-        // Verifica que el token exista y coincida
+        // Verifica que el token proporcionado coincida con el almacenado
         if (!user.reset_token || user.reset_token !== token) {
             return res.status(400).json({
                 success: false,
@@ -507,8 +571,8 @@ app.post("/verify-reset-code", async (req, res) => { // express.json() ya es glo
     }
 });
 
-// Ruta para resetear contraseña
-app.post("/reset-password", async (req, res) => { // express.json() ya es global
+// Ruta para resetear la contraseña del usuario
+app.post("/reset-password", async (req, res) => {
     const { email, token, newPassword } = req.body;
 
     if (!email || !token || !newPassword) {
@@ -519,7 +583,7 @@ app.post("/reset-password", async (req, res) => { // express.json() ya es global
     }
 
     try {
-        // Busca al usuario con el email y token de recuperación válido y no expirado
+        // Busca al usuario con el email y un token de recuperación válido y no expirado
         const [users] = await pool.query(
             "SELECT * FROM usuarios WHERE email = ? AND reset_token = ? AND reset_token_expires > NOW()",
             [email, token]
@@ -532,6 +596,7 @@ app.post("/reset-password", async (req, res) => { // express.json() ya es global
             });
         }
 
+        // Hashea la nueva contraseña
         const hashedPassword = await bcrypt.hash(newPassword, 10);
 
         // Actualiza la contraseña y anula los campos de recuperación de token
@@ -555,14 +620,16 @@ app.post("/reset-password", async (req, res) => { // express.json() ya es global
     }
 });
 
-// =============================================
-// RUTAS DE CLOUDINARY
-// =============================================
+// =============================================================================
+// RUTAS DE CLOUDINARY (Subida de Imágenes)
+// =============================================================================
 
-// Esta ruta no necesita express.json() porque fileUpload ya maneja el body
+// Ruta para subir imágenes a Cloudinary
+// Esta ruta no necesita express.json() porque fileUpload ya maneja el cuerpo de la solicitud (multipart/form-data).
 app.post('/upload-image', authenticateToken, async (req, res) => {
     try {
         console.log("Received upload request. Files:", req.files);
+        // Verifica si se ha subido un archivo y si el campo 'image' existe.
         if (!req.files || Object.keys(req.files).length === 0 || !req.files.image) {
             return res.status(400).json({ success: false, message: 'No se ha subido ningún archivo o el campo "image" está vacío.' });
         }
@@ -572,28 +639,30 @@ app.post('/upload-image', authenticateToken, async (req, res) => {
 
         const uploadOptions = {};
         if (file.tempFilePath) {
-            // Si express-fileupload usa archivos temporales (useTempFiles: true)
+            // Si express-fileupload usa archivos temporales (useTempFiles: true en la configuración)
             uploadOptions.file = file.tempFilePath;
         } else if (file.data) {
-            // Si express-fileupload maneja el archivo en memoria (useTempFiles: false o por defecto para pequeños)
+            // Si express-fileupload maneja el archivo en memoria (useTempFiles: false o por defecto para archivos pequeños)
             // Cloudinary puede subir desde un Buffer directamente si se le pasa como data URI
             uploadOptions.file = `data:${file.mimetype};base64,${file.data.toString('base64')}`;
         } else {
             return res.status(500).json({ success: false, message: 'No se pudo acceder al archivo subido (ni tempFilePath ni data).' });
         }
 
+        // Sube el archivo a Cloudinary
         const result = await cloudinary.uploader.upload(uploadOptions.file, {
-            folder: 'flookypets_profiles', // Asegúrate de que esta carpeta exista o se cree automáticamente
+            folder: 'flookypets_profiles', // Carpeta en Cloudinary donde se guardarán las imágenes
         });
 
-        // Si se usaron archivos temporales, eliminarlos después de subir
+        // Si se usaron archivos temporales, eliminarlos después de subir para liberar espacio.
         if (file.tempFilePath) {
-            const fs = require('fs'); // Importar 'fs' solo si es necesario
+            const fs = require('fs'); // Importar 'fs' solo si es necesario (para operaciones de sistema de archivos)
             fs.unlink(file.tempFilePath, (err) => {
                 if (err) console.error("Error al eliminar archivo temporal:", err);
             });
         }
 
+        // Responde con el URL seguro de la imagen subida
         res.json({ success: true, message: 'Imagen subida correctamente.', imageUrl: result.secure_url });
 
     } catch (error) {
@@ -608,43 +677,51 @@ app.post('/upload-image', authenticateToken, async (req, res) => {
 });
 
 
-// =============================================
+// =============================================================================
 // RUTAS DEL PANEL DE ADMINISTRADOR
-// =============================================
+// =============================================================================
 
 /**
  * OBTENER ESTADÍSTICAS PARA EL DASHBOARD DE ADMINISTRADOR
  * GET /admin/stats
+ * Requiere autenticación y rol de administrador.
  */
 app.get("/admin/stats", authenticateToken, isAdmin, async (req, res) => {
     try {
+        // Obtener el conteo total de usuarios (rol 'usuario')
         const [[{ totalUsers }]] = await pool.query(
             "SELECT COUNT(*) as totalUsers FROM usuarios WHERE role = 'usuario'"
         );
 
+        // Obtener el conteo total de veterinarios
         const [[{ totalVets }]] = await pool.query(
             "SELECT COUNT(*) as totalVets FROM usuarios WHERE role = 'veterinario'"
         );
 
+        // Obtener el conteo total de administradores
         const [[{ totalAdmins }]] = await pool.query(
             "SELECT COUNT(*) as totalAdmins FROM usuarios WHERE role = 'admin'"
         );
 
+        // Obtener el conteo total de servicios
         const [[{ totalServices }]] = await pool.query(
             "SELECT COUNT(*) as totalServices FROM servicios"
         );
 
+        // Obtener el conteo de citas para el mes actual
         const [[{ totalAppointments }]] = await pool.query(
-            "SELECT COUNT(*) as totalAppointments FROM citas WHERE MONTH(fecha) = MONTH(CURRENT_DATE())"
+            "SELECT COUNT(*) as totalAppointments FROM citas WHERE MONTH(fecha) = MONTH(CURRENT_DATE()) AND YEAR(fecha) = YEAR(CURRENT_DATE())"
         );
 
+        // Obtener el conteo de citas para el mes anterior (para calcular el crecimiento)
         const [[{ lastMonthAppointments }]] = await pool.query(
-            "SELECT COUNT(*) as lastMonthAppointments FROM citas WHERE MONTH(fecha) = MONTH(CURRENT_DATE()) - 1"
+            "SELECT COUNT(*) as lastMonthAppointments FROM citas WHERE MONTH(fecha) = MONTH(CURRENT_DATE() - INTERVAL 1 MONTH) AND YEAR(fecha) = YEAR(CURRENT_DATE() - INTERVAL 1 MONTH)"
         );
 
+        // Calcular el crecimiento mensual de citas
         const growth = lastMonthAppointments > 0
             ? ((totalAppointments - lastMonthAppointments) / lastMonthAppointments * 100).toFixed(2)
-            : 100;
+            : (totalAppointments > 0 ? 100 : 0); // Si no había citas el mes pasado pero hay ahora, el crecimiento es 100% (o 0 si no hay ninguna)
 
         res.json({
             success: true,
@@ -654,7 +731,7 @@ app.get("/admin/stats", authenticateToken, isAdmin, async (req, res) => {
                 totalAdmins,
                 totalServices,
                 totalAppointments,
-                monthlyGrowth: parseFloat(growth)
+                monthlyGrowth: parseFloat(growth) // Asegura que se envíe como número
             }
         });
     } catch (error) {
@@ -666,9 +743,11 @@ app.get("/admin/stats", authenticateToken, isAdmin, async (req, res) => {
 /**
  * NUEVO ENDPOINT: OBTENER CITAS POR MES PARA GRÁFICOS
  * GET /api/stats/citas-por-mes
+ * Requiere autenticación y rol de administrador.
  */
 app.get("/api/stats/citas-por-mes", authenticateToken, isAdmin, async (req, res) => {
     try {
+        // Consulta para obtener el conteo de citas por mes, limitado a los últimos 12 meses.
         const [citasPorMes] = await pool.query(
             `SELECT DATE_FORMAT(fecha, '%Y-%m') as mes, COUNT(*) as cantidad
              FROM citas
@@ -687,9 +766,11 @@ app.get("/api/stats/citas-por-mes", authenticateToken, isAdmin, async (req, res)
 /**
  * NUEVO ENDPOINT: OBTENER SERVICIOS POPULARES PARA GRÁFICOS
  * GET /api/stats/servicios-populares
+ * Requiere autenticación y rol de administrador.
  */
 app.get("/api/stats/servicios-populares", authenticateToken, isAdmin, async (req, res) => {
     try {
+        // Consulta para obtener los 5 servicios más populares basados en el número de citas.
         const [serviciosPopulares] = await pool.query(
             `SELECT s.nombre as servicio, COUNT(c.id_cita) as cantidad
              FROM servicios s
@@ -708,12 +789,13 @@ app.get("/api/stats/servicios-populares", authenticateToken, isAdmin, async (req
 /**
  * NUEVO ENDPOINT: OBTENER CONFIGURACIONES DEL ADMINISTRADOR
  * GET /admin/settings
- * (Implementación básica para evitar el error 404)
+ * (Implementación básica para evitar el error 404 en el frontend)
+ * Requiere autenticación y rol de administrador.
  */
 app.get("/admin/settings", authenticateToken, isAdmin, async (req, res) => {
     try {
         // En una aplicación real, aquí cargarías configuraciones desde la base de datos
-        // o un archivo de configuración. Por ahora, devolvemos un objeto vacío.
+        // o un archivo de configuración. Por ahora, devolvemos un objeto vacío o con datos de ejemplo.
         res.json({
             success: true,
             data: {
@@ -736,10 +818,12 @@ app.get("/admin/settings", authenticateToken, isAdmin, async (req, res) => {
 
 
 // ### **GESTIÓN DE ADMINISTRADORES**
+// Rutas para que los administradores gestionen otros administradores (crear, leer, actualizar, eliminar).
 
 // Obtener todos los administradores
 app.get("/api/admin/administrators", authenticateToken, isAdmin, async (req, res) => {
     try {
+        // Selecciona todos los usuarios con rol 'admin', excluyendo la contraseña
         const [admins] = await pool.query(
             `SELECT id, nombre, apellido, email, telefono, direccion, active, imagen_url,
             DATE_FORMAT(created_at, '%Y-%m-%d %H:%i') as created_at
@@ -760,10 +844,10 @@ app.get("/api/admin/administrators", authenticateToken, isAdmin, async (req, res
 });
 
 // Crear nuevo administrador
-app.post("/api/admin/administrators", authenticateToken, isAdmin, async (req, res) => { // express.json() ya es global
-    const { nombre, apellido, email, telefono, direccion, password } = req.body; // Eliminado imagen_url
+app.post("/api/admin/administrators", authenticateToken, isAdmin, async (req, res) => {
+    const { nombre, apellido, email, telefono, direccion, password } = req.body;
 
-    // Validación mejorada
+    // Validación mejorada de campos requeridos y longitud de contraseña
     if (!nombre || !email || !password || !telefono) {
         return res.status(400).json({
             success: false,
@@ -777,10 +861,10 @@ app.post("/api/admin/administrators", authenticateToken, isAdmin, async (req, re
             message: "La contraseña debe tener al menos 6 caracteres"
         });
     }
-    console.log("[ADMIN_REGISTER_ADMIN] Received data:", req.body); // Debugging log
+    console.log("[ADMIN_REGISTER_ADMIN] Received data:", req.body); // Log de depuración
 
     try {
-        // Verificar si el email ya existe
+        // Verificar si el email ya existe para evitar duplicados
         const [existing] = await pool.query(
             "SELECT id FROM usuarios WHERE email = ?",
             [email]
@@ -793,14 +877,14 @@ app.post("/api/admin/administrators", authenticateToken, isAdmin, async (req, re
             });
         }
 
-        // Hash de la contraseña
+        // Hashea la contraseña antes de insertarla
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Insertar nuevo administrador
+        // Insertar nuevo administrador con rol 'admin'
         const [result] = await pool.query(
             `INSERT INTO usuarios
             (nombre, apellido, email, telefono, direccion, password, role)
-            VALUES (UPPER(TRIM(?)), UPPER(TRIM(?)), UPPER(TRIM(?)), TRIM(?), UPPER(TRIM(?)), ?, 'admin')`, // Aplicar UPPER y TRIM
+            VALUES (UPPER(TRIM(?)), UPPER(TRIM(?)), UPPER(TRIM(?)), TRIM(?), UPPER(TRIM(?)), ?, 'admin')`, // Aplica UPPER y TRIM para estandarizar datos
             [nombre, apellido, email, telefono, direccion, hashedPassword]
         );
 
@@ -817,7 +901,7 @@ app.post("/api/admin/administrators", authenticateToken, isAdmin, async (req, re
             message: "Administrador creado correctamente",
             data: newAdmin[0]
         });
-        console.log("[ADMIN_REGISTER_ADMIN] Admin registered successfully:", email); // Debugging log
+        console.log("[ADMIN_REGISTER_ADMIN] Admin registered successfully:", email); // Log de depuración
 
     } catch (error) {
         console.error("Error al crear administrador:", error);
@@ -829,10 +913,10 @@ app.post("/api/admin/administrators", authenticateToken, isAdmin, async (req, re
     }
 });
 
-// Actualizar administrador
-app.put("/api/admin/administrators/:id", authenticateToken, isAdmin, async (req, res) => { // express.json() ya es global
+// Actualizar administrador existente
+app.put("/api/admin/administrators/:id", authenticateToken, isAdmin, async (req, res) => {
     const { id } = req.params;
-    const { nombre, apellido, telefono, direccion } = req.body; // Eliminado imagen_url
+    const { nombre, apellido, telefono, direccion } = req.body;
 
     // Validación básica
     if (!nombre || !telefono) {
@@ -841,10 +925,10 @@ app.put("/api/admin/administrators/:id", authenticateToken, isAdmin, async (req,
             message: "Nombre y teléfono son requeridos"
         });
     }
-    console.log("[ADMIN_UPDATE_ADMIN] Received data:", req.body, "for ID:", id); // Debugging log
+    console.log("[ADMIN_UPDATE_ADMIN] Received data:", req.body, "for ID:", id); // Log de depuración
 
     try {
-        // Un administrador no debería poder modificarse a sí mismo desde este panel (usa su perfil)
+        // Un administrador no debería poder modificarse a sí mismo desde este panel (debe usar su perfil)
         if (parseInt(id) === req.user.id) {
             return res.status(403).json({
                 success: false,
@@ -852,7 +936,7 @@ app.put("/api/admin/administrators/:id", authenticateToken, isAdmin, async (req,
             });
         }
 
-        // Verificar que el administrador existe y tiene el rol correcto
+        // Verificar que el administrador a actualizar existe y tiene el rol correcto
         const [existing] = await pool.query(
             "SELECT id FROM usuarios WHERE id = ? AND role = 'admin'",
             [id]
@@ -865,13 +949,13 @@ app.put("/api/admin/administrators/:id", authenticateToken, isAdmin, async (req,
             });
         }
 
-        // Construir la consulta de actualización dinámicamente
+        // Construir la consulta de actualización dinámicamente para solo actualizar campos presentes
         const fields = [];
         const values = [];
-        if (nombre !== undefined) { fields.push('nombre = UPPER(TRIM(?))'); values.push(nombre); } // Aplicar UPPER y TRIM
-        if (apellido !== undefined) { fields.push('apellido = UPPER(TRIM(?))'); values.push(apellido); } // Aplicar UPPER y TRIM
-        if (telefono !== undefined) { fields.push('telefono = TRIM(?)'); values.push(telefono); } // Aplicar TRIM
-        if (direccion !== undefined) { fields.push('direccion = UPPER(TRIM(?))'); values.push(direccion); } // Aplicar UPPER y TRIM
+        if (nombre !== undefined) { fields.push('nombre = UPPER(TRIM(?))'); values.push(nombre); } // Aplica UPPER y TRIM
+        if (apellido !== undefined) { fields.push('apellido = UPPER(TRIM(?))'); values.push(apellido); } // Aplica UPPER y TRIM
+        if (telefono !== undefined) { fields.push('telefono = TRIM(?)'); values.push(telefono); } // Aplica TRIM
+        if (direccion !== undefined) { fields.push('direccion = UPPER(TRIM(?))'); values.push(direccion); } // Aplica UPPER y TRIM
 
 
         if (fields.length === 0) {
@@ -896,7 +980,7 @@ app.put("/api/admin/administrators/:id", authenticateToken, isAdmin, async (req,
             message: "Administrador actualizado correctamente",
             data: updatedAdmin[0]
         });
-        console.log("[ADMIN_UPDATE_ADMIN] Admin updated successfully:", id); // Debugging log
+        console.log("[ADMIN_UPDATE_ADMIN] Admin updated successfully:", id); // Log de depuración
 
     } catch (error) {
         console.error("Error al actualizar administrador:", error);
@@ -911,7 +995,7 @@ app.put("/api/admin/administrators/:id", authenticateToken, isAdmin, async (req,
 // Eliminar administrador
 app.delete("/api/admin/administrators/:id", authenticateToken, isAdmin, async (req, res) => {
     const { id } = req.params;
-    console.log("[ADMIN_DELETE_ADMIN] Deleting admin with ID:", id); // Debugging log
+    console.log("[ADMIN_DELETE_ADMIN] Deleting admin with ID:", id); // Log de depuración
 
     try {
         // Evitar que un administrador se elimine a sí mismo
@@ -922,7 +1006,7 @@ app.delete("/api/admin/administrators/:id", authenticateToken, isAdmin, async (r
             });
         }
 
-        // Verificar si el administrador tiene citas asignadas
+        // Verificar si el administrador tiene citas asignadas (clave foránea)
         const [appointments] = await pool.query(
             "SELECT id_cita FROM citas WHERE id_veterinario = ?",
             [id]
@@ -935,7 +1019,7 @@ app.delete("/api/admin/administrators/:id", authenticateToken, isAdmin, async (r
             });
         }
 
-        // Verificar si el administrador tiene historiales médicos asociados
+        // Verificar si el administrador tiene historiales médicos asociados (clave foránea)
         const [records] = await pool.query(
             "SELECT id_historial FROM historial_medico WHERE veterinario = ?",
             [id]
@@ -948,7 +1032,7 @@ app.delete("/api/admin/administrators/:id", authenticateToken, isAdmin, async (r
             });
         }
 
-        // Eliminar el administrador
+        // Eliminar el administrador de la base de datos
         const [result] = await pool.query(
             "DELETE FROM usuarios WHERE id = ? AND role = 'admin'",
             [id]
@@ -965,7 +1049,7 @@ app.delete("/api/admin/administrators/:id", authenticateToken, isAdmin, async (r
             success: true,
             message: "Administrador eliminado correctamente"
         });
-        console.log("[ADMIN_DELETE_ADMIN] Admin deleted successfully:", id); // Debugging log
+        console.log("[ADMIN_DELETE_ADMIN] Admin deleted successfully:", id); // Log de depuración
 
     } catch (error) {
         console.error("Error al eliminar administrador:", error);
@@ -988,13 +1072,16 @@ app.delete("/api/admin/administrators/:id", authenticateToken, isAdmin, async (r
 
 
 // ### **GESTIÓN DE VETERINARIOS**
+// Rutas para que los administradores gestionen a los veterinarios.
+// La ruta GET /usuarios/veterinarios también es accesible para usuarios normales para seleccionar un veterinario al agendar una cita.
 
 // Obtener todos los veterinarios
 // MODIFICADO: Se eliminó el middleware isVetOrAdmin para permitir que usuarios regulares accedan a esta lista para agendar citas.
 app.get("/usuarios/veterinarios", authenticateToken, async (req, res) => {
     try {
+        // Selecciona todos los usuarios con rol 'veterinario', excluyendo la contraseña
         const [vets] = await pool.query(
-            "SELECT id, nombre, apellido, email, telefono, direccion, active, imagen_url, created_at FROM usuarios WHERE role = 'veterinario'"
+            "SELECT id, nombre, apellido, email, telefono, direccion, active, imagen_url, created_at, experiencia, universidad, horario FROM usuarios WHERE role = 'veterinario'"
         );
         res.json({ success: true, data: vets });
     } catch (error) {
@@ -1004,8 +1091,8 @@ app.get("/usuarios/veterinarios", authenticateToken, async (req, res) => {
 });
 
 // Crear nuevo veterinario
-app.post("/usuarios/veterinarios", authenticateToken, isAdmin, async (req, res) => { // express.json() ya es global
-    const { nombre, apellido, email, telefono, direccion, password, experiencia, universidad, horario } = req.body; // Eliminado imagen_url
+app.post("/usuarios/veterinarios", authenticateToken, isAdmin, async (req, res) => {
+    const { nombre, apellido, email, telefono, direccion, password, experiencia, universidad, horario } = req.body;
 
     // Validación de campos requeridos
     if (!nombre || !email || !password || !telefono || !experiencia || !universidad || !horario) {
@@ -1015,7 +1102,7 @@ app.post("/usuarios/veterinarios", authenticateToken, isAdmin, async (req, res) 
     if (password.length < 6) {
         return res.status(400).json({ success: false, message: "La contraseña debe tener al menos 6 caracteres" });
     }
-    console.log("[ADMIN_REGISTER_VET] Received data:", req.body); // Debugging log
+    console.log("[ADMIN_REGISTER_VET] Received data:", req.body); // Log de depuración
 
     try {
         // Verificar si el email ya existe
@@ -1028,25 +1115,25 @@ app.post("/usuarios/veterinarios", authenticateToken, isAdmin, async (req, res) 
             return res.status(400).json({ success: false, message: "El email ya está registrado" });
         }
 
-        // Hash de la contraseña
+        // Hashea la contraseña
         const hashedPassword = await bcrypt.hash(password, 10);
 
         // Insertar nuevo veterinario con rol 'veterinario'
         const [result] = await pool.query(
             `INSERT INTO usuarios
             (nombre, apellido, email, telefono, direccion, password, role, experiencia, universidad, horario)
-            VALUES (UPPER(TRIM(?)), UPPER(TRIM(?)), UPPER(TRIM(?)), TRIM(?), UPPER(TRIM(?)), ?, 'veterinario', ?, ?, ?)`, // Aplicar UPPER y TRIM
+            VALUES (UPPER(TRIM(?)), UPPER(TRIM(?)), UPPER(TRIM(?)), TRIM(?), UPPER(TRIM(?)), ?, 'veterinario', ?, ?, ?)`, // Aplica UPPER y TRIM
             [nombre, apellido, email, telefono, direccion, hashedPassword, experiencia, universidad, horario]
         );
 
         // Obtener el veterinario recién creado para devolverlo en la respuesta
         const [newVet] = await pool.query(
-            "SELECT id, nombre, apellido, email, telefono, direccion, active, imagen_url, created_at FROM usuarios WHERE id = ?",
+            "SELECT id, nombre, apellido, email, telefono, direccion, active, imagen_url, created_at, experiencia, universidad, horario FROM usuarios WHERE id = ?",
             [result.insertId]
         );
 
         res.status(201).json({ success: true, message: "Veterinario creado correctamente", data: newVet[0] });
-        console.log("[ADMIN_REGISTER_VET] Vet registered successfully:", email); // Debugging log
+        console.log("[ADMIN_REGISTER_VET] Vet registered successfully:", email); // Log de depuración
 
     } catch (error) {
         console.error("Error al crear veterinario:", error);
@@ -1055,15 +1142,15 @@ app.post("/usuarios/veterinarios", authenticateToken, isAdmin, async (req, res) 
 });
 
 // Actualizar veterinario
-app.put("/usuarios/veterinarios/:id", authenticateToken, isAdmin, async (req, res) => { // express.json() ya es global
+app.put("/usuarios/veterinarios/:id", authenticateToken, isAdmin, async (req, res) => {
     const { id } = req.params;
-    const { nombre, apellido, telefono, direccion, active, experiencia, universidad, horario } = req.body; // Eliminado imagen_url
+    const { nombre, apellido, telefono, direccion, active, experiencia, universidad, horario } = req.body;
 
     // Validación básica
     if (!nombre || !telefono || !experiencia || !universidad || !horario) {
         return res.status(400).json({ success: false, message: "Nombre, teléfono, experiencia, universidad y horario son requeridos" });
     }
-    console.log("[ADMIN_UPDATE_VET] Received data:", req.body, "for ID:", id); // Debugging log
+    console.log("[ADMIN_UPDATE_VET] Received data:", req.body, "for ID:", id); // Log de depuración
 
     try {
         // Verificar que el veterinario existe y tiene el rol correcto
@@ -1079,11 +1166,11 @@ app.put("/usuarios/veterinarios/:id", authenticateToken, isAdmin, async (req, re
         // Construir la consulta de actualización dinámicamente
         const fields = [];
         const values = [];
-        if (nombre !== undefined) { fields.push('nombre = UPPER(TRIM(?))'); values.push(nombre); } // Aplicar UPPER y TRIM
-        if (apellido !== undefined) { fields.push('apellido = UPPER(TRIM(?))'); values.push(apellido); } // Aplicar UPPER y TRIM
-        if (telefono !== undefined) { fields.push('telefono = TRIM(?)'); values.push(telefono); } // Aplicar TRIM
-        if (direccion !== undefined) { fields.push('direccion = UPPER(TRIM(?))'); values.push(direccion); } // Aplicar UPPER y TRIM
-        if (active !== undefined) { fields.push('active = ?'); values.push(active ? 1 : 0); }
+        if (nombre !== undefined) { fields.push('nombre = UPPER(TRIM(?))'); values.push(nombre); } // Aplica UPPER y TRIM
+        if (apellido !== undefined) { fields.push('apellido = UPPER(TRIM(?))'); values.push(apellido); } // Aplica UPPER y TRIM
+        if (telefono !== undefined) { fields.push('telefono = TRIM(?)'); values.push(telefono); } // Aplica TRIM
+        if (direccion !== undefined) { fields.push('direccion = UPPER(TRIM(?))'); values.push(direccion); } // Aplica UPPER y TRIM
+        if (active !== undefined) { fields.push('active = ?'); values.push(active ? 1 : 0); } // Convierte booleano a 0/1
         if (experiencia !== undefined) { fields.push('experiencia = ?'); values.push(experiencia); }
         if (universidad !== undefined) { fields.push('universidad = ?'); values.push(universidad); }
         if (horario !== undefined) { fields.push('horario = ?'); values.push(horario); }
@@ -1100,12 +1187,12 @@ app.put("/usuarios/veterinarios/:id", authenticateToken, isAdmin, async (req, re
 
         // Obtener el veterinario actualizado para devolverlo en la respuesta
         const [updatedVet] = await pool.query(
-            "SELECT id, nombre, apellido, email, telefono, direccion, active, imagen_url, created_at FROM usuarios WHERE id = ?",
+            "SELECT id, nombre, apellido, email, telefono, direccion, active, imagen_url, created_at, experiencia, universidad, horario FROM usuarios WHERE id = ?",
             [id]
         );
 
         res.json({ success: true, message: "Veterinario actualizado correctamente", data: updatedVet[0] });
-        console.log("[ADMIN_UPDATE_VET] Vet updated successfully:", id); // Debugging log
+        console.log("[ADMIN_UPDATE_VET] Vet updated successfully:", id); // Log de depuración
 
     } catch (error) {
         console.error("Error al actualizar veterinario:", error);
@@ -1116,10 +1203,10 @@ app.put("/usuarios/veterinarios/:id", authenticateToken, isAdmin, async (req, re
 // Eliminar veterinario
 app.delete("/usuarios/veterinarios/:id", authenticateToken, isAdmin, async (req, res) => {
     const { id } = req.params;
-    console.log("[ADMIN_DELETE_VET] Deleting vet with ID:", id); // Debugging log
+    console.log("[ADMIN_DELETE_VET] Deleting vet with ID:", id); // Log de depuración
 
     try {
-        // Verificar si el veterinario tiene citas asignadas
+        // Verificar si el veterinario tiene citas asignadas (clave foránea)
         const [appointments] = await pool.query(
             "SELECT id_cita FROM citas WHERE id_veterinario = ?",
             [id]
@@ -1132,7 +1219,7 @@ app.delete("/usuarios/veterinarios/:id", authenticateToken, isAdmin, async (req,
             });
         }
 
-        // Verificar si el veterinario tiene historiales médicos asociados
+        // Verificar si el veterinario tiene historiales médicos asociados (clave foránea)
         const [records] = await pool.query(
             "SELECT id_historial FROM historial_medico WHERE veterinario = ?",
             [id]
@@ -1145,7 +1232,7 @@ app.delete("/usuarios/veterinarios/:id", authenticateToken, isAdmin, async (req,
             });
         }
 
-        // Eliminar el veterinario
+        // Eliminar el veterinario de la base de datos
         const [result] = await pool.query(
             "DELETE FROM usuarios WHERE id = ? AND role = 'veterinario'",
             [id]
@@ -1156,11 +1243,12 @@ app.delete("/usuarios/veterinarios/:id", authenticateToken, isAdmin, async (req,
         }
 
         res.json({ success: true, message: "Veterinario eliminado correctamente" });
-        console.log("[ADMIN_DELETE_VET] Vet deleted successfully:", id); // Debugging log
+        console.log("[ADMIN_DELETE_VET] Vet deleted successfully:", id); // Log de depuración
 
     } catch (error) {
         console.error("Error al eliminar veterinario:", error);
 
+        // Manejo específico para errores de clave foránea
         if (error.code === 'ER_ROW_IS_REFERENCED_2') {
             return res.status(400).json({
                 success: false,
@@ -1173,6 +1261,7 @@ app.delete("/usuarios/veterinarios/:id", authenticateToken, isAdmin, async (req,
 });
 
 // ### **GESTIÓN DE SERVICIOS**
+// Rutas para que los administradores gestionen los servicios ofrecidos por la clínica.
 
 // Obtener todos los servicios
 app.get("/servicios", authenticateToken, async (req, res) => {
@@ -1202,27 +1291,28 @@ app.get("/servicios/:id", authenticateToken, async (req, res) => {
 
 
 // Crear nuevo servicio
-app.post("/servicios", authenticateToken, isAdmin, async (req, res) => { // express.json() ya es global
+app.post("/servicios", authenticateToken, isAdmin, async (req, res) => {
     const { nombre, descripcion, precio } = req.body;
 
     if (!nombre || !descripcion || !precio) {
         return res.status(400).json({ success: false, message: "Todos los campos son requeridos" });
     }
-    console.log("[ADMIN_CREATE_SERVICE] Received data:", req.body); // Debugging log
+    console.log("[ADMIN_CREATE_SERVICE] Received data:", req.body); // Log de depuración
 
     try {
         const [result] = await pool.query(
-            "INSERT INTO servicios (nombre, descripcion, precio) VALUES (UPPER(TRIM(?)), ?, ?)", // Aplicar UPPER y TRIM
+            "INSERT INTO servicios (nombre, descripcion, precio) VALUES (UPPER(TRIM(?)), ?, ?)", // Aplica UPPER y TRIM
             [nombre, descripcion, precio]
         );
 
+        // Obtener el servicio recién creado para devolverlo en la respuesta
         const [newService] = await pool.query(
             "SELECT * FROM servicios WHERE id_servicio = ?",
             [result.insertId]
         );
 
         res.status(201).json({ success: true, message: "Servicio creado correctamente", data: newService[0] });
-        console.log("[ADMIN_CREATE_SERVICE] Service created successfully:", nombre); // Debugging log
+        console.log("[ADMIN_CREATE_SERVICE] Service created successfully:", nombre); // Log de depuración
 
     } catch (error) {
         console.error("Error al crear servicio:", error);
@@ -1231,24 +1321,25 @@ app.post("/servicios", authenticateToken, isAdmin, async (req, res) => { // expr
 });
 
 // Actualizar servicio
-app.put("/servicios/:id", authenticateToken, isAdmin, async (req, res) => { // express.json() ya es global
+app.put("/servicios/:id", authenticateToken, isAdmin, async (req, res) => {
     const { id } = req.params;
     const { nombre, descripcion, precio } = req.body;
-    console.log("[ADMIN_UPDATE_SERVICE] Received data:", req.body, "for ID:", id); // Debugging log
+    console.log("[ADMIN_UPDATE_SERVICE] Received data:", req.body, "for ID:", id); // Log de depuración
 
     try {
         await pool.query(
-            "UPDATE servicios SET nombre = UPPER(TRIM(?)), descripcion = ?, precio = ? WHERE id_servicio = ?", // Aplicar UPPER y TRIM
+            "UPDATE servicios SET nombre = UPPER(TRIM(?)), descripcion = ?, precio = ? WHERE id_servicio = ?", // Aplica UPPER y TRIM
             [nombre, descripcion, precio, id]
         );
 
+        // Obtener el servicio actualizado para devolverlo en la respuesta
         const [updatedService] = await pool.query(
             "SELECT * FROM servicios WHERE id_servicio = ?",
             [id]
         );
 
         res.json({ success: true, message: "Servicio actualizado correctamente", data: updatedService[0] });
-        console.log("[ADMIN_UPDATE_SERVICE] Service updated successfully:", id); // Debugging log
+        console.log("[ADMIN_UPDATE_SERVICE] Service updated successfully:", id); // Log de depuración
 
     } catch (error) {
         console.error("Error al actualizar servicio:", error);
@@ -1259,16 +1350,18 @@ app.put("/servicios/:id", authenticateToken, isAdmin, async (req, res) => { // e
 // Eliminar servicio
 app.delete("/servicios/:id", authenticateToken, isAdmin, async (req, res) => {
     const { id } = req.params;
-    console.log("[ADMIN_DELETE_SERVICE] Deleting service with ID:", id); // Debugging log
+    console.log("[ADMIN_DELETE_SERVICE] Deleting service with ID:", id); // Log de depuración
 
     try {
+        // Intenta eliminar el servicio
         await pool.query("DELETE FROM servicios WHERE id_servicio = ?", [id]);
         res.json({ success: true, message: "Servicio eliminado correctamente" });
-        console.log("[ADMIN_DELETE_SERVICE] Service deleted successfully:", id); // Debugging log
+        console.log("[ADMIN_DELETE_SERVICE] Service deleted successfully:", id); // Log de depuración
 
     } catch (error) {
         console.error("Error al eliminar servicio:", error);
 
+        // Manejo específico para errores de clave foránea (si el servicio está asociado a citas)
         if (error.code === 'ER_ROW_IS_REFERENCED_2') {
             return res.status(400).json({
                 success: false,
@@ -1280,13 +1373,14 @@ app.delete("/servicios/:id", authenticateToken, isAdmin, async (req, res) => {
     }
 });
 
-// =============================================
+// =============================================================================
 // RUTAS DE GESTIÓN DE USUARIOS (REGULARES/CLIENTES)
-// =============================================
+// =============================================================================
 
-// Obtener todos los usuarios con role 'usuario' (para la tabla de AdminUsers)
+// Obtener todos los usuarios con rol 'usuario' (para la tabla de AdminUsers)
 app.get("/admin/usuarios", authenticateToken, isAdmin, async (req, res) => {
     try {
+        // Consulta para obtener usuarios con rol 'usuario' y el conteo de sus mascotas.
         const [users] = await pool.query(
             `SELECT u.id, u.nombre, u.apellido, u.email, u.telefono, u.direccion, u.active, u.imagen_url,
              COUNT(m.id_mascota) as num_mascotas, u.created_at, u.tipo_documento, u.numero_documento, u.fecha_nacimiento
@@ -1303,7 +1397,8 @@ app.get("/admin/usuarios", authenticateToken, isAdmin, async (req, res) => {
     }
 });
 
-// NUEVA RUTA: Obtener todos los usuarios con role 'usuario' para veterinarios (y admins)
+// NUEVA RUTA: Obtener todos los usuarios con rol 'usuario' (para veterinarios y administradores)
+// Utilizada en el formulario de citas para seleccionar un cliente.
 app.get("/usuarios", authenticateToken, isVetOrAdmin, async (req, res) => {
     try {
         const [users] = await pool.query(
@@ -1327,7 +1422,7 @@ app.get("/usuarios", authenticateToken, isVetOrAdmin, async (req, res) => {
 app.get("/usuarios/:id", authenticateToken, isOwnerOrAdmin, async (req, res) => {
     const { id } = req.params;
     try {
-        // Fetch user basic data
+        // Obtener datos básicos del usuario
         const [users] = await pool.query(
             `SELECT id, nombre, apellido, email, telefono, direccion, tipo_documento, numero_documento,
                     fecha_nacimiento, role, active, created_at, experiencia, universidad, horario, imagen_url,
@@ -1342,14 +1437,14 @@ app.get("/usuarios/:id", authenticateToken, isOwnerOrAdmin, async (req, res) => 
         }
         let user = users[0];
 
-        // Fetch count of registered pets for this user
+        // Obtener el conteo de mascotas registradas para este usuario
         const [[{ num_mascotas }]] = await pool.query(
             "SELECT COUNT(*) as num_mascotas FROM mascotas WHERE id_propietario = ?",
             [id]
         );
         user.mascotasRegistradas = num_mascotas;
 
-        // Fetch count of completed appointments for this user
+        // Obtener el conteo de citas completadas para este usuario
         const [[{ citas_realizadas }]] = await pool.query(
             "SELECT COUNT(*) as citas_realizadas FROM citas WHERE id_cliente = ? AND estado = 'COMPLETA'",
             [id]
@@ -1364,23 +1459,25 @@ app.get("/usuarios/:id", authenticateToken, isOwnerOrAdmin, async (req, res) => 
 });
 
 // Actualizar usuario (general, para clientes, veterinarios, admins)
-app.put("/usuarios/:id", authenticateToken, isOwnerOrAdmin, async (req, res) => { // express.json() ya es global
+app.put("/usuarios/:id", authenticateToken, isOwnerOrAdmin, async (req, res) => {
     const { id } = req.params;
     const {
         nombre, apellido, email, telefono, direccion, tipo_documento, numero_documento,
         fecha_nacimiento, active, password, experiencia, universidad, horario, imagen_url,
         notificaciones_activas, sonido_notificacion, recordatorios_cita, intervalo_recordatorio
     } = req.body;
-    console.log("[UPDATE_USER] Received data:", req.body, "for ID:", id); // Debugging log
+    console.log("[UPDATE_USER] Received data:", req.body, "for ID:", id); // Log de depuración
 
     try {
         const fields = [];
         const values = [];
 
-        if (nombre !== undefined) { fields.push('nombre = UPPER(TRIM(?))'); values.push(nombre); } // Aplicar UPPER y TRIM
-        if (apellido !== undefined) { fields.push('apellido = UPPER(TRIM(?))'); values.push(apellido); } // Aplicar UPPER y TRIM
+        // Construye la consulta de actualización dinámicamente
+        if (nombre !== undefined) { fields.push('nombre = UPPER(TRIM(?))'); values.push(nombre); } // Aplica UPPER y TRIM
+        if (apellido !== undefined) { fields.push('apellido = UPPER(TRIM(?))'); values.push(apellido); } // Aplica UPPER y TRIM
 
         if (email !== undefined) {
+            // Verifica si el nuevo email ya está en uso por otro usuario
             const [existing] = await pool.query(
                 "SELECT id FROM usuarios WHERE email = ? AND id != ?",
                 [email, id]
@@ -1388,29 +1485,32 @@ app.put("/usuarios/:id", authenticateToken, isOwnerOrAdmin, async (req, res) => 
             if (existing.length > 0) {
                 return res.status(400).json({ success: false, message: "El email ya está en uso por otro usuario." });
             }
-            fields.push('email = UPPER(TRIM(?))'); values.push(email); // Aplicar UPPER y TRIM
+            fields.push('email = UPPER(TRIM(?))'); values.push(email); // Aplica UPPER y TRIM
         }
 
-        if (telefono !== undefined) { fields.push('telefono = TRIM(?)'); values.push(telefono); } // Aplicar TRIM
-        if (direccion !== undefined) { fields.push('direccion = UPPER(TRIM(?))'); values.push(direccion); } // Aplicar UPPER y TRIM
-        if (tipo_documento !== undefined) { fields.push('tipo_documento = UPPER(TRIM(?))'); values.push(tipo_documento); } // Aplicar UPPER y TRIM
-        if (numero_documento !== undefined) { fields.push('numero_documento = UPPER(TRIM(?))'); values.push(numero_documento); } // Aplicar UPPER y TRIM
+        if (telefono !== undefined) { fields.push('telefono = TRIM(?)'); values.push(telefono); } // Aplica TRIM
+        if (direccion !== undefined) { fields.push('direccion = UPPER(TRIM(?))'); values.push(direccion); } // Aplica UPPER y TRIM
+        if (tipo_documento !== undefined) { fields.push('tipo_documento = UPPER(TRIM(?))'); values.push(tipo_documento); } // Aplica UPPER y TRIM
+        if (numero_documento !== undefined) { fields.push('numero_documento = UPPER(TRIM(?))'); values.push(numero_documento); } // Aplica UPPER y TRIM
         if (fecha_nacimiento !== undefined) { fields.push('fecha_nacimiento = ?'); values.push(fecha_nacimiento); }
 
+        // 'active' solo puede ser cambiado por un admin o el propio usuario (si se le permite desactivar su cuenta)
         if (active !== undefined && (req.user.role === 'admin' || (req.user.id === parseInt(id)))) {
             fields.push('active = ?'); values.push(active ? 1 : 0);
         }
 
+        // Si se proporciona una nueva contraseña, hashearla
         if (password) {
             const hashedPassword = await bcrypt.hash(password, 10);
             fields.push('password = ?'); values.push(hashedPassword);
         }
 
+        // Campos específicos de veterinario, solo actualizables por admin o el propio veterinario
         if (req.user.role === 'admin' || (req.user.role === 'veterinario' && req.user.id === parseInt(id))) {
             if (experiencia !== undefined) { fields.push('experiencia = ?'); values.push(experiencia); }
             if (universidad !== undefined) { fields.push('universidad = ?'); values.push(universidad); }
             if (horario !== undefined) { fields.push('horario = ?'); values.push(horario); }
-        } else { // Si no es admin o el propio veterinario, asegurar que estos campos sean null
+        } else { // Si no es admin o el propio veterinario, asegurar que estos campos sean NULL si se intenta modificar
             if (experiencia !== undefined) { fields.push('experiencia = NULL'); }
             if (universidad !== undefined) { fields.push('universidad = NULL'); }
             if (horario !== undefined) { fields.push('horario = NULL'); }
@@ -1419,6 +1519,7 @@ app.put("/usuarios/:id", authenticateToken, isOwnerOrAdmin, async (req, res) => 
         // La imagen_url puede venir en el body si no se cambió el archivo, o se actualizó con la URL de Cloudinary
         if (imagen_url !== undefined) { fields.push('imagen_url = ?'); values.push(imagen_url); }
 
+        // Campos de configuración de notificaciones del usuario
         if (notificaciones_activas !== undefined) { fields.push('notificaciones_activas = ?'); values.push(notificaciones_activas ? 1 : 0); }
         if (sonido_notificacion !== undefined) { fields.push('sonido_notificacion = ?'); values.push(sonido_notificacion); }
         if (recordatorios_cita !== undefined) { fields.push('recordatorios_cita = ?'); values.push(recordatorios_cita ? 1 : 0); }
@@ -1438,6 +1539,7 @@ app.put("/usuarios/:id", authenticateToken, isOwnerOrAdmin, async (req, res) => 
             return res.status(404).json({ success: false, message: "Usuario no encontrado o no autorizado para actualizar." });
         }
 
+        // Obtener el usuario actualizado para devolverlo en la respuesta
         const [updatedUser] = await pool.query(
             `SELECT id, nombre, apellido, email, telefono, direccion, tipo_documento, numero_documento,
                     fecha_nacimiento, role, active, created_at, experiencia, universidad, horario, imagen_url,
@@ -1447,7 +1549,7 @@ app.put("/usuarios/:id", authenticateToken, isOwnerOrAdmin, async (req, res) => 
         );
 
         res.json({ success: true, message: "Usuario actualizado correctamente.", data: updatedUser[0] });
-        console.log("[UPDATE_USER] User updated successfully:", id); // Debugging log
+        console.log("[UPDATE_USER] User updated successfully:", id); // Log de depuración
 
     } catch (error) {
         console.error("Error al actualizar usuario:", error);
@@ -1456,10 +1558,10 @@ app.put("/usuarios/:id", authenticateToken, isOwnerOrAdmin, async (req, res) => 
 });
 
 
-// Eliminar usuario y datos relacionados
+// Eliminar usuario y datos relacionados (solo para administradores)
 app.delete("/usuarios/:id", authenticateToken, isAdmin, async (req, res) => {
     const { id } = req.params;
-    console.log("[DELETE_USER] Deleting user with ID:", id); // Debugging log
+    console.log("[DELETE_USER] Deleting user with ID:", id); // Log de depuración
 
     try {
         // Eliminar registros de historial médico asociados a las mascotas del usuario
@@ -1469,7 +1571,7 @@ app.delete("/usuarios/:id", authenticateToken, isAdmin, async (req, res) => {
             await pool.query("DELETE FROM historial_medico WHERE id_mascota IN (?)", [mascotaIds]);
         }
 
-        // Eliminar citas asociadas al usuario (si hay, basado en id_cliente)
+        // Eliminar citas asociadas al usuario (como cliente)
         await pool.query("DELETE FROM citas WHERE id_cliente = ?", [id]);
 
         // Eliminar mascotas del usuario
@@ -1483,7 +1585,7 @@ app.delete("/usuarios/:id", authenticateToken, isAdmin, async (req, res) => {
         }
 
         res.json({ success: true, message: "Usuario y sus datos asociados eliminados correctamente." });
-        console.log("[DELETE_USER] User deleted successfully:", id); // Debugging log
+        console.log("[DELETE_USER] User deleted successfully:", id); // Log de depuración
 
     } catch (error) {
         console.error("Error al eliminar usuario:", error);
@@ -1492,26 +1594,32 @@ app.delete("/usuarios/:id", authenticateToken, isAdmin, async (req, res) => {
 });
 
 
-// =============================================
+// =============================================================================
 // RUTAS DE GESTIÓN DE MASCOTAS
-// =============================================
+// =============================================================================
 
-// Obtener todas las mascotas
+// Obtener todas las mascotas (filtradas por propietario si el rol es 'usuario')
 app.get("/mascotas", authenticateToken, isOwnerOrAdmin, async (req, res) => {
     try {
         const { id_propietario } = req.query;
         let query = `SELECT m.*, CONCAT(u.nombre, ' ', u.apellido) as propietario_nombre,
-                            u.apellido as propietario_apellido -- Añadido para mostrar en dropdown de historial
+                            u.apellido as propietario_apellido
                      FROM mascotas m
                      JOIN usuarios u ON m.id_propietario = u.id`;
         const queryParams = [];
+        const conditions = [];
 
+        // Si el usuario autenticado es un 'usuario' normal, solo puede ver sus propias mascotas.
         if (req.user.role === 'usuario') {
-            query += ` WHERE m.id_propietario = ?`;
+            conditions.push(`m.id_propietario = ?`);
             queryParams.push(req.user.id);
-        } else if (id_propietario) {
-            query += ` WHERE m.id_propietario = ?`;
+        } else if (id_propietario) { // Si es admin/vet, puede filtrar por id_propietario
+            conditions.push(`m.id_propietario = ?`);
             queryParams.push(id_propietario);
+        }
+
+        if (conditions.length > 0) {
+            query += ` WHERE ` + conditions.join(' AND ');
         }
 
         query += ` ORDER BY m.nombre ASC`;
@@ -1545,14 +1653,14 @@ app.get("/mascotas/:id", authenticateToken, isOwnerOrAdmin, async (req, res) => 
     }
 });
 
-// Registrar nueva mascota
-app.post("/mascotas", authenticateToken, isVetOrAdmin, async (req, res) => { // express.json() ya es global
+// Registrar nueva mascota (solo para veterinarios o admins)
+app.post("/mascotas", authenticateToken, isVetOrAdmin, async (req, res) => {
     const { nombre, especie, raza, edad, peso, sexo, color, microchip, id_propietario, imagen_url } = req.body;
 
     if (!nombre || !especie || !id_propietario) {
         return res.status(400).json({ success: false, message: "Nombre, especie y ID de propietario son requeridos." });
     }
-    console.log("[CREATE_PET] Received data:", req.body); // Debugging log
+    console.log("[CREATE_PET] Received data:", req.body); // Log de depuración
 
     try {
         // Verificar que el propietario exista y sea un usuario regular
@@ -1563,14 +1671,15 @@ app.post("/mascotas", authenticateToken, isVetOrAdmin, async (req, res) => { // 
 
         const [result] = await pool.query(
             `INSERT INTO mascotas (nombre, especie, raza, edad, peso, sexo, color, microchip, id_propietario, imagen_url)
-             VALUES (UPPER(TRIM(?)), UPPER(TRIM(?)), UPPER(TRIM(?)), ?, ?, UPPER(TRIM(?)), UPPER(TRIM(?)), UPPER(TRIM(?)), ?, ?)`, // Aplicar UPPER y TRIM
+             VALUES (UPPER(TRIM(?)), UPPER(TRIM(?)), UPPER(TRIM(?)), ?, ?, UPPER(TRIM(?)), UPPER(TRIM(?)), UPPER(TRIM(?)), ?, ?)`, // Aplica UPPER y TRIM
             [nombre, especie, raza, edad, peso, sexo, color, microchip, id_propietario, imagen_url || null]
         );
 
+        // Obtener la mascota recién creada para devolverla en la respuesta
         const [newMascota] = await pool.query("SELECT * FROM mascotas WHERE id_mascota = ?", [result.insertId]);
 
         res.status(201).json({ success: true, message: "Mascota registrada correctamente.", data: newMascota[0] });
-        console.log("[CREATE_PET] Pet registered successfully:", nombre); // Debugging log
+        console.log("[CREATE_PET] Pet registered successfully:", nombre); // Log de depuración
 
     } catch (error) {
         console.error("Error al registrar mascota:", error);
@@ -1579,12 +1688,13 @@ app.post("/mascotas", authenticateToken, isVetOrAdmin, async (req, res) => { // 
 });
 
 // Actualizar mascota
-app.put("/mascotas/:id", authenticateToken, isOwnerOrAdmin, async (req, res) => { // express.json() ya es global
+app.put("/mascotas/:id", authenticateToken, isOwnerOrAdmin, async (req, res) => {
     const { id } = req.params;
     const { nombre, especie, raza, edad, peso, sexo, color, microchip, id_propietario, imagen_url } = req.body;
-    console.log("[UPDATE_PET] Received data:", req.body, "for ID:", id); // Debugging log
+    console.log("[UPDATE_PET] Received data:", req.body, "for ID:", id); // Log de depuración
 
     try {
+        // Si se intenta cambiar el propietario, verificar que el nuevo propietario sea válido
         if (id_propietario !== undefined) {
             const [owner] = await pool.query("SELECT id FROM usuarios WHERE id = ? AND role = 'usuario'", [id_propietario]);
             if (owner.length === 0) {
@@ -1592,16 +1702,17 @@ app.put("/mascotas/:id", authenticateToken, isOwnerOrAdmin, async (req, res) => 
             }
         }
 
+        // Construir la consulta de actualización dinámicamente
         const fields = [];
         const values = [];
-        if (nombre !== undefined) { fields.push('nombre = UPPER(TRIM(?))'); values.push(nombre); } // Aplicar UPPER y TRIM
-        if (especie !== undefined) { fields.push('especie = UPPER(TRIM(?))'); values.push(especie); } // Aplicar UPPER y TRIM
-        if (raza !== undefined) { fields.push('raza = UPPER(TRIM(?))'); values.push(raza); } // Aplicar UPPER y TRIM
+        if (nombre !== undefined) { fields.push('nombre = UPPER(TRIM(?))'); values.push(nombre); } // Aplica UPPER y TRIM
+        if (especie !== undefined) { fields.push('especie = UPPER(TRIM(?))'); values.push(especie); } // Aplica UPPER y TRIM
+        if (raza !== undefined) { fields.push('raza = UPPER(TRIM(?))'); values.push(raza); } // Aplica UPPER y TRIM
         if (edad !== undefined) { fields.push('edad = ?'); values.push(edad); }
         if (peso !== undefined) { fields.push('peso = ?'); values.push(peso); }
-        if (sexo !== undefined) { fields.push('sexo = UPPER(TRIM(?))'); values.push(sexo); } // Aplicar UPPER y TRIM
-        if (color !== undefined) { fields.push('color = UPPER(TRIM(?))'); values.push(color); } // Aplicar UPPER y TRIM
-        if (microchip !== undefined) { fields.push('microchip = UPPER(TRIM(?))'); values.push(microchip); } // Aplicar UPPER y TRIM
+        if (sexo !== undefined) { fields.push('sexo = UPPER(TRIM(?))'); values.push(sexo); } // Aplica UPPER y TRIM
+        if (color !== undefined) { fields.push('color = UPPER(TRIM(?))'); values.push(color); } // Aplica UPPER y TRIM
+        if (microchip !== undefined) { fields.push('microchip = UPPER(TRIM(?))'); values.push(microchip); } // Aplica UPPER y TRIM
         if (imagen_url !== undefined) { fields.push('imagen_url = ?'); values.push(imagen_url); }
 
         if (fields.length === 0) {
@@ -1617,9 +1728,10 @@ app.put("/mascotas/:id", authenticateToken, isOwnerOrAdmin, async (req, res) => 
             return res.status(404).json({ success: false, message: "Mascota no encontrada o sin cambios." });
         }
 
+        // Obtener la mascota actualizada para devolverla en la respuesta
         const [updatedMascota] = await pool.query("SELECT * FROM mascotas WHERE id_mascota = ?", [id]);
         res.json({ success: true, message: "Mascota actualizada correctamente.", data: updatedMascota[0] });
-        console.log("[UPDATE_PET] Pet updated successfully:", id); // Debugging log
+        console.log("[UPDATE_PET] Pet updated successfully:", id); // Log de depuración
 
     } catch (error) {
         console.error("Error al actualizar mascota:", error);
@@ -1627,22 +1739,26 @@ app.put("/mascotas/:id", authenticateToken, isOwnerOrAdmin, async (req, res) => 
     }
 });
 
+// Eliminar mascota (solo para veterinarios o admins)
 app.delete("/mascotas/:id", authenticateToken, isVetOrAdmin, async (req, res) => {
     const { id } = req.params;
-    console.log("[DELETE_PET] Deleting pet with ID:", id); // Debugging log
+    console.log("[DELETE_PET] Deleting pet with ID:", id); // Log de depuración
 
     try {
+        // Eliminar registros de historial médico asociados a la mascota
         await pool.query("DELETE FROM historial_medico WHERE id_mascota = ?", [id]);
 
-        const [result] = await pool.query("DELETE FROM citas WHERE id_mascota = ?", [id]);
-        
+        // Eliminar citas asociadas a la mascota
+        await pool.query("DELETE FROM citas WHERE id_mascota = ?", [id]);
+
+        // Finalmente, eliminar la mascota
         const [result2] = await pool.query("DELETE FROM mascotas WHERE id_mascota = ?", [id]);
 
         if (result2.affectedRows === 0) {
             return res.status(404).json({ success: false, message: "Mascota no encontrada." });
         }
         res.json({ success: true, message: "Mascota y sus historiales/citas asociados eliminados correctamente." });
-        console.log("[DELETE_PET] Pet deleted successfully:", id); // Debugging log
+        console.log("[DELETE_PET] Pet deleted successfully:", id); // Log de depuración
 
     } catch (error) {
         console.error("Error al eliminar mascota:", error);
@@ -1651,18 +1767,18 @@ app.delete("/mascotas/:id", authenticateToken, isVetOrAdmin, async (req, res) =>
 });
 
 
-// =============================================
+// =============================================================================
 // RUTAS DE GESTIÓN DE HISTORIAL MÉDICO (Actualizadas para Veterinarios y Usuarios)
-// =============================================
+// =============================================================================
 
-// Obtener todos los historiales médicos (para veterinarios y administradores)
-app.get("/historial_medico", authenticateToken, async (req, res) => { // Removed isVetOrAdmin here, auth is handled by isOwnerOrAdmin if id_mascota is present
+// Obtener todos los historiales médicos (para veterinarios y administradores, o filtrado para usuarios)
+app.get("/historial_medico", authenticateToken, async (req, res) => {
     try {
         const { id_mascota } = req.query;
         let query = `SELECT h.*, m.nombre as mascota_nombre, m.especie, m.raza,
                     CONCAT(u_prop.nombre, ' ', u_prop.apellido) as propietario_nombre,
                     CONCAT(u_vet.nombre, ' ', u_vet.apellido) as veterinario_nombre,
-                    u_vet.id as veterinario_id -- Añadido para el frontend
+                    u_vet.id as veterinario_id
              FROM historial_medico h
              JOIN mascotas m ON h.id_mascota = m.id_mascota
              JOIN usuarios u_prop ON m.id_propietario = u_prop.id
@@ -1671,9 +1787,9 @@ app.get("/historial_medico", authenticateToken, async (req, res) => { // Removed
         const conditions = [];
 
         if (req.user.role === 'usuario') {
-            // If a regular user, they can only see their own pet's medical history
+            // Si es un usuario regular, solo puede ver el historial médico de sus propias mascotas.
             if (id_mascota) {
-                // Verify if the pet belongs to the user
+                // Verifica si la mascota pertenece al usuario
                 const [petOwner] = await pool.query("SELECT id_propietario FROM mascotas WHERE id_mascota = ?", [id_mascota]);
                 if (petOwner.length === 0 || petOwner[0].id_propietario !== req.user.id) {
                     return res.status(403).json({ success: false, message: "Acceso denegado. Solo puedes ver los historiales de tus propias mascotas." });
@@ -1681,11 +1797,11 @@ app.get("/historial_medico", authenticateToken, async (req, res) => { // Removed
                 conditions.push(`h.id_mascota = ?`);
                 queryParams.push(id_mascota);
             } else {
-                // If no specific pet ID is provided, a regular user cannot see all medical records
+                // Si no se proporciona un ID de mascota, un usuario regular no puede ver todos los historiales.
                 return res.status(403).json({ success: false, message: "Acceso denegado. Se requiere especificar una mascota para ver el historial." });
             }
         } else if (req.user.role === 'veterinario' || req.user.role === 'admin') {
-            // Vets and Admins can filter by id_mascota or see all
+            // Veterinarios y administradores pueden filtrar por id_mascota o ver todos los historiales.
             if (id_mascota) {
                 conditions.push(`h.id_mascota = ?`);
                 queryParams.push(id_mascota);
@@ -1716,7 +1832,7 @@ app.get("/historial_medico/:id", authenticateToken, isOwnerOrAdmin, async (req, 
             `SELECT h.*, m.nombre as mascota_nombre, m.especie, m.raza,
                     CONCAT(u_prop.nombre, ' ', u_prop.apellido) as propietario_nombre,
                     CONCAT(u_vet.nombre, ' ', u_vet.apellido) as veterinario_nombre,
-                    u_vet.id as veterinario_id -- Añadido para el frontend
+                    u_vet.id as veterinario_id
              FROM historial_medico h
              JOIN mascotas m ON h.id_mascota = m.id_mascota
              JOIN usuarios u_prop ON m.id_propietario = u_prop.id
@@ -1736,13 +1852,13 @@ app.get("/historial_medico/:id", authenticateToken, isOwnerOrAdmin, async (req, 
 });
 
 // Registrar nuevo historial médico (solo para veterinarios o admins)
-app.post("/historial_medico", authenticateToken, isVetOrAdmin, async (req, res) => { // express.json() ya es global
+app.post("/historial_medico", authenticateToken, isVetOrAdmin, async (req, res) => {
     const { id_mascota, fecha_consulta, diagnostico, tratamiento, observaciones, veterinario, peso_actual, temperatura, proxima_cita } = req.body;
 
     if (!id_mascota || !fecha_consulta || !diagnostico || !tratamiento || !veterinario) {
         return res.status(400).json({ success: false, message: "Campos requeridos incompletos para el historial médico." });
     }
-    console.log("[CREATE_MEDICAL_RECORD] Received data:", req.body); // Debugging log
+    console.log("[CREATE_MEDICAL_RECORD] Received data:", req.body); // Log de depuración
 
     try {
         // Verificar que la mascota exista
@@ -1763,10 +1879,11 @@ app.post("/historial_medico", authenticateToken, isVetOrAdmin, async (req, res) 
             [id_mascota, fecha_consulta, diagnostico, tratamiento, observaciones, veterinario, peso_actual || null, temperatura || null, proxima_cita || null]
         );
 
+        // Obtener el registro de historial médico recién creado para devolverlo en la respuesta
         const [newRecord] = await pool.query("SELECT * FROM historial_medico WHERE id_historial = ?", [result.insertId]);
 
         res.status(201).json({ success: true, message: "Historial médico registrado correctamente.", data: newRecord[0] });
-        console.log("[CREATE_MEDICAL_RECORD] Medical record created successfully for mascota:", id_mascota); // Debugging log
+        console.log("[CREATE_MEDICAL_RECORD] Medical record created successfully for mascota:", id_mascota); // Log de depuración
 
     } catch (error) {
         console.error("Error al registrar historial médico:", error);
@@ -1775,10 +1892,10 @@ app.post("/historial_medico", authenticateToken, isVetOrAdmin, async (req, res) 
 });
 
 // Actualizar historial médico (solo para veterinarios o admins)
-app.put("/historial_medico/:id", authenticateToken, isVetOrAdmin, async (req, res) => { // express.json() ya es global
+app.put("/historial_medico/:id", authenticateToken, isVetOrAdmin, async (req, res) => {
     const { id } = req.params;
     const { fecha_consulta, diagnostico, tratamiento, observaciones, veterinario, peso_actual, temperatura, proxima_cita } = req.body;
-    console.log("[UPDATE_MEDICAL_RECORD] Received data:", req.body, "for ID:", id); // Debugging log
+    console.log("[UPDATE_MEDICAL_RECORD] Received data:", req.body, "for ID:", id); // Log de depuración
 
     try {
         // Verificar que el historial exista
@@ -1820,9 +1937,10 @@ app.put("/historial_medico/:id", authenticateToken, isVetOrAdmin, async (req, re
             return res.status(404).json({ success: false, message: "Historial médico no encontrado o sin cambios." });
         }
 
+        // Obtener el registro de historial médico actualizado para devolverlo en la respuesta
         const [updatedRecord] = await pool.query("SELECT * FROM historial_medico WHERE id_historial = ?", [id]);
         res.json({ success: true, message: "Historial médico actualizado correctamente.", data: updatedRecord[0] });
-        console.log("[UPDATE_MEDICAL_RECORD] Medical record updated successfully:", id); // Debugging log
+        console.log("[UPDATE_MEDICAL_RECORD] Medical record updated successfully:", id); // Log de depuración
 
     } catch (error) {
         console.error("Error al actualizar historial médico:", error);
@@ -1830,10 +1948,10 @@ app.put("/historial_medico/:id", authenticateToken, isVetOrAdmin, async (req, re
     }
 });
 
-// Eliminar historial médico (solo para admins)
+// Eliminar historial médico (solo para administradores)
 app.delete("/historial_medico/:id", authenticateToken, isAdmin, async (req, res) => {
     const { id } = req.params;
-    console.log("[DELETE_MEDICAL_RECORD] Deleting medical record with ID:", id); // Debugging log
+    console.log("[DELETE_MEDICAL_RECORD] Deleting medical record with ID:", id); // Log de depuración
 
     try {
         const [result] = await pool.query("DELETE FROM historial_medico WHERE id_historial = ?", [id]);
@@ -1842,7 +1960,7 @@ app.delete("/historial_medico/:id", authenticateToken, isAdmin, async (req, res)
             return res.status(404).json({ success: false, message: "Historial médico no encontrado." });
         }
         res.json({ success: true, message: "Historial médico eliminado correctamente." });
-        console.log("[DELETE_MEDICAL_RECORD] Medical record deleted successfully:", id); // Debugging log
+        console.log("[DELETE_MEDICAL_RECORD] Medical record deleted successfully:", id); // Log de depuración
 
     } catch (error) {
         console.error("Error al eliminar historial médico:", error);
@@ -1851,9 +1969,9 @@ app.delete("/historial_medico/:id", authenticateToken, isAdmin, async (req, res)
 });
 
 
-// =============================================
+// =============================================================================
 // RUTAS DE GESTIÓN DE CITAS (MODIFICADAS Y NUEVAS)
-// =============================================
+// =============================================================================
 
 // **NUEVA RUTA:** Obtener las últimas citas registradas para el veterinario logeado (para el Dashboard)
 app.get("/veterinario/citas/ultimas", authenticateToken, isVetOrAdmin, async (req, res) => {
@@ -1865,14 +1983,14 @@ app.get("/veterinario/citas/ultimas", authenticateToken, isVetOrAdmin, async (re
                     CONCAT(u_cli.nombre, ' ', u_cli.apellido) as propietario_nombre,
                     u_cli.apellido as propietario_apellido,
                     m.nombre as mascota_nombre, m.especie as mascota_especie,
-                    m.imagen_url as mascota_imagen_url /* Asegúrate de que esta columna exista en tu tabla de mascotas */
+                    m.imagen_url as mascota_imagen_url
              FROM citas c
              JOIN servicios s ON c.id_servicio = s.id_servicio
              JOIN usuarios u_cli ON c.id_cliente = u_cli.id
              JOIN mascotas m ON c.id_mascota = m.id_mascota
-             WHERE c.id_veterinario = ? AND c.estado = 'PENDIENTE' /* Solo citas pendientes para el dashboard */
+             WHERE c.id_veterinario = ? AND c.estado = 'PENDIENTE'
              ORDER BY c.fecha DESC
-             LIMIT 5`, // Últimas 5 citas
+             LIMIT 5`, // Últimas 5 citas pendientes
             [veterinarioId]
         );
         res.json({ success: true, data: citas });
@@ -1960,7 +2078,7 @@ app.get("/citas", authenticateToken, async (req, res) => {
     }
 });
 
-// Obtener una cita por ID (propietario o admin/vet)
+// Obtener una cita por ID (accesible por propietario o admin/vet)
 app.get("/citas/:id", authenticateToken, isOwnerOrAdmin, async (req, res) => {
     const { id } = req.params;
     try {
@@ -1991,11 +2109,12 @@ app.get("/citas/:id", authenticateToken, isOwnerOrAdmin, async (req, res) => {
 });
 
 // Registrar nueva cita (para usuarios y admins/vets)
-app.post("/citas", authenticateToken, async (req, res) => {
+// CORREGIDO: Ruta cambiada de "/citas" a "/citas/agendar" para coincidir con el frontend.
+app.post("/citas/agendar", authenticateToken, async (req, res) => {
     let requestBody = req.body;
 
-    // WORKAROUND: If express.json() failed to parse (because it received a double-stringified JSON),
-    // req.body might be empty or not an object. We need to re-read the raw body stream.
+    // WORKAROUND: Si express.json() falló al parsear (porque recibió un JSON doblemente stringificado),
+    // req.body podría estar vacío o no ser un objeto. Necesitamos re-leer el stream del cuerpo crudo.
     if (typeof requestBody !== 'object' || requestBody === null || Object.keys(requestBody).length === 0) {
         let rawData = '';
         await new Promise((resolve, reject) => {
@@ -2012,17 +2131,17 @@ app.post("/citas", authenticateToken, async (req, res) => {
 
         if (rawData.startsWith('"') && rawData.endsWith('"')) {
             try {
-                // Attempt to parse the rawData twice
+                // Intenta parsear el rawData dos veces
                 requestBody = JSON.parse(JSON.parse(rawData));
-                console.warn("WORKAROUND: Double-stringified JSON detected and re-parsed in /citas route.");
+                console.warn("WORKAROUND: JSON doblemente stringificado detectado y re-parseado en la ruta /citas/agendar.");
             } catch (parseError) {
-                console.error("WORKAROUND FAILED: Could not re-parse double-stringified JSON in /citas route.", parseError);
+                console.error("WORKAROUND FALLÓ: No se pudo re-parsear JSON doblemente stringificado en la ruta /citas/agendar.", parseError);
                 return res.status(400).json({ success: false, message: "Datos de solicitud inválidos o corruptos." });
             }
         } else {
-            // If it's not double-stringified, but express.json() still failed,
-            // it's likely genuinely malformed or empty.
-            console.error("Request body is not an object and not double-stringified JSON. Raw data:", rawData);
+            // Si no está doblemente stringificado, pero express.json() aún falló,
+            // es probable que esté realmente malformado o vacío.
+            console.error("El cuerpo de la solicitud no es un objeto y no es JSON doblemente stringificado. Datos crudos:", rawData);
             return res.status(400).json({ success: false, message: "Datos de solicitud inválidos." });
         }
     }
@@ -2031,31 +2150,31 @@ app.post("/citas", authenticateToken, async (req, res) => {
     const userRole = req.user.role;
     const userIdFromToken = req.user.id;
 
-    // Default state for new appointments is PENDIENTE
+    // El estado por defecto para nuevas citas es PENDIENTE
     let estado = 'PENDIENTE';
 
     if (!fecha_cita || !id_servicio || !id_cliente || !id_mascota) {
         return res.status(400).json({ success: false, message: "Fecha, servicio, cliente y mascota son requeridos para la cita." });
     }
 
-    // A client can only create appointments for themselves
+    // Un cliente solo puede crear citas para sí mismo
     if (userRole === 'usuario' && userIdFromToken !== id_cliente) {
         return res.status(403).json({ success: false, message: "Acceso denegado. No puedes crear citas para otros usuarios." });
     }
 
-    // A vet/admin can create appointments for any client, but they still start as PENDIENTE
-    // If a vet/admin explicitly sends a state, it will be overridden to PENDIENTE here.
-    console.log("[CREATE_APPOINTMENT] Received data:", requestBody); // Debugging log
+    console.log("[CREATE_APPOINTMENT] Received data:", requestBody); // Log de depuración
 
     let assignedVetId = id_veterinario;
 
     try {
+        // Verifica que el servicio exista
         const [service] = await pool.query("SELECT id_servicio, nombre FROM servicios WHERE id_servicio = ?", [id_servicio]);
         if (service.length === 0) {
             return res.status(400).json({ success: false, message: "ID de servicio no válido." });
         }
         const servicio_nombre = service[0].nombre;
 
+        // Verifica que el cliente exista y tenga el rol 'usuario'
         const [cliente] = await pool.query("SELECT id, nombre, apellido, email FROM usuarios WHERE id = ? AND role = 'usuario'", [id_cliente]);
         if (cliente.length === 0) {
             return res.status(400).json({ success: false, message: "ID de cliente no válido o no es un usuario." });
@@ -2063,13 +2182,14 @@ app.post("/citas", authenticateToken, async (req, res) => {
         const cliente_nombre = `${cliente[0].nombre} ${cliente[0].apellido}`;
         const cliente_email = cliente[0].email;
 
+        // Verifica que la mascota exista y pertenezca al cliente
         const [mascota] = await pool.query("SELECT id_mascota, nombre FROM mascotas WHERE id_mascota = ? AND id_propietario = ?", [id_mascota, id_cliente]);
         if (mascota.length === 0) {
             return res.status(400).json({ success: false, message: "ID de mascota no válido o la mascota no pertenece a este cliente." });
         }
         const mascota_nombre = mascota[0].nombre;
 
-        // If no vet is assigned, auto-assign one randomly
+        // Si no se asigna un veterinario, asignar uno aleatoriamente
         if (!assignedVetId) {
             const [vets] = await pool.query("SELECT id FROM usuarios WHERE role = 'veterinario' AND active = 1");
             if (vets.length === 0) {
@@ -2078,13 +2198,14 @@ app.post("/citas", authenticateToken, async (req, res) => {
             const randomIndex = Math.floor(Math.random() * vets.length);
             assignedVetId = vets[randomIndex].id;
         } else {
-            // Validate if the provided vet ID is actually a veterinarian
+            // Validar si el ID de veterinario proporcionado es realmente un veterinario
             const [vet] = await pool.query("SELECT id FROM usuarios WHERE id = ? AND role = 'veterinario'", [assignedVetId]);
             if (vet.length === 0) {
                 return res.status(400).json({ success: false, message: "ID de veterinario no válido o no es un veterinario." });
             }
         }
 
+        // Inserta la nueva cita en la base de datos
         const [result] = await pool.query(
             `INSERT INTO citas (fecha, estado, servicios, id_servicio, id_cliente, id_veterinario, id_mascota)
              VALUES (?, ?, ?, ?, ?, ?, ?)`,
@@ -2094,12 +2215,12 @@ app.post("/citas", authenticateToken, async (req, res) => {
         const newCitaId = result.insertId;
         const [newCita] = await pool.query("SELECT * FROM citas WHERE id_cita = ?", [newCitaId]);
 
-        // Notifications logic for new appointment (always PENDIENTE)
+        // Lógica de notificaciones para la nueva cita (siempre PENDIENTE)
         const [assignedVet] = await pool.query("SELECT nombre, apellido, email FROM usuarios WHERE id = ?", [assignedVetId]);
         const vetName = assignedVet.length > 0 ? `${assignedVet[0].nombre} ${assignedVet[0].apellido}` : 'Veterinario asignado';
         const vetEmail = assignedVet.length > 0 ? assignedVet[0].email : null;
 
-        // Notify the assigned veterinarian about the new PENDING appointment
+        // Notificar al veterinario asignado sobre la nueva cita PENDIENTE
         await pool.query(
             `INSERT INTO notificaciones (id_usuario, tipo, mensaje, referencia_id) VALUES (?, ?, ?, ?)`,
             [assignedVetId, 'cita_creada_vet', `Nueva cita PENDIENTE de ${cliente_nombre} para ${mascota_nombre} (${servicio_nombre}) el ${fecha_cita}.`, newCitaId]
@@ -2112,7 +2233,7 @@ app.post("/citas", authenticateToken, async (req, res) => {
             );
         }
 
-        // Notify the client that their appointment is PENDING
+        // Notificar al cliente que su cita está PENDIENTE
         await pool.query(
             `INSERT INTO notificaciones (id_usuario, tipo, mensaje, referencia_id) VALUES (?, ?, ?, ?)`,
             [id_cliente, 'cita_registrada_user', `Tu cita para ${mascota_nombre} (${servicio_nombre}) el ${fecha_cita} ha sido registrada y está PENDIENTE de confirmación.`, newCitaId]
@@ -2120,7 +2241,7 @@ app.post("/citas", authenticateToken, async (req, res) => {
 
 
         res.status(201).json({ success: true, message: "Cita registrada correctamente y en estado PENDIENTE.", data: newCita[0] });
-        console.log("[CREATE_APPOINTMENT] Appointment created successfully and is PENDING:", newCitaId); // Debugging log
+        console.log("[CREATE_APPOINTMENT] Appointment created successfully and is PENDING:", newCitaId); // Log de depuración
 
     } catch (error) {
         console.error("Error al registrar cita:", error);
@@ -2128,7 +2249,7 @@ app.post("/citas", authenticateToken, async (req, res) => {
     }
 });
 
-// Actualizar cita (admin/vet/owner for cancel)
+// Actualizar cita (admin/vet/owner para cancelar)
 app.put("/citas/:id", authenticateToken, async (req, res) => {
     const { id } = req.params;
     let { fecha_cita, estado, notas_adicionales, id_servicio, id_cliente, id_veterinario, id_mascota } = req.body;
@@ -2138,28 +2259,29 @@ app.put("/citas/:id", authenticateToken, async (req, res) => {
         const userIdFromToken = req.user.id;
         const userRole = req.user.role;
 
+        // Obtener la cita existente para verificar permisos y estado anterior
         const [citaResult] = await pool.query("SELECT id_cliente, id_veterinario, estado, id_mascota FROM citas WHERE id_cita = ?", [id]);
         if (citaResult.length === 0) {
             return res.status(404).json({ success: false, message: "Cita no encontrada." });
         }
         const existingCita = citaResult[0];
         const oldEstado = existingCita.estado;
-        const newEstadoUpper = estado ? estado.toUpperCase() : null; // Ensure new state is uppercase for comparison
+        const newEstadoUpper = estado ? estado.toUpperCase() : null; // Asegura que el nuevo estado esté en mayúsculas para la comparación
 
         let isAuthorized = false;
 
         if (userRole === 'admin') {
-            // Admin can do anything
+            // El administrador puede realizar cualquier acción
             isAuthorized = true;
         } else if (userRole === 'usuario') {
-            // A regular user can only cancel their own appointments
+            // Un usuario regular solo puede cancelar sus propias citas
             if (userIdFromToken === existingCita.id_cliente && newEstadoUpper === 'CANCELADA') {
                 isAuthorized = true;
             } else {
                 return res.status(403).json({ success: false, message: "Acceso denegado. Los usuarios solo pueden cancelar sus propias citas." });
             }
         } else if (userRole === 'veterinario') {
-            // A veterinarian can accept, reject, complete, or cancel their assigned appointments
+            // Un veterinario puede aceptar, rechazar, completar o cancelar sus citas asignadas
             if (userIdFromToken === existingCita.id_veterinario) {
                 if (['ACEPTADA', 'RECHAZADA', 'COMPLETA', 'CANCELADA'].includes(newEstadoUpper)) {
                     isAuthorized = true;
@@ -2181,7 +2303,7 @@ app.put("/citas/:id", authenticateToken, async (req, res) => {
         if (fecha_cita !== undefined) { fields.push('fecha = ?'); values.push(fecha_cita); }
 
         if (newEstadoUpper !== null) {
-            fields.push('estado = ?'); values.push(newEstadoUpper); // Save state in uppercase
+            fields.push('estado = ?'); values.push(newEstadoUpper); // Guarda el estado en mayúsculas
         }
 
         if (notas_adicionales !== undefined) { fields.push('servicios = ?'); values.push(notas_adicionales); }
@@ -2192,10 +2314,10 @@ app.put("/citas/:id", authenticateToken, async (req, res) => {
             fields.push('id_servicio = ?'); values.push(id_servicio);
         }
 
-        // IMPORTANT: Re-validate id_mascota against id_cliente when updating
+        // IMPORTANTE: Re-validar id_mascota contra id_cliente al actualizar
         if (id_mascota !== undefined) {
-            // Ensure the provided id_mascota belongs to the *current* id_cliente of the appointment
-            // or the *new* id_cliente if it's also being changed in this request (only by admin)
+            // Asegura que el id_mascota proporcionado pertenezca al id_cliente *actual* de la cita
+            // o al *nuevo* id_cliente si también se está cambiando en esta solicitud (solo por admin)
             const targetClientId = (userRole === 'admin' && id_cliente !== undefined) ? id_cliente : existingCita.id_cliente;
 
             const [mascota] = await pool.query("SELECT id_mascota FROM mascotas WHERE id_mascota = ? AND id_propietario = ?", [id_mascota, targetClientId]);
@@ -2205,7 +2327,7 @@ app.put("/citas/:id", authenticateToken, async (req, res) => {
             fields.push('id_mascota = ?'); values.push(id_mascota);
         }
 
-        // Only admin can change client or vet of an appointment
+        // Solo el administrador puede cambiar el cliente o el veterinario de una cita
         if (userRole === 'admin') {
             if (id_cliente !== undefined) {
                 const [cliente] = await pool.query("SELECT id FROM usuarios WHERE id = ? AND role = 'usuario'", [id_cliente]);
@@ -2282,21 +2404,21 @@ app.put("/citas/:id", authenticateToken, async (req, res) => {
                     [clienteId, 'cita_rechazada_user', `Tu cita para ${mascotaNombre} (${servicioNombre}) el ${citaFecha} ha sido RECHAZADA por ${veterinarioNombre}. Por favor, reagenda o contacta al veterinario.`, id]
                 );
             } else if (newEstadoUpper === 'CANCELADA') {
-                // Determine who cancelled to send appropriate notification
+                // Determinar quién canceló para enviar la notificación apropiada
                 if (userRole === 'usuario' && userIdFromToken === clienteId) {
-                    // Client cancelled
+                    // Cliente canceló
                     await pool.query(
                         `INSERT INTO notificaciones (id_usuario, tipo, mensaje, referencia_id) VALUES (?, ?, ?, ?)`,
                         [veterinarioId, 'cita_cancelada_vet', `La cita de ${updatedCita.propietario_nombre} para ${mascotaNombre} el ${citaFecha} ha sido CANCELADA por el cliente.`, id]
                     );
                 } else if (userRole === 'veterinario' && userIdFromToken === veterinarioId) {
-                    // Veterinarian cancelled
+                    // Veterinario canceló
                     await pool.query(
                         `INSERT INTO notificaciones (id_usuario, tipo, mensaje, referencia_id) VALUES (?, ?, ?, ?)`,
                         [clienteId, 'cita_cancelada_user', `Tu cita para ${mascotaNombre} (${servicioNombre}) el ${citaFecha} ha sido CANCELADA por el veterinario ${veterinarioNombre}.`, id]
                     );
                 } else if (userRole === 'admin') {
-                    // Admin cancelled
+                    // Administrador canceló
                     await pool.query(
                         `INSERT INTO notificaciones (id_usuario, tipo, mensaje, referencia_id) VALUES (?, ?, ?, ?)`,
                         [clienteId, 'cita_cancelada_admin', `Tu cita para ${mascotaNombre} (${servicioNombre}) el ${citaFecha} ha sido CANCELADA por un administrador.`, id]
@@ -2309,7 +2431,7 @@ app.put("/citas/:id", authenticateToken, async (req, res) => {
                     }
                 }
             } else if (newEstadoUpper === 'COMPLETA') {
-                // Only vet or admin can mark as complete, notify client
+                // Solo veterinario o administrador pueden marcar como completa, notificar al cliente
                 await pool.query(
                     `INSERT INTO notificaciones (id_usuario, tipo, mensaje, referencia_id) VALUES (?, ?, ?, ?)`,
                     [clienteId, 'cita_completada_user', `Tu cita para ${mascotaNombre} (${servicioNombre}) el ${citaFecha} ha sido marcada como COMPLETADA por ${veterinarioNombre}.`, id]
@@ -2326,10 +2448,10 @@ app.put("/citas/:id", authenticateToken, async (req, res) => {
     }
 });
 
-// Eliminar cita (admin)
+// Eliminar cita (solo para administradores)
 app.delete("/citas/:id", authenticateToken, isAdmin, async (req, res) => {
     const { id } = req.params;
-    console.log("[DELETE_APPOINTMENT] Deleting appointment with ID:", id); // Debugging log
+    console.log("[DELETE_APPOINTMENT] Deleting appointment with ID:", id); // Log de depuración
 
     try {
         const [result] = await pool.query("DELETE FROM citas WHERE id_cita = ?", [id]);
@@ -2338,7 +2460,7 @@ app.delete("/citas/:id", authenticateToken, isAdmin, async (req, res) => {
             return res.status(404).json({ success: false, message: "Cita no encontrada." });
         }
         res.json({ success: true, message: "Cita eliminada correctamente." });
-        console.log("[DELETE_APPOINTMENT] Appointment deleted successfully:", id); // Debugging log
+        console.log("[DELETE_APPOINTMENT] Appointment deleted successfully:", id); // Log de depuración
 
     } catch (error) {
         console.error("Error al eliminar cita:", error);
@@ -2346,50 +2468,48 @@ app.delete("/citas/:id", authenticateToken, isAdmin, async (req, res) => {
     }
 });
 
-// =============================================
+// =============================================================================
 // RUTAS DE GESTIÓN DE NOTIFICACIONES
-// =============================================
+// =============================================================================
 
-// Obtener notificaciones para un usuario específico (cliente o veterinario)
-app.get("/api/notifications/veterinarian/:veterinarianId", authenticateToken, async (req, res) => { // Changed path to match frontend
-    const { veterinarianId } = req.params;
-    const { role } = req.user; // Rol del usuario autenticado, obtenido del token
-
-    // Validar que el usuario solo pueda ver sus propias notificaciones
-    if (req.user.id !== parseInt(veterinarianId) && role !== 'admin') {
-        return res.status(403).json({ success: false, message: 'Acceso denegado. No tienes permisos para ver estas notificaciones.' });
-    }
-
+// Ruta para obtener notificaciones por ID de usuario (cliente o veterinario)
+// Esta ruta es utilizada por el frontend para cargar las notificaciones del usuario logeado.
+app.get('/api/notifications/user/:id', authenticateToken, async (req, res) => {
     try {
-        let query = `
-            SELECT id_notificacion, id_usuario, tipo, mensaje, leida, fecha_creacion, referencia_id
-            FROM notificaciones
-            WHERE id_usuario = ?
-            ORDER BY fecha_creacion DESC;
-        `;
-        const [notifications] = await pool.query(query, [veterinarianId]);
+        const userId = req.params.id;
+        // Verifica si el usuario autenticado tiene permiso para ver estas notificaciones
+        // (admin, veterinario o el propio usuario)
+        if (req.user.role !== 'admin' && req.user.role !== 'veterinario' && req.user.id !== parseInt(userId)) {
+            return res.status(403).json({ success: false, message: "Acceso denegado. No tienes permiso para ver estas notificaciones." });
+        }
+
+        const [notifications] = await pool.query(
+            `SELECT id_notificacion, id_usuario, tipo, mensaje, leida, fecha_creacion, referencia_id
+             FROM notificaciones WHERE id_usuario = ? ORDER BY fecha_creacion DESC`,
+            [userId]
+        );
         res.json({ success: true, data: notifications });
     } catch (error) {
-        console.error("Error al obtener notificaciones del veterinario:", error);
-        // Enviar un mensaje de error más específico en desarrollo
-        res.status(500).json({ success: false, message: "Error al obtener notificaciones del veterinario.", error: process.env.NODE_ENV === 'development' ? error.message : "Error interno del servidor." });
+        console.error("Error al obtener notificaciones por usuario:", error);
+        res.status(500).json({ success: false, message: "Error al obtener notificaciones", error: process.env.NODE_ENV === 'development' ? error.stack : error.message });
     }
 });
 
 // Marcar una notificación como leída
-app.put("/api/notifications/mark-read/:notificationId", authenticateToken, async (req, res) => { // Changed path to match frontend
+// CORREGIDO: Ruta cambiada de "/api/notifications/mark-read/:notificationId" a "/api/notifications/:notificationId/read"
+app.put("/api/notifications/:notificationId/read", authenticateToken, async (req, res) => {
     const { notificationId } = req.params;
     const userIdFromToken = req.user.id;
-    const { leida } = req.body; // Expecting 'leida' (boolean) in the request body
+    const { leida } = req.body; // Se espera 'leida' (booleano) en el cuerpo de la solicitud
 
     if (typeof leida === 'undefined') {
         return res.status(400).json({ success: false, message: 'El estado "leida" es requerido.' });
     }
 
     try {
-        // Primero, verificar que la notificación pertenece al usuario autenticado
+        // Primero, verificar que la notificación pertenece al usuario autenticado o es admin
         const [notificationCheck] = await pool.query(
-            `SELECT id_usuario FROM notificaciones WHERE id_notificacion = ?`, // Changed to 'notificaciones'
+            `SELECT id_usuario FROM notificaciones WHERE id_notificacion = ?`,
             [notificationId]
         );
 
@@ -2402,11 +2522,12 @@ app.put("/api/notifications/mark-read/:notificationId", authenticateToken, async
         }
 
         const [result] = await pool.query(
-            `UPDATE notificaciones SET leida = ? WHERE id_notificacion = ?`, // Changed to 'notificaciones'
+            `UPDATE notificaciones SET leida = ? WHERE id_notificacion = ?`,
             [leida, notificationId]
         );
 
         if (result.affectedRows === 0) {
+            // Esto podría ocurrir si la notificación ya estaba en el estado solicitado
             return res.status(404).json({ success: false, message: 'Notificación no encontrada o ya estaba en el estado solicitado.' });
         }
         res.json({ success: true, message: 'Notificación actualizada exitosamente.' });
@@ -2417,7 +2538,7 @@ app.put("/api/notifications/mark-read/:notificationId", authenticateToken, async
 });
 
 // Eliminar una notificación
-app.delete("/api/notifications/:notificationId", authenticateToken, async (req, res) => { // Changed path to match frontend
+app.delete("/api/notifications/:notificationId", authenticateToken, async (req, res) => {
     const { notificationId } = req.params;
     const userIdFromToken = req.user.id;
     const userRoleFromToken = req.user.role;
@@ -2425,7 +2546,7 @@ app.delete("/api/notifications/:notificationId", authenticateToken, async (req, 
     try {
         // Primero, verificar que la notificación pertenece al usuario autenticado o es admin
         const [notificationCheck] = await pool.query(
-            `SELECT id_usuario FROM notificaciones WHERE id_notificacion = ?`, // Changed to 'notificaciones'
+            `SELECT id_usuario FROM notificaciones WHERE id_notificacion = ?`,
             [notificationId]
         );
 
@@ -2438,7 +2559,7 @@ app.delete("/api/notifications/:notificationId", authenticateToken, async (req, 
         }
 
         const [result] = await pool.query(
-            `DELETE FROM notificaciones WHERE id_notificacion = ?`, // Changed to 'notificaciones'
+            `DELETE FROM notificaciones WHERE id_notificacion = ?`,
             [notificationId]
         );
 
@@ -2454,7 +2575,7 @@ app.delete("/api/notifications/:notificationId", authenticateToken, async (req, 
 
 // Ruta para crear una notificación (ej. para uso interno del backend al agendar/cancelar citas)
 // Esta ruta podría ser invocada por otras funciones del backend, no necesariamente desde el frontend directamente
-app.post('/api/notifications', authenticateToken, async (req, res) => { // Changed path to match frontend
+app.post('/api/notifications', authenticateToken, async (req, res) => {
     const { id_usuario, tipo, mensaje, referencia_id } = req.body;
     const creatorIdFromToken = req.user.id;
     const creatorRoleFromToken = req.user.role;
@@ -2471,7 +2592,7 @@ app.post('/api/notifications', authenticateToken, async (req, res) => { // Chang
 
     try {
         const [result] = await pool.query(
-            `INSERT INTO notificaciones (id_usuario, tipo, mensaje, referencia_id) VALUES (?, ?, ?, ?)`, // Changed to 'notificaciones'
+            `INSERT INTO notificaciones (id_usuario, tipo, mensaje, referencia_id) VALUES (?, ?, ?, ?)`,
             [id_usuario, tipo, mensaje, referencia_id || null]
         );
         res.status(201).json({ success: true, message: 'Notificación creada exitosamente.', id: result.insertId });
@@ -2482,9 +2603,9 @@ app.post('/api/notifications', authenticateToken, async (req, res) => { // Chang
 });
 
 
-// =============================================
+// =============================================================================
 // RUTAS YA EXISTENTES Y AJUSTADAS PARA COHERENCIA
-// =============================================
+// =============================================================================
 
 // ### **VISUALIZACIÓN DE CITAS** (Endpoint para Admin)
 app.get("/admin/citas", authenticateToken, isAdmin, async (req, res) => {
@@ -2548,37 +2669,25 @@ app.get("/admin/historiales", authenticateToken, isAdmin, async (req, res) => {
 });
 
 
-// Iniciar el servidor
+// =============================================================================
+// INICIO DEL SERVIDOR Y MANEJO DE ERRORES GLOBAL
+// =============================================================================
+
+// Iniciar el servidor Express en el puerto especificado
 app.listen(PORT, () => {
     console.log(`Servidor corriendo en el puerto ${PORT}`);
 });
 
 // Middleware de manejo de errores global (DEBE SER EL ÚLTIMO app.use)
+// Este middleware captura cualquier error no manejado en las rutas anteriores.
 app.use((err, req, res, next) => {
-    console.error("Unhandled server error:", err);
+    console.error("Unhandled server error:", err); // Log del error completo en la consola del servidor
     res.status(500).json({
         success: false,
         message: "Ocurrió un error inesperado en el servidor.",
+        // En desarrollo, se envía el stack trace para depuración; en producción, solo un mensaje genérico.
         error: process.env.NODE_ENV === 'development' ? err.stack : err.message
     });
 });
-// Ruta para obtener notificaciones por ID de usuario
-app.get('/api/notifications/user/:id', authenticateToken, async (req, res) => {
-    try {
-        const userId = req.params.id;
-        // Verifica si el usuario autenticado tiene permiso para ver estas notificaciones
-        // Por ejemplo, si es admin, veterinario o el propio usuario
-        if (req.user.role !== 'admin' && req.user.role !== 'veterinario' && req.user.id !== parseInt(userId)) {
-            return res.status(403).json({ success: false, message: "Acceso denegado. No tienes permiso para ver estas notificaciones." });
-        }
 
-        const [notifications] = await pool.query(
-            `SELECT * FROM notificaciones WHERE id_usuario = ? ORDER BY fecha_creacion DESC`,
-            [userId]
-        );
-        res.json({ success: true, data: notifications });
-    } catch (error) {
-        console.error("Error al obtener notificaciones por usuario:", error);
-        res.status(500).json({ success: false, message: "Error al obtener notificaciones", error: process.env.NODE_ENV === 'development' ? error.stack : error.message });
-    }
-});
+// Fin del archivo server.txt
