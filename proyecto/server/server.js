@@ -80,7 +80,7 @@ app.use(express.json()); // Habilita el parsing de JSON en el cuerpo de las peti
 const pool = mysql.createPool({
     host: process.env.DB_HOST || "127.0.0.1",       // Host de la base de datos
     user: process.env.DB_USER || "root",           // Usuario de la base de datos
-    password: process.env.DB_PASSWORD || "12345678", // Contraseña de la base de datos
+    password: process.env.DB_PASSWORD || "", // Contraseña de la base de datos
     database: process.env.DB_NAME || "veterinaria", // Nombre de la base de datos
     waitForConnections: true,                      // Esperar si no hay conexiones disponibles
     connectionLimit: 10,                           // Número máximo de conexiones en el pool
@@ -2667,7 +2667,62 @@ app.get("/admin/historiales", authenticateToken, isAdmin, async (req, res) => {
         res.status(500).json({ success: false, message: "Error al obtener historiales médicos de admin", error: process.env.NODE_ENV === 'development' ? error.stack : error.message });
     }
 });
+// Ruta para agendar una nueva cita
+app.post('/citas', authenticateToken, async (req, res) => {
+    const { id_cliente, id_mascota, id_veterinario, fecha_cita, motivo, estado } = req.body;
 
+    // Validaciones básicas
+    if (!id_cliente || !id_mascota || !id_veterinario || !fecha_cita || !motivo) {
+        return res.status(400).json({ success: false, message: "Todos los campos obligatorios deben ser proporcionados." });
+    }
+
+    try {
+        // Verificar si el cliente existe y su rol es 'usuario'
+        const [cliente] = await pool.query("SELECT id FROM usuarios WHERE id = ? AND role = 'usuario'", [id_cliente]);
+        if (cliente.length === 0) {
+            return res.status(400).json({ success: false, message: "ID de cliente no válido o no es un usuario regular." });
+        }
+
+        // Verificar si la mascota existe y pertenece al cliente
+        const [mascota] = await pool.query("SELECT id_propietario FROM mascotas WHERE id_mascota = ?", [id_mascota]);
+        if (mascota.length === 0) {
+            return res.status(404).json({ success: false, message: "Mascota no encontrada." });
+        }
+        if (mascota[0].id_propietario !== parseInt(id_cliente)) {
+            return res.status(403).json({ success: false, message: "La mascota no pertenece al cliente especificado." });
+        }
+
+        // Verificar si el veterinario existe y su rol es 'veterinario'
+        const [veterinario] = await pool.query("SELECT id FROM usuarios WHERE id = ? AND role = 'veterinario'", [id_veterinario]);
+        if (veterinario.length === 0) {
+            return res.status(400).json({ success: false, message: "ID de veterinario no válido o no es un veterinario registrado." });
+        }
+
+        // Asegurar que solo el cliente o un administrador/veterinario pueda agendar la cita para ese cliente
+        if (req.user.role === 'usuario' && req.user.id !== parseInt(id_cliente)) {
+            return res.status(403).json({ success: false, message: "Acceso denegado. Solo puedes agendar citas para tu propio perfil." });
+        }
+
+        // Insertar la cita en la base de datos
+        const [result] = await pool.query(
+            `INSERT INTO citas (id_cliente, id_mascota, id_veterinario, fecha_cita, motivo, estado) VALUES (?, ?, ?, ?, ?, ?)`,
+            [id_cliente, id_mascota, id_veterinario, fecha_cita, motivo, estado || 'pendiente']
+        );
+
+        // Obtener la cita recién creada para devolverla en la respuesta
+        const [newCita] = await pool.query("SELECT * FROM citas WHERE id_cita = ?", [result.insertId]);
+
+        res.status(201).json({ success: true, message: "Cita agendada correctamente.", data: newCita[0] });
+
+    } catch (error) {
+        console.error("Error al agendar cita:", error);
+        res.status(500).json({
+            success: false,
+            message: "Error al agendar cita.",
+            error: process.env.NODE_ENV === 'development' ? error.stack : error.message
+        });
+    }
+});
 
 // =============================================================================
 // INICIO DEL SERVIDOR Y MANEJO DE ERRORES GLOBAL

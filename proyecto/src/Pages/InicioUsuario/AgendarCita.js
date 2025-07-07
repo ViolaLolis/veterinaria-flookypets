@@ -144,9 +144,10 @@ const AgendarCita = () => {
         id_servicio: servicio.id_servicio,
         id_veterinario: selectedVeterinario ? parseInt(selectedVeterinario) : null,
         id_mascota: parseInt(selectedMascota),
-        fecha_cita: fechaHora.toISOString().slice(0, 19).replace('T', ' '),
-        notas_adicionales: servicio.nombre,
-        estado: 'PENDIENTE'
+        fecha: fechaHora.toISOString().slice(0, 19).replace('T', ' '),
+        hora: selectedTime, // Agregado: Envía la hora por separado
+        motivo: servicio.nombre, // Cambiado: 'notas_adicionales' a 'motivo'
+        estado: 'pendiente'
       };
 
       const response = await authFetch('/citas', {
