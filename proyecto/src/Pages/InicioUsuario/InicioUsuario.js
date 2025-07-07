@@ -107,7 +107,8 @@ const InicioUsuario = ({ user, setUser }) => {
       return;
     }
     try {
-      const response = await authFetch(`/api/notifications`);
+      // CAMBIO AQUÍ: Usar el ID de usuario en la ruta
+      const response = await authFetch(`/api/notifications/user/${currentUserId}`);
       if (response.success) {
         setNotifications(response.data);
       } else {

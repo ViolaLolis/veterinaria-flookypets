@@ -120,9 +120,10 @@ const AgendarCita = () => {
   };
 
   const handleSubmit = async () => {
+    // Ajusta la validación del campo de fecha para usar 'fecha' en lugar de 'fecha_cita'
     const mascotaError = validateField('id_mascota_cita', selectedMascota);
     const servicioError = validateField('id_servicio_cita', servicio?.id_servicio);
-    const fechaHoraError = validateField('fecha_cita', date && selectedTime ? `${date.toISOString().split('T')[0]} ${selectedTime}` : '');
+    const fechaHoraError = validateField('fecha', date && selectedTime ? `${date.toISOString().split('T')[0]} ${selectedTime}` : '');
 
     if (mascotaError || servicioError || fechaHoraError) {
       setErrorSeleccion(mascotaError || servicioError || fechaHoraError);
@@ -139,15 +140,15 @@ const AgendarCita = () => {
       fechaHora.setMinutes(parseInt(minutes, 10));
       fechaHora.setSeconds(0);
 
+      // Objeto de la cita a enviar al backend
       const nuevaCita = {
         id_cliente: user.id,
-        id_servicio: servicio.id_servicio,
-        id_veterinario: selectedVeterinario ? parseInt(selectedVeterinario) : null,
+        id_servicio: servicio.id_servicio, // Asegúrate de que este ID sea correcto
+        id_veterinario: selectedVeterinario ? parseInt(selectedVeterinario) : null, // Puede ser null si es opcional
         id_mascota: parseInt(selectedMascota),
-        fecha: fechaHora.toISOString().slice(0, 19).replace('T', ' '),
-        hora: selectedTime, // Agregado: Envía la hora por separado
-        motivo: servicio.nombre, // Cambiado: 'notas_adicionales' a 'motivo'
-        estado: 'pendiente'
+        fecha: fechaHora.toISOString().slice(0, 19).replace('T', ' '), // Formato DATETIME esperado por la BD y el backend
+        motivo: servicio.nombre, // Se mantiene como 'motivo' para el frontend, el backend lo mapeará a 'servicios'
+        estado: 'pendiente' // Estado inicial de la cita
       };
 
       const response = await authFetch('/citas', {

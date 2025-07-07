@@ -2667,63 +2667,55 @@ app.get("/admin/historiales", authenticateToken, isAdmin, async (req, res) => {
         res.status(500).json({ success: false, message: "Error al obtener historiales médicos de admin", error: process.env.NODE_ENV === 'development' ? error.stack : error.message });
     }
 });
-// Ruta para agendar una nueva cita
-app.post('/citas', authenticateToken, async (req, res) => {
-    const { id_cliente, id_mascota, id_veterinario, fecha_cita, motivo, estado } = req.body;
-
-    // Validaciones básicas
-    if (!id_cliente || !id_mascota || !id_veterinario || !fecha_cita || !motivo) {
-        return res.status(400).json({ success: false, message: "Todos los campos obligatorios deben ser proporcionados." });
-    }
-
+// Ruta para obtener todas las citas (accesible para admin y veterinarios, o clientes viendo sus propias citas)
+app.get('/api/citas', authenticateToken, async (req, res) => {
     try {
-        // Verificar si el cliente existe y su rol es 'usuario'
-        const [cliente] = await pool.query("SELECT id FROM usuarios WHERE id = ? AND role = 'usuario'", [id_cliente]);
-        if (cliente.length === 0) {
-            return res.status(400).json({ success: false, message: "ID de cliente no válido o no es un usuario regular." });
+        const { role, id: userId } = req.user; // Obtener rol e ID del usuario autenticado
+
+        let query = `
+            SELECT 
+                c.*,
+                u.nombre AS cliente_nombre,
+                u.apellido AS cliente_apellido,
+                m.nombre AS mascota_nombre,
+                v.nombre AS veterinario_nombre,
+                v.apellido AS veterinario_apellido,
+                s.nombre AS servicio_nombre
+            FROM 
+                citas c
+            JOIN 
+                usuarios u ON c.id_cliente = u.id
+            JOIN 
+                mascotas m ON c.id_mascota = m.id_mascota
+            JOIN 
+                servicios s ON c.id_servicio = s.id_servicio
+            LEFT JOIN 
+                usuarios v ON c.id_veterinario = v.id`;
+        
+        const queryParams = [];
+
+        if (role === 'veterinario') {
+            query += ` WHERE c.id_veterinario = ?`;
+            queryParams.push(userId);
+        } else if (role === 'usuario') {
+            query += ` WHERE c.id_cliente = ?`;
+            queryParams.push(userId);
         }
+        // Si es admin, no se agrega WHERE, ve todas las citas
 
-        // Verificar si la mascota existe y pertenece al cliente
-        const [mascota] = await pool.query("SELECT id_propietario FROM mascotas WHERE id_mascota = ?", [id_mascota]);
-        if (mascota.length === 0) {
-            return res.status(404).json({ success: false, message: "Mascota no encontrada." });
-        }
-        if (mascota[0].id_propietario !== parseInt(id_cliente)) {
-            return res.status(403).json({ success: false, message: "La mascota no pertenece al cliente especificado." });
-        }
+        query += ` ORDER BY c.fecha DESC`;
 
-        // Verificar si el veterinario existe y su rol es 'veterinario'
-        const [veterinario] = await pool.query("SELECT id FROM usuarios WHERE id = ? AND role = 'veterinario'", [id_veterinario]);
-        if (veterinario.length === 0) {
-            return res.status(400).json({ success: false, message: "ID de veterinario no válido o no es un veterinario registrado." });
-        }
-
-        // Asegurar que solo el cliente o un administrador/veterinario pueda agendar la cita para ese cliente
-        if (req.user.role === 'usuario' && req.user.id !== parseInt(id_cliente)) {
-            return res.status(403).json({ success: false, message: "Acceso denegado. Solo puedes agendar citas para tu propio perfil." });
-        }
-
-        // Insertar la cita en la base de datos
-        const [result] = await pool.query(
-            `INSERT INTO citas (id_cliente, id_mascota, id_veterinario, fecha_cita, motivo, estado) VALUES (?, ?, ?, ?, ?, ?)`,
-            [id_cliente, id_mascota, id_veterinario, fecha_cita, motivo, estado || 'pendiente']
-        );
-
-        // Obtener la cita recién creada para devolverla en la respuesta
-        const [newCita] = await pool.query("SELECT * FROM citas WHERE id_cita = ?", [result.insertId]);
-
-        res.status(201).json({ success: true, message: "Cita agendada correctamente.", data: newCita[0] });
-
+        const [citas] = await pool.query(query, queryParams);
+        res.json({ success: true, data: citas });
     } catch (error) {
-        console.error("Error al agendar cita:", error);
-        res.status(500).json({
-            success: false,
-            message: "Error al agendar cita.",
-            error: process.env.NODE_ENV === 'development' ? error.stack : error.message
+        console.error("Error al obtener citas:", error);
+        res.status(500).json({ 
+            success: false, 
+            message: "Error al obtener citas.", 
+            error: process.env.NODE_ENV === 'development' ? error.stack : error.message 
         });
     }
 });
-
 // =============================================================================
 // INICIO DEL SERVIDOR Y MANEJO DE ERRORES GLOBAL
 // =============================================================================

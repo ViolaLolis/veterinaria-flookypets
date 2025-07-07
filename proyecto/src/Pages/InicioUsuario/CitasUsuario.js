@@ -1,49 +1,18 @@
+// CitasUsuario.js
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import styles from './Styles/CitasUsuario.module.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-    faCalendarAlt, faShoppingCart, faPaw, faUser, faClipboardList,
-    faChevronDown, faChevronUp, faTimesCircle, faPlusCircle
+    faCalendarAlt, faShoppingCart, faPaw, faUser, faClipboardList, faTimesCircle, faPlusCircle,
 } from '@fortawesome/free-solid-svg-icons';
 import { FaSpinner } from 'react-icons/fa';
 import { authFetch } from '../../utils/api';
 
-// Componente de leer más / menos
-const ReadMoreLessText = ({ text, maxLength = 120 }) => {
-    const [isExpanded, setIsExpanded] = useState(false);
-
-    if (!text || text.trim() === 'N/A' || text.trim() === '') {
-        return <span className={styles.noDetailText}>No hay detalles adicionales.</span>;
-    }
-
-    if (text.length <= maxLength) {
-        return <span>{text}</span>;
-    }
-
-    const displayedText = isExpanded ? text : `${text.substring(0, maxLength)}...`;
-
-    return (
-        <div className={styles.readMoreContainer}>
-            <span id="cita-detalle-texto">{displayedText}</span>
-            <motion.button
-                onClick={() => setIsExpanded(!isExpanded)}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className={styles.readMoreButton}
-                aria-expanded={isExpanded}
-                aria-controls="cita-detalle-texto"
-            >
-                {isExpanded ? (
-                    <>Leer menos <FontAwesomeIcon icon={faChevronUp} /></>
-                ) : (
-                    <>Leer más <FontAwesomeIcon icon={faChevronDown} /></>
-                )}
-            </motion.button>
-        </div>
-    );
-};
+// El componente ReadMoreLessText ha sido eliminado según tu solicitud.
+// Si deseas reintroducirlo, asegúrate de definirlo o importarlo correctamente.
 
 const CitasUsuario = () => {
     const navigate = useNavigate();
@@ -62,17 +31,19 @@ const CitasUsuario = () => {
             return;
         }
         try {
-            const response = await authFetch(`/citas?id_cliente=${user.id}`);
+            // Asegúrate de que esta URL coincida con la ruta en tu backend
+            const response = await authFetch(`/api/citas?id_cliente=${user.id}`);
             if (response.success) {
                 const mappedAppointments = response.data.map(cita => ({
                     id_cita: cita.id_cita,
+                    // La fecha ya debería venir formateada desde el backend
                     fecha: cita.fecha,
                     servicio_nombre: cita.servicio_nombre || 'Servicio Desconocido',
                     mascota_nombre: cita.mascota_nombre || 'Mascota Desconocida',
                     mascota_especie: cita.mascota_especie || 'N/A',
                     veterinario_nombre: cita.veterinario_nombre || 'Sin asignar',
                     estado: cita.estado,
-                    detalle: cita.servicios || 'No hay observaciones adicionales para esta cita en particular.'
+                    detalle: cita.detalle || 'No hay observaciones adicionales para esta cita en particular.' // Usa 'detalle' que viene del backend
                 }));
                 // Ordenar las citas: primero pendientes/aceptadas, luego completadas/canceladas, por fecha.
                 const sortedAppointments = mappedAppointments.sort((a, b) => {
@@ -80,7 +51,9 @@ const CitasUsuario = () => {
                     if (statusOrder[a.estado] !== statusOrder[b.estado]) {
                         return statusOrder[a.estado] - statusOrder[b.estado];
                     }
-                    return new Date(a.fecha) - new Date(b.fecha);
+                    // Asegúrate de que las fechas sean objetos Date válidos para la comparación
+                    // Al venir del backend en formato ISO, new Date() debería manejarlas bien.
+                    return new Date(a.fecha).getTime() - new Date(b.fecha).getTime();
                 });
                 setUserAppointments(sortedAppointments);
             } else {
@@ -96,7 +69,7 @@ const CitasUsuario = () => {
 
     useEffect(() => {
         fetchUserAppointments();
-    }, [user?.id]); // Depende específicamente de user.id para evitar recargas innecesarias
+    }, [user?.id]);
 
     const openConfirmModal = (appointment) => {
         setAppointmentToManage(appointment);
@@ -113,9 +86,12 @@ const CitasUsuario = () => {
 
         setIsManagingAppointment(true);
         try {
-            const response = await authFetch(`/citas/${appointmentToManage.id_cita}`, {
+            const response = await authFetch(`/api/citas/${appointmentToManage.id_cita}`, { // Ruta actualizada para coincidir con tu backend
                 method: 'PUT',
-                body: { estado: 'cancelada' }
+                body: JSON.stringify({ estado: 'cancelada' }), // Asegúrate de enviar como JSON string
+                headers: {
+                    'Content-Type': 'application/json'
+                }
             });
 
             if (response.success) {
@@ -129,7 +105,8 @@ const CitasUsuario = () => {
                         if (statusOrder[a.estado] !== statusOrder[b.estado]) {
                             return statusOrder[a.estado] - statusOrder[b.estado];
                         }
-                        return new Date(a.fecha) - new Date(b.fecha);
+                        // Aquí también, asegúrate de que sean fechas válidas.
+                        return new Date(a.fecha).getTime() - new Date(b.fecha).getTime();
                     })
                 );
                 showNotification(`Cita para ${appointmentToManage.mascota_nombre} ha sido cancelada.`, 'success');
@@ -146,8 +123,15 @@ const CitasUsuario = () => {
     };
 
     const formatDateTime = (dateTimeString) => {
+        if (!dateTimeString) {
+            return 'Fecha no disponible';
+        }
         try {
             const date = new Date(dateTimeString);
+            if (isNaN(date.getTime())) {
+                console.warn("Fecha inválida generada para el string:", dateTimeString);
+                return 'Fecha no válida';
+            }
             return date.toLocaleDateString('es-ES', {
                 year: 'numeric',
                 month: 'long',
@@ -155,8 +139,9 @@ const CitasUsuario = () => {
                 hour: '2-digit',
                 minute: '2-digit'
             });
-        } catch {
-            return 'Fecha inválida';
+        } catch (error) {
+            console.error("Error al formatear la fecha:", dateTimeString, error);
+            return 'Error de formato de fecha';
         }
     };
 
@@ -197,7 +182,7 @@ const CitasUsuario = () => {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, x: -50 }}
-                                whileHover={{ scale: 1.01 }} // Ligeramente menos escala para no ser demasiado intrusivo
+                                whileHover={{ scale: 1.01 }}
                                 transition={{ duration: 0.2, ease: "easeOut" }}
                             >
                                 <div className={styles.citaInfoGrid}>
@@ -213,13 +198,14 @@ const CitasUsuario = () => {
                                         <FontAwesomeIcon icon={faClipboardList} className={styles.observacionIcon} />
                                         <strong>Detalles de la Cita:</strong>
                                     </div>
-                                    <ReadMoreLessText text={cita.detalle} />
+                                    {/* Aquí se reemplaza ReadMoreLessText por un span o p normal */}
+                                    <p>{cita.detalle}</p>
                                 </div>
 
                                 <div className={styles.citaActions}>
                                     {(cita.estado === 'pendiente' || cita.estado === 'aceptada') && (
                                         <motion.button
-                                            className={styles.accionBtnDanger} // Usar Danger para cancelar
+                                            className={styles.accionBtnDanger}
                                             onClick={() => openConfirmModal(cita)}
                                             whileHover={{ scale: 1.05 }}
                                             whileTap={{ scale: 0.95 }}
@@ -279,7 +265,7 @@ const CitasUsuario = () => {
 
                             <div className={styles.modalActions}>
                                 <motion.button
-                                    className={styles.modalButtonDanger} // Botón de confirmación de cancelación en rojo
+                                    className={styles.modalButtonDanger}
                                     onClick={handleCancelAppointment}
                                     disabled={isManagingAppointment}
                                     whileHover={{ scale: 1.05 }}
