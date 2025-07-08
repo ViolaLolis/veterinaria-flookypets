@@ -19,7 +19,7 @@ import EditarMascota from "./Pages/InicioUsuario/EditarMascota.js";
 import DetalleCita from "./Pages/InicioUsuario/DetalleCita.js";
 import EditarPerfil from "./Pages/InicioUsuario/EditarPerfil.js";
 import DetalleServicio from "./Pages/InicioUsuario/DetalleServicio.js";
-import DetalleHistorial from "./Pages/InicioUsuario/DetalleHistorial.js";
+import DetalleHistorial from "./Pages/InicioUsuario/DetalleHistorial.js"; // Componente para el detalle del historial del usuario
 import ListaMascotasUsuario from "./Pages/InicioUsuario/ListaMascotasUsuario.js";
 
 // Componentes de Veterinario
@@ -34,7 +34,7 @@ import EditarMascotaVeterinario from "./Pages/InicioVeterinario/EditarMascota";
 import ListaCitasVeterinario from "./Pages/InicioVeterinario/ListaCitasVeterinario";
 import DetalleCitaVeterinario from "./Pages/InicioVeterinario/DetalleCitaVeterinario";
 import ListaHistorialesVeterinario from "./Pages/InicioVeterinario/ListaHistoriales";
-import DetalleHistorialVeterinario from "./Pages/InicioVeterinario/DetalleHistorialVeterinario";
+import DetalleHistorialVeterinario from "./Pages/InicioVeterinario/DetalleHistorialVeterinario"; // Componente para el detalle del historial del veterinario
 import VerPerfilVeterinario from "./Pages/InicioVeterinario/VerPerfilVeterinario";
 import EditarPerfilVeterinario from "./Pages/InicioVeterinario/EditarPerfilVeterinario";
 import MainVeterinario from "./Pages/InicioVeterinario/MainVeterinario";
@@ -100,9 +100,9 @@ function App() {
                 showConsoleWarning();
             }).catch(err => {
                 if (window._originalConsoleError) {
-                   window._originalConsoleError("Error al cargar la advertencia de la consola:", err);
+                    window._originalConsoleError("Error al cargar la advertencia de la consola:", err);
                 } else {
-                   console.error("Error al cargar la advertencia de la consola:", err);
+                    console.error("Error al cargar la advertencia de la consola:", err);
                 }
             });
         }
@@ -152,6 +152,8 @@ function App() {
                             <Route path="citas/agendar" element={<CrearCitaVeterinario />} />
                             <Route path="citas/:id" element={<DetalleCitaVeterinario />} />
                             <Route path="historiales" element={<ListaHistorialesVeterinario />} />
+                            {/* Ruta para el detalle del historial médico para veterinarios */}
+                            <Route path="historiales/:idHistorial" element={<DetalleHistorialVeterinario />} />
                             <Route path="historiales/registrar" element={<RegistrarHistorialMedico />} />
                             <Route path="historiales/editar/:id" element={<EditarHistorialMedico />} />
                             <Route path="perfil" element={<VerPerfilVeterinario setUser={setUser} />} />
@@ -176,6 +178,7 @@ function App() {
                             <Route path="perfil/editar" element={<EditarPerfil user={user} setUser={setUser} />} />
                             <Route path="perfil/configuracion" element={<ConfiguracionPerfil user={user} setUser={setUser} />} />
                             <Route path="historial/:mascotaId" element={<HistorialMedico user={user} />} />
+                            {/* Ruta para el detalle del historial médico para usuarios */}
                             <Route path="historial/:mascotaId/:historialId" element={<DetalleHistorial user={user} />} />
                         </Route>
                     </Route>

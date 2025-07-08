@@ -3,7 +3,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams, useOutletContext } from 'react-router-dom';
 import styles from './Style/DetalleHistorialVeterinarioStyles.module.css';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'; // <--- ASEGÚRATE DE QUE ESTA LÍNEA ESTÉ PRESENTE Y SIN COMENTAR
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faArrowLeft,
   faFileMedicalAlt,
@@ -16,7 +16,7 @@ import {
   faSpinner,
   faTimesCircle,
 } from '@fortawesome/free-solid-svg-icons';
-import { authFetch } from './api';
+import { authFetch } from '../../utils/api'; // Asegúrate que la ruta a authFetch sea correcta
 
 const containerVariants = {
   hidden: { opacity: 0, x: '-100vw' },
@@ -52,7 +52,8 @@ const cardVariants = {
 
 const DetalleHistorialVeterinario = () => {
   const navigate = useNavigate();
-  const { id } = useParams();
+  // CORRECCIÓN: Cambiar 'id' a 'idHistorial' para que coincida con la ruta en App.js
+  const { idHistorial } = useParams();
   const { user, showNotification } = useOutletContext() || {};
 
   const [historial, setHistorial] = useState(null);
@@ -64,8 +65,16 @@ const DetalleHistorialVeterinario = () => {
   const fetchHistorial = useCallback(async () => {
     setLoading(true);
     setError(null);
+    // Asegúrate de que idHistorial tenga un valor antes de hacer la llamada
+    if (!idHistorial) {
+      setError('ID de historial médico no proporcionado.');
+      setLoading(false);
+      if (showNotification) showNotification('ID de historial médico no proporcionado.', 'error');
+      return;
+    }
     try {
-      const response = await authFetch(`/historial_medico/${id}`);
+      // CORRECCIÓN: Usar idHistorial en la llamada a authFetch
+      const response = await authFetch(`/historial_medico/${idHistorial}`);
       if (response.success && response.data) {
         setHistorial(response.data);
       } else {
@@ -79,7 +88,7 @@ const DetalleHistorialVeterinario = () => {
     } finally {
       setLoading(false);
     }
-  }, [id, showNotification]);
+  }, [idHistorial, showNotification]); // Asegúrate de incluir idHistorial en las dependencias
 
   useEffect(() => {
     fetchHistorial();
@@ -90,7 +99,8 @@ const DetalleHistorialVeterinario = () => {
   };
 
   const handleEdit = () => {
-    navigate(`/veterinario/historiales/editar/${id}`);
+    // CORRECCIÓN: Usar idHistorial en la navegación a la página de edición
+    navigate(`/veterinario/historiales/editar/${idHistorial}`);
   };
 
   const handleDeleteClick = () => {
@@ -100,7 +110,8 @@ const DetalleHistorialVeterinario = () => {
   const confirmDeleteHistorial = async () => {
     setIsDeleting(true);
     try {
-      const response = await authFetch(`/historial_medico/${id}`, {
+      // CORRECCIÓN: Usar idHistorial en la llamada a authFetch para eliminar
+      const response = await authFetch(`/historial_medico/${idHistorial}`, {
         method: 'DELETE',
       });
       if (response.success) {

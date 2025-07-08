@@ -1,6 +1,6 @@
 // src/Pages/InicioAdministrador/ServicesManagement.js
 import React, { useState, useEffect, useCallback } from 'react';
-import { FaBriefcaseMedical, FaSearch, FaPlus, FaEdit, FaTrash, FaSpinner, FaTimes, FaInfoCircle } from 'react-icons/fa';
+import { FaBriefcaseMedical, FaSearch, FaPlus, FaEdit, FaTrash, FaSpinner, FaTimes, FaInfoCircle, FaExclamationTriangle } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 import { authFetch } from '../../utils/api'; // Ruta ajustada
 import { validateField } from '../../utils/validation'; // Importa la función de validación
@@ -18,6 +18,13 @@ function ServicesManagement({ user }) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [formErrors, setFormErrors] = useState({}); // Estado para errores de formulario
     const { addNotification } = useNotifications(); // Usa el hook de notificaciones
+
+    // Estados para el modal de confirmación de eliminación
+    const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
+    const [serviceToDelete, setServiceToDelete] = useState(null);
+    const [deleteErrorMessage, setDeleteErrorMessage] = useState(''); // Mensaje de error específico para la eliminación
+    const [isDeleting, setIsDeleting] = useState(false); // Estado para el spinner en el modal de eliminación
+
 
     const [formData, setFormData] = useState({
         nombre: '',
@@ -44,7 +51,7 @@ function ServicesManagement({ user }) {
         } finally {
             setIsLoading(false);
         }
-    }, [authFetch, addNotification]);
+    }, [addNotification]); // Eliminado authFetch de dependencias si no es necesario (ya es una constante)
 
     useEffect(() => {
         if (user && user.token) {
@@ -59,7 +66,7 @@ function ServicesManagement({ user }) {
         const results = services.filter(service =>
             service.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
             service.descripcion.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            service.precio.toLowerCase().includes(searchTerm.toLowerCase())
+            String(service.precio).toLowerCase().includes(searchTerm.toLowerCase()) // Convertir a string para buscar en precio
         );
         setFilteredServices(results);
     }, [searchTerm, services]);
@@ -89,7 +96,7 @@ function ServicesManagement({ user }) {
         // Validar el campo individualmente al cambiar
         const errorMessage = validateField(name, value, formData);
         setFormErrors(prev => ({ ...prev, [name]: errorMessage }));
-    }, [formData]); // Depende de formData para validaciones cruzadas si las hubiera
+    }, [formData]);
 
     const handleSubmit = useCallback(async (e) => {
         e.preventDefault();
@@ -117,12 +124,20 @@ function ServicesManagement({ user }) {
             if (editingService) {
                 response = await authFetch(`/servicios/${editingService.id_servicio}`, {
                     method: 'PUT',
-                    body: formData
+                    // Asegúrate de que el body se envíe como JSON
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData) // Stringify el body
                 });
             } else {
                 response = await authFetch('/servicios', {
                     method: 'POST',
-                    body: formData
+                    // Asegúrate de que el body se envíe como JSON
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData) // Stringify el body
                 });
             }
 
@@ -139,36 +154,42 @@ function ServicesManagement({ user }) {
         } finally {
             setIsSubmitting(false);
         }
-    }, [editingService, formData, authFetch, addNotification, fetchServices]);
+    }, [editingService, formData, addNotification, fetchServices]); // Eliminado authFetch de dependencias si no es necesario
 
-    const handleDelete = useCallback(async (id) => {
-        // *** REEMPLAZO DE window.confirm ***
-        // Aquí deberías integrar un modal de confirmación personalizado.
-        // Por ejemplo:
-        // const confirmed = await showCustomConfirmModal('¿Estás seguro de eliminar este servicio? Esta acción es irreversible.');
-        // if (!confirmed) return;
+    // Función para abrir el modal de confirmación de eliminación
+    const handleDeleteClick = useCallback((service) => {
+        setServiceToDelete(service);
+        setDeleteErrorMessage(''); // Limpiar cualquier mensaje de error anterior
+        setShowDeleteConfirmModal(true);
+    }, []);
 
-        // Temporalmente, mantenemos window.confirm para funcionalidad, pero se debe reemplazar
-        if (!window.confirm('¿Estás seguro de eliminar este servicio? Esta acción es irreversible.')) {
-            return;
-        }
+    // Función para confirmar la eliminación después de la advertencia
+    const confirmDelete = useCallback(async () => {
+        if (!serviceToDelete) return;
 
-        setIsLoading(true);
+        setIsDeleting(true);
+        setDeleteErrorMessage(''); // Limpiar el mensaje de error antes de intentar eliminar
+
         try {
-            const response = await authFetch(`/servicios/${id}`, { method: 'DELETE' });
+            const response = await authFetch(`/servicios/${serviceToDelete.id_servicio}`, { method: 'DELETE' });
             if (response.success) {
                 addNotification('success', response.message || 'Servicio eliminado correctamente.', 5000);
+                setShowDeleteConfirmModal(false); // Cerrar el modal
                 fetchServices(); // Re-fetch all services
             } else {
+                // Si el backend devuelve un mensaje específico de error (ej. por clave foránea)
+                setDeleteErrorMessage(response.message || 'Error al eliminar el servicio.');
                 addNotification('error', response.message || 'Error al eliminar el servicio.', 5000);
             }
         } catch (err) {
-            addNotification('error', `Error de conexión: ${err.message}`, 5000);
+            const errorMessage = err.message || 'Error de conexión al servidor.';
+            setDeleteErrorMessage(`Error de conexión: ${errorMessage}`);
+            addNotification('error', errorMessage, 5000);
             console.error("Error deleting service:", err);
         } finally {
-            setIsLoading(false);
+            setIsDeleting(false);
         }
-    }, [authFetch, addNotification, fetchServices]);
+    }, [serviceToDelete, addNotification, fetchServices]); // Eliminado authFetch de dependencias
 
     if (isLoading && services.length === 0) {
         return (
@@ -249,7 +270,7 @@ function ServicesManagement({ user }) {
                                         </button>
                                         <button
                                             className="btn-icon btn-delete"
-                                            onClick={() => handleDelete(service.id_servicio)}
+                                            onClick={() => handleDeleteClick(service)} // Usar handleDeleteClick
                                             disabled={isLoading}
                                             title="Eliminar Servicio"
                                         >
@@ -278,6 +299,7 @@ function ServicesManagement({ user }) {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
+                        onClick={() => setIsModalOpen(false)} // Cerrar modal al hacer click fuera
                     >
                         <motion.div
                             className="modal-content"
@@ -285,6 +307,7 @@ function ServicesManagement({ user }) {
                             animate={{ scale: 1, opacity: 1 }}
                             exit={{ scale: 0.9, opacity: 0 }}
                             transition={{ duration: 0.2 }}
+                            onClick={(e) => e.stopPropagation()} // Evitar que el click en el contenido cierre el modal
                         >
                             <div className="modal-header">
                                 <h3>{editingService ? 'Editar Servicio' : 'Registrar Nuevo Servicio'}</h3>
@@ -336,6 +359,61 @@ function ServicesManagement({ user }) {
                                     {isSubmitting ? <FaSpinner className="spinner-icon" /> : (editingService ? 'Actualizar Servicio' : 'Registrar Servicio')}
                                 </button>
                             </form>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Nuevo Modal de Confirmación de Eliminación */}
+            <AnimatePresence>
+                {showDeleteConfirmModal && (
+                    <motion.div
+                        className="modal-overlay"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => setShowDeleteConfirmModal(false)}
+                    >
+                        <motion.div
+                            className="modal-content"
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            transition={{ duration: 0.2 }}
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="modal-header">
+                                <h3>Confirmar Eliminación de Servicio</h3>
+                                <button className="close-modal-btn" onClick={() => setShowDeleteConfirmModal(false)}>
+                                    <FaTimes />
+                                </button>
+                            </div>
+                            <div className="modal-body">
+                                {deleteErrorMessage ? (
+                                    <p className="error-message-modal">
+                                        <FaExclamationTriangle className="icon-warning" /> {deleteErrorMessage}
+                                    </p>
+                                ) : (
+                                    <p>¿Estás seguro de que deseas eliminar el servicio "<strong>{serviceToDelete?.nombre}</strong>"?</p>
+                                )}
+                                <p className="warning-text">Esta acción es irreversible si se completa.</p>
+                            </div>
+                            <div className="modal-actions">
+                                <button
+                                    className="btn-cancel"
+                                    onClick={() => setShowDeleteConfirmModal(false)}
+                                    disabled={isDeleting}
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    className="btn-delete"
+                                    onClick={confirmDelete}
+                                    disabled={isDeleting || deleteErrorMessage !== ''} // Deshabilitar si hay un mensaje de error que impide la eliminación
+                                >
+                                    {isDeleting ? <FaSpinner className="spinner-icon" /> : 'Sí, Eliminar'}
+                                </button>
+                            </div>
                         </motion.div>
                     </motion.div>
                 )}

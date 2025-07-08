@@ -80,7 +80,7 @@ app.use(express.json()); // Habilita el parsing de JSON en el cuerpo de las peti
 const pool = mysql.createPool({
     host: process.env.DB_HOST || "127.0.0.1",       // Host de la base de datos
     user: process.env.DB_USER || "root",           // Usuario de la base de datos
-    password: process.env.DB_PASSWORD || "", // Contraseña de la base de datos
+    password: process.env.DB_PASSWORD || "12345678", // Contraseña de la base de datos
     database: process.env.DB_NAME || "veterinaria", // Nombre de la base de datos
     waitForConnections: true,                      // Esperar si no hay conexiones disponibles
     connectionLimit: 10,                           // Número máximo de conexiones en el pool
@@ -2074,7 +2074,11 @@ app.get("/citas", authenticateToken, async (req, res) => {
         res.json({ success: true, data: citas });
     } catch (error) {
         console.error("Error al obtener citas:", error);
-        res.status(500).json({ success: false, message: "Error al obtener citas", error: process.env.NODE_ENV === 'development' ? error.stack : error.message });
+        res.status(500).json({
+            success: false,
+            message: "Error al obtener citas.",
+            error: process.env.NODE_ENV === 'development' ? error.stack : error.message
+        });
     }
 });
 
@@ -2252,8 +2256,44 @@ app.post("/citas/agendar", authenticateToken, async (req, res) => {
 // Actualizar cita (admin/vet/owner para cancelar)
 app.put("/citas/:id", authenticateToken, async (req, res) => {
     const { id } = req.params;
-    let { fecha_cita, estado, notas_adicionales, id_servicio, id_cliente, id_veterinario, id_mascota } = req.body;
-    console.log("[UPDATE_APPOINTMENT] Received data:", req.body, "for ID:", id);
+    let requestBody = req.body; // Cambiado de 'let { ... } = req.body;' para permitir reasignación
+    console.log("[UPDATE_APPOINTMENT] Received data:", requestBody, "for ID:", id);
+
+    // WORKAROUND: Si express.json() falló al parsear (porque recibió un JSON doblemente stringificado),
+    // req.body podría estar vacío o no ser un objeto. Necesitamos re-leer el stream del cuerpo crudo.
+    if (typeof requestBody !== 'object' || requestBody === null || Object.keys(requestBody).length === 0) {
+        let rawData = '';
+        await new Promise((resolve, reject) => {
+            req.on('data', chunk => {
+                rawData += chunk;
+            });
+            req.on('end', () => {
+                resolve();
+            });
+            req.on('error', err => {
+                reject(err);
+            });
+        });
+
+        if (rawData.startsWith('"') && rawData.endsWith('"')) {
+            try {
+                // Intenta parsear el rawData dos veces
+                requestBody = JSON.parse(JSON.parse(rawData));
+                console.warn("WORKAROUND: JSON doblemente stringificado detectado y re-parseado en la ruta PUT /citas/:id.");
+            } catch (parseError) {
+                console.error("WORKAROUND FALLÓ: No se pudo re-parsear JSON doblemente stringificado en la ruta PUT /citas/:id.", parseError);
+                return res.status(400).json({ success: false, message: "Datos de solicitud inválidos o corruptos." });
+            }
+        } else {
+            // Si no está doblemente stringificado, pero express.json() aún falló,
+            // es probable que esté realmente malformado o vacío.
+            console.error("El cuerpo de la solicitud no es un objeto y no es JSON doblemente stringificado. Datos crudos:", rawData);
+            return res.status(400).json({ success: false, message: "Datos de solicitud inválidos." });
+        }
+    }
+
+    // Ahora, extrae las propiedades de requestBody
+    const { fecha_cita, estado, notas_adicionales, id_servicio, id_cliente, id_veterinario, id_mascota } = requestBody;
 
     try {
         const userIdFromToken = req.user.id;
@@ -2338,7 +2378,7 @@ app.put("/citas/:id", authenticateToken, async (req, res) => {
                 const [vet] = await pool.query("SELECT id FROM usuarios WHERE id = ? AND role = 'veterinario'", [id_veterinario]);
                 if (vet.length === 0) return res.status(400).json({ success: false, message: "ID de veterinario no válido o no es un veterinario." });
                 fields.push('id_veterinario = ?'); values.push(id_veterinario);
-            } else if (req.body.hasOwnProperty('id_veterinario') && id_veterinario === null) {
+            } else if (requestBody.hasOwnProperty('id_veterinario') && id_veterinario === null) { // Usa requestBody aquí
                 fields.push('id_veterinario = ?'); values.push(null);
             }
         }
@@ -2407,10 +2447,13 @@ app.put("/citas/:id", authenticateToken, async (req, res) => {
                 // Determinar quién canceló para enviar la notificación apropiada
                 if (userRole === 'usuario' && userIdFromToken === clienteId) {
                     // Cliente canceló
-                    await pool.query(
-                        `INSERT INTO notificaciones (id_usuario, tipo, mensaje, referencia_id) VALUES (?, ?, ?, ?)`,
-                        [veterinarioId, 'cita_cancelada_vet', `La cita de ${updatedCita.propietario_nombre} para ${mascotaNombre} el ${citaFecha} ha sido CANCELADA por el cliente.`, id]
-                    );
+                    // Solo notificar al veterinario si hay uno asignado
+                    if (veterinarioId) {
+                        await pool.query(
+                            `INSERT INTO notificaciones (id_usuario, tipo, mensaje, referencia_id) VALUES (?, ?, ?, ?)`,
+                            [veterinarioId, 'cita_cancelada_vet', `La cita de ${updatedCita.propietario_nombre} para ${mascotaNombre} el ${citaFecha} ha sido CANCELADA por el cliente.`, id]
+                        );
+                    }
                 } else if (userRole === 'veterinario' && userIdFromToken === veterinarioId) {
                     // Veterinario canceló
                     await pool.query(
@@ -2673,7 +2716,7 @@ app.get('/api/citas', authenticateToken, async (req, res) => {
         const { role, id: userId } = req.user; // Obtener rol e ID del usuario autenticado
 
         let query = `
-            SELECT 
+            SELECT
                 c.*,
                 u.nombre AS cliente_nombre,
                 u.apellido AS cliente_apellido,
@@ -2681,17 +2724,17 @@ app.get('/api/citas', authenticateToken, async (req, res) => {
                 v.nombre AS veterinario_nombre,
                 v.apellido AS veterinario_apellido,
                 s.nombre AS servicio_nombre
-            FROM 
+            FROM
                 citas c
-            JOIN 
+            JOIN
                 usuarios u ON c.id_cliente = u.id
-            JOIN 
+            JOIN
                 mascotas m ON c.id_mascota = m.id_mascota
-            JOIN 
+            JOIN
                 servicios s ON c.id_servicio = s.id_servicio
-            LEFT JOIN 
+            LEFT JOIN
                 usuarios v ON c.id_veterinario = v.id`;
-        
+
         const queryParams = [];
 
         if (role === 'veterinario') {
@@ -2709,13 +2752,355 @@ app.get('/api/citas', authenticateToken, async (req, res) => {
         res.json({ success: true, data: citas });
     } catch (error) {
         console.error("Error al obtener citas:", error);
-        res.status(500).json({ 
-            success: false, 
-            message: "Error al obtener citas.", 
-            error: process.env.NODE_ENV === 'development' ? error.stack : error.message 
+        res.status(500).json({
+            success: false,
+            message: "Error al obtener citas.",
+            error: process.env.NODE_ENV === 'development' ? error.stack : error.message
         });
     }
 });
+// Ruta para agendar una nueva cita (POST)
+app.post('/citas', authenticateToken, async (req, res) => {
+    const { id_cliente, id_servicio, id_veterinario, id_mascota, fecha, motivo, estado } = req.body;
+
+    // Validación básica de los campos requeridos
+    if (!id_cliente || !id_servicio || !id_mascota || !fecha || !motivo) {
+        return res.status(400).json({ success: false, message: 'Faltan campos obligatorios para agendar la cita.' });
+    }
+
+    try {
+        const [result] = await pool.query(
+            'INSERT INTO citas (id_cliente, id_servicio, id_veterinario, id_mascota, fecha, servicios, estado) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            [id_cliente, id_servicio, id_veterinario || null, id_mascota, fecha, motivo, estado || 'pendiente']
+        );
+
+        res.status(201).json({
+            success: true,
+            message: 'Cita agendada exitosamente.',
+            citaId: result.insertId
+        });
+
+    } catch (error) {
+        console.error('Error al agendar cita:', error);
+        // Envía el stack trace solo en desarrollo para depuración
+        res.status(500).json({
+            success: false,
+            message: 'Error interno del servidor al agendar cita.',
+            error: process.env.NODE_ENV === 'development' ? error.stack : error.message
+        });
+    }
+});
+// server.txt - Dentro de tus rutas existentes
+
+// Ruta para obtener un servicio por su ID
+app.get('/servicios/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        const [rows] = await pool.query('SELECT * FROM servicios WHERE id = ?', [id]);
+        if (rows.length > 0) {
+            res.status(200).json({ success: true, data: rows[0] });
+        } else {
+            res.status(404).json({ success: false, message: 'Servicio no encontrado.' });
+        }
+    } catch (error) {
+        console.error('Error al obtener servicio por ID:', error);
+        res.status(500).json({ success: false, message: 'Error interno del servidor al obtener servicio.' });
+    }
+});
+// Actualizar cita (admin/vet/owner para cancelar)
+app.put("/citas/:id", authenticateToken, async (req, res) => {
+    const { id } = req.params;
+    let requestBody = req.body; // Cambiado de 'let { ... } = req.body;' para permitir reasignación
+    console.log("[UPDATE_APPOINTMENT] Received data:", requestBody, "for ID:", id);
+
+    // WORKAROUND: Si express.json() falló al parsear (porque recibió un JSON doblemente stringificado),
+    // req.body podría estar vacío o no ser un objeto. Necesitamos re-leer el stream del cuerpo crudo.
+    if (typeof requestBody !== 'object' || requestBody === null || Object.keys(requestBody).length === 0) {
+        let rawData = '';
+        await new Promise((resolve, reject) => {
+            req.on('data', chunk => {
+                rawData += chunk;
+            });
+            req.on('end', () => {
+                resolve();
+            });
+            req.on('error', err => {
+                reject(err);
+            });
+        });
+
+        if (rawData.startsWith('"') && rawData.endsWith('"')) {
+            try {
+                // Intenta parsear el rawData dos veces
+                requestBody = JSON.parse(JSON.parse(rawData));
+                console.warn("WORKAROUND: JSON doblemente stringificado detectado y re-parseado en la ruta PUT /citas/:id.");
+            } catch (parseError) {
+                console.error("WORKAROUND FALLÓ: No se pudo re-parsear JSON doblemente stringificado en la ruta PUT /citas/:id.", parseError);
+                return res.status(400).json({ success: false, message: "Datos de solicitud inválidos o corruptos." });
+            }
+        } else {
+            // Si no está doblemente stringificado, pero express.json() aún falló,
+            // es probable que esté realmente malformado o vacío.
+            console.error("El cuerpo de la solicitud no es un objeto y no es JSON doblemente stringificado. Datos crudos:", rawData);
+            return res.status(400).json({ success: false, message: "Datos de solicitud inválidos." });
+        }
+    }
+
+    // Ahora, extrae las propiedades de requestBody
+    const { fecha_cita, estado, notas_adicionales, id_servicio, id_cliente, id_veterinario, id_mascota } = requestBody;
+
+    try {
+        const userIdFromToken = req.user.id;
+        const userRole = req.user.role;
+
+        // Obtener la cita existente para verificar permisos y estado anterior
+        const [citaResult] = await pool.query("SELECT id_cliente, id_veterinario, estado, id_mascota FROM citas WHERE id_cita = ?", [id]);
+        if (citaResult.length === 0) {
+            return res.status(404).json({ success: false, message: "Cita no encontrada." });
+        }
+        const existingCita = citaResult[0];
+        const oldEstado = existingCita.estado;
+        const newEstadoUpper = estado ? estado.toUpperCase() : null; // Asegura que el nuevo estado esté en mayúsculas para la comparación
+
+        let isAuthorized = false;
+
+        if (userRole === 'admin') {
+            // El administrador puede realizar cualquier acción
+            isAuthorized = true;
+        } else if (userRole === 'usuario') {
+            // Un usuario regular solo puede cancelar sus propias citas
+            if (userIdFromToken === existingCita.id_cliente && newEstadoUpper === 'CANCELADA') {
+                isAuthorized = true;
+            } else {
+                return res.status(403).json({ success: false, message: "Acceso denegado. Los usuarios solo pueden cancelar sus propias citas." });
+            }
+        } else if (userRole === 'veterinario') {
+            // Un veterinario puede aceptar, rechazar, completar o cancelar sus citas asignadas
+            if (userIdFromToken === existingCita.id_veterinario) {
+                if (['ACEPTADA', 'RECHAZADA', 'COMPLETA', 'CANCELADA'].includes(newEstadoUpper)) {
+                    isAuthorized = true;
+                } else {
+                    return res.status(403).json({ success: false, message: "Acceso denegado. Los veterinarios solo pueden aceptar, rechazar, completar o cancelar sus citas asignadas." });
+                }
+            } else {
+                return res.status(403).json({ success: false, message: "Acceso denegado. No eres el veterinario asignado a esta cita." });
+            }
+        }
+
+        if (!isAuthorized) {
+            return res.status(403).json({ success: false, message: "Acceso denegado. No tienes permisos para realizar esta acción." });
+        }
+
+        const fields = [];
+        const values = [];
+
+        if (fecha_cita !== undefined) { fields.push('fecha = ?'); values.push(fecha_cita); }
+
+        if (newEstadoUpper !== null) {
+            fields.push('estado = ?'); values.push(newEstadoUpper); // Guarda el estado en mayúsculas
+        }
+
+        if (notas_adicionales !== undefined) { fields.push('servicios = ?'); values.push(notas_adicionales); }
+
+        if (id_servicio !== undefined) {
+            const [service] = await pool.query("SELECT id_servicio FROM servicios WHERE id_servicio = ?", [id_servicio]);
+            if (service.length === 0) return res.status(400).json({ success: false, message: "ID de servicio no válido." });
+            fields.push('id_servicio = ?'); values.push(id_servicio);
+        }
+
+        // IMPORTANTE: Re-validar id_mascota contra id_cliente al actualizar
+        if (id_mascota !== undefined) {
+            // Asegura que el id_mascota proporcionado pertenezca al id_cliente *actual* de la cita
+            // o al *nuevo* id_cliente si también se está cambiando en esta solicitud (solo por admin)
+            const targetClientId = (userRole === 'admin' && id_cliente !== undefined) ? id_cliente : existingCita.id_cliente;
+
+            const [mascota] = await pool.query("SELECT id_mascota FROM mascotas WHERE id_mascota = ? AND id_propietario = ?", [id_mascota, targetClientId]);
+            if (mascota.length === 0) {
+                return res.status(400).json({ success: false, message: "ID de mascota no válido o la mascota no pertenece al cliente de esta cita." });
+            }
+            fields.push('id_mascota = ?'); values.push(id_mascota);
+        }
+
+        // Solo el administrador puede cambiar el cliente o el veterinario de una cita
+        if (userRole === 'admin') {
+            if (id_cliente !== undefined) {
+                const [cliente] = await pool.query("SELECT id FROM usuarios WHERE id = ? AND role = 'usuario'", [id_cliente]);
+                if (cliente.length === 0) return res.status(400).json({ success: false, message: "ID de cliente no válido o no es un usuario." });
+                fields.push('id_cliente = ?'); values.push(id_cliente);
+            }
+            if (id_veterinario !== undefined) {
+                const [vet] = await pool.query("SELECT id FROM usuarios WHERE id = ? AND role = 'veterinario'", [id_veterinario]);
+                if (vet.length === 0) return res.status(400).json({ success: false, message: "ID de veterinario no válido o no es un veterinario." });
+                fields.push('id_veterinario = ?'); values.push(id_veterinario);
+            } else if (requestBody.hasOwnProperty('id_veterinario') && id_veterinario === null) { // Usa requestBody aquí
+                fields.push('id_veterinario = ?'); values.push(null);
+            }
+        }
+
+
+        if (fields.length === 0) {
+            return res.status(400).json({ success: false, message: "No hay datos para actualizar." });
+        }
+
+        const query = `UPDATE citas SET ${fields.join(', ')} WHERE id_cita = ?`;
+        values.push(id);
+
+        const [result] = await pool.query(query, values);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ success: false, message: "Cita no encontrada o sin cambios." });
+        }
+
+        // Obtener la cita actualizada para enviar notificaciones
+        const [updatedCitaRows] = await pool.query(
+            `SELECT c.id_cita, DATE_FORMAT(c.fecha, '%Y-%m-%d %H:%i') as fecha_cita, c.estado, c.servicios as observaciones,
+                    s.nombre as servicio_nombre, s.precio, s.id_servicio,
+                    u_cli.id as id_cliente, CONCAT(u_cli.nombre, ' ', u_cli.apellido) as propietario_nombre, u_cli.telefono as propietario_telefono, u_cli.email as propietario_email, u_cli.direccion as propietario_direccion,
+                    u_vet.id as id_veterinario, CONCAT(u_vet.nombre, ' ', u_vet.apellido) as veterinario_nombre, u_vet.email as veterinario_email,
+                    u_vet.direccion as veterinario_direccion,
+                    m.nombre as mascota_nombre, m.especie as mascota_especie, m.raza as mascota_raza,
+                    m.imagen_url as mascota_imagen_url
+             FROM citas c
+             JOIN servicios s ON c.id_servicio = s.id_servicio
+             JOIN usuarios u_cli ON c.id_cliente = u_cli.id
+             LEFT JOIN usuarios u_vet ON c.id_veterinario = u_vet.id
+             LEFT JOIN mascotas m ON c.id_mascota = m.id_mascota
+             WHERE c.id_cita = ?`,
+            [id]
+        );
+        const updatedCita = updatedCitaRows[0];
+
+        // Lógica de notificaciones solo si el estado ha cambiado
+        if (newEstadoUpper !== oldEstado.toUpperCase()) {
+            const clienteEmail = updatedCita.propietario_email;
+            const clienteId = updatedCita.id_cliente;
+            const servicioNombre = updatedCita.servicio_nombre;
+            const citaFecha = updatedCita.fecha_cita;
+            const veterinarioNombre = updatedCita.veterinario_nombre;
+            const veterinarioEmail = updatedCita.veterinario_email;
+            const veterinarioId = updatedCita.id_veterinario;
+            const mascotaNombre = updatedCita.mascota_nombre;
+
+
+            if (newEstadoUpper === 'ACEPTADA') {
+                await pool.query(
+                    `INSERT INTO notificaciones (id_usuario, tipo, mensaje, referencia_id) VALUES (?, ?, ?, ?)`,
+                    [clienteId, 'cita_aceptada_user', `Tu cita para ${mascotaNombre} (${servicioNombre}) el ${citaFecha} ha sido ACEPTADA por ${veterinarioNombre}.`, id]
+                );
+                simulateSendEmail(
+                    clienteEmail,
+                    `Confirmación de Cita Aceptada - Flooky Pets`,
+                    `Hola ${updatedCita.propietario_nombre},\n\nTu cita para el servicio de ${servicioNombre} para ${mascotaNombre} ha sido ACEPTADA.\n\nDetalles de la cita:\nFecha y Hora: ${citaFecha}\nVeterinario: ${veterinarioNombre}\nUbicación: ${updatedCita.veterinario_direccion || 'No especificada'}\n\n¡Te esperamos!\n\nSaludos,\nEl equipo de Flooky Pets`
+                );
+            } else if (newEstadoUpper === 'RECHAZADA') {
+                await pool.query(
+                    `INSERT INTO notificaciones (id_usuario, tipo, mensaje, referencia_id) VALUES (?, ?, ?, ?)`,
+                    [clienteId, 'cita_rechazada_user', `Tu cita para ${mascotaNombre} (${servicioNombre}) el ${citaFecha} ha sido RECHAZADA por ${veterinarioNombre}. Por favor, reagenda o contacta al veterinario.`, id]
+                );
+            } else if (newEstadoUpper === 'CANCELADA') {
+                // Determinar quién canceló para enviar la notificación apropiada
+                if (userRole === 'usuario' && userIdFromToken === clienteId) {
+                    // Cliente canceló
+                    // Solo notificar al veterinario si hay uno asignado
+                    if (veterinarioId) {
+                        await pool.query(
+                            `INSERT INTO notificaciones (id_usuario, tipo, mensaje, referencia_id) VALUES (?, ?, ?, ?)`,
+                            [veterinarioId, 'cita_cancelada_vet', `La cita de ${updatedCita.propietario_nombre} para ${mascotaNombre} el ${citaFecha} ha sido CANCELADA por el cliente.`, id]
+                        );
+                    }
+                } else if (userRole === 'veterinario' && userIdFromToken === veterinarioId) {
+                    // Veterinario canceló
+                    await pool.query(
+                        `INSERT INTO notificaciones (id_usuario, tipo, mensaje, referencia_id) VALUES (?, ?, ?, ?)`,
+                        [clienteId, 'cita_cancelada_user', `Tu cita para ${mascotaNombre} (${servicioNombre}) el ${citaFecha} ha sido CANCELADA por el veterinario ${veterinarioNombre}.`, id]
+                    );
+                } else if (userRole === 'admin') {
+                    // Administrador canceló
+                    await pool.query(
+                        `INSERT INTO notificaciones (id_usuario, tipo, mensaje, referencia_id) VALUES (?, ?, ?, ?)`,
+                        [clienteId, 'cita_cancelada_admin', `Tu cita para ${mascotaNombre} (${servicioNombre}) el ${citaFecha} ha sido CANCELADA por un administrador.`, id]
+                    );
+                    if (veterinarioId) {
+                        await pool.query(
+                            `INSERT INTO notificaciones (id_usuario, tipo, mensaje, referencia_id) VALUES (?, ?, ?, ?)`,
+                            [veterinarioId, 'cita_cancelada_admin', `La cita de ${updatedCita.propietario_nombre} para ${mascotaNombre} el ${citaFecha} ha sido CANCELADA por un administrador.`, id]
+                        );
+                    }
+                }
+            } else if (newEstadoUpper === 'COMPLETA') {
+                // Solo veterinario o administrador pueden marcar como completa, notificar al cliente
+                await pool.query(
+                    `INSERT INTO notificaciones (id_usuario, tipo, mensaje, referencia_id) VALUES (?, ?, ?, ?)`,
+                    [clienteId, 'cita_completada_user', `Tu cita para ${mascotaNombre} (${servicioNombre}) el ${citaFecha} ha sido marcada como COMPLETADA por ${veterinarioNombre}.`, id]
+                );
+            }
+        }
+
+        res.json({ success: true, message: "Cita actualizada correctamente.", data: updatedCita });
+        console.log("[UPDATE_APPOINTMENT] Appointment updated successfully:", id);
+
+    } catch (error) {
+        console.error("Error al actualizar cita:", error);
+        res.status(500).json({ success: false, message: "Error al actualizar cita.", error: process.env.NODE_ENV === 'development' ? error.stack : error.message });
+    }
+});
+
+// Eliminar cita (solo para administradores)
+app.delete("/citas/:id", authenticateToken, isAdmin, async (req, res) => {
+    const { id } = req.params;
+    console.log("[DELETE_APPOINTMENT] Deleting appointment with ID:", id); // Log de depuración
+
+    try {
+        const [result] = await pool.query("DELETE FROM citas WHERE id_cita = ?", [id]);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ success: false, message: "Cita no encontrada." });
+        }
+        res.json({ success: true, message: "Cita eliminada correctamente." });
+        console.log("[DELETE_APPOINTMENT] Appointment deleted successfully:", id); // Log de depuración
+
+    } catch (error) {
+        console.error("Error al eliminar cita:", error);
+        res.status(500).json({ success: false, message: "Error al eliminar cita.", error: process.env.NODE_ENV === 'development' ? error.stack : error.message });
+    }
+});
+// Eliminar servicio
+app.delete("/servicios/:id", authenticateToken, isAdmin, async (req, res) => {
+    const { id } = req.params;
+    console.log("[ADMIN_DELETE_SERVICE] Deleting service with ID:", id); // Log de depuración
+
+    try {
+        // Primero, verificar si el servicio está asociado a alguna cita
+        const [citasCount] = await pool.query(
+            "SELECT COUNT(*) as count FROM citas WHERE id_servicio = ?",
+            [id]
+        );
+
+        if (citasCount[0].count > 0) {
+            // Si hay citas asociadas, no permitir la eliminación y enviar un mensaje específico
+            return res.status(400).json({
+                success: false,
+                message: "No se puede eliminar el servicio porque está asociado a citas existentes. Por favor, elimina o modifica las citas que usan este servicio primero."
+            });
+        }
+
+        // Si no hay citas asociadas, proceder con la eliminación del servicio
+        const [result] = await pool.query("DELETE FROM servicios WHERE id_servicio = ?", [id]);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ success: false, message: "Servicio no encontrado." });
+        }
+
+        res.json({ success: true, message: "Servicio eliminado correctamente" });
+        console.log("[ADMIN_DELETE_SERVICE] Service deleted successfully:", id); // Log de depuración
+
+    } catch (error) {
+        console.error("Error al eliminar servicio:", error);
+        // Manejo genérico de otros errores del servidor
+        res.status(500).json({ success: false, message: "Error al eliminar servicio", error: process.env.NODE_ENV === 'development' ? error.stack : error.message });
+    }
+});
+
 // =============================================================================
 // INICIO DEL SERVIDOR Y MANEJO DE ERRORES GLOBAL
 // =============================================================================
@@ -2736,5 +3121,3 @@ app.use((err, req, res, next) => {
         error: process.env.NODE_ENV === 'development' ? err.stack : err.message
     });
 });
-
-// Fin del archivo server.txt

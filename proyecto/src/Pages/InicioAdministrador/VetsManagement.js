@@ -1,9 +1,10 @@
 // src/Pages/InicioAdministrador/VetsManagement.js
 import React, { useState, useEffect, useCallback } from 'react';
-import { FaStethoscope, FaSearch, FaPlus, FaEdit, FaTrash, FaSpinner, FaTimes, FaInfoCircle, FaToggleOn, FaToggleOff } from 'react-icons/fa';
+import { FaStethoscope, FaSearch, FaPlus, FaEdit, FaTrash, FaSpinner, FaTimes, FaInfoCircle, FaToggleOn, FaToggleOff, FaExclamationTriangle } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 import { authFetch } from '../../utils/api'; // Ruta ajustada
 import { validateField } from '../../utils/validation'; // Importa la función de validación
+// import './Styles/VetsManagement.css'; // Ruta relativa al CSS
 import { useNotifications } from '../../Notifications/NotificationContext'; // Ruta ajustada
 
 function VetsManagement({ user }) {
@@ -18,6 +19,19 @@ function VetsManagement({ user }) {
     const [formErrors, setFormErrors] = useState({}); // Estado para errores de formulario
     const { addNotification } = useNotifications(); // Usa el hook de notificaciones
 
+    // Estados para el modal de confirmación de eliminación
+    const [showDeleteConfirmModalVet, setShowDeleteConfirmModalVet] = useState(false);
+    const [vetToDelete, setVetToDelete] = useState(null);
+    const [deleteErrorMessageVet, setDeleteErrorMessageVet] = useState(''); // Mensaje de error específico para la eliminación
+    const [isDeletingVet, setIsDeletingVet] = useState(false); // Estado para el spinner en el modal de eliminación
+
+    // Estados para el modal de confirmación de activar/desactivar
+    const [showToggleConfirmModal, setShowToggleConfirmModal] = useState(false);
+    const [vetToToggle, setVetToToggle] = useState(null);
+    const [isToggling, setIsToggling] = useState(false);
+    const [toggleErrorMessage, setToggleErrorMessage] = useState('');
+
+
     const [formData, setFormData] = useState({
         nombre: '',
         apellido: '',
@@ -28,7 +42,6 @@ function VetsManagement({ user }) {
         experiencia: '',
         universidad: '',
         horario: ''
-        // Eliminado: imagen_url, ya que se gestiona en el perfil del usuario
     });
 
     const fetchVets = useCallback(async () => {
@@ -50,7 +63,7 @@ function VetsManagement({ user }) {
         } finally {
             setIsLoading(false);
         }
-    }, [authFetch, addNotification]);
+    }, [addNotification]); // Eliminado authFetch de dependencias si no es necesario (ya es una constante)
 
     useEffect(() => {
         if (user && user.token) {
@@ -100,7 +113,6 @@ function VetsManagement({ user }) {
             experiencia: vet.experiencia || '',
             universidad: vet.universidad || '',
             horario: vet.horario || ''
-            // Eliminado: imagen_url
         });
         setFormErrors({}); // Limpiar errores al abrir el modal
         setIsModalOpen(true);
@@ -160,16 +172,21 @@ function VetsManagement({ user }) {
             // Eliminar imagen_url del payload, ya no se gestiona aquí
             delete payload.imagen_url;
 
-
             if (editingVet) {
                 response = await authFetch(`/usuarios/veterinarios/${editingVet.id}`, {
                     method: 'PUT',
-                    body: payload
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
                 });
             } else {
                 response = await authFetch('/usuarios/veterinarios', {
                     method: 'POST',
-                    body: payload
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
                 });
             }
 
@@ -186,68 +203,83 @@ function VetsManagement({ user }) {
         } finally {
             setIsSubmitting(false);
         }
-    }, [editingVet, formData, authFetch, addNotification, fetchVets]);
+    }, [editingVet, formData, addNotification, fetchVets]); // Eliminado authFetch de dependencias si no es necesario
 
-    const handleDelete = useCallback(async (id) => {
-        // *** REEMPLAZO DE window.confirm ***
-        // Aquí deberías integrar un modal de confirmación personalizado.
-        // Por ejemplo:
-        // const confirmed = await showCustomConfirmModal('¿Estás seguro de eliminar este veterinario? Esta acción es irreversible y eliminará datos asociados.');
-        // if (!confirmed) return;
+    // Función para abrir el modal de confirmación de eliminación
+    const handleDeleteClick = useCallback((vet) => {
+        setVetToDelete(vet);
+        setDeleteErrorMessageVet(''); // Limpiar cualquier mensaje de error anterior
+        setShowDeleteConfirmModalVet(true);
+    }, []);
 
-        // Temporalmente, mantenemos window.confirm para funcionalidad, pero se debe reemplazar
-        if (!window.confirm('¿Estás seguro de eliminar este veterinario? Esta acción es irreversible y eliminará datos asociados.')) {
-            return;
-        }
+    // Función para confirmar la eliminación después de la advertencia
+    const confirmDeleteVet = useCallback(async () => {
+        if (!vetToDelete) return;
 
-        setIsLoading(true);
+        setIsDeletingVet(true);
+        setDeleteErrorMessageVet(''); // Limpiar el mensaje de error antes de intentar eliminar
+
         try {
-            const response = await authFetch(`/usuarios/veterinarios/${id}`, { method: 'DELETE' });
+            const response = await authFetch(`/usuarios/veterinarios/${vetToDelete.id}`, { method: 'DELETE' });
             if (response.success) {
                 addNotification('success', response.message || 'Veterinario eliminado correctamente.', 5000);
+                setShowDeleteConfirmModalVet(false); // Cerrar el modal
                 fetchVets(); // Re-fetch all vets
             } else {
+                // Si el backend devuelve un mensaje específico de error (ej. por clave foránea)
+                setDeleteErrorMessageVet(response.message || 'Error al eliminar el veterinario.');
                 addNotification('error', response.message || 'Error al eliminar el veterinario.', 5000);
             }
         } catch (err) {
-            addNotification('error', `Error de conexión: ${err.message}`, 5000);
+            const errorMessage = err.message || 'Error de conexión al servidor.';
+            setDeleteErrorMessageVet(`Error de conexión: ${errorMessage}`);
+            addNotification('error', errorMessage, 5000);
             console.error("Error deleting vet:", err);
         } finally {
-            setIsLoading(false);
+            setIsDeletingVet(false);
         }
-    }, [authFetch, addNotification, fetchVets]);
+    }, [vetToDelete, addNotification, fetchVets]); // Eliminado authFetch de dependencias
 
-    const handleToggleActive = useCallback(async (vetId, currentStatus) => {
-        // *** REEMPLAZO DE window.confirm ***
-        // Aquí deberías integrar un modal de confirmación personalizado.
-        // Por ejemplo:
-        // const confirmed = await showCustomConfirmModal(`¿Estás seguro de ${currentStatus ? 'desactivar' : 'activar'} este veterinario?`);
-        // if (!confirmed) return;
+    // Función para abrir el modal de confirmación de activar/desactivar
+    const handleToggleActiveClick = useCallback((vet) => {
+        setVetToToggle(vet);
+        setToggleErrorMessage(''); // Limpiar cualquier mensaje de error anterior
+        setShowToggleConfirmModal(true);
+    }, []);
 
-        // Temporalmente, mantenemos window.confirm para funcionalidad, pero se debe reemplazar
-        if (!window.confirm(`¿Estás seguro de ${currentStatus ? 'desactivar' : 'activar'} este veterinario?`)) {
-            return;
-        }
+    // Función para confirmar el cambio de estado (activar/desactivar)
+    const confirmToggleActive = useCallback(async () => {
+        if (!vetToToggle) return;
 
-        setIsLoading(true);
+        setIsToggling(true);
+        setToggleErrorMessage('');
+
         try {
-            const response = await authFetch(`/usuarios/${vetId}`, { // Usamos la ruta general de usuarios para toggle active
+            const response = await authFetch(`/usuarios/${vetToToggle.id}`, { // Usamos la ruta general de usuarios para toggle active
                 method: 'PUT',
-                body: { active: !currentStatus }
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ active: !vetToToggle.active })
             });
             if (response.success) {
-                addNotification('success', response.message || `Veterinario ${currentStatus ? 'desactivado' : 'activado'} correctamente.`, 5000);
+                addNotification('success', response.message || `Veterinario ${vetToToggle.active ? 'desactivado' : 'activado'} correctamente.`, 5000);
+                setShowToggleConfirmModal(false);
                 fetchVets(); // Re-fetch all vets
             } else {
+                setToggleErrorMessage(response.message || `Error al cambiar el estado del veterinario.`);
                 addNotification('error', response.message || `Error al cambiar el estado del veterinario.`, 5000);
             }
         } catch (err) {
-            addNotification('error', `Error de conexión: ${err.message}`, 5000);
+            const errorMessage = err.message || 'Error de conexión al servidor.';
+            setToggleErrorMessage(`Error de conexión: ${errorMessage}`);
+            addNotification('error', errorMessage, 5000);
             console.error("Error toggling vet active status:", err);
         } finally {
-            setIsLoading(false);
+            setIsToggling(false);
         }
-    }, [authFetch, addNotification, fetchVets]);
+    }, [vetToToggle, addNotification, fetchVets]);
+
 
     if (isLoading && vets.length === 0) {
         return (
@@ -334,7 +366,7 @@ function VetsManagement({ user }) {
                                         </button>
                                         <button
                                             className={`btn-icon ${vet.active ? 'btn-deactivate' : 'btn-activate'}`}
-                                            onClick={() => handleToggleActive(vet.id, vet.active)}
+                                            onClick={() => handleToggleActiveClick(vet)} // Usar el nuevo handler
                                             disabled={isLoading}
                                             title={vet.active ? 'Desactivar Veterinario' : 'Activar Veterinario'}
                                         >
@@ -342,7 +374,7 @@ function VetsManagement({ user }) {
                                         </button>
                                         <button
                                             className="btn-icon btn-delete"
-                                            onClick={() => handleDelete(vet.id)}
+                                            onClick={() => handleDeleteClick(vet)} // Usar el nuevo handler
                                             disabled={isLoading}
                                             title="Eliminar Veterinario"
                                         >
@@ -371,6 +403,7 @@ function VetsManagement({ user }) {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
+                        onClick={() => { setIsModalOpen(false); setFormErrors({}); }} // Cerrar modal al hacer click fuera y limpiar errores
                     >
                         <motion.div
                             className="modal-content"
@@ -378,6 +411,7 @@ function VetsManagement({ user }) {
                             animate={{ scale: 1, opacity: 1 }}
                             exit={{ scale: 0.9, opacity: 0 }}
                             transition={{ duration: 0.2 }}
+                            onClick={(e) => e.stopPropagation()} // Evitar que el click en el contenido cierre el modal
                         >
                             <div className="modal-header">
                                 <h3>{editingVet ? 'Editar Veterinario' : 'Registrar Nuevo Veterinario'}</h3>
@@ -433,11 +467,120 @@ function VetsManagement({ user }) {
                                     <input type="text" id="horario" name="horario" value={formData.horario} onChange={handleFormChange} required disabled={isSubmitting} />
                                     {formErrors.horario && <p className="error-message-inline">{formErrors.horario}</p>}
                                 </div>
-                                {/* Eliminado el campo imagen_url */}
                                 <button type="submit" className="submit-btn" disabled={isSubmitting}>
                                     {isSubmitting ? <FaSpinner className="spinner-icon" /> : (editingVet ? 'Actualizar Veterinario' : 'Registrar Veterinario')}
                                 </button>
                             </form>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Nuevo Modal de Confirmación de Eliminación para Veterinarios */}
+            <AnimatePresence>
+                {showDeleteConfirmModalVet && (
+                    <motion.div
+                        className="modal-overlay"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => setShowDeleteConfirmModalVet(false)}
+                    >
+                        <motion.div
+                            className="modal-content"
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            transition={{ duration: 0.2 }}
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="modal-header">
+                                <h3>Confirmar Eliminación de Veterinario</h3>
+                                <button className="close-modal-btn" onClick={() => setShowDeleteConfirmModalVet(false)}>
+                                    <FaTimes />
+                                </button>
+                            </div>
+                            <div className="modal-body">
+                                {deleteErrorMessageVet ? (
+                                    <p className="error-message-modal">
+                                        <FaExclamationTriangle className="icon-warning" /> {deleteErrorMessageVet}
+                                    </p>
+                                ) : (
+                                    <p>¿Estás seguro de que deseas eliminar al veterinario "<strong>{vetToDelete?.nombre} {vetToDelete?.apellido}</strong>"?</p>
+                                )}
+                                <p className="warning-text">Esta acción es irreversible si se completa.</p>
+                            </div>
+                            <div className="modal-actions">
+                                <button
+                                    className="btn-cancel"
+                                    onClick={() => setShowDeleteConfirmModalVet(false)}
+                                    disabled={isDeletingVet}
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    className="btn-delete"
+                                    onClick={confirmDeleteVet}
+                                    disabled={isDeletingVet || deleteErrorMessageVet !== ''} // Deshabilitar si hay un mensaje de error que impide la eliminación
+                                >
+                                    {isDeletingVet ? <FaSpinner className="spinner-icon" /> : 'Sí, Eliminar'}
+                                </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Nuevo Modal de Confirmación para Activar/Desactivar Veterinario */}
+            <AnimatePresence>
+                {showToggleConfirmModal && (
+                    <motion.div
+                        className="modal-overlay"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => setShowToggleConfirmModal(false)}
+                    >
+                        <motion.div
+                            className="modal-content"
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            transition={{ duration: 0.2 }}
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="modal-header">
+                                <h3>Confirmar Cambio de Estado</h3>
+                                <button className="close-modal-btn" onClick={() => setShowToggleConfirmModal(false)}>
+                                    <FaTimes />
+                                </button>
+                            </div>
+                            <div className="modal-body">
+                                {toggleErrorMessage ? (
+                                    <p className="error-message-modal">
+                                        <FaExclamationTriangle className="icon-warning" /> {toggleErrorMessage}
+                                    </p>
+                                ) : (
+                                    <p>¿Estás seguro de {vetToToggle?.active ? 'desactivar' : 'activar'} al veterinario "<strong>{vetToToggle?.nombre} {vetToToggle?.apellido}</strong>"?</p>
+                                )}
+                                <p className="warning-text">Esto afectará su capacidad para ser asignado a nuevas citas.</p>
+                            </div>
+                            <div className="modal-actions">
+                                <button
+                                    className="btn-cancel"
+                                    onClick={() => setShowToggleConfirmModal(false)}
+                                    disabled={isToggling}
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    className="btn-primary" // Usar un estilo de botón primario o de acción
+                                    onClick={confirmToggleActive}
+                                    disabled={isToggling || toggleErrorMessage !== ''}
+                                >
+                                    {isToggling ? <FaSpinner className="spinner-icon" /> : `Sí, ${vetToToggle?.active ? 'Desactivar' : 'Activar'}`}
+                                </button>
+                            </div>
                         </motion.div>
                     </motion.div>
                 )}

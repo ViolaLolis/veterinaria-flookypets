@@ -1,5 +1,3 @@
-// CitasUsuario.js
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -43,13 +41,13 @@ const CitasUsuario = () => {
                     mascota_especie: cita.mascota_especie || 'N/A',
                     veterinario_nombre: cita.veterinario_nombre || 'Sin asignar',
                     estado: cita.estado,
-                    detalle: cita.detalle || 'No hay observaciones adicionales para esta cita en particular.' // Usa 'detalle' que viene del backend
+                    detalle: cita.servicios || 'No hay observaciones adicionales para esta cita en particular.' // Usa 'servicios' que viene del backend
                 }));
                 // Ordenar las citas: primero pendientes/aceptadas, luego completadas/canceladas, por fecha.
                 const sortedAppointments = mappedAppointments.sort((a, b) => {
                     const statusOrder = { 'pendiente': 1, 'aceptada': 2, 'completa': 3, 'cancelada': 4, 'rechazada': 5 };
-                    if (statusOrder[a.estado] !== statusOrder[b.estado]) {
-                        return statusOrder[a.estado] - statusOrder[b.estado];
+                    if (statusOrder[a.estado.toLowerCase()] !== statusOrder[b.estado.toLowerCase()]) {
+                        return statusOrder[a.estado.toLowerCase()] - statusOrder[b.estado.toLowerCase()];
                     }
                     // Asegúrate de que las fechas sean objetos Date válidos para la comparación
                     // Al venir del backend en formato ISO, new Date() debería manejarlas bien.
@@ -86,9 +84,10 @@ const CitasUsuario = () => {
 
         setIsManagingAppointment(true);
         try {
-            const response = await authFetch(`/api/citas/${appointmentToManage.id_cita}`, { // Ruta actualizada para coincidir con tu backend
+            // CORRECCIÓN: Pasa un objeto JavaScript directamente, authFetch lo stringificará.
+            const response = await authFetch(`/citas/${appointmentToManage.id_cita}`, { 
                 method: 'PUT',
-                body: JSON.stringify({ estado: 'cancelada' }), // Asegúrate de enviar como JSON string
+                body: { estado: 'cancelada' }, // ¡CAMBIO CLAVE AQUÍ! No uses JSON.stringify() aquí.
                 headers: {
                     'Content-Type': 'application/json'
                 }
@@ -102,8 +101,8 @@ const CitasUsuario = () => {
                             : cita
                     ).sort((a, b) => { // Re-ordenar después de la actualización
                         const statusOrder = { 'pendiente': 1, 'aceptada': 2, 'completa': 3, 'cancelada': 4, 'rechazada': 5 };
-                        if (statusOrder[a.estado] !== statusOrder[b.estado]) {
-                            return statusOrder[a.estado] - statusOrder[b.estado];
+                        if (statusOrder[a.estado.toLowerCase()] !== statusOrder[b.estado.toLowerCase()]) {
+                            return statusOrder[a.estado.toLowerCase()] - statusOrder[b.estado.toLowerCase()];
                         }
                         // Aquí también, asegúrate de que sean fechas válidas.
                         return new Date(a.fecha).getTime() - new Date(b.fecha).getTime();
@@ -203,7 +202,7 @@ const CitasUsuario = () => {
                                 </div>
 
                                 <div className={styles.citaActions}>
-                                    {(cita.estado === 'pendiente' || cita.estado === 'aceptada') && (
+                                    {(cita.estado.toLowerCase() === 'pendiente' || cita.estado.toLowerCase() === 'aceptada') && (
                                         <motion.button
                                             className={styles.accionBtnDanger}
                                             onClick={() => openConfirmModal(cita)}
@@ -254,6 +253,7 @@ const CitasUsuario = () => {
                             initial={{ scale: 0.8, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             exit={{ scale: 0.8, opacity: 0 }}
+                            transition={{ type: "spring", damping: 15, stiffness: 300 }}
                             onClick={(e) => e.stopPropagation()}
                         >
                             <button className={styles.modalCloseButton} onClick={closeModal} aria-label="Cerrar modal">

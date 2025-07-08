@@ -234,7 +234,7 @@ const AgendarCita = () => {
             <h4>{servicio.nombre}</h4>
             <p>{servicio.descripcion}</p>
             <div className={styles.servicePrice}>
-              <span>${typeof servicio.precio === 'number' ? servicio.precio.toLocaleString('es-CO') : servicio.precio}</span>
+              <span>{typeof servicio.precio === 'number' ? servicio.precio.toLocaleString('es-CO') : servicio.precio}</span>
             </div>
           </div>
         </motion.div>
