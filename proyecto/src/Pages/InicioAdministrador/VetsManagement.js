@@ -63,7 +63,7 @@ function VetsManagement({ user }) {
         } finally {
             setIsLoading(false);
         }
-    }, [addNotification]); // Eliminado authFetch de dependencias si no es necesario (ya es una constante)
+    }, [addNotification]);
 
     useEffect(() => {
         if (user && user.token) {
@@ -133,7 +133,7 @@ function VetsManagement({ user }) {
         const originalEmail = editingVet ? editingVet.email : ''; // Pasa el email original si estamos editando
         const errorMessage = validateField(name, newValue, { ...formData, [name]: newValue }, !editingVet, originalEmail);
         setFormErrors(prev => ({ ...prev, [name]: errorMessage }));
-    }, [formData, editingVet]); // Depende de formData y editingVet para la validación
+    }, [formData, editingVet]);
 
     const handleSubmit = useCallback(async (e) => {
         e.preventDefault();
@@ -172,21 +172,16 @@ function VetsManagement({ user }) {
             // Eliminar imagen_url del payload, ya no se gestiona aquí
             delete payload.imagen_url;
 
+            // IMPORTANTE: Pasar payload directamente, authFetch se encargará de stringificarlo
             if (editingVet) {
                 response = await authFetch(`/usuarios/veterinarios/${editingVet.id}`, {
                     method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(payload)
+                    body: payload // Pasa el objeto directamente
                 });
             } else {
                 response = await authFetch('/usuarios/veterinarios', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(payload)
+                    body: payload // Pasa el objeto directamente
                 });
             }
 
@@ -203,7 +198,7 @@ function VetsManagement({ user }) {
         } finally {
             setIsSubmitting(false);
         }
-    }, [editingVet, formData, addNotification, fetchVets]); // Eliminado authFetch de dependencias si no es necesario
+    }, [editingVet, formData, addNotification, fetchVets]);
 
     // Función para abrir el modal de confirmación de eliminación
     const handleDeleteClick = useCallback((vet) => {
@@ -238,7 +233,7 @@ function VetsManagement({ user }) {
         } finally {
             setIsDeletingVet(false);
         }
-    }, [vetToDelete, addNotification, fetchVets]); // Eliminado authFetch de dependencias
+    }, [vetToDelete, addNotification, fetchVets]);
 
     // Función para abrir el modal de confirmación de activar/desactivar
     const handleToggleActiveClick = useCallback((vet) => {
@@ -257,10 +252,7 @@ function VetsManagement({ user }) {
         try {
             const response = await authFetch(`/usuarios/${vetToToggle.id}`, { // Usamos la ruta general de usuarios para toggle active
                 method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ active: !vetToToggle.active })
+                body: { active: !vetToToggle.active } // Pasa el objeto directamente
             });
             if (response.success) {
                 addNotification('success', response.message || `Veterinario ${vetToToggle.active ? 'desactivado' : 'activado'} correctamente.`, 5000);

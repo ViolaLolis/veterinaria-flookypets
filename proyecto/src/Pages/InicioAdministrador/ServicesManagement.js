@@ -51,7 +51,7 @@ function ServicesManagement({ user }) {
         } finally {
             setIsLoading(false);
         }
-    }, [addNotification]); // Eliminado authFetch de dependencias si no es necesario (ya es una constante)
+    }, [addNotification]);
 
     useEffect(() => {
         if (user && user.token) {
@@ -121,23 +121,16 @@ function ServicesManagement({ user }) {
 
         try {
             let response;
+            // IMPORTANTE: Pasar formData directamente, authFetch se encargará de stringificarlo
             if (editingService) {
                 response = await authFetch(`/servicios/${editingService.id_servicio}`, {
                     method: 'PUT',
-                    // Asegúrate de que el body se envíe como JSON
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(formData) // Stringify el body
+                    body: formData // Pasa el objeto directamente
                 });
             } else {
                 response = await authFetch('/servicios', {
                     method: 'POST',
-                    // Asegúrate de que el body se envíe como JSON
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(formData) // Stringify el body
+                    body: formData // Pasa el objeto directamente
                 });
             }
 
@@ -154,7 +147,7 @@ function ServicesManagement({ user }) {
         } finally {
             setIsSubmitting(false);
         }
-    }, [editingService, formData, addNotification, fetchServices]); // Eliminado authFetch de dependencias si no es necesario
+    }, [editingService, formData, addNotification, fetchServices]);
 
     // Función para abrir el modal de confirmación de eliminación
     const handleDeleteClick = useCallback((service) => {
@@ -189,7 +182,7 @@ function ServicesManagement({ user }) {
         } finally {
             setIsDeleting(false);
         }
-    }, [serviceToDelete, addNotification, fetchServices]); // Eliminado authFetch de dependencias
+    }, [serviceToDelete, addNotification, fetchServices]);
 
     if (isLoading && services.length === 0) {
         return (

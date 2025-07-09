@@ -1,38 +1,35 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { FaSave, FaTimes, FaSpinner } from 'react-icons/fa';
 import { validateField } from '../../utils/validation';
-import Modal from '../../Components//Modal';
-import Notification from '../../Components//Notification';
+import Modal from '../../Components/Modal';
+import Notification from '../../Components/Notification';
 import './Styles/AdminMedicalRecordForm.css'; // Asumo que este CSS es genérico para formularios admin
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
-const AdminAppointmentForm = ({ isOpen, onClose, appointment, onSaveSuccess }) => {
+const AdminMedicalRecordForm = ({ isOpen, onClose, record, onSaveSuccess }) => {
     const [formData, setFormData] = useState({
-        id_cliente: '',
         id_mascota: '',
-        id_servicio: '',
-        id_veterinario: '',
-        fecha_cita: '',
-        notas_adicionales: '',
-        estado: 'PENDIENTE' // Default to PENDIENTE
+        fecha_consulta: '', // Formato 'YYYY-MM-DDTHH:mm' para input datetime-local
+        diagnostico: '',
+        tratamiento: '',
+        observaciones: '',
+        veterinario: '', // ID del veterinario
+        peso_actual: '',
+        temperatura: '',
+        proxima_cita: '', // Formato 'YYYY-MM-DDTHH:mm' para input datetime-local
     });
     const [formErrors, setFormErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [notification, setNotification] = useState(null);
-    const [clientes, setClientes] = useState([]);
-    const [mascotas, setMascotas] = useState([]); // All pets
-    const [servicios, setServicios] = useState([]);
+    const [mascotas, setMascotas] = useState([]);
     const [veterinarios, setVeterinarios] = useState([]);
-    const [filteredMascotas, setFilteredMascotas] = useState([]); // Mascotas filtered by selected client
-    const [isLoadingDependencies, setIsLoadingDependencies] = useState(false); // Nuevo estado de carga
+    const [isLoadingDependencies, setIsLoadingDependencies] = useState(false);
 
-    // Function to get authentication token
     const getAuthToken = () => {
         return localStorage.getItem('token');
     };
 
-    // Enhanced fetch function with authentication
     const authFetch = useCallback(async (url, options = {}) => {
         const token = getAuthToken();
         if (!token) {
@@ -58,63 +55,31 @@ const AdminAppointmentForm = ({ isOpen, onClose, appointment, onSaveSuccess }) =
             throw new Error('No autorizado');
         }
 
-        // Si la respuesta no es OK, pero no es 401/403, intentamos leer el mensaje de error del backend
         if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || `Error del servidor: ${response.status}`);
+            const contentType = response.headers.get("content-type");
+            if (contentType && contentType.indexOf("application/json") !== -1) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `Error del servidor: ${response.status}`);
+            } else {
+                const text = await response.text();
+                console.error("Response was not JSON:", text);
+                setNotification({ message: `Error del servidor: Respuesta inesperada. Estado: ${response.status}. Detalles: ${text.substring(0, 100)}...`, type: 'error' });
+                throw new Error("Respuesta del servidor no es JSON");
+            }
         }
 
         return response;
     }, []);
 
-    // Load appointment data if in edit mode
-    useEffect(() => {
-        if (appointment) {
-            setFormData({
-                id_cliente: appointment.id_cliente || '',
-                id_mascota: appointment.id_mascota || '',
-                id_servicio: appointment.id_servicio || '',
-                id_veterinario: appointment.id_veterinario || '',
-                fecha_cita: appointment.fecha_cita ? new Date(appointment.fecha_cita).toISOString().slice(0, 16) : '',
-                notas_adicionales: appointment.notas_adicionales || '',
-                estado: appointment.estado ? appointment.estado.toUpperCase() : 'PENDIENTE' // Ensure uppercase
-            });
-        } else {
-            // Reset form for new appointment
-            setFormData({
-                id_cliente: '',
-                id_mascota: '',
-                id_servicio: '',
-                id_veterinario: '',
-                fecha_cita: '',
-                notas_adicionales: '',
-                estado: 'PENDIENTE'
-            });
-        }
-        setFormErrors({});
-        setNotification(null);
-    }, [appointment, isOpen]);
-
-    // Load clients, all pets, services, and veterinarians
+    // Load dependencies (mascotas, veterinarios)
     useEffect(() => {
         const fetchDependencies = async () => {
-            setIsLoadingDependencies(true); // Inicia la carga
+            setIsLoadingDependencies(true);
             try {
-                const [clientesRes, mascotasRes, serviciosRes, vetsRes] = await Promise.allSettled([ // Usamos allSettled para que una falla no detenga las otras
-                    authFetch(`${API_BASE_URL}/usuarios`), // Endpoint para usuarios clientes
-                    authFetch(`${API_BASE_URL}/mascotas`), // Todas las mascotas
-                    authFetch(`${API_BASE_URL}/servicios`),
+                const [mascotasRes, vetsRes] = await Promise.allSettled([
+                    authFetch(`${API_BASE_URL}/mascotas`),
                     authFetch(`${API_BASE_URL}/usuarios/veterinarios`)
                 ]);
-
-                // Manejo de resultados individuales
-                if (clientesRes.status === 'fulfilled' && clientesRes.value.ok) {
-                    const data = await clientesRes.value.json();
-                    if (data.success) setClientes(data.data);
-                    else setNotification(prev => prev || { message: data.message || 'Error al cargar clientes.', type: 'error' });
-                } else if (clientesRes.status === 'rejected') {
-                    setNotification(prev => prev || { message: `Error al cargar clientes: ${clientesRes.reason?.message || 'Error desconocido'}`, type: 'error' });
-                }
 
                 if (mascotasRes.status === 'fulfilled' && mascotasRes.value.ok) {
                     const data = await mascotasRes.value.json();
@@ -122,14 +87,6 @@ const AdminAppointmentForm = ({ isOpen, onClose, appointment, onSaveSuccess }) =
                     else setNotification(prev => prev || { message: data.message || 'Error al cargar mascotas.', type: 'error' });
                 } else if (mascotasRes.status === 'rejected') {
                     setNotification(prev => prev || { message: `Error al cargar mascotas: ${mascotasRes.reason?.message || 'Error desconocido'}`, type: 'error' });
-                }
-
-                if (serviciosRes.status === 'fulfilled' && serviciosRes.value.ok) {
-                    const data = await serviciosRes.value.json();
-                    if (data.success) setServicios(data.data);
-                    else setNotification(prev => prev || { message: data.message || 'Error al cargar servicios.', type: 'error' });
-                } else if (serviciosRes.status === 'rejected') {
-                    setNotification(prev => prev || { message: `Error al cargar servicios: ${serviciosRes.reason?.message || 'Error desconocido'}`, type: 'error' });
                 }
 
                 if (vetsRes.status === 'fulfilled' && vetsRes.value.ok) {
@@ -141,12 +98,10 @@ const AdminAppointmentForm = ({ isOpen, onClose, appointment, onSaveSuccess }) =
                 }
 
             } catch (err) {
-                // Esto solo se capturaría si Promise.allSettled falla catastróficamente, lo cual es raro.
-                // Los errores individuales ya se manejan arriba.
                 console.error('Error general al cargar dependencias:', err);
                 setNotification(prev => prev || { message: 'Error inesperado al cargar datos necesarios.', type: 'error' });
             } finally {
-                setIsLoadingDependencies(false); // Finaliza la carga
+                setIsLoadingDependencies(false);
             }
         };
 
@@ -155,37 +110,82 @@ const AdminAppointmentForm = ({ isOpen, onClose, appointment, onSaveSuccess }) =
         }
     }, [isOpen, authFetch]);
 
-    // Filter pets when client is selected
+    // Load record data if in edit mode
     useEffect(() => {
-        if (formData.id_cliente) {
-            const clientMascotas = mascotas.filter(m => m.id_propietario === parseInt(formData.id_cliente));
-            setFilteredMascotas(clientMascotas);
-            // If the currently selected pet does not belong to the new client, reset it
-            if (formData.id_mascota && !clientMascotas.some(m => m.id_mascota === parseInt(formData.id_mascota))) {
-                setFormData(prev => ({ ...prev, id_mascota: '' }));
+        if (isOpen) {
+            if (record) {
+                // Formatear fechas para el input datetime-local
+                const formatForInput = (dateString) => {
+                    if (!dateString) return '';
+                    const date = new Date(dateString);
+                    return isNaN(date.getTime()) ? '' : date.toISOString().slice(0, 16);
+                };
+
+                setFormData({
+                    id_mascota: record.id_mascota || '',
+                    fecha_consulta: formatForInput(record.fecha_consulta),
+                    diagnostico: record.diagnostico || '',
+                    tratamiento: record.tratamiento || '',
+                    observaciones: record.observaciones || '',
+                    veterinario: record.veterinario_id || '', // Usar veterinario_id si viene del backend
+                    peso_actual: record.peso_actual || '',
+                    temperatura: record.temperatura || '',
+                    proxima_cita: formatForInput(record.proxima_cita),
+                });
+            } else {
+                // Reset form for new record
+                setFormData({
+                    id_mascota: '',
+                    fecha_consulta: '',
+                    diagnostico: '',
+                    tratamiento: '',
+                    observaciones: '',
+                    veterinario: '',
+                    peso_actual: '',
+                    temperatura: '',
+                    proxima_cita: '',
+                });
             }
-        } else {
-            setFilteredMascotas([]);
-            setFormData(prev => ({ ...prev, id_mascota: '' }));
+            setFormErrors({});
+            setNotification(null);
         }
-    }, [formData.id_cliente, mascotas]);
+    }, [record, isOpen]);
 
     // Handle form changes
-    const handleChange = (e) => {
+    const handleChange = useCallback((e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+        let newValue = value;
+
+        // Convertir IDs numéricos si no están vacíos
+        if (['id_mascota', 'veterinario'].includes(name)) {
+            newValue = value !== '' ? parseInt(value, 10) : '';
+        }
+        // Para campos numéricos como peso y temperatura, asegúrate de que sean números
+        if (['peso_actual', 'temperatura'].includes(name)) {
+            newValue = value !== '' ? parseFloat(value) : '';
+        }
+
+        setFormData(prev => ({ ...prev, [name]: newValue }));
 
         // Validate field in real-time
-        const validationError = validateField(`${name}_cita`, value, formData, !appointment);
+        const validationError = validateField(name, newValue);
         setFormErrors(prev => ({ ...prev, [name]: validationError }));
-    };
+    }, []);
 
     // Handle blur to show errors when leaving a field
-    const handleBlur = (e) => {
+    const handleBlur = useCallback((e) => {
         const { name, value } = e.target;
-        const validationError = validateField(`${name}_cita`, value, formData, !appointment);
+        let currentValue = value;
+        // Convertir IDs numéricos si no están vacíos para la validación onBlur
+        if (['id_mascota', 'veterinario'].includes(name)) {
+            currentValue = value !== '' ? parseInt(value, 10) : '';
+        }
+        if (['peso_actual', 'temperatura'].includes(name)) {
+            currentValue = value !== '' ? parseFloat(value) : '';
+        }
+        const validationError = validateField(name, currentValue);
         setFormErrors(prev => ({ ...prev, [name]: validationError }));
-    };
+    }, []);
 
     // Submit form (add or update)
     const handleSubmit = async (e) => {
@@ -198,18 +198,11 @@ const AdminAppointmentForm = ({ isOpen, onClose, appointment, onSaveSuccess }) =
         let hasErrors = false;
 
         const fieldsToValidate = [
-            'id_cliente', 'id_mascota', 'id_servicio', 'fecha_cita', 'estado'
+            'id_mascota', 'fecha_consulta', 'diagnostico', 'tratamiento', 'veterinario'
         ];
-        // id_veterinario y notas_adicionales son opcionales, solo validar si tienen un valor para reglas específicas
-        if (formData.id_veterinario) {
-            fieldsToValidate.push('id_veterinario');
-        }
-        if (formData.notas_adicionales) {
-            fieldsToValidate.push('notas_adicionales');
-        }
 
         for (const field of fieldsToValidate) {
-            const errorMsg = validateField(`${field}_cita`, formData[field], formData, !appointment);
+            const errorMsg = validateField(field, formData[field]);
             if (errorMsg) {
                 errors[field] = errorMsg;
                 hasErrors = true;
@@ -225,67 +218,66 @@ const AdminAppointmentForm = ({ isOpen, onClose, appointment, onSaveSuccess }) =
         }
 
         try {
-            let responseData; // Para almacenar la respuesta del backend
             const dataToSend = { ...formData };
-            dataToSend.estado = dataToSend.estado.toUpperCase(); // Ensure state is uppercase
 
-            // console.log("Sending appointment data:", dataToSend); // Debugging log
+            // Formatear fechas a ISO string antes de enviar al backend
+            if (dataToSend.fecha_consulta) {
+                const date = new Date(dataToSend.fecha_consulta);
+                dataToSend.fecha_consulta = isNaN(date.getTime()) ? null : date.toISOString();
+            } else {
+                dataToSend.fecha_consulta = null;
+            }
+            if (dataToSend.proxima_cita) {
+                const date = new Date(dataToSend.proxima_cita);
+                dataToSend.proxima_cita = isNaN(date.getTime()) ? null : date.toISOString();
+            } else {
+                dataToSend.proxima_cita = null;
+            }
 
-            if (appointment) {
-                // Update appointment
-                const response = await authFetch(`${API_BASE_URL}/citas/${appointment.id_cita}`, {
+            let responseData;
+            if (record) {
+                // Update medical record
+                const response = await authFetch(`${API_BASE_URL}/historial_medico/${record.id_historial}`, {
                     method: 'PUT',
                     body: JSON.stringify(dataToSend),
                 });
                 responseData = await response.json();
             } else {
-                // Create new appointment
-                const response = await authFetch(`${API_BASE_URL}/citas/agendar`, {
+                // Create new medical record
+                const response = await authFetch(`${API_BASE_URL}/historial_medico`, {
                     method: 'POST',
                     body: JSON.stringify(dataToSend),
                 });
                 responseData = await response.json();
             }
 
-            // console.log("Backend response for appointment:", responseData); // Debugging log
-
             if (responseData.success) {
                 setNotification({ message: responseData.message, type: 'success' });
                 onSaveSuccess(); // Notify parent component to reload the list
                 onClose(); // Close the modal
             } else {
-                setNotification({ message: responseData.message || 'Error al guardar la cita. Intenta de nuevo.', type: 'error' });
+                setNotification({ message: responseData.message || 'Error al guardar el historial médico. Intenta de nuevo.', type: 'error' });
             }
         } catch (err) {
-            console.error('Error al enviar el formulario de cita:', err);
-            setNotification({ message: `Error al guardar la cita: ${err.message || 'Error desconocido'}`, type: 'error' });
+            console.error('Error al enviar el formulario de historial médico:', err);
+            setNotification({ message: `Error al guardar el historial médico: ${err.message || 'Error desconocido'}`, type: 'error' });
         } finally {
             setIsSubmitting(false);
         }
     };
 
-    const getClientName = (id) => {
-        const client = clientes.find(c => c.id === parseInt(id));
-        return client ? `${client.nombre} ${client.apellido}` : '';
-    };
-
-    const getMascotaName = (id) => {
+    const getMascotaDisplay = (id) => {
         const mascota = mascotas.find(m => m.id_mascota === parseInt(id));
-        return mascota ? mascota.nombre : '';
+        return mascota ? `${mascota.nombre} (${mascota.especie})` : '';
     };
 
-    const getServicioName = (id) => {
-        const servicio = servicios.find(s => s.id_servicio === parseInt(id));
-        return servicio ? servicio.nombre : '';
-    };
-
-    const getVeterinarioName = (id) => {
+    const getVeterinarioDisplay = (id) => {
         const veterinario = veterinarios.find(v => v.id === parseInt(id));
         return veterinario ? `${veterinario.nombre} ${veterinario.apellido}` : '';
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title={appointment ? "Editar Cita" : "Agendar Nueva Cita"}>
+        <Modal isOpen={isOpen} onClose={onClose} title={record ? "Editar Historial Médico" : "Registrar Nuevo Historial Médico"}>
             {notification && (
                 <Notification
                     message={notification.message}
@@ -300,44 +292,14 @@ const AdminAppointmentForm = ({ isOpen, onClose, appointment, onSaveSuccess }) =
             ) : (
                 <form onSubmit={handleSubmit} className="admin-form">
                     <div className="form-grid">
-                        <div className="form-group">
-                            <label htmlFor="id_cliente">Cliente:</label>
-                            {appointment ? (
-                                <input
-                                    type="text"
-                                    id="cliente_display"
-                                    value={getClientName(formData.id_cliente)}
-                                    className="input-disabled"
-                                    disabled
-                                />
-                            ) : (
-                                <select
-                                    id="id_cliente"
-                                    name="id_cliente"
-                                    value={formData.id_cliente}
-                                    onChange={handleChange}
-                                    onBlur={handleBlur}
-                                    className={formErrors.id_cliente ? 'input-error' : ''}
-                                    disabled={isSubmitting || isLoadingDependencies} // Deshabilitar si se está enviando o cargando dependencias
-                                >
-                                    <option value="">Selecciona un cliente</option>
-                                    {clientes.map(cliente => (
-                                        <option key={cliente.id} value={cliente.id}>
-                                            {cliente.nombre} {cliente.apellido} ({cliente.email})
-                                        </option>
-                                    ))}
-                                </select>
-                            )}
-                            {formErrors.id_cliente && <span className="error-text">{formErrors.id_cliente}</span>}
-                        </div>
-
+                        {/* Mascota */}
                         <div className="form-group">
                             <label htmlFor="id_mascota">Mascota:</label>
-                            {appointment ? (
+                            {record ? (
                                 <input
                                     type="text"
                                     id="mascota_display"
-                                    value={getMascotaName(formData.id_mascota)}
+                                    value={getMascotaDisplay(formData.id_mascota)}
                                     className="input-disabled"
                                     disabled
                                 />
@@ -349,12 +311,12 @@ const AdminAppointmentForm = ({ isOpen, onClose, appointment, onSaveSuccess }) =
                                     onChange={handleChange}
                                     onBlur={handleBlur}
                                     className={formErrors.id_mascota ? 'input-error' : ''}
-                                    disabled={isSubmitting || !formData.id_cliente || isLoadingDependencies} // Deshabilitar si no hay cliente o cargando
+                                    disabled={isSubmitting || isLoadingDependencies}
                                 >
                                     <option value="">Selecciona una mascota</option>
-                                    {filteredMascotas.map(mascota => (
+                                    {mascotas.map(mascota => (
                                         <option key={mascota.id_mascota} value={mascota.id_mascota}>
-                                            {mascota.nombre} ({mascota.especie})
+                                            {mascota.nombre} ({mascota.especie}) - Propietario: {mascota.propietario_nombre}
                                         </option>
                                     ))}
                                 </select>
@@ -362,104 +324,148 @@ const AdminAppointmentForm = ({ isOpen, onClose, appointment, onSaveSuccess }) =
                             {formErrors.id_mascota && <span className="error-text">{formErrors.id_mascota}</span>}
                         </div>
 
+                        {/* Fecha de Consulta */}
                         <div className="form-group">
-                            <label htmlFor="id_servicio">Servicio Principal:</label>
-                            <select
-                                id="id_servicio"
-                                name="id_servicio"
-                                value={formData.id_servicio}
-                                onChange={handleChange}
-                                onBlur={handleBlur}
-                                className={formErrors.id_servicio ? 'input-error' : ''}
-                                disabled={isSubmitting || isLoadingDependencies} // Deshabilitar si se está enviando o cargando
-                            >
-                                <option value="">Selecciona un servicio</option>
-                                {servicios.map(servicio => (
-                                    <option key={servicio.id_servicio} value={servicio.id_servicio}>
-                                        {servicio.nombre} (${servicio.precio})
-                                    </option>
-                                ))}
-                            </select>
-                            {formErrors.id_servicio && <span className="error-text">{formErrors.id_servicio}</span>}
-                        </div>
-
-                        <div className="form-group">
-                            <label htmlFor="id_veterinario">Veterinario Asignado:</label>
-                            <select
-                                id="id_veterinario"
-                                name="id_veterinario"
-                                value={formData.id_veterinario}
-                                onChange={handleChange}
-                                onBlur={handleBlur}
-                                className={formErrors.id_veterinario ? 'input-error' : ''}
-                                disabled={isSubmitting || isLoadingDependencies} // Deshabilitar si se está enviando o cargando
-                            >
-                                <option value="">Asignar automáticamente</option>
-                                {veterinarios.map(vet => (
-                                    <option key={vet.id} value={vet.id}>
-                                        {vet.nombre} {vet.apellido} ({vet.email})
-                                    </option>
-                                ))}
-                            </select>
-                            {formErrors.id_veterinario && <span className="error-text">{formErrors.id_veterinario}</span>}
-                        </div>
-
-                        <div className="form-group">
-                            <label htmlFor="fecha_cita">Fecha y Hora:</label>
+                            <label htmlFor="fecha_consulta">Fecha de Consulta:</label>
                             <input
                                 type="datetime-local"
-                                id="fecha_cita"
-                                name="fecha_cita"
-                                value={formData.fecha_cita}
+                                id="fecha_consulta"
+                                name="fecha_consulta"
+                                value={formData.fecha_consulta}
                                 onChange={handleChange}
                                 onBlur={handleBlur}
-                                className={formErrors.fecha_cita ? 'input-error' : ''}
+                                className={formErrors.fecha_consulta ? 'input-error' : ''}
                                 disabled={isSubmitting}
                             />
-                            {formErrors.fecha_cita && <span className="error-text">{formErrors.fecha_cita}</span>}
+                            {formErrors.fecha_consulta && <span className="error-text">{formErrors.fecha_consulta}</span>}
                         </div>
 
-                        <div className="form-group">
-                            <label htmlFor="notas_adicionales">Notas Adicionales / Ubicación:</label>
-                            <input
-                                type="text"
-                                id="notas_adicionales"
-                                name="notas_adicionales"
-                                value={formData.notas_adicionales}
+                        {/* Diagnóstico */}
+                        <div className="form-group full-width">
+                            <label htmlFor="diagnostico">Diagnóstico:</label>
+                            <textarea
+                                id="diagnostico"
+                                name="diagnostico"
+                                value={formData.diagnostico}
                                 onChange={handleChange}
                                 onBlur={handleBlur}
-                                className={formErrors.notas_adicionales ? 'input-error' : ''}
+                                className={formErrors.diagnostico ? 'input-error' : ''}
+                                rows="3"
                                 disabled={isSubmitting}
-                            />
-                            {formErrors.notas_adicionales && <span className="error-text">{formErrors.notas_adicionales}</span>}
+                            ></textarea>
+                            {formErrors.diagnostico && <span className="error-text">{formErrors.diagnostico}</span>}
                         </div>
 
+                        {/* Tratamiento */}
+                        <div className="form-group full-width">
+                            <label htmlFor="tratamiento">Tratamiento:</label>
+                            <textarea
+                                id="tratamiento"
+                                name="tratamiento"
+                                value={formData.tratamiento}
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                className={formErrors.tratamiento ? 'input-error' : ''}
+                                rows="3"
+                                disabled={isSubmitting}
+                            ></textarea>
+                            {formErrors.tratamiento && <span className="error-text">{formErrors.tratamiento}</span>}
+                        </div>
+
+                        {/* Observaciones */}
+                        <div className="form-group full-width">
+                            <label htmlFor="observaciones">Observaciones:</label>
+                            <textarea
+                                id="observaciones"
+                                name="observaciones"
+                                value={formData.observaciones}
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                className={formErrors.observaciones ? 'input-error' : ''}
+                                rows="3"
+                                disabled={isSubmitting}
+                            ></textarea>
+                            {formErrors.observaciones && <span className="error-text">{formErrors.observaciones}</span>}
+                        </div>
+
+                        {/* Veterinario */}
                         <div className="form-group">
-                            <label htmlFor="estado">Estado:</label>
+                            <label htmlFor="veterinario">Veterinario:</label>
                             <select
-                                id="estado"
-                                name="estado"
-                                value={formData.estado}
+                                id="veterinario"
+                                name="veterinario"
+                                value={formData.veterinario}
                                 onChange={handleChange}
                                 onBlur={handleBlur}
-                                className={formErrors.estado ? 'input-error' : ''}
-                                disabled={isSubmitting}
+                                className={formErrors.veterinario ? 'input-error' : ''}
+                                disabled={isSubmitting || isLoadingDependencies}
                             >
-                                <option value="PENDIENTE">PENDIENTE</option>
-                                <option value="ACEPTADA">ACEPTADA</option>
-                                <option value="RECHAZADA">RECHAZADA</option>
-                                <option value="COMPLETA">COMPLETA</option>
-                                <option value="CANCELADA">CANCELADA</option>
+                                <option value="">Selecciona un veterinario</option>
+                                {veterinarios.map(vet => (
+                                    <option key={vet.id} value={vet.id}>
+                                        {vet.nombre} {vet.apellido}
+                                    </option>
+                                ))}
                             </select>
-                            {formErrors.estado && <span className="error-text">{formErrors.estado}</span>}
+                            {formErrors.veterinario && <span className="error-text">{formErrors.veterinario}</span>}
+                        </div>
+
+                        {/* Peso Actual */}
+                        <div className="form-group">
+                            <label htmlFor="peso_actual">Peso Actual (kg):</label>
+                            <input
+                                type="number"
+                                id="peso_actual"
+                                name="peso_actual"
+                                value={formData.peso_actual}
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                className={formErrors.peso_actual ? 'input-error' : ''}
+                                disabled={isSubmitting}
+                                step="0.01"
+                            />
+                            {formErrors.peso_actual && <span className="error-text">{formErrors.peso_actual}</span>}
+                        </div>
+
+                        {/* Temperatura */}
+                        <div className="form-group">
+                            <label htmlFor="temperatura">Temperatura (°C):</label>
+                            <input
+                                type="number"
+                                id="temperatura"
+                                name="temperatura"
+                                value={formData.temperatura}
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                className={formErrors.temperatura ? 'input-error' : ''}
+                                disabled={isSubmitting}
+                                step="0.1"
+                            />
+                            {formErrors.temperatura && <span className="error-text">{formErrors.temperatura}</span>}
+                        </div>
+
+                        {/* Próxima Cita */}
+                        <div className="form-group">
+                            <label htmlFor="proxima_cita">Próxima Cita:</label>
+                            <input
+                                type="datetime-local"
+                                id="proxima_cita"
+                                name="proxima_cita"
+                                value={formData.proxima_cita}
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                className={formErrors.proxima_cita ? 'input-error' : ''}
+                                disabled={isSubmitting}
+                            />
+                            {formErrors.proxima_cita && <span className="error-text">{formErrors.proxima_cita}</span>}
                         </div>
                     </div>
 
                     <div className="form-actions">
-                        <button type="submit" className="btn-primary" disabled={isSubmitting || isLoadingDependencies}>
-                            {isSubmitting ? <FaSpinner className="spinner" /> : <FaSave />} {appointment ? 'Actualizar Cita' : 'Agendar Cita'}
+                        <button type="submit" className="btn-primary" disabled={isSubmitting}>
+                            {isSubmitting ? <FaSpinner className="spinner" /> : <FaSave />} {record ? 'Actualizar Historial' : 'Registrar Historial'}
                         </button>
-                        <button type="button" className="btn-secondary" onClick={onClose} disabled={isSubmitting || isLoadingDependencies}>
+                        <button type="button" className="btn-secondary" onClick={onClose} disabled={isSubmitting}>
                             <FaTimes /> Cancelar
                         </button>
                     </div>
@@ -469,4 +475,4 @@ const AdminAppointmentForm = ({ isOpen, onClose, appointment, onSaveSuccess }) =
     );
 };
 
-export default AdminAppointmentForm;
+export default AdminMedicalRecordForm;

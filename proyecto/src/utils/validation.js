@@ -5,9 +5,20 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const phoneRegex = /^\+?(\d{1,4})?[-.\s]?(\(?\d{2,4}\)?[-.\s]?)?\d{3,4}[-.\s]?\d{4}$/; // Más flexible para números internacionales
 const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s'-]+$/;
-const alphanumericRegex = /^[a-zA-Z0-9\s.,#\-/()]+$/; // Para direcciones, etc.
 const documentNumberRegex = /^[a-zA-Z0-9-]+$/; // Para números de documento
 const positiveNumberRegex = /^\d+(\.\d+)?$/; // Para números positivos, enteros o decimales
+
+// --- NUEVA REGEX PARA DIRECCIONES ---
+// Esta regex intenta ser más flexible para capturar formatos comunes en Colombia,
+// permitiendo varios componentes y el uso opcional de # y -.
+// Permite:
+// - Tipos de vía y abreviaturas (calle, cll, carrera, cra, etc.)
+// - Números de vía con o sin letras (ej. 15, 19C)
+// - El símbolo # o el guion - para el número de puerta/apartamento.
+// - Información adicional al final (ej. Barrio, Apto, Torre, etc.)
+//   que puede incluir letras, números, espacios, puntos, comas, guiones, numeral, paréntesis y barras.
+const addressRegex = /^(?:calle|carrera|avenida|transversal|diagonal|cll|cra|av|tv|dg|kr|km)\b\.?\s*\d{1,4}(?:\s*[a-zA-Z])?(?:\s*[#\-\s]\s*\d{1,4}(?:\s*[a-zA-Z])?)?(?:\s*[a-zA-Z0-9\s.,#\-'/()]*)*$/i;
+
 
 // Patrones de seguridad básicos
 const sqlInjectionKeywords = /(SELECT|INSERT|UPDATE|DELETE|DROP|ALTER|CREATE|UNION|TRUNCATE|EXEC|xp_cmdshell|--|;)/i;
@@ -85,7 +96,7 @@ export const validateField = (fieldName, value, allFormData = {}, isNewEntry = f
             // Validación de email genérico/de prueba:
             // Solo aplica si es una nueva entrada O si el email ha cambiado Y el nuevo email es genérico.
             const isGenericEmail = /(test|demo|example|placeholder|temp|prueba|admin|root|qwerty|password)@/i.test(trimmedValue) ||
-                                   /(test|demo|example|placeholder|temp|prueba|admin|root|qwerty|password)\.com/i.test(trimmedValue);
+                                 /(test|demo|example|placeholder|temp|prueba|admin|root|qwerty|password)\.com/i.test(trimmedValue);
             if (isGenericEmail && (isNewEntry || (trimmedValue !== originalEmail))) {
                 message = 'El email es demasiado genérico o de prueba. Por favor, usa un email real.';
             }
@@ -108,17 +119,15 @@ export const validateField = (fieldName, value, allFormData = {}, isNewEntry = f
                     message = 'La dirección debe tener al menos 5 caracteres.';
                 } else if (trimmedValue.length > 100) {
                     message = 'La dirección no debe exceder los 100 caracteres.';
-                } else if (!alphanumericRegex.test(trimmedValue)) {
-                    message = 'La dirección contiene caracteres no permitidos.';
-                } else if (trimmedValue.includes('..') || trimmedValue.includes('--') || trimmedValue.includes(',,') ||
-                           trimmedValue.startsWith('.') || trimmedValue.endsWith('.') ||
-                           trimmedValue.startsWith('-') || trimmedValue.endsWith('-') ||
-                           trimmedValue.startsWith(',') || trimmedValue.endsWith(',')) {
-                    message = 'Formato incorrecto de puntuación (ej. no al inicio/final o consecutivos).';
                 }
-                // Validación de estructura de dirección (ej. "Calle 123 #45-67") - Recomendado para Colombia
-                else if (!/(calle|carrera|avenida|transversal|diagonal|cll|cra|av|tv|dg|kr|km)\s*\d+\s*(#|\snumero\s|no\s*)\s*\d+(\s*[a-zA-Z])?(\s*-\s*\d+)?(\s*[a-zA-Z])?\s*([a-zA-Z0-9\s#\-.]+)?$/i.test(trimmedValue)) {
-                    message = 'Formato de dirección recomendado: Tipo de Vía (Calle, Carrera, Av) + Número de Vía + # + Número de Casa/Edificio (ej. Calle 15 #19C-55).';
+                // Una validación más genérica para caracteres no esperados, antes de la regex de estructura
+                // Esto atrapa cualquier símbolo o carácter que no sea alfanumérico, espacio, o los permitidos
+                else if (!/^[a-zA-Z0-9\s.,#\-'/()]*$/.test(trimmedValue)) {
+                    message = 'La dirección contiene caracteres no permitidos. Solo se permiten letras, números, espacios y los símbolos ., #, -, /, (, ).';
+                }
+                // --- VALIDACIÓN DE ESTRUCTURA DE DIRECCIÓN MEJORADA ---
+                else if (!addressRegex.test(trimmedValue)) {
+                    message = 'El formato de dirección es inválido. Ejemplos válidos: "Calle 15 #19C-55", "Transversal 12 #4A-60", "Carrera 7 #20-10 Apartamento 301", "Cll 10 #1-20".';
                 }
             }
             break;
@@ -171,8 +180,7 @@ export const validateField = (fieldName, value, allFormData = {}, isNewEntry = f
             if (trimmedValue) {
                 const birthDate = new Date(trimmedValue);
                 const today = new Date();
-                const minDate = new Date('1900-01-01'); // Fecha mínima razonable
-                const maxAgeDate = new Date(); // No se puede nacer en el futuro
+                const maxAgeDate = new Date();
                 maxAgeDate.setFullYear(maxAgeDate.getFullYear() - 120); // Edad máxima de 120 años para humanos
 
                 if (isNaN(birthDate.getTime())) {
@@ -204,8 +212,8 @@ export const validateField = (fieldName, value, allFormData = {}, isNewEntry = f
             if (!trimmedValue) {
                 message = `El ${fieldName.replace('_mascota', '')} de la mascota es requerido.`;
             } else if (trimmedValue.length < 2 || trimmedValue.length > 100) {
-                message = `El ${fieldName.replace('_mascota', '')} de la mascota debe tener entre 2 y 100 caracteres.`;
-            } else if (!nameRegex.test(trimmedValue)) { // Reutiliza nameRegex para nombres de mascotas
+                message = `El ${fieldName.replace('_mascota', '')} de la mascota debe tener entre 2 y 100 caracteres.`;}
+            else if (!nameRegex.test(trimmedValue)) { // Reutiliza nameRegex para nombres de mascotas
                 message = `El ${fieldName.replace('_mascota', '')} de la mascota solo permite letras, espacios, guiones y apóstrofes.`;
             }
             break;
@@ -250,8 +258,8 @@ export const validateField = (fieldName, value, allFormData = {}, isNewEntry = f
             if (trimmedValue) { // Microchip es opcional
                 if (trimmedValue.length < 5 || trimmedValue.length > 50) {
                     message = 'El microchip debe tener entre 5 y 50 caracteres.';
-                } else if (!alphanumericRegex.test(trimmedValue)) {
-                    message = 'El microchip contiene caracteres no permitidos.';
+                } else if (!/^[a-zA-Z0-9]+$/.test(trimmedValue)) { // Solo alfanumérico para microchip
+                    message = 'El microchip solo puede contener letras y números.';
                 }
             }
             break;

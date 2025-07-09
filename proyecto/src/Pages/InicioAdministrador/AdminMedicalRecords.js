@@ -154,7 +154,9 @@ const AdminMedicalRecords = ({ user }) => {
         if (!isoString) return 'N/A';
         try {
             const date = new Date(isoString);
-            const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'America/Bogota' };
+            // Formato para mostrar en la tabla, ejemplo: "08/07/2025, 07:00 p. m."
+            // Usar toLocaleString con opciones para asegurar el formato deseado
+            const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true };
             return date.toLocaleString('es-CO', options);
         } catch (e) {
             console.error("Error formatting date:", e);
