@@ -134,20 +134,18 @@ const CrearCitaVeterinario = () => {
   const [selectedServicio, setSelectedServicio] = useState('');
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedTime, setSelectedTime] = useState(null);
-
   // Estados para el filtro de clientes
   const [clientSearchQuery, setClientSearchQuery] = useState('');
   const [filteredClientes, setFilteredClientes] = useState([]);
-
   // ID del veterinario logeado (obtenido del contexto)
   const loggedInVeterinarioId = user?.id;
-
   // Estados de UI
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
-  const [validationErrors, setValidationErrors] = useState({}); // Nuevo estado para errores de validación por campo
+  const [validationErrors, setValidationErrors] = useState({});
+  // Nuevo estado para errores de validación por campo
 
   const validateForm = useCallback(() => {
     let errors = {};
@@ -288,7 +286,6 @@ const CrearCitaVeterinario = () => {
     };
     fetchMascotas();
   }, [selectedCliente, showNotification, authFetch]);
-
   // Filtrar clientes por búsqueda
   useEffect(() => {
     const query = clientSearchQuery.toLowerCase();
@@ -307,27 +304,28 @@ const CrearCitaVeterinario = () => {
     setSelectedCliente(e.target.value);
     setValidationErrors(prev => ({ ...prev, selectedCliente: '' })); // Limpiar error al cambiar
   };
-
   const handleMascotaChange = (e) => {
     setSelectedMascota(e.target.value);
-    setValidationErrors(prev => ({ ...prev, selectedMascota: '' })); // Limpiar error al cambiar
+    setValidationErrors(prev => ({ ...prev, selectedMascota: '' }));
+    // Limpiar error al cambiar
   };
 
   const handleServicioChange = (e) => {
     setSelectedServicio(e.target.value);
     setValidationErrors(prev => ({ ...prev, selectedServicio: '' })); // Limpiar error al cambiar
   };
-
   const handleDateChange = (date) => {
     setSelectedDate(date);
-    setValidationErrors(prev => ({ ...prev, selectedDate: '' })); // Limpiar error al cambiar
+    setValidationErrors(prev => ({ ...prev, selectedDate: '' }));
+    // Limpiar error al cambiar
     // Opcional: Si se selecciona una nueva fecha, resetear la hora para forzar una nueva selección válida
     setSelectedTime(null);
   };
 
   const handleTimeChange = (time) => {
     setSelectedTime(time);
-    setValidationErrors(prev => ({ ...prev, selectedTime: '' })); // Limpiar error al cambiar
+    setValidationErrors(prev => ({ ...prev, selectedTime: '' }));
+    // Limpiar error al cambiar
   };
 
   const handleSubmit = async (e) => {
@@ -355,7 +353,6 @@ const CrearCitaVeterinario = () => {
     fullDateTime.setMinutes(selectedTime.getMinutes());
     fullDateTime.setSeconds(0);
     fullDateTime.setMilliseconds(0);
-
     const newCita = {
       id_cliente: parseInt(selectedCliente),
       id_mascota: parseInt(selectedMascota),
@@ -364,32 +361,30 @@ const CrearCitaVeterinario = () => {
       fecha_cita: fullDateTime.toISOString().slice(0, 19).replace('T', ' '), // Formato YYYY-MM-DD HH:MM:SS
       estado: 'pendiente' // Estado inicial
     };
-
     console.log("Intentando agendar cita:", newCita);
 
     try {
-      // Ahora authFetch devuelve directamente el objeto con success/data/message
-      const response = await authFetch('/citas', { // Ruta corregida a /citas
+      // LA LÍNEA CORREGIDA ES ESTA:
+      const response = await authFetch('/citas/agendar', { // Ruta corregida a /citas/agendar
         method: 'POST',
         body: JSON.stringify(newCita),
       });
-
       if (response.success) {
         setSuccessMessage('¡Cita agendada exitosamente!');
         showNotification('Cita agendada exitosamente.', 'success');
-
         // Limpiar formulario después de éxito
         setSelectedCliente('');
         setSelectedMascota('');
         setSelectedServicio('');
-        setSelectedDate(new Date()); // Volver a la fecha actual
+        setSelectedDate(new Date());
+        // Volver a la fecha actual
         setSelectedTime(null);
         setClientSearchQuery('');
         setMascotasCliente([]);
-        setValidationErrors({}); // Limpiar errores de validación
+        setValidationErrors({});
+        // Limpiar errores de validación
 
         setTimeout(() => navigate('/veterinario/citas'), 1500);
-
       } else {
         setError(response.message || 'Hubo un problema al agendar la cita. Por favor, intente de nuevo.');
         showNotification(response.message || 'Hubo un problema al agendar la cita.', 'error');
@@ -402,7 +397,6 @@ const CrearCitaVeterinario = () => {
       setSubmitting(false);
     }
   };
-
   if (loading) {
     return (
       <motion.div
@@ -598,7 +592,8 @@ const CrearCitaVeterinario = () => {
                 onChange={handleDateChange}
                 dateFormat="dd/MM/yyyy"
                 locale="es"
-                minDate={new Date()} // No permitir fechas pasadas
+                minDate={new Date()} // No
+                // permitir fechas pasadas
                 className="date-picker-input"
                 placeholderText="Seleccione la fecha"
                 required
