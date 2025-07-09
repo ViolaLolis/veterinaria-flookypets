@@ -4,8 +4,8 @@ import veteStyles from './Style/ListaPropietariosStyles.module.css'; // Asegúra
 import { motion, AnimatePresence } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faEye, faEdit, faPlus, faTrashAlt, faUser, faSync, faSearch, faSpinner, faTimesCircle, faExclamationTriangle
-} from '@fortawesome/free-solid-svg-icons';
+  faEye, faEdit, faPlus, faUser, faSync, faSearch, faSpinner, faExclamationTriangle
+} from '@fortawesome/free-solid-svg-icons'; // Eliminado faTrashAlt y faTimesCircle
 import { authFetch } from './api'; // Asegúrate de que la ruta sea correcta a tu archivo api.js
 
 // Variantes de Framer Motion
@@ -52,8 +52,9 @@ const ListaPropietarios = () => {
   const [error, setError] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [propietarioToDelete, setPropietarioToDelete] = useState(null);
+  // Eliminado showConfirmModal y propietarioToDelete porque el botón de eliminación se quita.
+  // const [showConfirmModal, setShowConfirmModal] = useState(false);
+  // const [propietarioToDelete, setPropietarioToDelete] = useState(null);
 
   const fetchPropietarios = useCallback(async () => {
     setLoading(true);
@@ -111,45 +112,8 @@ const ListaPropietarios = () => {
     fetchPropietarios();
   };
 
-  const handleDeleteClick = (propietario) => {
-    setPropietarioToDelete(propietario);
-    setShowConfirmModal(true);
-  };
-
-  const handleConfirmDelete = async () => {
-    setShowConfirmModal(false);
-    if (!propietarioToDelete) return;
-
-    setRefreshing(true); // Usamos refreshing para indicar que estamos en una operación
-    try {
-      const response = await authFetch(`/usuarios/${propietarioToDelete.id}`, {
-        method: 'DELETE',
-      });
-
-      if (response.success) {
-        showNotification('Propietario eliminado exitosamente.', 'success');
-        // Actualizar la lista de propietarios en el UI
-        setPropietarios(prevPropietarios =>
-          prevPropietarios.filter(prop => prop.id !== propietarioToDelete.id)
-        );
-      } else {
-        setError(response.message || 'Error al eliminar el propietario.');
-        if (showNotification) showNotification(response.message || 'Error al eliminar el propietario.', 'error');
-      }
-    } catch (err) {
-      console.error("Error deleting propietario:", err);
-      setError('Error de conexión al servidor al eliminar el propietario.');
-      if (showNotification) showNotification('Error de conexión al servidor al eliminar el propietario.', 'error');
-    } finally {
-      setRefreshing(false);
-      setPropietarioToDelete(null);
-    }
-  };
-
-  const handleCancelDelete = () => {
-    setShowConfirmModal(false);
-    setPropietarioToDelete(null);
-  };
+  // Eliminado las funciones handleDeleteClick, handleConfirmDelete y handleCancelDelete
+  // ya que no se usará el botón de eliminar ni el modal de confirmación.
 
   if (loading) {
     return (
@@ -311,16 +275,19 @@ const ListaPropietarios = () => {
                     </Link>
                   </motion.div>
 
+                  {/* ELIMINADO: Botón de eliminación y su contenedor motion.div */}
+                  {/*
                   <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
                     <button
                       className={`${veteStyles.veteActionButton} ${veteStyles.veteDeleteButton}`}
                       title="Eliminar"
                       onClick={() => handleDeleteClick(propietario)}
-                      disabled={refreshing} // Deshabilita el botón mientras se elimina
+                      disabled={refreshing}
                     >
                       <FontAwesomeIcon icon={faTrashAlt} />
                     </button>
                   </motion.div>
+                  */}
                 </div>
               </motion.li>
             ))}
@@ -347,7 +314,8 @@ const ListaPropietarios = () => {
         )}
       </AnimatePresence>
 
-      {/* Modal de Confirmación de Eliminación */}
+      {/* ELIMINADO: Modal de Confirmación de Eliminación */}
+      {/*
       <AnimatePresence>
         {showConfirmModal && (
           <motion.div
@@ -355,14 +323,14 @@ const ListaPropietarios = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={handleCancelDelete} // Cierra el modal al hacer clic fuera
+            onClick={handleCancelDelete}
           >
             <motion.div
               className={veteStyles.modalContent}
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.8, opacity: 0 }}
-              onClick={(e) => e.stopPropagation()} // Evita que el clic se propague al overlay
+              onClick={(e) => e.stopPropagation()}
             >
               <h3>Confirmar Eliminación</h3>
               <p>
@@ -386,7 +354,7 @@ const ListaPropietarios = () => {
                   variants={buttonVariants}
                   whileHover="hover"
                   whileTap="tap"
-                  disabled={refreshing} // Deshabilita el botón mientras se elimina
+                  disabled={refreshing}
                 >
                   {refreshing ? (
                     <>
@@ -403,6 +371,7 @@ const ListaPropietarios = () => {
           </motion.div>
         )}
       </AnimatePresence>
+      */}
     </motion.div>
   );
 };

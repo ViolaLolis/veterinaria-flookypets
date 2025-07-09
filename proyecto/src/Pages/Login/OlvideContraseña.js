@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { send } from '@emailjs/browser';
+// import { send } from '@emailjs/browser'; // Comentar esta línea si no se usa EmailJS
+
 import '../Styles/OlvidarContraseña.css';
 
 const serviceId = 'Flooky Pets';
@@ -56,23 +57,18 @@ function OlvideContraseña() {
   };
 
   const enviarCodigoPorCorreo = async (codigo, email) => {
-    const templateParams = {
-      to_email: email,
-      from_name: 'Flooky Pets',
-      reply_to: 'soporte@flookypets.com',
-      verification_code: codigo,
-      user_name: email.split('@')[0]
-    };
-
+    // Estas líneas son las que se deben comentar/descomentar para controlar el envío real de correos.
+    // Si los correos son inventados y no existen, es mejor simular el envío.
     try {
-      await send(serviceId, templateId, templateParams, publicKey);
+      // await send(serviceId, templateId, templateParams, publicKey); // <--- PARTE A COMENTAR/DESCOMENTAR
+      console.log(`[SIMULACIÓN] Código de verificación enviado a: ${email} con código: ${codigo}`); // Mensaje para depuración
       setCodigoEnviado(true);
       setTiempoRestante(60);
       setError('');
       setSuccessMessage('Código de verificación enviado a tu correo');
       return true;
     } catch (err) {
-      console.error('Error al enviar correo:', err); // Este console.error será suprimido en producción
+      // console.error('Error al enviar correo:', err); // <--- PARTE A COMENTAR/DESCOMENTAR
       let errorMsg = 'Error al enviar el código. Intenta nuevamente.';
 
       if (err.text?.includes("recipient's address is corrupted")) {

@@ -3,8 +3,8 @@ import { useNavigate, useParams, useOutletContext } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faArrowLeft, faSave, faSpinner, faTimesCircle, faCheckCircle,
-  faUser, faEnvelope, faPhone, faMapMarkerAlt, faCamera, faExclamationTriangle, faSync
+  faArrowLeft, faSpinner, faCheckCircle,
+  faUser, faExclamationTriangle, faSync
 } from '@fortawesome/free-solid-svg-icons';
 import { authFetch } from './api'; // Asegúrate de que la ruta sea correcta
 import styles from './Style/EditarPropietarioStyles.module.css'; // Crear/Actualizar este archivo CSS
@@ -33,7 +33,7 @@ const EditarPropietario = () => {
   const { id } = useParams(); // Obtener el ID del propietario de la URL
   const navigate = useNavigate();
   // Asumiendo que showNotification se pasa a través de un OutletContext o un contexto global
-  const { showNotification } = useOutletContext(); 
+  const { showNotification } = useOutletContext();
 
   const [formData, setFormData] = useState({
     nombre: '',
@@ -49,11 +49,11 @@ const EditarPropietario = () => {
     confirm_password: ''
   });
 
-  const [selectedFile, setSelectedFile] = useState(null);
+  // Eliminado: const [selectedFile, setSelectedFile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   // error ahora es un objeto para manejar errores por campo
-  const [error, setError] = useState({}); 
+  const [error, setError] = useState({});
   // successMessage ahora es un objeto para consistencia con mascotas
   const [successMessage, setSuccessMessage] = useState(null);
 
@@ -157,44 +157,7 @@ const EditarPropietario = () => {
     setSuccessMessage(null); // Limpiar mensajes de éxito/error al cambiar un campo
   };
 
-  const handleFileChange = (e) => {
-    setSelectedFile(e.target.files[0]);
-  };
-
-  const handleUploadImage = async () => {
-    if (!selectedFile) {
-      return formData.imagen_url; // Si no hay nuevo archivo, retorna la URL existente
-    }
-
-    const imageData = new FormData();
-    imageData.append('image', selectedFile);
-
-    try {
-      const response = await authFetch('/upload-image', {
-        method: 'POST',
-        headers: {
-          // No Content-Type aquí, FormData lo establece automáticamente con el boundary
-        },
-        body: imageData,
-      });
-
-      if (response.success) {
-        if (showNotification) showNotification('Imagen de perfil subida exitosamente.', 'success');
-        setFormData(prev => ({ ...prev, imagen_url: response.imageUrl }));
-        setSelectedFile(null); // Limpiar el archivo seleccionado
-        return response.imageUrl;
-      } else {
-        setError(prev => ({ ...prev, image: response.message || 'Error al subir la imagen.' }));
-        if (showNotification) showNotification(response.message || 'Error al subir la imagen.', 'error');
-        return null;
-      }
-    } catch (err) {
-      console.error("Error uploading image:", err);
-      setError(prev => ({ ...prev, image: err.message || 'Error de conexión al servidor al subir imagen.' }));
-      if (showNotification) showNotification(err.message || 'Error de conexión al servidor al subir imagen.', 'error');
-      return null;
-    }
-  };
+  // Eliminado: handleFileChange y handleUploadImage
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -207,7 +170,7 @@ const EditarPropietario = () => {
     Object.keys(formData).forEach(key => {
       // Excluir new_password y confirm_password de la validación inicial si no se están cambiando
       if ((key === 'new_password' || key === 'confirm_password') && !formData.new_password.trim()) {
-        return; 
+        return;
       }
       const fieldError = validateField(key, formData[key]);
       if (fieldError) {
@@ -234,14 +197,7 @@ const EditarPropietario = () => {
       return;
     }
 
-    let updatedImageUrl = formData.imagen_url;
-    if (selectedFile) {
-      updatedImageUrl = await handleUploadImage();
-      if (updatedImageUrl === null) { // Si la subida de imagen falla
-        setIsSubmitting(false);
-        return;
-      }
-    }
+    // Eliminado: Lógica de subida de imagen (handleUploadImage)
 
     const dataToUpdate = {
       nombre: formData.nombre,
@@ -252,7 +208,7 @@ const EditarPropietario = () => {
       tipo_documento: formData.tipo_documento,
       numero_documento: formData.numero_documento,
       fecha_nacimiento: formData.fecha_nacimiento,
-      imagen_url: updatedImageUrl, // Usar la URL actualizada
+      imagen_url: formData.imagen_url, // Siempre usa la URL existente, no hay nueva subida
     };
 
     if (formData.new_password) {
@@ -270,10 +226,10 @@ const EditarPropietario = () => {
       if (response.success) {
         setSuccessMessage({ texto: 'Propietario actualizado exitosamente.', tipo: 'exito' });
         if (showNotification) showNotification('Propietario actualizado exitosamente.', 'success');
-        
+
         // Recargar los datos para asegurar que la UI refleje los cambios guardados
         // y limpiar campos de contraseña
-        loadPropietarioData(); 
+        loadPropietarioData();
       } else {
         setSuccessMessage({ texto: response.message || 'Error al actualizar el propietario. Inténtalo de nuevo.', tipo: 'error' });
         if (showNotification) showNotification(response.message || 'Error al actualizar el propietario.', 'error');
@@ -293,11 +249,9 @@ const EditarPropietario = () => {
 
   // URL de previsualización de la imagen
   const previewImageUrl = useMemo(() => {
-    if (selectedFile) {
-      return URL.createObjectURL(selectedFile);
-    }
+    // Si no hay archivo seleccionado (porque ya no se permite), solo usa la URL existente o un placeholder
     return formData.imagen_url || `https://placehold.co/150x150/00acc1/ffffff?text=${formData.nombre?.charAt(0) || 'P'}`;
-  }, [selectedFile, formData.imagen_url, formData.nombre]);
+  }, [formData.imagen_url, formData.nombre]);
 
 
   if (loading) {
@@ -310,7 +264,7 @@ const EditarPropietario = () => {
   }
 
   // Si hay un error de carga inicial, mostrar un mensaje y botón de reintento
-  if (error.fetch) { 
+  if (error.fetch) {
     return (
       <div className={styles.veteErrorContainer}>
         <FontAwesomeIcon icon={faExclamationTriangle} size="3x" color="#dc3545" />
@@ -350,7 +304,7 @@ const EditarPropietario = () => {
       </div>
 
       <form onSubmit={handleSubmit} className={styles.veteFormulario}> {/* Usar estilo consistente */}
-        {/* Sección de Imagen de Perfil */}
+        {/* Sección de Imagen de Perfil - Ahora solo muestra, no permite editar */}
         <div className={styles.profileImageSection}>
           <img
             src={previewImageUrl}
@@ -361,20 +315,7 @@ const EditarPropietario = () => {
               e.target.src = `https://placehold.co/150x150/00acc1/ffffff?text=${formData.nombre?.charAt(0) || 'P'}`;
             }}
           />
-          <label htmlFor="file-upload" className={styles.uploadButton}>
-            <FontAwesomeIcon icon={faCamera} /> Cambiar Foto
-            <input
-              id="file-upload"
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-              className={styles.fileInput}
-              disabled={isSubmitting}
-            />
-          </label>
-          {selectedFile && (
-            <p className={styles.fileName}>Archivo seleccionado: {selectedFile.name}</p>
-          )}
+          {/* Eliminado: Botón para cambiar foto y input de archivo */}
           {error?.image && <span className={styles.errorMessageField}>{error.image}</span>}
         </div>
 

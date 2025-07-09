@@ -91,7 +91,6 @@ CREATE TABLE password_history (
     changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES usuarios(id) ON DELETE CASCADE
 );
-
 -- NUEVA TABLA: notificaciones
 CREATE TABLE notificaciones (
     id_notificacion INT AUTO_INCREMENT PRIMARY KEY,
@@ -103,7 +102,6 @@ CREATE TABLE notificaciones (
     referencia_id INT, -- ID de la cita, mascota, etc.
     FOREIGN KEY (id_usuario) REFERENCES usuarios(id) ON DELETE CASCADE
 );
-
 
 -- Inserción de datos iniciales en servicios
 INSERT INTO servicios (nombre, descripcion, precio) VALUES
@@ -234,8 +232,18 @@ SELECT * FROM historial_medico;
 SELECT * FROM citas;
 SELECT * FROM notificaciones;
 
+INSERT INTO usuarios (email, password, nombre, apellido, telefono, direccion, tipo_documento, numero_documento, fecha_nacimiento, role, experiencia, universidad, horario, imagen_url) VALUES
+('jrodriguez926@lipecun.edu.co', 'Juan4562!', 'Daniela', 'Gómez', '3101234567', 'Calle Veterinaria 1', 'CC', '11223344', '1985-03-15', 'admin', '7 AÑOS', 'UNIVERSIDAD DE LA SALLE', 'LUNES, MIÉRCOLES, VIERNES: 8:00 AM - 4:00 PM', 'https://res.cloudinary.com/dnemd8wp0/image/upload/v1719705600/flookypets_profiles/vet_laura.jpg'),
+('admin4@example.com', 'Juan4562!', 'Johan', 'Hernández', '3152345678', 'Avenida Animales 2', 'CC', '22334455', '1988-07-22', 'veterinario', '5 AÑOS', 'UNIVERSIDAD JAVERIANA', 'MARTES, JUEVES: 10:00 AM - 7:00 PM', 'https://res.cloudinary.com/dnemd8wp0/image/upload/v1719705600/flookypets_profiles/vet_mario.jpg');
+
+INSERT INTO usuarios (email, password, nombre, apellido, telefono, direccion, tipo_documento, numero_documento, fecha_nacimiento, role, experiencia, universidad, horario, imagen_url) VALUES
+('akira456romo@gmail.com', 'Juan4562!', 'Ana', 'Gómez', '3101234567', 'Calle Veterinaria 1', 'CC', '11223344', '1985-03-15', 'admin', '7 AÑOS', 'UNIVERSIDAD DE LA SALLE', 'LUNES, MIÉRCOLES, VIERNES: 8:00 AM - 4:00 PM', 'https://res.cloudinary.com/dnemd8wp0/image/upload/v1719705600/flookypets_profiles/vet_laura.jpg');
 ALTER TABLE usuarios
 ADD COLUMN notificaciones_activas BOOLEAN DEFAULT TRUE,
 ADD COLUMN sonido_notificacion VARCHAR(50) DEFAULT 'default',
 ADD COLUMN recordatorios_cita BOOLEAN DEFAULT TRUE,
 ADD COLUMN intervalo_recordatorio VARCHAR(50) DEFAULT '30 minutos';
+
+UPDATE usuarios
+SET role = 'veterinario'
+WHERE email = 'jrodriguez926@lipecun.edu.co';
