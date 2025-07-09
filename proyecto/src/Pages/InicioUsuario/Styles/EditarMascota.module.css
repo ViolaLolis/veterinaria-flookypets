@@ -1,16 +1,23 @@
-/* Variables CSS para una gestión de colores más sencilla y CLARA */
-:root {
-  --primary-color: #4dd0e1; /* Cian claro */
-  --accent-color: #82f7ff; /* Cian muy claro, casi blanco azulado */
-  --background-light: #F0F8FF; /* Un azul claro muy sutil para el fondo general */
-  --card-background: #FFFFFF; /* Blanco puro para tarjetas/contenedores */
-  --text-color-dark: #2C3E50; /* Azul oscuro para el texto principal (más suave que el negro) */
-  --text-color-medium: #7F8C8D; /* Gris azulado medio para texto secundario */
-  --border-color: #B2EBF2; /* Un azul cian más pálido para bordes */
-  --error-color: #E74C3C; /* Rojo estándar para errores, claro pero visible */
-  --success-color: #2ECC71; /* Verde para mensajes de éxito */
-  --shadow-light: rgba(0, 0, 0, 0.08); /* Sombra muy sutil */
-  --transition-speed: 0.3s ease;
+/* Color Definitions (directly applied) */
+.editarMascotaContainer {
+  /* Main text and general element colors */
+  --primary-cyan: #00acc1;
+  --light-cyan: #4dd0e1;
+  --dark-cyan: #007c91;
+  --text-color: #333333; /* Dark gray for general text */
+  --error-red: #e74c3c;
+  --border-color: #cccccc;
+  --background-light: #f9f9f9;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 30px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px var(--shadow-color);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: var(--text-color);
 }
 
 .loadingContainer {
@@ -18,14 +25,14 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 80vh;
-  font-size: 1.2rem;
-  color: var(--text-color-medium);
+  min-height: 300px;
+  font-size: 1.2em;
+  color: var(--dark-cyan);
 }
 
 .spinnerIcon {
-  font-size: 3rem;
-  color: var(--primary-color); /* Color del spinner acorde a la nueva paleta */
+  font-size: 3em;
+  color: var(--primary-cyan);
   animation: spin 1s linear infinite;
   margin-bottom: 15px;
 }
@@ -35,185 +42,173 @@
   100% { transform: rotate(360deg); }
 }
 
-.editarMascotaContainer {
-  background-color: var(--background-light);
-  min-height: 100vh;
-  padding: 40px 20px;
-  font-family: 'Poppins', sans-serif;
-  color: var(--text-color-dark);
-}
-
 .editarMascotaHeader {
   display: flex;
-  justify-content: space-between;
   align-items: center;
   margin-bottom: 30px;
-  padding: 20px 30px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, var(--primary-color), var(--accent-color)); /* Degradado con los nuevos colores */
-  color: var(--text-color-dark); /* Texto oscuro para contrastar con el fondo claro del header */
-  box-shadow: 0 4px 15px var(--shadow-light);
-  flex-wrap: wrap;
-  gap: 15px;
-}
-
-.editarMascotaHeader h2 {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 2.5rem;
-  color: var(--text-color-dark); /* Color del título más oscuro para legibilidad */
-  margin: 0;
-  font-weight: 700;
-}
-
-.headerIcon {
-  font-size: 2.2rem;
-  color: var(--text-color-dark); /* Color del icono del título más oscuro */
+  border-bottom: 2px solid var(--light-cyan);
+  padding-bottom: 15px;
 }
 
 .backButton {
-  background: rgba(255, 255, 255, 0.6); /* Fondo semi-transparente blanco para el botón de volver */
-  border: 1px solid rgba(255, 255, 255, 0.8); /* Borde blanco sutil */
-  color: var(--text-color-dark); /* Texto oscuro */
-  padding: 12px 20px;
-  border-radius: 25px;
+  background: none;
+  border: none;
+  color: var(--dark-cyan);
+  font-size: 1em;
   cursor: pointer;
-  font-size: 1rem;
-  font-weight: 600;
   display: flex;
   align-items: center;
   gap: 8px;
-  transition: background-color var(--transition-speed), transform var(--transition-speed), border-color var(--transition-speed);
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .backButton:hover {
-  background-color: rgba(255, 255, 255, 0.8); /* Más opaco al hover */
-  border-color: #FFFFFF;
-  transform: translateY(-2px);
+  background-color: var(--light-cyan);
+  color: #ffffff;
+}
+
+.editarMascotaHeader h2 {
+  flex-grow: 1;
+  text-align: center;
+  margin: 0;
+  color: var(--dark-cyan);
+  font-size: 1.8em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.headerIcon {
+  color: var(--primary-cyan);
+  font-size: 1.2em;
 }
 
 .editarMascotaForm {
-  background-color: var(--card-background);
-  padding: 40px;
-  border-radius: 12px;
-  box-shadow: 0 8px 25px var(--shadow-light);
-  max-width: 900px;
-  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
 }
 
 .formGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 25px;
-  margin-bottom: 30px;
+  gap: 20px;
 }
 
 .formGroup {
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
 .formGroup label {
   margin-bottom: 8px;
-  font-weight: 600;
-  color: var(--text-color-dark);
-  font-size: 0.95rem;
+  font-weight: bold;
+  color: var(--dark-cyan);
+  font-size: 0.95em;
 }
 
-.formGroup input[type="text"],
-.formGroup input[type="number"],
+.formGroup input,
 .formGroup select {
   padding: 12px 15px;
   border: 1px solid var(--border-color);
   border-radius: 8px;
-  font-size: 1rem;
-  color: var(--text-color-dark);
-  transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
-  background-color: #fff;
-  outline: none;
+  font-size: 1em;
+  color: var(--text-color);
+  background-color: #fcfcfc;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-.formGroup input[type="text"]:focus,
-.formGroup input[type="number"]:focus,
+.formGroup input:focus,
 .formGroup select:focus {
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(77, 208, 225, 0.2); /* Sombra al enfocar con el primary color */
+  border-color: var(--primary-cyan);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 172, 193, 0.2); /* Light cyan shadow for focus */
 }
 
 .formGroup.hasError input,
 .formGroup.hasError select {
-  border-color: var(--error-color);
+  border-color: var(--error-red);
 }
 
 .errorText {
-  color: var(--error-color);
-  font-size: 0.85rem;
+  color: var(--error-red);
+  font-size: 0.85em;
   margin-top: 5px;
   display: flex;
   align-items: center;
   gap: 5px;
 }
 
-.fullWidth {
-  grid-column: 1 / -1;
-}
-
+/* Image Upload Specific Styles */
 .imageUploadWrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  grid-column: 1 / -1; /* Spans full width */
   text-align: center;
 }
 
 .imageUploadLabel {
-  width: 100%;
-  text-align: left;
-  margin-bottom: 8px;
-  font-weight: 600; /* Hace la etiqueta más prominente */
-  color: var(--text-color-dark);
+  display: block;
+  margin-bottom: 15px;
+  font-weight: bold;
+  color: var(--dark-cyan);
+  font-size: 0.95em;
 }
 
 .imageUploadArea {
-  width: 200px;
-  height: 200px;
-  border: 2px dashed var(--border-color);
-  border-radius: 12px;
+  width: 180px; /* Standard size for a square image upload */
+  height: 180px;
+  border: 2px dashed var(--light-cyan);
+  border-radius: 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  margin: 0 auto 15px auto;
   cursor: pointer;
-  overflow: hidden;
+  background-color: #fdfdfd;
+  transition: border-color 0.3s ease, background-color 0.3s ease;
+  overflow: hidden; /* Ensure image doesn't overflow rounded corners */
   position: relative;
-  transition: border-color var(--transition-speed), background-color var(--transition-speed);
-  margin-bottom: 10px;
 }
 
 .imageUploadArea:hover {
-  border-color: var(--primary-color); /* Usar el primary color al hover */
-  background-color: #E0F7FA; /* Un fondo muy claro de cian al hover */
+  border-color: var(--primary-cyan);
+  background-color: #effaff; /* Very light cyan */
 }
 
 .imageUploadArea.hasErrorBorder {
-  border-color: var(--error-color);
+  border-color: var(--error-red);
+}
+
+.fileInput {
+  display: none; /* Hide native file input */
 }
 
 .imagePlaceholder {
   display: flex;
   flex-direction: column;
   align-items: center;
-  color: var(--text-color-medium);
+  justify-content: center;
+  color: var(--primary-cyan);
+  font-size: 1em;
+  gap: 10px;
 }
 
 .imagePlaceholder svg {
-  font-size: 3rem;
-  margin-bottom: 10px;
+  font-size: 3em;
+  color: var(--light-cyan);
+}
+
+.imagePlaceholder span {
+  font-weight: bold;
 }
 
 .imagePlaceholder p {
-  font-size: 0.9rem;
-  margin: 0;
+  font-size: 0.85em;
+  color: #888888;
 }
 
 .imagePreviewContainer {
@@ -221,15 +216,15 @@
   height: 100%;
   position: relative;
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
 }
 
 .imagePreview {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 10px;
+  border-radius: 8px; /* Slightly less than container to show dashed border */
 }
 
 .overlay {
@@ -238,106 +233,128 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(77, 208, 225, 0.6); /* Overlay con el primary color y más opaco */
-  color: white;
+  background-color: rgba(0, 172, 193, 0.6); /* Semi-transparent primary cyan */
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  color: white;
   opacity: 0;
-  transition: opacity var(--transition-speed);
-  border-radius: 10px;
+  transition: opacity 0.3s ease;
+  border-radius: 10px; /* Match container border-radius */
 }
 
-.imageUploadArea:hover .overlay {
+.imagePreviewContainer:hover .overlay {
   opacity: 1;
 }
 
 .overlay svg {
-  font-size: 2rem;
+  font-size: 2em;
   margin-bottom: 5px;
 }
 
 .overlay span {
-  font-size: 0.9rem;
-  font-weight: 600;
+  font-size: 0.9em;
+  font-weight: bold;
 }
 
-.fileInput {
-  display: none;
-}
-
+/* Submit Button */
 .submitButton {
-  background-color: var(--primary-color); /* Usar primary color para el botón de enviar */
-  color: var(--text-color-dark); /* Texto oscuro para el botón de enviar */
+  background-color: var(--primary-cyan);
+  color: white;
   padding: 15px 25px;
   border: none;
   border-radius: 8px;
+  font-size: 1.1em;
+  font-weight: bold;
   cursor: pointer;
-  font-size: 1.1rem;
-  font-weight: 600;
+  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  width: fit-content;
-  margin: 30px auto 0;
-  transition: background-color var(--transition-speed), transform var(--transition-speed), box-shadow var(--transition-speed);
-  box-shadow: 0 4px 10px rgba(77, 208, 225, 0.3); /* Sombra sutil con el color del botón */
+  margin-top: 20px;
 }
 
-.submitButton:hover {
-  background-color: #26C6DA; /* Un tono un poco más oscuro de cian al pasar el ratón */
-  transform: translateY(-2px);
-  box-shadow: 0 6px 15px rgba(77, 208, 225, 0.4);
+.submitButton:hover:not(:disabled) {
+  background-color: var(--dark-cyan); /* Slightly darker on hover for depth */
+  box-shadow: 0 4px 15px rgba(0, 172, 193, 0.4);
 }
 
 .submitButton:disabled {
-  background-color: #B2EBF2; /* Color más claro para deshabilitado */
-  color: var(--text-color-medium);
+  background-color: #cccccc;
   cursor: not-allowed;
   box-shadow: none;
-  transform: none;
 }
+
+/* Spinner for submitting state */
+.submitButton .spinnerIcon {
+  font-size: 1em; /* Adjust size for button */
+  animation: spin 1s linear infinite;
+  margin-bottom: 0; /* Remove margin from global spinner rule */
+}
+
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-  .editarMascotaForm {
-      padding: 25px;
-  }
-
-  .editarMascotaHeader h2 {
-      font-size: 1.8rem;
+  .editarMascotaContainer {
+    margin: 20px;
+    padding: 20px;
   }
 
   .formGrid {
-      grid-template-columns: 1fr;
+    grid-template-columns: 1fr; /* Stack columns on small screens */
   }
 
-  .imageUploadArea {
-      width: 180px;
-      height: 180px;
+  .editarMascotaHeader h2 {
+    font-size: 1.5em;
   }
 }
 
 @media (max-width: 480px) {
   .editarMascotaContainer {
-      padding: 20px 15px;
+    margin: 15px;
+    padding: 15px;
   }
 
   .editarMascotaHeader {
-      flex-direction: column;
-      align-items: flex-start;
-      padding: 15px 20px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
   }
 
   .editarMascotaHeader h2 {
-      font-size: 1.6rem;
+    font-size: 1.3em;
+    text-align: left;
+    justify-content: flex-start;
   }
 
   .backButton {
-      width: 100%;
-      justify-content: center;
-      margin-top: 10px;
+    align-self: flex-start;
+  }
+
+  .submitButton {
+    font-size: 1em;
+    padding: 12px 20px;
   }
 }
+
+/* ... código CSS existente ... */
+
+.formGroup input:focus,
+.formGroup select:focus {
+  border-color: var(--primary-cyan);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 172, 193, 0.2); /* Light cyan shadow for focus */
+}
+
+/* Estilos para campos deshabilitados */
+.formGroup input:disabled,
+.formGroup select:disabled {
+  background-color: #e9e9e9; /* Un gris claro para el fondo */
+  color: #777777; /* Un gris más oscuro para el texto */
+  border-color: #dddddd; /* Borde más claro */
+  cursor: not-allowed; /* Cambia el cursor para indicar que no es editable */
+}
+
+/* ... el resto de tu código CSS ... */

@@ -1,0 +1,469 @@
+/* Color Palette (consistent with EditarMascota) */
+/* Estas variables se usarán localmente dentro de este módulo CSS */
+.detalleMascotaContainer {
+  --primary-cyan: #00acc1;
+  --light-cyan: #4dd0e1;
+  --dark-cyan: #007c91;
+  --text-color: #333333; /* Dark gray for general text */
+  --light-gray: #f4f4f4;
+  --medium-gray: #e0e0e0;
+  --dark-gray: #757575;
+  --error-red: #e74c3c;
+  --success-green: #2ecc71;
+  --background-light: #f9f9f9;
+  --shadow-color: rgba(0, 0, 0, 0.15); /* Slightly stronger shadow for depth */
+
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 30px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px var(--shadow-color);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: var(--text-color);
+  line-height: 1.6;
+}
+
+/* --- Loading and Error States --- */
+.loadingContainer,
+.errorMessage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  font-size: 1.2em;
+  color: var(--dark-cyan);
+  text-align: center;
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.spinnerIcon {
+  font-size: 3.5em;
+  color: var(--primary-cyan);
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+.errorMessage .infoIcon {
+  font-size: 3.5em;
+  color: var(--error-red);
+  margin-bottom: 20px;
+}
+
+.errorMessage p {
+  font-size: 1.1em;
+  color: var(--text-color);
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* --- Page Header / Title --- */
+.detalleMascotaTitle {
+  font-size: 2.2em;
+  color: var(--dark-cyan);
+  text-align: center;
+  margin-bottom: 30px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid var(--light-cyan);
+  position: relative;
+  font-weight: 600;
+}
+
+.detalleMascotaTitle::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -2px; /* Alineado con el borde inferior */
+  transform: translateX(-50%);
+  width: 60px; /* Ancho de la línea de acento */
+  height: 4px;
+  background-color: var(--primary-cyan);
+  border-radius: 2px;
+}
+
+/* --- Mascota Information Section --- */
+.detalleMascotaInfo {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Responsive grid */
+  gap: 20px; /* Space between grid items */
+  background-color: var(--background-light);
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.05); /* Soft inner shadow */
+  margin-bottom: 30px;
+}
+
+.infoItem {
+  display: flex;
+  align-items: center;
+  background-color: #ffffff;
+  padding: 15px 20px;
+  border-radius: 8px;
+  border: 1px solid var(--medium-gray);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.infoItem:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.infoItem .infoIcon {
+  font-size: 1.5em;
+  color: var(--primary-cyan);
+  margin-right: 15px;
+  flex-shrink: 0; /* Prevent icon from shrinking */
+}
+
+.infoItem p {
+  margin: 0;
+  font-size: 1.05em;
+  color: var(--text-color);
+  flex-grow: 1;
+}
+
+.infoItem p strong {
+  color: var(--dark-cyan);
+  font-weight: 600;
+}
+
+/* --- Image Container --- */
+.imageContainer {
+  grid-column: 1 / -1; /* Spans full width */
+  text-align: center;
+  margin-top: 15px;
+}
+
+.mascotaImage {
+  width: 250px;
+  height: 250px;
+  object-fit: cover;
+  border-radius: 50%; /* Make it circular */
+  border: 5px solid var(--primary-cyan);
+  box-shadow: 0 5px 15px rgba(0, 172, 193, 0.3); /* Shadow matching primary color */
+}
+
+/* --- Historial Médico Section --- */
+.detalleMascotaHistorial {
+  background-color: var(--background-light);
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.05);
+  margin-bottom: 30px;
+}
+
+.detalleMascotaHistorial h3 {
+  font-size: 1.7em;
+  color: var(--dark-cyan);
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--medium-gray);
+  padding-bottom: 10px;
+}
+
+.historialList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.historialItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px dashed var(--medium-gray);
+  font-size: 1.05em;
+  color: var(--text-color);
+}
+
+.historialItem:last-child {
+  border-bottom: none;
+}
+
+.historialDate {
+  font-weight: bold;
+  color: var(--primary-cyan);
+  flex-shrink: 0;
+  margin-right: 10px;
+}
+
+.historialDiagnosis {
+  flex-grow: 1;
+  margin-right: 10px;
+}
+
+.historialDetailLink {
+  color: var(--dark-cyan);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s ease, text-decoration 0.3s ease;
+  flex-shrink: 0;
+}
+
+.historialDetailLink:hover {
+  color: var(--primary-cyan);
+  text-decoration: underline;
+}
+
+.noHistorial {
+  text-align: center;
+  color: var(--dark-gray);
+  padding: 20px;
+  border: 1px dashed var(--medium-gray);
+  border-radius: 8px;
+  margin-top: 20px;
+}
+
+/* --- Action Buttons --- */
+.detalleMascotaActions {
+  display: flex;
+  flex-wrap: wrap; /* Allow wrapping on smaller screens */
+  gap: 15px;
+  justify-content: center;
+  margin-top: 30px;
+}
+
+.detalleMascotaButton,
+.detalleMascotaBack {
+  padding: 12px 25px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1em;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+  text-decoration: none; /* For Link components */
+  justify-content: center;
+  flex-grow: 1; /* Allow buttons to grow */
+  max-width: 250px; /* Limit button width */
+}
+
+.detalleMascotaButton.editar {
+  background-color: var(--primary-cyan);
+  color: white;
+}
+
+.detalleMascotaButton.editar:hover {
+  background-color: var(--dark-cyan);
+  box-shadow: 0 4px 15px rgba(0, 172, 193, 0.3);
+}
+
+.detalleMascotaButton.eliminar {
+  background-color: var(--error-red);
+  color: white;
+}
+
+.detalleMascotaButton.eliminar:hover {
+  background-color: #c0392b; /* Darker red */
+  box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+}
+
+.detalleMascotaButton:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.detalleMascotaBack {
+  background-color: var(--medium-gray);
+  color: var(--text-color);
+  border: 1px solid var(--dark-gray);
+}
+
+.detalleMascotaBack:hover {
+  background-color: var(--dark-gray);
+  color: white;
+  box-shadow: 0 4px 15px rgba(117, 117, 117, 0.3);
+}
+
+/* --- Modal for Confirmation --- */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.6); /* Semi-transparent dark background */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modalContent {
+  background-color: #ffffff;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  max-width: 500px;
+  width: 90%;
+  text-align: center;
+}
+
+.modalContent h3 {
+  color: var(--dark-cyan);
+  font-size: 1.8em;
+  margin-bottom: 20px;
+}
+
+.modalContent p {
+  color: var(--text-color);
+  margin-bottom: 30px;
+  font-size: 1.1em;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.submitBtn,
+.cancelBtn {
+  padding: 12px 25px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1em;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+}
+
+.submitBtn {
+  background-color: var(--error-red);
+  color: white;
+}
+
+.submitBtn:hover:not(:disabled) {
+  background-color: #c0392b;
+}
+
+.cancelBtn {
+  background-color: var(--medium-gray);
+  color: var(--text-color);
+  border: 1px solid var(--dark-gray);
+}
+
+.cancelBtn:hover:not(:disabled) {
+  background-color: var(--dark-gray);
+  color: white;
+}
+
+.submitBtn:disabled,
+.cancelBtn:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 768px) {
+  .detalleMascotaContainer {
+    margin: 20px;
+    padding: 20px;
+  }
+
+  .detalleMascotaTitle {
+    font-size: 1.8em;
+  }
+
+  .detalleMascotaInfo {
+    grid-template-columns: 1fr; /* Stack info items */
+    padding: 20px;
+  }
+
+  .infoItem {
+    padding: 12px 15px;
+    font-size: 0.95em;
+  }
+
+  .detalleMascotaHistorial {
+    padding: 20px;
+  }
+
+  .historialItem {
+    flex-direction: column; /* Stack date and diagnosis */
+    align-items: flex-start;
+    gap: 5px;
+  }
+
+  .historialDetailLink {
+    align-self: flex-end; /* Push link to the right */
+  }
+
+  .detalleMascotaActions {
+    flex-direction: column; /* Stack buttons */
+    align-items: center;
+  }
+
+  .detalleMascotaButton,
+  .detalleMascotaBack {
+    width: 100%; /* Full width buttons */
+    max-width: 300px; /* Limit max width for aesthetic */
+  }
+
+  .mascotaImage {
+    width: 180px;
+    height: 180px;
+  }
+}
+
+@media (max-width: 480px) {
+  .detalleMascotaContainer {
+    margin: 15px;
+    padding: 15px;
+  }
+
+  .detalleMascotaTitle {
+    font-size: 1.5em;
+  }
+
+  .loadingContainer,
+  .errorMessage {
+    min-height: 250px;
+    font-size: 1em;
+  }
+
+  .spinnerIcon,
+  .errorMessage .infoIcon {
+    font-size: 2.5em;
+  }
+
+  .modalContent {
+    padding: 20px;
+  }
+
+  .modalContent h3 {
+    font-size: 1.5em;
+  }
+
+  .modalContent p {
+    font-size: 1em;
+  }
+
+  .modalActions {
+    flex-direction: column;
+  }
+
+  .submitBtn,
+  .cancelBtn {
+    width: 100%;
+  }
+}

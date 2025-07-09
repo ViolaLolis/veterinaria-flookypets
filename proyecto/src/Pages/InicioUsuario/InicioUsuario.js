@@ -3,13 +3,13 @@ import { useNavigate, Outlet, useLocation } from 'react-router-dom';
 import {
   FaPaw, FaCalendarAlt, FaShoppingBag, FaChevronDown,
   FaSignOutAlt, FaUser, FaSpinner, FaBars, FaTimes,
-  FaHome, FaBell // Import FaBell for notifications
-} from 'react-icons/fa';
+  FaHome, FaBell, FaQuestionCircle // Importa FaQuestionCircle para el icono de ayuda
+} from 'react-icons/fa'; // Asegúrate de importar FaQuestionCircle
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheckCircle, faTimesCircle, faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
 import styles from './Styles/InicioUsuario.module.css';
 import logo from '../Inicio/Imagenes/flooty.png';
-import { authFetch } from './api'; // Asumiendo que `authFetch` es tu función para llamadas autenticadas
+import { authFetch } from './api';
 
 const InicioUsuario = ({ user, setUser }) => {
   const navigate = useNavigate();
@@ -36,6 +36,7 @@ const InicioUsuario = ({ user, setUser }) => {
     if (path.startsWith('/usuario/citas')) return 'citas';
     if (path.startsWith('/usuario/servicios')) return 'servicios';
     if (path.startsWith('/usuario/perfil')) return 'perfil';
+    if (path.startsWith('/usuario/ayuda')) return 'ayuda'; // Nuevo: Añadir 'ayuda'
     return 'dashboard';
   }, [location.pathname]);
 
@@ -83,8 +84,7 @@ const InicioUsuario = ({ user, setUser }) => {
     }
 
     try {
-      // Usar authFetch para obtener los datos del usuario real
-      const response = await authFetch(`/usuarios/${currentUser.id}`); // Asumiendo que esta ruta existe
+      const response = await authFetch(`/usuarios/${currentUser.id}`);
       if (response.success) {
         setUserData(response.data);
       } else {
@@ -100,24 +100,20 @@ const InicioUsuario = ({ user, setUser }) => {
     }
   }, [user, showNotification, navigate, setUser]);
 
-  // FUNCIÓN ACTUALIZADA PARA OBTENER NOTIFICACIONES DESDE LA API
   const fetchNotifications = useCallback(async (currentUserId) => {
     if (!currentUserId) {
       console.warn('No user ID provided for fetching notifications.');
       return;
     }
     try {
-      // CAMBIO AQUÍ: Usar el ID de usuario en la ruta
       const response = await authFetch(`/api/notifications/user/${currentUserId}`);
       if (response.success) {
         setNotifications(response.data);
       } else {
         console.error('Error al obtener notificaciones:', response.message);
-        // Opcional: showNotification('Error al cargar notificaciones', 'error');
       }
     } catch (error) {
       console.error('Error de conexión al obtener notificaciones:', error);
-      // Opcional: showNotification('Error de conexión con el servidor de notificaciones', 'error');
     }
   }, []);
 
@@ -125,11 +121,10 @@ const InicioUsuario = ({ user, setUser }) => {
     fetchUserData();
     if (user?.id) {
       fetchNotifications(user.id);
-      // Establecer un intervalo para refrescar las notificaciones cada 60 segundos
       const notificationInterval = setInterval(() => {
         fetchNotifications(user.id);
       }, 60000);
-      return () => clearInterval(notificationInterval); // Limpiar el intervalo al desmontar
+      return () => clearInterval(notificationInterval);
     }
   }, [fetchUserData, fetchNotifications, user]);
 
@@ -145,7 +140,6 @@ const InicioUsuario = ({ user, setUser }) => {
     }, 1500);
   }, [navigate, setUser, showNotification]);
 
-  // FUNCIÓN ACTUALIZADA PARA MARCAR NOTIFICACIÓN COMO LEÍDA EN LA API
   const markNotificationAsRead = useCallback(async (id_notificacion) => {
     try {
       const response = await authFetch(`/api/notifications/${id_notificacion}/read`, {
@@ -157,7 +151,6 @@ const InicioUsuario = ({ user, setUser }) => {
             n.id_notificacion === id_notificacion ? { ...n, leida: true } : n
           )
         );
-        // Opcional: showNotification('Notificación marcada como leída', 'success');
       } else {
         console.error('Error al marcar como leída:', response.message);
         showNotification('Error al marcar notificación como leída', 'error');
@@ -286,7 +279,13 @@ const InicioUsuario = ({ user, setUser }) => {
           >
             <FaShoppingBag /> Servicios
           </button>
-          {/* BOTÓN DE NOTIFICACIONES PARA MÓVIL */}
+          {/* NUEVO BOTÓN DE AYUDA */}
+          <button
+            className={`${styles.navButton} ${activeTab === 'ayuda' ? styles.active : ''}`}
+            onClick={() => { navigate('/usuario/ayuda'); setIsMobileMenuOpen(false); }}
+          >
+            <FaQuestionCircle /> Ayuda
+          </button>
           {isMobileMenuOpen && (
             <div
               className={`${styles.navButton} ${styles.notificationMobileButton}`}
@@ -301,7 +300,6 @@ const InicioUsuario = ({ user, setUser }) => {
         </nav>
 
         <div className={styles.profileAndNotificationsSection}>
-          {/* Icono de Notificaciones para Desktop */}
           <div className={styles.notificationIconContainer} ref={notificationsRef}>
             <button
               className={styles.notificationIconButton}
@@ -321,7 +319,7 @@ const InicioUsuario = ({ user, setUser }) => {
                 ) : (
                   <ul>
                     {notifications
-                      .sort((a, b) => new Date(b.fecha_creacion) - new Date(a.fecha_creacion)) // Más recientes primero
+                      .sort((a, b) => new Date(b.fecha_creacion) - new Date(a.fecha_creacion))
                       .map((notif) => (
                         <li key={notif.id_notificacion} className={notif.leida ? styles.read : styles.unread}>
                           <div className={styles.notificationContent}>
@@ -354,10 +352,10 @@ const InicioUsuario = ({ user, setUser }) => {
               title={`Hola, ${userData?.nombre || 'Usuario'}`}
             >
               <img
-                src={userData?.imagen_url || `https://api.dicebear.com/7.x/initials/svg?seed=${userData?.nombre || 'U'}&chars=1&backgroundColor=00acc1,007c91,4dd0e1&fontFamily=Poppins`}
+                src={userData?.imagen_url || `https://api.dicebear.com/7.x/initials/svg?seed=${userData?.nombre || 'U'}&chars=1&backgroundColor=00acc1,007c91,4dd0e1&fontFamily=Poppins&size=35`}
                 alt="Avatar de Usuario"
                 className={styles.profileAvatar}
-                onError={(e) => e.target.src = `https://api.dicebear.com/7.x/initials/svg?seed=${userData?.nombre || 'U'}&chars=1&backgroundColor=00acc1,007c91,4dd0e1&fontFamily=Poppins`}
+                onError={(e) => e.target.src = `https://api.dicebear.com/7.x/initials/svg?seed=${userData?.nombre || 'U'}&chars=1&backgroundColor=00acc1,007c91,4dd0e1&fontFamily=Poppins&size=35`}
               />
               <span className={styles.profileName}>{userData?.nombre?.split(' ')[0] || 'Usuario'}</span>
               <FaChevronDown className={`${styles.dropdownIcon} ${showProfileMenu ? styles.rotate : ''}`} />

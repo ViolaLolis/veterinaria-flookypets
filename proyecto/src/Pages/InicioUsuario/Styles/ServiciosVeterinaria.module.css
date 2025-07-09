@@ -1,202 +1,268 @@
-/* Asegúrate de que las variables de color estén definidas en tu :root o importadas */
+/* ServiciosUsuario.module.css */
 
-.servicesDashboard {
-  padding: 2.5rem;
-  max-width: 1200px;
-  margin: 0 auto;
-  background-color: var(--background-light); /* O el color de fondo de tu mainContent */
-  border-radius: 15px;
-  /* Considera una sombra sutil si no está ya en el contenedor principal del dashboard */
-  /* box-shadow: 0 5px 20px var(--shadow-medium); */
+/* --- Variables (renombradas para especificidad) --- */
+.suPrimaryColor { color: #00acc1; }
+.suPrimaryDark { color: #007c91; }
+.suTextDark { color: #333333; }
+.suTextLight { color: #666666; }
+.suBackgroundLight { background-color: #f8f9fa; }
+.suBackgroundMedium { background-color: #e9ecef; }
+.suBorderColor { border-color: #dee2e6; }
+.suErrorColor { color: #f44336; }
+.suShadowMedium { box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); }
+
+
+/* --- Contenedor Principal del Dashboard --- */
+.suServicesDashboard {
+    padding: 30px;
+    background-color: #f8f9fa; /* Color directo */
+    min-height: calc(100vh - var(--header-height, 60px)); /* Ajusta según la altura de tu header/footer */
+    font-family: 'Poppins', sans-serif;
 }
 
-.dashboardHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2.5rem;
-  flex-wrap: wrap; /* Permite que los elementos se envuelvan en pantallas pequeñas */
-  gap: 1.5rem; /* Espacio entre título y búsqueda */
+/* --- Encabezado del Dashboard --- */
+.suDashboardHeader {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 25px;
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e0e0e0; /* Color directo */
 }
 
-.headerTitle {
-  display: flex;
-  align-items: center;
-  gap: 15px;
+.suHeaderTitle {
+    display: flex;
+    align-items: center;
+    gap: 15px;
 }
 
-.titleIcon {
-  font-size: 2.5rem;
-  color: var(--primary-color);
+.suTitleIcon {
+    font-size: 2.5rem;
+    color: #00acc1; /* Color directo */
 }
 
-.dashboardHeader h2 {
-  font-size: 2.2rem;
-  color: var(--primary-dark);
-  margin: 0;
-  font-weight: 700;
+.suDashboardHeader h2 {
+    font-size: 2.8rem;
+    color: #007c91; /* Color directo */
+    font-weight: 700;
+    margin: 0;
+    line-height: 1.2;
 }
 
-.searchContainer {
-  position: relative;
-  display: flex;
-  align-items: center;
-  max-width: 400px;
-  width: 100%; /* Ajuste para responsividad */
+/* --- Contenedor de Búsqueda --- */
+.suSearchContainer {
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: white;
 }
 
-.searchInput {
-  width: 100%;
-  padding: 12px 45px 12px 15px; /* Más padding a la derecha para el icono de búsqueda */
-  border: 1px solid var(--border-color);
-  border-radius: 30px;
-  font-size: 1rem;
-  color: var(--text-dark);
-  outline: none;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px var(--shadow-light);
+.suSearchInput {
+    flex-grow: 1;
+    padding: 15px 20px;
+    padding-right: 60px;
+    border: 1px solid #dee2e6;
+    border-right: none;
+    border-radius: 12px 0 0 12px;
+    font-size: 1.1rem;
+    color: #333333; /* Color directo */
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-.searchInput:focus {
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px var(--primary-glow);
+.suSearchInput::placeholder {
+    color: #999999; /* Color directo */
 }
 
-.searchIcon {
-  position: absolute;
-  right: 15px;
-  color: var(--text-light);
-  font-size: 1.1rem;
+.suSearchInput:focus {
+    border-color: #00acc1; /* Color directo */
+    box-shadow: 0 0 0 3px rgba(0, 172, 193, 0.2);
 }
 
-.clearSearchButton {
-  position: absolute;
-  right: 40px; /* Adjust position to not overlap with searchIcon */
-  background: none;
-  border: none;
-  color: var(--text-light);
-  cursor: pointer;
-  font-size: 1.1rem;
-  padding: 5px;
-  border-radius: 50%;
-  transition: color 0.2s ease, background-color 0.2s ease;
-  z-index: 1; /* Ensure it's above the input */
+.suSearchIcon {
+    position: absolute;
+    right: 20px;
+    color: #00acc1; /* Color directo */
+    font-size: 1.3rem;
+    pointer-events: none;
 }
 
-.clearSearchButton:hover {
-  color: var(--primary-dark);
-  background-color: var(--background-medium);
+.suClearSearchButton {
+    background-color: transparent;
+    border: none;
+    padding: 0 15px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    color: #999; /* Color directo */
+    transition: color 0.2s ease;
+    display: flex;
+    align-items: center;
+    height: 100%;
+    position: absolute;
+    right: 50px;
+    z-index: 20;
 }
 
-.servicesGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* Min 300px, responsive */
-  gap: 2.5rem; /* Espacio entre tarjetas */
-  padding-bottom: 2rem; /* Espacio al final del grid */
+.suClearSearchButton:hover {
+    color: #00acc1; /* Color directo */
 }
 
-.loadingContainer, .errorMessage, .noResults {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 3rem;
-  text-align: center;
-  color: var(--text-light);
-  font-size: 1.2rem;
-  background-color: white;
-  border-radius: 15px;
-  box-shadow: 0 4px 15px var(--shadow-light);
-  margin-top: 2rem;
+/* --- Grid de Servicios --- */
+.suServicesGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    padding: 20px 0;
 }
 
-.spinnerIcon, .errorIcon, .infoIcon {
-  font-size: 3rem;
-  color: var(--primary-color);
-  margin-bottom: 1rem;
+/* --- Mensajes de Estado (Cargando, Error, Sin Resultados) --- */
+.suLoadingContainer,
+.suErrorMessage,
+.suNoResults {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 50px 20px;
+    text-align: center;
+    border-radius: 15px;
+    background-color: white;
+    margin-top: 50px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
 }
 
-.errorIcon {
-  color: var(--error-color);
+.suSpinnerIcon,
+.suErrorIcon,
+.suInfoIcon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    color: #00acc1; /* Color directo */
 }
 
-.infoIcon {
-  color: var(--info-color);
+.suErrorIcon {
+    color: #f44336; /* Color directo */
 }
 
-.retryButton, .clearSearchButtonInNoResults {
-  background-color: var(--primary-color);
-  color: white;
-  border: none;
-  padding: 12px 25px;
-  border-radius: 50px;
-  cursor: pointer;
-  font-size: 1rem;
-  font-weight: 600;
-  margin-top: 1.5rem;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+.suLoadingContainer p,
+.suErrorMessage p,
+.suNoResults p {
+    font-size: 1.3rem;
+    color: #333333; /* Color directo */
+    margin-bottom: 25px;
+    line-height: 1.5;
 }
 
-.retryButton:hover, .clearSearchButtonInNoResults:hover {
-  background-color: var(--primary-dark);
-  transform: translateY(-2px);
+.suSpinnerIcon {
+    animation: suSpin 1.5s linear infinite; /* Animación renombrada */
 }
 
-/* Media Queries para Responsividad */
-@media (max-width: 768px) {
-  .servicesDashboard {
-      padding: 1.5rem;
-  }
+@keyframes suSpin { /* Animación renombrada */
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
 
-  .dashboardHeader {
-      flex-direction: column;
-      align-items: flex-start; /* Alinea los elementos a la izquierda en móvil */
-      gap: 1rem;
-  }
+.suRetryButton,
+.suClearSearchButtonInNoResults {
+    background-color: #00acc1; /* Color directo */
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-size: 1.05rem;
+    font-weight: 600;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
 
-  .dashboardHeader h2 {
-      font-size: 1.8rem;
-  }
+.suRetryButton:hover,
+.suClearSearchButtonInNoResults:hover {
+    background-color: #007c91; /* Color directo */
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+}
 
-  .searchContainer {
-      max-width: 100%;
-  }
+/* --- Media Queries --- */
+@media (min-width: 768px) {
+    .suDashboardHeader {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
 
-  .servicesGrid {
-      grid-template-columns: 1fr; /* Una columna en pantallas pequeñas */
-      gap: 1.5rem;
-  }
+    .suDashboardHeader h2 {
+        font-size: 3rem;
+    }
 
-  .loadingContainer, .errorMessage, .noResults {
-      padding: 2rem;
-      font-size: 1rem;
-  }
+    .suSearchContainer {
+        width: auto;
+        flex-grow: 0.7;
+    }
 
-  .spinnerIcon, .errorIcon, .infoIcon {
-      font-size: 2.5rem;
-  }
+    .suServicesGrid {
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 35px;
+    }
 }
 
 @media (max-width: 480px) {
-  .servicesDashboard {
-      padding: 1rem;
-  }
-  .dashboardHeader h2 {
-      font-size: 1.5rem;
-  }
-  .searchInput {
-      padding: 10px 40px 10px 12px;
-      font-size: 0.9rem;
-  }
-  .searchIcon, .clearSearchButton {
-      font-size: 1rem;
-  }
-  .clearSearchButton {
-      right: 35px;
-  }
-  .retryButton, .clearSearchButtonInNoResults {
-      padding: 10px 20px;
-      font-size: 0.9rem;
-  }
+    .suServicesDashboard {
+        padding: 20px 15px;
+    }
+
+    .suDashboardHeader {
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .suTitleIcon {
+        font-size: 2rem;
+    }
+
+    .suDashboardHeader h2 {
+        font-size: 2.2rem;
+    }
+
+    .suSearchInput {
+        padding: 12px 15px;
+        padding-right: 50px;
+        font-size: 1rem;
+    }
+
+    .suSearchIcon {
+        right: 15px;
+        font-size: 1.1rem;
+    }
+    .suClearSearchButton {
+        right: 45px;
+    }
+
+    .suServicesGrid {
+        grid-template-columns: 1fr;
+        gap: 25px;
+    }
+
+    .suLoadingContainer p,
+    .suErrorMessage p,
+    .suNoResults p {
+        font-size: 1.1rem;
+    }
+
+    .suSpinnerIcon,
+    .suErrorIcon,
+    .suInfoIcon {
+        font-size: 3rem;
+    }
+
+    .suRetryButton,
+    .suClearSearchButtonInNoResults {
+        padding: 10px 20px;
+        font-size: 0.95rem;
+    }
 }

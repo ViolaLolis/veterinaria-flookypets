@@ -1,15 +1,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, useOutletContext } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FaEdit, FaArrowLeft, FaSpinner, FaUpload, FaTimesCircle } from 'react-icons/fa'; // Agregamos FaTimesCircle para el icono de error
-import styles from './Styles/EditarMascota.module.css'; // ¡Importación correcta para CSS Modules!
+import { FaEdit, FaArrowLeft, FaSpinner, FaUpload, FaTimesCircle } from 'react-icons/fa';
+import styles from './Styles/EditarMascota.module.css';
 import { authFetch } from '../../utils/api';
 import { validateField } from '../../utils/validation';
 
 const EditarMascota = () => {
-    const { id } = useParams(); // ID de la mascota a editar
+    const { id } = useParams();
     const navigate = useNavigate();
-    const { user, showNotification } = useOutletContext(); // Obtener user y showNotification del contexto
+    const { user, showNotification } = useOutletContext();
 
     const [formData, setFormData] = useState({
         nombre_mascota: '',
@@ -19,14 +19,14 @@ const EditarMascota = () => {
         peso_mascota: '',
         sexo_mascota: '',
         color_mascota: '',
-        microchip_mascota: '',
-        imagen_mascota: null, // Para el archivo de imagen
+        microchip_mascota: '', // Este valor se cargará pero no será editable
+        imagen_mascota: null,
     });
-    const [currentImageUrl, setCurrentImageUrl] = useState(null); // Para la URL de la imagen existente
+    const [currentImageUrl, setCurrentImageUrl] = useState(null);
     const [errors, setErrors] = useState({});
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [imagePreview, setImagePreview] = useState(null); // Para mostrar la vista previa de la nueva imagen
+    const [imagePreview, setImagePreview] = useState(null);
 
     const fetchMascotaDetails = useCallback(async () => {
         setIsLoading(true);
@@ -39,10 +39,9 @@ const EditarMascota = () => {
             const response = await authFetch(`/mascotas/${id}`);
             if (response.success) {
                 const mascotaData = response.data;
-                // Verificar si el usuario actual es el propietario o un administrador
                 if (user.id !== mascotaData.id_propietario && user.role !== 'admin') {
                     showNotification('No tienes permisos para editar esta mascota.', 'error');
-                    navigate('/usuario/mascotas'); // Redirigir si no tiene permisos
+                    navigate('/usuario/mascotas');
                     return;
                 }
 
@@ -54,14 +53,14 @@ const EditarMascota = () => {
                     peso_mascota: mascotaData.peso || '',
                     sexo_mascota: mascotaData.sexo || '',
                     color_mascota: mascotaData.color || '',
-                    microchip_mascota: mascotaData.microchip || '',
-                    imagen_mascota: null, // No cargar el archivo, solo la URL
+                    microchip_mascota: mascotaData.microchip || '', // Se carga el valor existente
+                    imagen_mascota: null,
                 });
                 setCurrentImageUrl(mascotaData.imagen_url || null);
-                setImagePreview(mascotaData.imagen_url || null); // Inicializar la vista previa con la imagen actual
+                setImagePreview(mascotaData.imagen_url || null);
             } else {
                 showNotification(response.message || 'Error al cargar los datos de la mascota.', 'error');
-                navigate('/usuario/mascotas'); // Redirigir en caso de error
+                navigate('/usuario/mascotas');
             }
         } catch (err) {
             console.error("Error fetching pet details for editing:", err);
@@ -81,34 +80,32 @@ const EditarMascota = () => {
         // Convertir a mayúsculas solo si el tipo de input es 'text'
         const newValue = (type === 'text') ? value.toUpperCase() : value;
         setFormData(prev => ({ ...prev, [id]: newValue }));
-        // Validar el campo inmediatamente para mostrar errores
-        const error = validateField(id, newValue, formData, false); // isNewEntry=false para edición
+        const error = validateField(id, newValue, formData, false);
         setErrors(prev => ({ ...prev, [id]: error }));
     };
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (file) {
-            // Validar tipo de archivo y tamaño
             if (!file.type.startsWith('image/')) {
                 setErrors(prev => ({ ...prev, imagen_mascota: 'Solo se permiten archivos de imagen.' }));
                 setImagePreview(null);
-                e.target.value = null; // Limpiar el input file
+                e.target.value = null;
                 return;
             }
             if (file.size > 5 * 1024 * 1024) { // 5MB
                 setErrors(prev => ({ ...prev, imagen_mascota: 'La imagen no debe exceder los 5MB.' }));
                 setImagePreview(null);
-                e.target.value = null; // Limpiar el input file
+                e.target.value = null;
                 return;
             }
 
             setFormData(prev => ({ ...prev, imagen_mascota: file }));
-            setErrors(prev => ({ ...prev, imagen_mascota: null })); // Limpiar error si se selecciona un archivo válido
-            setImagePreview(URL.createObjectURL(file)); // Crear URL para la vista previa
+            setErrors(prev => ({ ...prev, imagen_mascota: null }));
+            setImagePreview(URL.createObjectURL(file));
         } else {
             setFormData(prev => ({ ...prev, imagen_mascota: null }));
-            setImagePreview(currentImageUrl); // Volver a la imagen actual si no se selecciona nada
+            setImagePreview(currentImageUrl);
         }
     };
 
@@ -117,16 +114,14 @@ const EditarMascota = () => {
         setIsSubmitting(true);
 
         let newErrors = {};
-        // Validar todos los campos del formulario antes de enviar
         Object.keys(formData).forEach(key => {
-            if (key !== 'imagen_mascota') { // La imagen tiene su propia validación
+            if (key !== 'imagen_mascota' && key !== 'microchip_mascota') { // Excluir imagen y microchip de la validación estándar del formulario
                 const error = validateField(key, formData[key], formData, false);
                 if (error) {
                     newErrors[key] = error;
                 }
             }
         });
-        // Si ya había un error en la imagen (ej. tamaño/tipo inválido), mantenerlo
         if (errors.imagen_mascota) {
             newErrors.imagen_mascota = errors.imagen_mascota;
         }
@@ -139,9 +134,8 @@ const EditarMascota = () => {
         }
 
         try {
-            let imageUrlToSave = currentImageUrl; // Por defecto, mantener la imagen actual
+            let imageUrlToSave = currentImageUrl;
             if (formData.imagen_mascota) {
-                // Si se seleccionó una nueva imagen, subirla primero
                 const formDataImage = new FormData();
                 formDataImage.append('image', formData.imagen_mascota);
 
@@ -167,18 +161,18 @@ const EditarMascota = () => {
                 peso: formData.peso_mascota ? parseFloat(formData.peso_mascota) : null,
                 sexo: formData.sexo_mascota,
                 color: formData.color_mascota,
-                microchip: formData.microchip_mascota,
-                imagen_url: imageUrlToSave, // Usar la nueva URL o la existente
+                microchip: formData.microchip_mascota, // Aseguramos que se envíe el microchip existente
+                imagen_url: imageUrlToSave,
             };
 
             const response = await authFetch(`/mascotas/${id}`, {
                 method: 'PUT',
-                body: updatedMascota, // authFetch se encarga de JSON.stringify
+                body: updatedMascota,
             });
 
             if (response.success) {
                 showNotification('¡Mascota actualizada con éxito!', 'success');
-                navigate(`/usuario/mascotas/${id}`); // Redirigir al detalle de la mascota
+                navigate(`/usuario/mascotas/${id}`);
             } else {
                 showNotification(response.message || 'Error al actualizar la mascota.', 'error');
             }
@@ -309,14 +303,16 @@ const EditarMascota = () => {
                         {errors.color_mascota && <p className={styles.errorText}><FaTimesCircle /> {errors.color_mascota}</p>}
                     </div>
 
+                    {/* Campo de Microchip deshabilitado */}
                     <div className={`${styles.formGroup} ${errors.microchip_mascota ? styles.hasError : ''}`}>
-                        <label htmlFor="microchip_mascota">Número de Microchip (opcional):</label>
+                        <label htmlFor="microchip_mascota">Número de Microchip:</label> {/* Etiqueta sin "opcional" */}
                         <input
                             type="text"
                             id="microchip_mascota"
                             value={formData.microchip_mascota}
-                            onChange={handleChange}
+                            onChange={handleChange} // onChange se mantiene pero no se disparará
                             placeholder="Número de identificación"
+                            disabled // Campo deshabilitado
                         />
                         {errors.microchip_mascota && <p className={styles.errorText}><FaTimesCircle /> {errors.microchip_mascota}</p>}
                     </div>
