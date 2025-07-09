@@ -91,7 +91,7 @@ const Servicios = () => {
                 className="services__image"
                 onError={(e) => {
                   e.target.onerror = null;
-                  e.target.src = 'https://via.placeholder.com/150?text=Imagen+no+disponible';
+                  e.target.src = 'https://via.placeholder.com/300x200?text=Imagen+no+disponible'; // Placeholder más grande
                 }}
               />
             </div>
@@ -100,7 +100,8 @@ const Servicios = () => {
               
               {expandedServiceId !== service.id && (
                 <button className="services__show-more" onClick={() => handleShowMore(service.id)}>
-                  Mostrar más <svg viewBox="0 0 24 24" fill="currentColor" className="icon">
+                  Mostrar más 
+                  <svg className="services__icon" viewBox="0 0 24 24" fill="currentColor">
                     <path fillRule="evenodd" d="M12 14.5V5.5a1 1 0 112 0v9a1 1 0 01-1.707.707l-3 3a1 1 0 01-1.414-1.414L12 14.5z" clipRule="evenodd" />
                   </svg>
                 </button>
@@ -109,7 +110,8 @@ const Servicios = () => {
                 <div className="services__full-description">
                   <p>{service.fullDescription}</p>
                   <button className="services__show-less" onClick={() => handleShowMore(service.id)}>
-                    Mostrar menos <svg viewBox="0 0 24 24" fill="currentColor" className="icon">
+                    Mostrar menos 
+                    <svg className="services__icon" viewBox="0 0 24 24" fill="currentColor">
                       <path fillRule="evenodd" d="M12 9.5v9a1 1 0 11-2 0v-9a1 1 0 011.707-.707l3-3a1 1 0 011.414 1.414L12 9.5z" clipRule="evenodd" />
                     </svg>
                   </button>

@@ -1,0 +1,255 @@
+/* src/components/Styles/DetalleHistorial.module.css */
+
+/* --- Colores y Estilos Base --- */
+.primaryColor { color: #00acc1; } /* Azul Cian vibrante */
+.primaryLightBg { background-color: #4dd0e1; } /* Azul Cian más claro para fondos de botones */
+.primaryDarkText { color: #007c91; } /* Azul Cian más oscuro para texto principal */
+.secondaryAccentColor { color: #ffb300; } /* Naranja para acentos/advertencias */
+.textDark { color: #333333; } /* Texto principal oscuro */
+.textMedium { color: #666666; } /* Texto secundario/descripciones */
+.textLight { color: #ffffff; } /* Texto claro */
+.bgLight { background-color: #f8f9fa; } /* Fondo muy claro */
+.bgMedium { background-color: #e9ecef; } /* Fondo para secciones o elementos */
+.borderColor { border-color: #dee2e6; } /* Color de borde general */
+
+/* Sombras */
+.shadowLight { box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); }
+.shadowMedium { box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); }
+
+/* Transiciones */
+.transitionEase { transition: all 0.3s ease; }
+
+/* Bordes y Radios */
+.borderRadiusCard { border-radius: 18px; }
+.borderRadiusButton { border-radius: 50px; }
+
+
+/* --- Contenedor Principal del Detalle --- */
+.detalleHistorialContainer {
+    padding: 30px;
+    max-width: 700px; /* Ancho máximo para un solo detalle */
+    margin: 40px auto; /* Centra el contenido */
+    background-color: white;
+    border-radius: 18px; /* Usar borderRadiusCard */
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); /* Usar shadowMedium */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    animation: fadeIn 0.5s ease-out; /* Animación de entrada general */
+}
+
+/* Animación de entrada para el contenedor principal (alternativa a framer-motion si quieres CSS) */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+
+/* --- Título de la Sección --- */
+.detalleHistorialTitle {
+    font-size: 2rem;
+    color: #007c91; /* primaryDarkText */
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #00acc1; /* primaryColor */
+    text-align: center;
+    font-weight: 700;
+}
+
+/* --- Información Detallada del Historial --- */
+.detalleHistorialInfo {
+    background-color: #e0f7fa; /* Un azul claro suave */
+    border-left: 5px solid #00acc1; /* primaryColor */
+    border-radius: 10px;
+    padding: 25px;
+    margin-bottom: 30px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); /* shadowLight más sutil */
+}
+
+.detalleHistorialInfo p {
+    font-size: 1.05rem;
+    color: #333333; /* textDark */
+    line-height: 1.6;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: baseline;
+    gap: 8px; /* Espacio entre el strong y el valor */
+}
+
+.detalleHistorialInfo p strong {
+    color: #007c91; /* primaryDarkText */
+    min-width: 120px; /* Asegura alineación de los labels */
+    flex-shrink: 0; /* Evita que el strong se encoja */
+}
+
+/* Último párrafo sin margen inferior */
+.detalleHistorialInfo p:last-child {
+    margin-bottom: 0;
+}
+
+/* --- Acciones (Botones) --- */
+.detalleHistorialActions {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.detalleHistorialBack {
+    background-color: #00acc1; /* primaryColor */
+    color: white; /* textLight */
+    border: none;
+    padding: 12px 25px;
+    border-radius: 50px; /* borderRadiusButton */
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    text-decoration: none; /* Para Link */
+    display: inline-flex; /* Para centrar y permitir padding */
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease; /* transitionEase */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.detalleHistorialBack:hover {
+    background-color: #00838f; /* Un tono más oscuro de primaryColor */
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.detalleHistorialBack svg { /* Si agregas un icono de flecha */
+    font-size: 1.1rem;
+}
+
+
+/* --- Mensajes de Estado (Carga, Error, No Data) --- */
+.loadingContainer,
+.errorMessage,
+.noDataMessage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 50px 20px;
+    background-color: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.07);
+    margin-top: 30px;
+    text-align: center;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.loadingContainer p,
+.errorMessage p,
+.noDataMessage p {
+    font-size: 1.2rem;
+    color: #666666; /* textMedium */
+    margin-top: 15px;
+}
+
+.spinnerIcon {
+    font-size: 3rem;
+    color: #00acc1; /* primaryColor */
+    animation: spin 1s linear infinite;
+}
+
+.infoIcon {
+    font-size: 3rem;
+    color: #ffb300; /* secondaryAccentColor */
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Estilo para el botón de volver en mensajes de error/no data */
+.backButton {
+    background-color: #6c757d; /* Gris para botones de volver genéricos */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 20px;
+    transition: all 0.3s ease;
+    text-decoration: none; /* Para Link */
+}
+
+.backButton:hover {
+    background-color: #495057;
+    transform: translateY(-2px);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* --- Responsividad --- */
+@media (max-width: 768px) {
+    .detalleHistorialContainer {
+        padding: 20px;
+        margin: 20px auto;
+    }
+
+    .detalleHistorialTitle {
+        font-size: 1.8rem;
+        margin-bottom: 20px;
+    }
+
+    .detalleHistorialInfo {
+        padding: 20px;
+    }
+
+    .detalleHistorialInfo p {
+        flex-direction: column; /* Apila el label y el valor */
+        align-items: flex-start;
+        gap: 2px;
+        margin-bottom: 15px;
+    }
+
+    .detalleHistorialInfo p strong {
+        min-width: unset; /* Quita el min-width */
+        font-size: 0.95rem;
+        margin-bottom: 5px; /* Espacio extra entre label y valor */
+    }
+
+    .detalleHistorialBack {
+        width: 100%;
+        justify-content: center;
+        padding: 10px 20px;
+    }
+
+    .loadingContainer,
+    .errorMessage,
+    .noDataMessage {
+        padding: 30px 15px;
+    }
+
+    .loadingContainer p,
+    .errorMessage p,
+    .noDataMessage p {
+        font-size: 1rem;
+    }
+
+    .spinnerIcon,
+    .infoIcon {
+        font-size: 2.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .detalleHistorialContainer {
+        padding: 15px;
+    }
+
+    .detalleHistorialTitle {
+        font-size: 1.6rem;
+    }
+
+    .detalleHistorialInfo {
+        padding: 15px;
+    }
+
+    .detalleHistorialInfo p {
+        font-size: 0.95rem;
+    }
+}

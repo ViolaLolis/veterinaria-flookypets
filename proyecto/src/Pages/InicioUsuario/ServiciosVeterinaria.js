@@ -3,11 +3,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faConciergeBell, faSearch, faInfoCircle, faSpinner, faBroom } from '@fortawesome/free-solid-svg-icons';
 import TarjetaServicio from './TarjetaServicio'; // Asegúrate de que TarjetaServicio esté en la misma carpeta o ajusta la ruta
-import './Styles/ServiciosVeterinaria.module.css'; // Importar el CSS sin .module
+import styles from './Styles/ServiciosVeterinaria.module.css'; // Importar como CSS Module
 import { authFetch } from '../../utils/api'; // Importar la función authFetch
 import { toast } from 'react-toastify'; // Import toast for user feedback
 
-function ServiciosUsuario() { // Renombrado de ServiciosVeterinaria a ServiciosUsuario
+function ServiciosUsuario() {
     const [services, setServices] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [isLoading, setIsLoading] = useState(true);
@@ -38,25 +38,25 @@ function ServiciosUsuario() { // Renombrado de ServiciosVeterinaria a ServiciosU
         } finally {
             setIsLoading(false);
         }
-    }, []); // No dependencies, runs once on mount
+    }, []);
 
     useEffect(() => {
         fetchServices();
-    }, [fetchServices]); // `fetchServices` is stable due to useCallback
+    }, [fetchServices]);
 
     // --- Search Filtering (Optimized with useMemo) ---
     const filteredServices = useMemo(() => {
         if (!searchTerm) {
-            return services; // Return all services if search term is empty
+            return services;
         }
         const lowerCaseSearchTerm = searchTerm.toLowerCase();
         return services.filter(service =>
             service.nombre.toLowerCase().includes(lowerCaseSearchTerm) ||
             service.descripcion.toLowerCase().includes(lowerCaseSearchTerm) ||
-            (service.categoria && service.categoria.toLowerCase().includes(lowerCaseSearchTerm)) || // Search by category
-            (service.especialista && service.especialista.toLowerCase().includes(lowerCaseSearchTerm)) // Search by specialist
+            (service.categoria && service.categoria.toLowerCase().includes(lowerCaseSearchTerm)) ||
+            (service.especialista && service.especialista.toLowerCase().includes(lowerCaseSearchTerm))
         );
-    }, [searchTerm, services]); // Recalculate only when searchTerm or services change
+    }, [searchTerm, services]);
 
     // --- Handlers ---
     const handleSearchChange = (e) => {
@@ -70,8 +70,8 @@ function ServiciosUsuario() { // Renombrado de ServiciosVeterinaria a ServiciosU
     // --- Render Logic ---
     if (isLoading) {
         return (
-            <div className="loading-container" aria-live="polite" aria-busy="true">
-                <FontAwesomeIcon icon={faSpinner} spin className="spinner-icon" />
+            <div className={styles.suLoadingContainer} aria-live="polite" aria-busy="true">
+                <FontAwesomeIcon icon={faSpinner} spin className={styles.suSpinnerIcon} />
                 <p>Cargando servicios...</p>
             </div>
         );
@@ -79,10 +79,10 @@ function ServiciosUsuario() { // Renombrado de ServiciosVeterinaria a ServiciosU
 
     if (error) {
         return (
-            <div className="error-message" role="alert">
-                <FontAwesomeIcon icon={faInfoCircle} className="error-icon" />
+            <div className={styles.suErrorMessage} role="alert">
+                <FontAwesomeIcon icon={faInfoCircle} className={styles.suErrorIcon} />
                 <p>{error}</p>
-                <button onClick={fetchServices} className="retry-button">
+                <button onClick={fetchServices} className={styles.suRetryButton}>
                     Reintentar
                 </button>
             </div>
@@ -91,41 +91,41 @@ function ServiciosUsuario() { // Renombrado de ServiciosVeterinaria a ServiciosU
 
     return (
         <motion.div
-            className="services-dashboard"
+            className={styles.suServicesDashboard}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
         >
-            <div className="dashboard-header">
-                <div className="header-title">
-                    <FontAwesomeIcon icon={faConciergeBell} className="title-icon" />
+            <div className={styles.suDashboardHeader}>
+                <div className={styles.suHeaderTitle}>
+                    <FontAwesomeIcon icon={faConciergeBell} className={styles.suTitleIcon} />
                     <h2>Servicios Disponibles</h2>
                 </div>
-                <div className="search-container">
+                <div className={styles.suSearchContainer}>
                     <input
                         type="text"
                         placeholder="Buscar por nombre, descripción, categoría o especialista..."
                         value={searchTerm}
                         onChange={handleSearchChange}
-                        className="search-input"
+                        className={styles.suSearchInput}
                         aria-label="Buscar servicios"
                     />
-                    {searchTerm && ( // Show clear button only when there's a search term
+                    {searchTerm && (
                         <button
                             onClick={handleClearSearch}
-                            className="clear-search-button"
+                            className={styles.suClearSearchButton}
                             aria-label="Limpiar búsqueda"
                             title="Limpiar búsqueda"
                         >
                             <FontAwesomeIcon icon={faBroom} />
                         </button>
                     )}
-                    <FontAwesomeIcon icon={faSearch} className="search-icon" />
+                    <FontAwesomeIcon icon={faSearch} className={styles.suSearchIcon} />
                 </div>
             </div>
 
             {filteredServices.length > 0 ? (
-                <div className="services-grid">
+                <div className={styles.suServicesGrid}>
                     <AnimatePresence mode="popLayout">
                         {filteredServices.map(service => (
                             <TarjetaServicio key={service.id_servicio} servicio={service} />
@@ -133,11 +133,11 @@ function ServiciosUsuario() { // Renombrado de ServiciosVeterinaria a ServiciosU
                     </AnimatePresence>
                 </div>
             ) : (
-                <div className="no-results">
-                    <FontAwesomeIcon icon={faInfoCircle} className="info-icon" />
+                <div className={styles.suNoResults}>
+                    <FontAwesomeIcon icon={faInfoCircle} className={styles.suInfoIcon} />
                     <p>{searchTerm ? `No se encontraron resultados para "${searchTerm}".` : 'Actualmente no hay servicios disponibles.'}</p>
-                    {searchTerm && ( // Suggest clearing search if no results
-                        <button onClick={handleClearSearch} className="clear-search-button-in-no-results">
+                    {searchTerm && (
+                        <button onClick={handleClearSearch} className={styles.suClearSearchButtonInNoResults}>
                             Limpiar búsqueda
                         </button>
                     )}

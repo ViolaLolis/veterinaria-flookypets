@@ -1,266 +1,478 @@
-.container {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 20px;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+/* Colores - Directamente definidos */
+.perfilPrimaryColor { color: #00acc1; }
+.perfilPrimaryLight { color: #4dd0e1; }
+.perfilPrimaryDark { color: #00838f; } /* Un poco más oscuro para hover */
+.perfilAccentColor { color: #28a745; }
+.perfilTextDark { color: #343a40; }
+.perfilTextMedium { color: #6c757d; }
+.perfilTextLight { color: #f8f9fa; }
+.perfilBackgroundLight { background-color: #e9ecef; }
+.perfilCardBackground { background-color: #ffffff; }
+.perfilBorderColor { border-color: #dee2e6; }
+.perfilShadowLight { box-shadow: rgba(0, 0, 0, 0.05); }
+.perfilShadowMedium { box-shadow: rgba(0, 0, 0, 0.1); }
+.perfilErrorColor { color: #dc3545; }
+.perfilWarningColor { color: #ffc107; }
+
+/* Estilo para el cuerpo para asegurar fondo y altura mínima */
+body {
+  background-color: #e9ecef; /* Fondo general claro */
+  font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  min-height: 100vh; /* Asegura que el body ocupe al menos la altura de la ventana */
+  display: flex; /* Permite que el contenido se estire o se centre verticalmente */
+  flex-direction: column;
 }
 
-.header {
-  background: linear-gradient(135deg, #00acc1, #00838f);
-  color: white;
-  padding: 30px;
-  border-radius: 15px;
-  margin-bottom: 30px;
-  box-shadow: 0 5px 20px rgba(0, 172, 193, 0.3);
+/* Contenedor principal del perfil */
+.perfilContainer {
+  max-width: 800px;
+  margin: 1.5rem auto; /* Reducido a 1.5rem de margen superior/inferior */
+  padding: 1.2rem 1.8rem; /* Reducido padding */
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08); /* Sombra ligeramente más suave */
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem; /* Reducido el espacio entre secciones */
+  position: relative;
+  flex-grow: 1; /* Permite que el contenedor crezca y ocupe el espacio disponible */
 }
 
-.headerContent {
+/* Notificaciones (sin cambios significativos aquí para el scroll) */
+.perfilNotification {
+  position: absolute;
+  top: 1rem; /* Más cerca del borde superior */
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.7rem 1.2rem; /* Ligeramente más pequeño */
+  border-radius: 8px;
+  font-size: 0.85rem;
   display: flex;
   align-items: center;
-  gap: 30px;
+  gap: 0.6rem;
+  z-index: 10;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+  min-width: 220px;
+  justify-content: center;
+  text-align: center;
 }
 
-.profileImageContainer {
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
+.perfilNotification.success {
+  background-color: #28a745;
+  color: white;
+}
+
+.perfilNotification.error {
+  background-color: #dc3545;
+  color: white;
+}
+
+/* Encabezado del Perfil (más compacto) */
+.perfilHeader {
+  background: linear-gradient(135deg, #00acc1 0%, #4dd0e1 100%);
+  color: #f8f9fa;
+  padding: 2rem 1.2rem; /* Reducido padding */
+  border-radius: 10px;
+  text-align: center;
   position: relative;
   overflow: hidden;
-  border: 4px solid #e0f7fa;
+  box-shadow: 0 6px 18px rgba(0, 172, 193, 0.25);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
-.profileImage {
+/* Efectos de fondo sutiles en el header */
+.perfilHeader::before, .perfilHeader::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.1;
+  background: #f8f9fa;
+}
+.perfilHeader::before {
+  width: 120px; /* Tamaño reducido */
+  height: 120px;
+  top: -20px; /* Posición ajustada */
+  left: -20px;
+}
+.perfilHeader::after {
+  width: 160px; /* Tamaño reducido */
+  height: 160px;
+  bottom: -40px;
+  right: -40px;
+}
+
+.perfilHeaderContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem; /* Reducido espacio */
+  z-index: 1;
+}
+
+.perfilProfileImageContainer {
+  position: relative;
+  width: 120px; /* Tamaño ligeramente más pequeño */
+  height: 120px;
+  border-radius: 50%;
+  border: 4px solid #f8f9fa; /* Borde más delgado */
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Sombra más suave */
+  flex-shrink: 0;
+  transition: transform 0.3s ease;
+}
+
+.perfilProfileImageContainer:hover {
+  transform: scale(1.03);
+}
+
+.perfilProfileImage {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.editProfileButton {
+.perfilEditProfileButton {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: rgba(0, 172, 193, 0.8);
+  bottom: 6px; /* Ajustado posición */
+  right: 6px;
+  background-color: #28a745;
   color: white;
-  border: none;
-  padding: 8px;
-  cursor: pointer;
-  font-size: 1rem;
-}
-
-.header h1 {
-  margin: 0;
-  font-size: 1.8rem;
-}
-
-.userEmail {
-  margin: 5px 0;
-  opacity: 0.9;
-}
-
-.membershipBadge {
-  background: #e0f7fa;
-  color: #00796b;
-  padding: 5px 15px;
-  border-radius: 20px;
-  font-weight: bold;
-  display: inline-block;
-  margin-top: 10px;
-}
-
-.statsContainer {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 15px;
-  margin-bottom: 30px;
-}
-
-.statCard {
-  background: white;
-  border-radius: 12px;
-  padding: 20px;
-  text-align: center;
-  box-shadow: 0 3px 15px rgba(0, 0, 0, 0.05);
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.statCard h3 {
-  margin: 0;
-  font-size: 2rem;
-  color: #00acc1;
-}
-
-.statCard p {
-  margin: 5px 0 0;
-  color: #666;
-}
-
-.infoCard {
-  background: white;
-  border-radius: 12px;
-  padding: 25px;
-  margin-bottom: 30px;
-  box-shadow: 0 3px 15px rgba(0, 0, 0, 0.05);
-}
-
-.cardTitle {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: #00796b;
-  margin-top: 0;
-  margin-bottom: 20px;
-}
-
-.cardIcon {
-  color: #00acc1;
-  font-size: 1.5rem;
-}
-
-.infoGrid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
-}
-
-.infoItem {
-  margin-bottom: 15px;
-}
-
-.infoItemFull {
-  grid-column: span 2;
-}
-
-.infoItem label {
-  display: block;
-  font-weight: 500;
-  color: #00acc1;
-  margin-bottom: 5px;
-}
-
-.infoItem p, .infoItemFull p {
-  margin: 0;
-  padding: 10px;
-  background: #f5fbfc;
-  border-radius: 8px;
-}
-
-.editButton {
-  background: #00acc1;
-  color: white;
-  border: none;
-  padding: 12px 25px;
-  border-radius: 30px;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 20px;
-  transition: all 0.3s;
-}
-
-.editButton:hover {
-  background: #00838f;
-}
-
-.optionsContainer {
-  margin-bottom: 30px;
-}
-
-.sectionTitle {
-  color: #00796b;
-  margin-bottom: 20px;
-}
-
-.optionCard {
-  background: white;
-  border-radius: 12px;
-  padding: 20px;
-  margin-bottom: 15px;
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  cursor: pointer;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
-  transition: all 0.3s;
-}
-
-.optionIcon {
-  font-size: 1.5rem;
-  color: #00acc1;
-  width: 50px;
-  height: 50px;
-  background: #e0f7fa;
+  border: 2px solid #f8f9fa; /* Borde más delgado */
   border-radius: 50%;
+  width: 35px; /* Tamaño reducido */
+  height: 35px;
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.optionCard h3 {
-  margin: 0 0 5px;
-  color: #333;
-}
-
-.optionCard p {
-  margin: 0;
-  color: #666;
-  font-size: 0.9rem;
-}
-
-.logoutButton {
-  background: #f44336;
-  color: white;
-  border: none;
-  padding: 15px 30px;
-  border-radius: 30px;
-  font-size: 1rem;
-  font-weight: 500;
+  font-size: 0.9rem; /* Fuente más pequeña */
   cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.perfilEditProfileButton:hover {
+  background-color: #218838;
+  transform: scale(1.15);
+}
+
+.perfilHeader h1 {
+  font-size: 2.2rem; /* Tamaño de fuente ligeramente más pequeño */
+  margin: 0.3rem 0 0.1rem 0; /* Márgenes reducidos */
+  font-weight: 700;
+  letter-spacing: 0.8px;
+}
+
+.perfilUserEmail {
+  font-size: 1rem; /* Tamaño de fuente ligeramente más pequeño */
+  opacity: 0.9;
+  margin-bottom: 0.8rem; /* Margen reducido */
+}
+
+.perfilMembershipBadge {
+  background-color: rgba(255, 255, 255, 0.3);
+  color: #f8f9fa;
+  padding: 0.4rem 0.9rem; /* Relleno reducido */
+  border-radius: 25px;
+  font-size: 0.85rem; /* Tamaño de fuente ligeramente más pequeño */
+  font-weight: 600;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+}
+
+/* Tarjeta de Información Personal */
+.perfilInfoCard {
+  background-color: #ffffff;
+  border-radius: 10px;
+  padding: 1.8rem; /* Reducido padding */
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.04);
+  border: 1px solid #dee2e6;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.perfilCardTitle {
+  font-size: 1.6rem; /* Tamaño de fuente ligeramente más pequeño */
+  color: #343a40;
+  margin-bottom: 1.5rem; /* Reducido margen */
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin: 0 auto;
-  transition: all 0.3s;
+  gap: 0.7rem;
+  font-weight: 600;
+  padding-bottom: 0.7rem; /* Reducido padding */
+  border-bottom: 2px solid #00acc1; /* Borde más delgado */
 }
 
+.perfilCardIcon {
+  color: #00acc1;
+  font-size: 1.8rem; /* Tamaño de fuente ligeramente más pequeño */
+}
+
+.perfilInfoGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); /* Min-width ligeramente reducido */
+  gap: 1.2rem 2rem; /* Espacio reducido */
+  margin-bottom: 1.5rem; /* Reducido margen */
+}
+
+.perfilInfoItem label {
+  display: block;
+  font-size: 0.8rem; /* Tamaño de fuente ligeramente más pequeño */
+  color: #6c757d;
+  margin-bottom: 0.3rem; /* Margen reducido */
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.perfilInfoItem p {
+  font-size: 1rem; /* Tamaño de fuente ligeramente más pequeño */
+  color: #343a40;
+  margin: 0;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+.perfilInfoItemFull {
+  grid-column: 1 / -1;
+}
+
+/* Botones */
+.perfilEditButton {
+  background-color: #00acc1;
+  color: white;
+  padding: 0.8rem 1.8rem; /* Relleno reducido */
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.95rem; /* Tamaño de fuente ligeramente más pequeño */
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem; /* Reducido margen */
+  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+  box-shadow: 0 3px 10px rgba(0, 172, 193, 0.15);
+}
+
+.perfilEditButton:hover {
+  background-color: #00838f;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 12px rgba(0, 172, 193, 0.25);
+}
+
+.perfilLogoutButton {
+  background-color: #dc3545;
+  color: white;
+  padding: 0.8rem 1.8rem; /* Relleno reducido */
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.95rem; /* Tamaño de fuente ligeramente más pequeño */
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: center;
+  width: fit-content;
+  margin: 1.2rem auto 0 auto; /* Reducido margen, se mantiene centrado */
+  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+  box-shadow: 0 3px 10px rgba(220, 53, 69, 0.15);
+}
+
+.perfilLogoutButton:hover {
+  background-color: #c82333;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 12px rgba(220, 53, 69, 0.25);
+}
+
+/* Mensajes de estado (Loading, Error, No Data) - Optimizados */
+.perfilLoadingContainer,
+.perfilErrorMessage,
+.perfilNoDataMessage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 250px; /* Altura mínima reducida */
+  text-align: center;
+  padding: 1.5rem; /* Relleno reducido */
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04);
+  color: #343a40;
+  margin: 1.5rem auto; /* Margen reducido */
+  max-width: 500px; /* Ancho máximo reducido */
+}
+
+.perfilSpinner {
+  font-size: 3.5rem; /* Tamaño de icono reducido */
+  color: #00acc1;
+  animation: spin 1.5s linear infinite;
+  margin-bottom: 1.2rem; /* Margen reducido */
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.perfilErrorMessage p,
+.perfilNoDataMessage p {
+  font-size: 1.1rem; /* Tamaño de fuente ligeramente más pequeño */
+  margin-bottom: 1.5rem; /* Margen reducido */
+  color: #343a40;
+  line-height: 1.5;
+}
+
+.perfilErrorIcon,
+.perfilInfoIcon {
+  font-size: 3.5rem; /* Tamaño de icono reducido */
+  margin-bottom: 1.2rem; /* Margen reducido */
+}
+
+.perfilErrorIcon {
+  color: #dc3545;
+}
+
+.perfilInfoIcon {
+  color: #ffc107;
+}
+
+.perfilBackButton {
+  background-color: #6c757d;
+  color: white;
+  padding: 0.7rem 1.5rem; /* Relleno reducido */
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem; /* Tamaño de fuente ligeramente más pequeño */
+  font-weight: 600;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.perfilBackButton:hover {
+  background-color: #5a6268;
+  transform: translateY(-2px);
+}
+
+/* Responsividad para pantallas muy pequeñas */
 @media (max-width: 768px) {
-  .headerContent {
-    flex-direction: column;
-    text-align: center;
+  .perfilContainer {
+    margin: 1rem auto;
+    padding: 1rem;
+    gap: 1rem;
   }
-  
-  .infoGrid {
+
+  .perfilHeader {
+    padding: 1.5rem 1rem;
+  }
+
+  .perfilProfileImageContainer {
+    width: 100px;
+    height: 100px;
+    border-width: 3px;
+  }
+
+  .perfilEditProfileButton {
+    width: 30px;
+    height: 30px;
+    font-size: 0.8rem;
+    bottom: 5px;
+    right: 5px;
+  }
+
+  .perfilHeader h1 {
+    font-size: 2rem;
+  }
+
+  .perfilUserEmail {
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .perfilMembershipBadge {
+    padding: 0.3rem 0.7rem;
+    font-size: 0.75rem;
+  }
+
+  .perfilInfoCard {
+    padding: 1.5rem;
+  }
+
+  .perfilCardTitle {
+    font-size: 1.4rem;
+    margin-bottom: 1rem;
+    flex-direction: row; /* Mantener en fila si hay espacio */
+    text-align: left;
+  }
+
+  .perfilCardIcon {
+    font-size: 1.6rem;
+  }
+
+  .perfilInfoGrid {
     grid-template-columns: 1fr;
+    gap: 0.8rem;
   }
-  
-  .infoItemFull {
-    grid-column: span 1;
+
+  .perfilInfoItem label {
+    font-size: 0.75rem;
   }
-  
-  .statsContainer {
-    grid-template-columns: 1fr;
+
+  .perfilInfoItem p {
+    font-size: 0.9rem;
+  }
+
+  .perfilEditButton,
+  .perfilLogoutButton {
+    padding: 0.7rem 1.2rem;
+    font-size: 0.85rem;
   }
 }
 
 @media (max-width: 480px) {
-  .header {
-    padding: 20px;
+  .perfilContainer {
+    margin: 0.8rem 0.5rem;
+    padding: 0.8rem;
   }
-  
-  .header h1 {
-    font-size: 1.5rem;
+
+  .perfilHeader {
+    padding: 1rem 0.5rem;
   }
-  
-  .optionCard {
-    flex-direction: column;
-    text-align: center;
+
+  .perfilProfileImageContainer {
+    width: 80px;
+    height: 80px;
   }
-  
-  .optionIcon {
-    margin-bottom: 10px;
+
+  .perfilHeader h1 {
+    font-size: 1.6rem;
+  }
+
+  .perfilUserEmail {
+    font-size: 0.8rem;
+  }
+
+  .perfilInfoCard {
+    padding: 1rem;
+  }
+
+  .perfilCardTitle {
+    font-size: 1.2rem;
+  }
+
+  .perfilInfoItem p {
+    font-size: 0.85rem;
+  }
+
+  .perfilEditButton,
+  .perfilLogoutButton {
+    padding: 0.6rem 1rem;
+    font-size: 0.8rem;
   }
 }

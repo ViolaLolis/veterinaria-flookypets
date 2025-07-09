@@ -1,509 +1,469 @@
-/* src/Pages/DetalleCita/Styles/DetalleCita.css */
-
-/* --- Variables de Color (Replicadas para consistencia si no usas un archivo global) --- */
-:root {
-    --primary-color: #00acc1; /* Azul cian vibrante (principal) */
-    --primary-light: #4dd0e1; /* Azul cian más claro para acentos y hover */
-    --primary-dark: #007c91; /* Azul cian más oscuro para sombras profundas y texto principal */
-    --text-dark: #333333;
-    --text-light: #666666;
-    --background-light: #f8f9fa; /* Fondo general */
-    --background-medium: #e9ecef; /* Fondo para elementos interactivos o secciones */
-    --border-color: #dee2e6; /* Borde general */
-    --success-color: #4CAF50;
-    --error-color: #f44336;
-    --warning-color: #ff9800;
-    --info-color: #2196f3;
-
-    /* Nuevas variables de sombra para consistencia */
-    --shadow-light: rgba(0, 0, 0, 0.05); /* Más sutil para elementos internos */
-    --shadow-medium: rgba(0, 0, 0, 0.1);
-    --shadow-strong: rgba(0, 0, 0, 0.15); /* Para hover */
-}
-
-/* --- Contenedor Principal del Detalle de Cita --- */
-.detalleCitaContainer {
+/* Color Palette (consistent with EditarMascota) */
+/* Estas variables se usarán localmente dentro de este módulo CSS */
+.detalleMascotaContainer {
+    --primary-cyan: #00acc1;
+    --light-cyan: #4dd0e1;
+    --dark-cyan: #007c91;
+    --text-color: #333333; /* Dark gray for general text */
+    --light-gray: #f4f4f4;
+    --medium-gray: #e0e0e0;
+    --dark-gray: #757575;
+    --error-red: #e74c3c;
+    --success-green: #2ecc71;
+    --background-light: #f9f9f9;
+    --shadow-color: rgba(0, 0, 0, 0.15); /* Slightly stronger shadow for depth */
+  
     max-width: 900px;
-    margin: 3rem auto;
-    padding: 2.5rem;
-    background-color: white;
-    border-radius: 15px;
-    box-shadow: 0 8px 25px var(--shadow-medium);
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Consistencia en fuente */
-    box-sizing: border-box; /* Asegura que padding no aumente el ancho total */
-}
-
-.detalleCitaTitle {
-    font-size: 2.5rem;
-    color: var(--primary-dark);
-    text-align: center;
-    margin-bottom: 2rem;
-    font-weight: 700;
-    letter-spacing: -0.5px;
-    border-bottom: 2px solid var(--primary-light);
-    padding-bottom: 1rem;
-}
-
-/* --- Mensajes de Carga, Error y No Data --- */
-.loadingContainer,
-.errorMessage,
-.noDataMessage {
-    text-align: center;
-    padding: 3rem;
-    background-color: white;
-    border-radius: 15px;
-    box-shadow: 0 4px 15px var(--shadow-light);
-    max-width: 600px;
-    margin: 3rem auto;
+    margin: 40px auto;
+    padding: 30px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px var(--shadow-color);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--text-color);
+    line-height: 1.6;
+  }
+  
+  /* --- Loading and Error States --- */
+  .loadingContainer,
+  .errorMessage {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 1rem;
-}
-
-.spinnerIcon {
-    font-size: 3rem;
-    color: var(--primary-color);
-    animation: spin 1.5s linear infinite;
-}
-
-.infoIcon {
-    font-size: 3rem;
-    color: var(--info-color);
-}
-
-.errorMessage .infoIcon {
-    color: var(--error-color);
-}
-
-.loadingContainer p,
-.errorMessage p,
-.noDataMessage p {
-    font-size: 1.2rem;
-    color: var(--text-dark);
-    margin: 0;
-}
-
-/* --- Tarjeta de Información de la Cita --- */
-.citaInfoCard {
-    background-color: var(--background-light);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 2rem;
-    margin-bottom: 2.5rem;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.5rem;
-    box-shadow: inset 0 2px 8px var(--shadow-light); /* Sombra interna para profundidad */
-}
-
-.infoItem {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    font-size: 1.1rem;
-    color: var(--text-dark);
-    line-height: 1.4;
-}
-
-.infoItem strong {
-    color: var(--primary-dark);
-    font-weight: 600;
-}
-
-.infoItem .infoIcon { /* Íconos dentro de los items de información */
-    font-size: 1.8rem;
-    color: var(--primary-color);
-    flex-shrink: 0; /* Evita que el icono se encoja */
-}
-
-/* Estilos para los badges de estado */
-.statusBadge {
-    padding: 0.4em 0.8em;
-    border-radius: 20px;
-    font-size: 0.9em;
-    font-weight: 600;
-    text-transform: capitalize;
-    margin-left: 0.5rem;
-    white-space: nowrap; /* Evita que el texto del estado se rompa */
-}
-
-.statusBadge.pendiente {
-    background-color: var(--warning-color);
-    color: white;
-}
-
-.statusBadge.aceptada {
-    background-color: var(--success-color);
-    color: white;
-}
-
-.statusBadge.rechazada {
-    background-color: var(--error-color);
-    color: white;
-}
-
-.statusBadge.completa {
-    background-color: var(--primary-dark);
-    color: white;
-}
-
-.statusBadge.cancelada {
-    background-color: var(--text-light); /* Un gris para cancelado */
-    color: white;
-}
-
-
-/* --- Sección de Acciones --- */
-.citaActions {
-    display: flex;
-    flex-wrap: wrap; /* Permite que los botones se envuelvan en pantallas pequeñas */
-    justify-content: center;
-    gap: 1.5rem; /* Espacio entre los botones */
-    margin-top: 2rem;
-    border-top: 1px dashed var(--border-color); /* Separador visual */
-    padding-top: 2rem;
-}
-
-.actionButton {
-    background-color: var(--primary-color);
-    color: white;
-    border: none;
-    padding: 0.9rem 1.8rem;
-    border-radius: 50px;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.75rem;
-    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
-    box-shadow: 0 4px 10px var(--shadow-light);
-    min-width: 180px; /* Ancho mínimo para mantener uniformidad */
-    justify-content: center; /* Centrar contenido del botón */
-}
-
-.actionButton:hover {
-    background-color: var(--primary-dark);
-    transform: translateY(-3px);
-    box-shadow: 0 6px 15px var(--shadow-medium);
-}
-
-.actionButton:disabled {
-    background-color: var(--background-medium);
-    color: var(--text-light);
-    cursor: not-allowed;
-    opacity: 0.7;
-    transform: none;
-    box-shadow: none;
-}
-
-.cancelButton {
-    background-color: var(--error-color);
-}
-
-.cancelButton:hover {
-    background-color: #d32f2f; /* Un rojo más oscuro */
-}
-
-.completeButton {
-    background-color: var(--success-color);
-}
-
-.completeButton:hover {
-    background-color: #388e3c; /* Un verde más oscuro */
-}
-
-.editButton { /* Estilo para el botón de edición de admin */
-    background-color: var(--info-color);
-}
-
-.editButton:hover {
-    background-color: #1976d2; /* Un azul más oscuro */
-}
-
-.backButton {
-    background-color: var(--text-light); /* Un gris neutral para el botón de volver */
-    color: white;
-}
-
-.backButton:hover {
-    background-color: #5a5a5a;
-}
-
-/* --- Notificaciones Temporales --- */
-.notification {
-    padding: 1rem 1.5rem;
-    border-radius: 8px;
-    font-weight: 600;
-    margin-bottom: 2rem;
+    min-height: 400px;
+    font-size: 1.2em;
+    color: var(--dark-cyan);
     text-align: center;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    position: sticky; /* O fixed, dependiendo de dónde quieres que aparezca */
-    top: 20px; /* Ajusta la posición */
-    z-index: 1000; /* Asegura que esté por encima de otros elementos */
-}
-
-.notification.success {
-    background-color: var(--success-color);
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  }
+  
+  .spinnerIcon {
+    font-size: 3.5em;
+    color: var(--primary-cyan);
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+  }
+  
+  .errorMessage .infoIcon {
+    font-size: 3.5em;
+    color: var(--error-red);
+    margin-bottom: 20px;
+  }
+  
+  .errorMessage p {
+    font-size: 1.1em;
+    color: var(--text-color);
+    margin-bottom: 20px;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  /* --- Page Header / Title --- */
+  .detalleMascotaTitle {
+    font-size: 2.2em;
+    color: var(--dark-cyan);
+    text-align: center;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid var(--light-cyan);
+    position: relative;
+    font-weight: 600;
+  }
+  
+  .detalleMascotaTitle::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -2px; /* Alineado con el borde inferior */
+    transform: translateX(-50%);
+    width: 60px; /* Ancho de la línea de acento */
+    height: 4px;
+    background-color: var(--primary-cyan);
+    border-radius: 2px;
+  }
+  
+  /* --- Mascota Information Section --- */
+  .detalleMascotaInfo {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Responsive grid */
+    gap: 20px; /* Space between grid items */
+    background-color: var(--background-light);
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.05); /* Soft inner shadow */
+    margin-bottom: 30px;
+  }
+  
+  .infoItem {
+    display: flex;
+    align-items: center;
+    background-color: #ffffff;
+    padding: 15px 20px;
+    border-radius: 8px;
+    border: 1px solid var(--medium-gray);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .infoItem:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  .infoItem .infoIcon {
+    font-size: 1.5em;
+    color: var(--primary-cyan);
+    margin-right: 15px;
+    flex-shrink: 0; /* Prevent icon from shrinking */
+  }
+  
+  .infoItem p {
+    margin: 0;
+    font-size: 1.05em;
+    color: var(--text-color);
+    flex-grow: 1;
+  }
+  
+  .infoItem p strong {
+    color: var(--dark-cyan);
+    font-weight: 600;
+  }
+  
+  /* --- Image Container --- */
+  .imageContainer {
+    grid-column: 1 / -1; /* Spans full width */
+    text-align: center;
+    margin-top: 15px;
+  }
+  
+  .mascotaImage {
+    width: 250px;
+    height: 250px;
+    object-fit: cover;
+    border-radius: 50%; /* Make it circular */
+    border: 5px solid var(--primary-cyan);
+    box-shadow: 0 5px 15px rgba(0, 172, 193, 0.3); /* Shadow matching primary color */
+  }
+  
+  /* --- Historial Médico Section --- */
+  .detalleMascotaHistorial {
+    background-color: var(--background-light);
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.05);
+    margin-bottom: 30px;
+  }
+  
+  .detalleMascotaHistorial h3 {
+    font-size: 1.7em;
+    color: var(--dark-cyan);
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--medium-gray);
+    padding-bottom: 10px;
+  }
+  
+  .historialList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .historialItem {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px dashed var(--medium-gray);
+    font-size: 1.05em;
+    color: var(--text-color);
+  }
+  
+  .historialItem:last-child {
+    border-bottom: none;
+  }
+  
+  .historialDate {
+    font-weight: bold;
+    color: var(--primary-cyan);
+    flex-shrink: 0;
+    margin-right: 10px;
+  }
+  
+  .historialDiagnosis {
+    flex-grow: 1;
+    margin-right: 10px;
+  }
+  
+  .historialDetailLink {
+    color: var(--dark-cyan);
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease, text-decoration 0.3s ease;
+    flex-shrink: 0;
+  }
+  
+  .historialDetailLink:hover {
+    color: var(--primary-cyan);
+    text-decoration: underline;
+  }
+  
+  .noHistorial {
+    text-align: center;
+    color: var(--dark-gray);
+    padding: 20px;
+    border: 1px dashed var(--medium-gray);
+    border-radius: 8px;
+    margin-top: 20px;
+  }
+  
+  /* --- Action Buttons --- */
+  .detalleMascotaActions {
+    display: flex;
+    flex-wrap: wrap; /* Allow wrapping on smaller screens */
+    gap: 15px;
+    justify-content: center;
+    margin-top: 30px;
+  }
+  
+  .detalleMascotaButton,
+  .detalleMascotaBack {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1em;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    text-decoration: none; /* For Link components */
+    justify-content: center;
+    flex-grow: 1; /* Allow buttons to grow */
+    max-width: 250px; /* Limit button width */
+  }
+  
+  .detalleMascotaButton.editar {
+    background-color: var(--primary-cyan);
     color: white;
-}
-
-.notification.error {
-    background-color: var(--error-color);
+  }
+  
+  .detalleMascotaButton.editar:hover {
+    background-color: var(--dark-cyan);
+    box-shadow: 0 4px 15px rgba(0, 172, 193, 0.3);
+  }
+  
+  .detalleMascotaButton.eliminar {
+    background-color: var(--error-red);
     color: white;
-}
-
-/* --- Modal de Reagendamiento --- */
-.modalOverlay {
+  }
+  
+  .detalleMascotaButton.eliminar:hover {
+    background-color: #c0392b; /* Darker red */
+    box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+  }
+  
+  .detalleMascotaButton:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+  
+  .detalleMascotaBack {
+    background-color: var(--medium-gray);
+    color: var(--text-color);
+    border: 1px solid var(--dark-gray);
+  }
+  
+  .detalleMascotaBack:hover {
+    background-color: var(--dark-gray);
+    color: white;
+    box-shadow: 0 4px 15px rgba(117, 117, 117, 0.3);
+  }
+  
+  /* --- Modal for Confirmation --- */
+  .modalOverlay {
     position: fixed;
     top: 0;
     left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.6);
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.6); /* Semi-transparent dark background */
     display: flex;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
     z-index: 1000;
-}
-
-.modalContent {
-    background-color: white;
-    padding: 2.5rem;
-    border-radius: 15px;
-    box-shadow: 0 10px 30px var(--shadow-strong);
-    width: 90%;
+  }
+  
+  .modalContent {
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     max-width: 500px;
+    width: 90%;
     text-align: center;
-    box-sizing: border-box;
-}
-
-.modalContent h3 {
-    font-size: 1.8rem;
-    color: var(--primary-dark);
-    margin-bottom: 1rem;
-}
-
-.modalContent p {
-    font-size: 1rem;
-    color: var(--text-light);
-    margin-bottom: 1.5rem;
-}
-
-.modalInput {
-    width: calc(100% - 20px); /* Ajusta por padding */
-    padding: 0.8rem 1rem;
-    margin-bottom: 1rem;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    font-size: 1rem;
-    box-sizing: border-box;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.modalInput:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px var(--primary-glow);
-}
-
-.modalActions {
+  }
+  
+  .modalContent h3 {
+    color: var(--dark-cyan);
+    font-size: 1.8em;
+    margin-bottom: 20px;
+  }
+  
+  .modalContent p {
+    color: var(--text-color);
+    margin-bottom: 30px;
+    font-size: 1.1em;
+  }
+  
+  .modalActions {
     display: flex;
     justify-content: center;
-    gap: 1rem;
-    margin-top: 1.5rem;
-}
-
-.modalActions .primaryButton,
-.modalActions .secondaryButton {
-    padding: 0.8rem 1.5rem;
-    border-radius: 30px;
-    font-size: 0.95rem;
-    font-weight: 600;
+    gap: 15px;
+  }
+  
+  .submitBtn,
+  .cancelBtn {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1em;
+    font-weight: bold;
     cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
-    border: none; /* Reset para evitar bordes duplicados si ya tienes estilos de botón global */
-}
-
-.modalActions .primaryButton {
-    background-color: var(--primary-color);
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
+  }
+  
+  .submitBtn {
+    background-color: var(--error-red);
     color: white;
-    box-shadow: 0 2px 8px var(--shadow-light);
-}
-
-.modalActions .primaryButton:hover {
-    background-color: var(--primary-dark);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 10px var(--shadow-medium);
-}
-
-.modalActions .primaryButton:disabled {
-    background-color: var(--background-medium);
-    color: var(--text-light);
+  }
+  
+  .submitBtn:hover:not(:disabled) {
+    background-color: #c0392b;
+  }
+  
+  .cancelBtn {
+    background-color: var(--medium-gray);
+    color: var(--text-color);
+    border: 1px solid var(--dark-gray);
+  }
+  
+  .cancelBtn:hover:not(:disabled) {
+    background-color: var(--dark-gray);
+    color: white;
+  }
+  
+  .submitBtn:disabled,
+  .cancelBtn:disabled {
+    background-color: #cccccc;
     cursor: not-allowed;
-    opacity: 0.7;
-    transform: none;
     box-shadow: none;
-}
-
-.modalActions .secondaryButton {
-    background-color: var(--background-medium);
-    color: var(--text-dark);
-    border: 1px solid var(--border-color);
-}
-
-.modalActions .secondaryButton:hover {
-    background-color: #e0e0e0;
-    transform: translateY(-2px);
-    box-shadow: 0 2px 8px var(--shadow-light);
-}
-
-/* Animación para el spinner */
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-/* --- Media Queries para Responsividad --- */
-@media (max-width: 768px) {
-    .detalleCitaContainer {
-        margin: 1.5rem auto;
-        padding: 1.5rem;
+  }
+  
+  
+  /* --- Responsive Adjustments --- */
+  @media (max-width: 768px) {
+    .detalleMascotaContainer {
+      margin: 20px;
+      padding: 20px;
     }
-
-    .detalleCitaTitle {
-        font-size: 2rem;
-        margin-bottom: 1.5rem;
+  
+    .detalleMascotaTitle {
+      font-size: 1.8em;
     }
-
-    .citaInfoCard {
-        grid-template-columns: 1fr; /* Una columna en móviles */
-        padding: 1.2rem;
-        gap: 1rem;
+  
+    .detalleMascotaInfo {
+      grid-template-columns: 1fr; /* Stack info items */
+      padding: 20px;
     }
-
+  
     .infoItem {
-        font-size: 1rem;
+      padding: 12px 15px;
+      font-size: 0.95em;
     }
-
-    .infoItem .infoIcon {
-        font-size: 1.5rem;
+  
+    .detalleMascotaHistorial {
+      padding: 20px;
     }
-
-    .citaActions {
-        flex-direction: column; /* Botones apilados en móviles */
-        gap: 1rem;
-        padding-top: 1.5rem;
+  
+    .historialItem {
+      flex-direction: column; /* Stack date and diagnosis */
+      align-items: flex-start;
+      gap: 5px;
     }
-
-    .actionButton {
-        width: 100%; /* Ocupa todo el ancho disponible */
-        max-width: 300px; /* Limita el ancho máximo para no ser demasiado grande */
-        margin: 0 auto; /* Centrar el botón */
-        font-size: 0.95rem;
-        padding: 0.8rem 1.5rem;
+  
+    .historialDetailLink {
+      align-self: flex-end; /* Push link to the right */
     }
-
-    .modalContent {
-        padding: 1.5rem;
+  
+    .detalleMascotaActions {
+      flex-direction: column; /* Stack buttons */
+      align-items: center;
     }
-
-    .modalContent h3 {
-        font-size: 1.5rem;
+  
+    .detalleMascotaButton,
+    .detalleMascotaBack {
+      width: 100%; /* Full width buttons */
+      max-width: 300px; /* Limit max width for aesthetic */
     }
-
-    .modalInput {
-        padding: 0.7rem;
+  
+    .mascotaImage {
+      width: 180px;
+      height: 180px;
     }
-
-    .modalActions {
-        flex-direction: column;
-        gap: 0.8rem;
+  }
+  
+  @media (max-width: 480px) {
+    .detalleMascotaContainer {
+      margin: 15px;
+      padding: 15px;
     }
-
-    .modalActions .primaryButton,
-    .modalActions .secondaryButton {
-        width: 100%;
+  
+    .detalleMascotaTitle {
+      font-size: 1.5em;
     }
-}
-
-@media (max-width: 480px) {
-    .detalleCitaContainer {
-        padding: 1rem;
-        margin: 1rem auto;
-        border-radius: 10px;
-    }
-
-    .detalleCitaTitle {
-        font-size: 1.8rem;
-        margin-bottom: 1rem;
-        padding-bottom: 0.8rem;
-    }
-
+  
     .loadingContainer,
-    .errorMessage,
-    .noDataMessage {
-        padding: 1.5rem;
-        border-radius: 10px;
+    .errorMessage {
+      min-height: 250px;
+      font-size: 1em;
     }
-
-    .spinnerIcon, .infoIcon {
-        font-size: 2.5rem;
+  
+    .spinnerIcon,
+    .errorMessage .infoIcon {
+      font-size: 2.5em;
     }
-
-    .loadingContainer p,
-    .errorMessage p,
-    .noDataMessage p {
-        font-size: 1rem;
-    }
-
-    .citaInfoCard {
-        padding: 1rem;
-        gap: 0.8rem;
-    }
-
-    .infoItem {
-        font-size: 0.9rem;
-    }
-
-    .infoItem .infoIcon {
-        font-size: 1.3rem;
-    }
-
-    .statusBadge {
-        font-size: 0.8em;
-        padding: 0.3em 0.6em;
-    }
-
-    .citaActions {
-        padding-top: 1rem;
-    }
-
-    .actionButton {
-        font-size: 0.9rem;
-        padding: 0.7rem 1.2rem;
-        min-width: unset;
-    }
-
+  
     .modalContent {
-        padding: 1rem;
-        border-radius: 10px;
+      padding: 20px;
     }
-
+  
     .modalContent h3 {
-        font-size: 1.4rem;
-        margin-bottom: 0.8rem;
+      font-size: 1.5em;
     }
-
+  
     .modalContent p {
-        font-size: 0.9rem;
-        margin-bottom: 1rem;
+      font-size: 1em;
     }
-
-    .modalInput {
-        padding: 0.6rem 0.8rem;
-        font-size: 0.9rem;
+  
+    .modalActions {
+      flex-direction: column;
     }
-}
+  
+    .submitBtn,
+    .cancelBtn {
+      width: 100%;
+    }
+  }

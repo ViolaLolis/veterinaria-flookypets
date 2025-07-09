@@ -1,0 +1,409 @@
+/* Styles/HistorialMedico.css */
+
+/* --- Colores y Estilos Base --- */
+.primary-color { color: #00acc1; } /* Azul Cian vibrante */
+.primary-light-bg { background-color: #4dd0e1; } /* Azul Cian más claro para fondos de botones */
+.primary-dark-text { color: #007c91; } /* Azul Cian más oscuro para texto principal */
+.secondary-accent-color { color: #ffb300; } /* Naranja para acentos/advertencias */
+.text-dark { color: #333333; } /* Texto principal oscuro */
+.text-medium { color: #666666; } /* Texto secundario/descripciones */
+.text-light { color: #ffffff; } /* Texto claro */
+.bg-light { background-color: #f8f9fa; } /* Fondo muy claro */
+.bg-medium { background-color: #e9ecef; } /* Fondo para secciones o elementos */
+.border-color { border-color: #dee2e6; } /* Color de borde general */
+
+/* Sombras */
+.shadow-light { box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); }
+.shadow-medium { box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); }
+.shadow-strong { box-shadow: 0 15px 40px rgba(0, 0, 0, 0.18); }
+
+/* Transiciones */
+.transition-ease { transition: all 0.3s ease; }
+
+/* Bordes y Radios */
+.border-radius-card { border-radius: 18px; }
+.border-radius-button { border-radius: 50px; }
+
+/* --- Contenedor Principal --- */
+.historial-container {
+    padding: 30px;
+    max-width: 1000px; /* Ancho máximo para el contenido */
+    margin: 40px auto; /* Centra el contenido y da espacio superior/inferior */
+    background-color: white; /* Usar blanco explícitamente */
+    border-radius: 18px; /* Usar valor explícito */
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); /* Usar valor explícito */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Fuente moderna */
+}
+
+/* --- Encabezado del Historial --- */
+.historial-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #dee2e6; /* Usar valor explícito */
+    flex-wrap: wrap; /* Permite que los elementos se envuelvan en pantallas pequeñas */
+    gap: 15px; /* Espacio entre elementos si se envuelven */
+}
+
+.historial-header h2 {
+    font-size: 2.2rem;
+    color: #007c91; /* Usar valor explícito */
+    margin: 0;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 15px; /* Espacio entre el icono y el texto */
+}
+
+.historial-icon {
+    font-size: 2.5rem;
+    color: #00acc1; /* Usar valor explícito */
+}
+
+.back-button {
+    background-color: #4dd0e1; /* Usar valor explícito */
+    color: white; /* Usar valor explícito */
+    border: none;
+    padding: 10px 20px;
+    border-radius: 50px; /* Usar valor explícito */
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease; /* Usar valor explícito */
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+}
+
+.back-button:hover {
+    background-color: #007c91; /* Usar valor explícito */
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+}
+
+.back-button svg {
+    font-size: 1.1rem;
+}
+
+/* --- Tarjeta de Información de la Mascota --- */
+.mascota-info-card {
+    background-color: #e0f7fa; /* Un azul claro suave */
+    border-left: 5px solid #00acc1; /* Borde acentuado */
+    border-radius: 10px;
+    padding: 25px;
+    margin-bottom: 30px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.mascota-info-card h3 {
+    font-size: 1.5rem;
+    color: #007c91;
+    margin-top: 0;
+    margin-bottom: 15px;
+    border-bottom: 1px dashed #b2ebf2; /* Línea suave bajo el título */
+    padding-bottom: 10px;
+}
+
+.mascota-info-card p {
+    font-size: 1.05rem;
+    color: #333333;
+    line-height: 1.6;
+    margin-bottom: 8px;
+}
+
+.mascota-info-card p strong {
+    color: #007c91; /* Hace los nombres de los campos más oscuros */
+}
+
+/* --- Sección de Listado de Historial --- */
+.historial-list-section h3 {
+    font-size: 1.8rem;
+    color: #007c91;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.add-historial-button {
+    display: inline-flex; /* Para alinear con el texto del botón */
+    align-items: center;
+    gap: 8px;
+    background-color: #00acc1;
+    color: white;
+    padding: 12px 25px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    margin-bottom: 25px; /* Espacio debajo del botón */
+}
+
+.add-historial-button:hover {
+    background-color: #00838f;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.add-historial-button svg {
+    font-size: 1.2rem;
+}
+
+.historial-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid; /* Usar grid para la lista */
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Columnas responsivas */
+    gap: 25px; /* Espacio entre las tarjetas de historial */
+}
+
+/* --- Ítem del Historial (Cada Tarjeta) --- */
+.historial-item {
+    background-color: white;
+    border-radius: 15px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    padding: 25px;
+    border: 1px solid #e0e0e0;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s ease;
+}
+
+.historial-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+}
+
+.item-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed #e9ecef;
+}
+
+.item-icon {
+    font-size: 1.5rem;
+    color: #00acc1;
+    flex-shrink: 0;
+}
+
+.item-date {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #333333;
+    flex-grow: 1; /* Para que ocupe el espacio restante */
+}
+
+.item-veterinario {
+    font-size: 0.95rem;
+    color: #666666;
+    background-color: #f0f0f0;
+    padding: 5px 10px;
+    border-radius: 20px;
+}
+
+.item-body p {
+    font-size: 0.95rem;
+    color: #666666;
+    margin-bottom: 8px;
+    line-height: 1.5;
+}
+
+.item-body p strong {
+    color: #333333;
+    font-weight: 600;
+}
+
+.item-actions {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px dashed #e9ecef;
+    text-align: right;
+}
+
+.view-detail-button {
+    background-color: #00acc1;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 25px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+}
+
+.view-detail-button:hover {
+    background-color: #00838f;
+    transform: scale(1.05);
+    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* --- Mensajes de Estado (Carga, Error, No Data) --- */
+.loading-container,
+.error-message,
+.no-data-message,
+.no-historial-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 50px 20px;
+    background-color: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.07);
+    margin-top: 30px;
+    text-align: center;
+}
+
+.loading-container p,
+.error-message p,
+.no-data-message p,
+.no-historial-message p {
+    font-size: 1.2rem;
+    color: #666666;
+    margin-top: 15px;
+}
+
+.spinner-icon {
+    font-size: 3rem;
+    color: #00acc1;
+    animation: spin 1s linear infinite;
+}
+
+.info-icon {
+    font-size: 3rem;
+    color: #ffb300; /* Naranja para info/advertencia */
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* --- Responsividad --- */
+@media (max-width: 768px) {
+    .historial-container {
+        padding: 20px;
+        margin: 20px auto;
+    }
+
+    .historial-header {
+        flex-direction: column;
+        align-items: flex-start; /* Alinea los elementos a la izquierda */
+    }
+
+    .historial-header h2 {
+        font-size: 1.8rem;
+        margin-bottom: 15px;
+    }
+
+    .historial-icon {
+        font-size: 2rem;
+    }
+
+    .back-button {
+        width: 100%;
+        justify-content: center; /* Centra el contenido del botón */
+    }
+
+    .mascota-info-card {
+        padding: 20px;
+    }
+
+    .mascota-info-card h3 {
+        font-size: 1.3rem;
+    }
+
+    .historial-list-section h3 {
+        font-size: 1.6rem;
+    }
+
+    .add-historial-button {
+        width: 100%;
+        justify-content: center;
+        padding: 10px 20px;
+    }
+
+    .historial-list {
+        grid-template-columns: 1fr; /* Una sola columna en móviles */
+        gap: 20px;
+    }
+
+    .historial-item {
+        padding: 20px;
+    }
+
+    .item-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .item-date,
+    .item-veterinario {
+        width: 100%; /* Ocupa todo el ancho */
+        text-align: left;
+    }
+
+    .item-veterinario {
+        margin-top: 5px; /* Espacio entre fecha y veterinario */
+    }
+
+    .item-actions {
+        text-align: center; /* Centra el botón de detalle */
+    }
+
+    .view-detail-button {
+        width: 100%;
+        padding: 10px 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .historial-container {
+        padding: 15px;
+    }
+
+    .historial-header h2 {
+        font-size: 1.6rem;
+    }
+
+    .historial-icon {
+        font-size: 1.8rem;
+    }
+
+    .mascota-info-card p {
+        font-size: 0.95rem;
+    }
+
+    .historial-list-section h3 {
+        font-size: 1.4rem;
+    }
+
+    .historial-item {
+        padding: 15px;
+    }
+
+    .item-date,
+    .item-veterinario {
+        font-size: 0.9rem;
+    }
+
+    .item-body p {
+        font-size: 0.88rem;
+    }
+
+    .view-detail-button {
+        font-size: 0.85rem;
+        padding: 8px 12px;
+    }
+}

@@ -2,13 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate, useOutletContext } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FaSpinner, FaInfoCircle } from 'react-icons/fa';
-import styles from './Styles/DetalleHistorial.css'; // Asegúrate de que el CSS sea un módulo
+import styles from './Styles/DetalleHistorial.module.css'; // Asegúrate de que el CSS sea un módulo
 import { authFetch } from '../../utils/api'; // Importar la función authFetch
 
 const DetalleHistorial = () => {
   const { mascotaId, historialId } = useParams();
   const navigate = useNavigate();
-  const { user, showNotification } = useOutletContext(); // Obtener user y showNotification del contexto
+  const { user, showNotification } = useOutletContext(); // Obtener user y showNotification del contextof
 
   const [historial, setHistorial] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
