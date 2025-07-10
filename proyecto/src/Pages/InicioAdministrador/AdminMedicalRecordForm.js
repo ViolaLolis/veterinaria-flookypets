@@ -3,345 +3,375 @@ import { FaSave, FaTimes, FaSpinner } from 'react-icons/fa';
 import { validateField } from '../../utils/validation';
 import Modal from '../../Components/Modal';
 import Notification from '../../Components/Notification';
-import './Styles/AdminMedicalRecordForm.css'; // Asumo que este CSS es genérico para formularios admin
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 const AdminMedicalRecordForm = ({ isOpen, onClose, record, onSaveSuccess }) => {
     const [formData, setFormData] = useState({
         id_mascota: '',
-        fecha_consulta: '', // Formato 'YYYY-MM-DDTHH:mm' para input datetime-local
+        id_veterinario: '',
+        fecha_registro: '',
         diagnostico: '',
         tratamiento: '',
         observaciones: '',
-        veterinario: '', // ID del veterinario
-        peso_actual: '',
-        temperatura: '',
-        proxima_cita: '', // Formato 'YYYY-MM-DDTHH:mm' para input datetime-local
+        proxima_cita: '' // Campo opcional
     });
     const [formErrors, setFormErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [notification, setNotification] = useState(null);
-    const [mascotas, setMascotas] = useState([]);
+    const [clientes, setClientes] = useState([]);
     const [veterinarios, setVeterinarios] = useState([]);
-    const [isLoadingDependencies, setIsLoadingDependencies] = useState(false);
+    const [filteredMascotas, setFilteredMascotas] = useState([]);
+    const [selectedClientId, setSelectedClientId] = useState(''); // Estado para el cliente seleccionado en el dropdown
 
-    const getAuthToken = () => {
-        return localStorage.getItem('token');
-    };
-
-    const authFetch = useCallback(async (url, options = {}) => {
-        const token = getAuthToken();
-        if (!token) {
-            setNotification({ message: 'No se encontró token de autenticación. Por favor, inicia sesión de nuevo.', type: 'error' });
-            throw new Error('No se encontró token de autenticación');
+    const handleChange = useCallback((e) => {
+        const { name, value } = e.target;
+        if (name === 'id_cliente') { // Manejo especial para el cambio de cliente
+            setSelectedClientId(value);
+            setFormData(prev => ({ ...prev, id_mascota: '' })); // Limpiar mascota cuando cambia el cliente
         }
-
-        const defaultHeaders = {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        };
-
-        const response = await fetch(url, {
-            ...options,
-            headers: {
-                ...defaultHeaders,
-                ...options.headers,
-            },
-        });
-
-        if (response.status === 401 || response.status === 403) {
-            setNotification({ message: 'Sesión expirada o no autorizado. Por favor, inicia sesión de nuevo.', type: 'error' });
-            throw new Error('No autorizado');
-        }
-
-        if (!response.ok) {
-            const contentType = response.headers.get("content-type");
-            if (contentType && contentType.indexOf("application/json") !== -1) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || `Error del servidor: ${response.status}`);
-            } else {
-                const text = await response.text();
-                console.error("Response was not JSON:", text);
-                setNotification({ message: `Error del servidor: Respuesta inesperada. Estado: ${response.status}. Detalles: ${text.substring(0, 100)}...`, type: 'error' });
-                throw new Error("Respuesta del servidor no es JSON");
-            }
-        }
-
-        return response;
+        setFormData(prev => ({ ...prev, [name]: value }));
+        setFormErrors(prev => ({ ...prev, [name]: '' }));
     }, []);
 
-    // Load dependencies (mascotas, veterinarios)
-    useEffect(() => {
-        const fetchDependencies = async () => {
-            setIsLoadingDependencies(true);
-            try {
-                const [mascotasRes, vetsRes] = await Promise.allSettled([
-                    authFetch(`${API_BASE_URL}/mascotas`),
-                    authFetch(`${API_BASE_URL}/usuarios/veterinarios`)
-                ]);
-
-                if (mascotasRes.status === 'fulfilled' && mascotasRes.value.ok) {
-                    const data = await mascotasRes.value.json();
-                    if (data.success) setMascotas(data.data);
-                    else setNotification(prev => prev || { message: data.message || 'Error al cargar mascotas.', type: 'error' });
-                } else if (mascotasRes.status === 'rejected') {
-                    setNotification(prev => prev || { message: `Error al cargar mascotas: ${mascotasRes.reason?.message || 'Error desconocido'}`, type: 'error' });
-                }
-
-                if (vetsRes.status === 'fulfilled' && vetsRes.value.ok) {
-                    const data = await vetsRes.value.json();
-                    if (data.success) setVeterinarios(data.data);
-                    else setNotification(prev => prev || { message: data.message || 'Error al cargar veterinarios.', type: 'error' });
-                } else if (vetsRes.status === 'rejected') {
-                    setNotification(prev => prev || { message: `Error al cargar veterinarios: ${vetsRes.reason?.message || 'Error desconocido'}`, type: 'error' });
-                }
-
-            } catch (err) {
-                console.error('Error general al cargar dependencias:', err);
-                setNotification(prev => prev || { message: 'Error inesperado al cargar datos necesarios.', type: 'error' });
-            } finally {
-                setIsLoadingDependencies(false);
-            }
-        };
-
-        if (isOpen) {
-            fetchDependencies();
+    const handleBlur = useCallback((e) => {
+        const { name, value } = e.target;
+        const error = validateField(name, value);
+        if (error) {
+            setFormErrors(prev => ({ ...prev, [name]: error }));
         }
-    }, [isOpen, authFetch]);
+    }, []);
 
-    // Load record data if in edit mode
+    // === FETCHING INITIAL DATA ===
+
+    // Fetch clientes
+    const fetchClientes = useCallback(async () => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            setNotification({ message: 'No autorizado. Por favor, inicia sesión.', type: 'error' });
+            return;
+        }
+        try {
+            const response = await fetch(`${API_BASE_URL}/admin/clientes`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!response.ok) throw new Error('Error al cargar clientes.');
+            const data = await response.json();
+            if (data.success) {
+                setClientes(data.data);
+            } else {
+                setNotification({ message: data.message || 'No se pudieron cargar los clientes.', type: 'error' });
+            }
+        } catch (error) {
+            console.error("Error fetching clients:", error);
+            setNotification({ message: error.message || 'Error del servidor al cargar clientes.', type: 'error' });
+        }
+    }, [setNotification]);
+
+    // Fetch veterinarios
+    const fetchVeterinarios = useCallback(async () => {
+        const token = localStorage.getItem('token');
+        try {
+            const response = await fetch(`${API_BASE_URL}/veterinarios`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!response.ok) throw new Error('Error al cargar veterinarios.');
+            const data = await response.json();
+            if (data.success) {
+                setVeterinarios(data.data);
+            } else {
+                setNotification({ message: data.message || 'No se pudieron cargar los veterinarios.', type: 'error' });
+            }
+        } catch (error) {
+            console.error("Error fetching vets:", error);
+            setNotification({ message: error.message || 'Error del servidor al cargar veterinarios.', type: 'error' });
+        }
+    }, [setNotification]);
+
     useEffect(() => {
         if (isOpen) {
+            fetchClientes();
+            fetchVeterinarios();
+
             if (record) {
-                // Formatear fechas para el input datetime-local
-                const formatForInput = (dateString) => {
-                    if (!dateString) return '';
-                    const date = new Date(dateString);
-                    return isNaN(date.getTime()) ? '' : date.toISOString().slice(0, 16);
+                // Para edición: obtener el ID del propietario de la mascota para seleccionar el cliente
+                const fetchOwnerId = async () => {
+                    const token = localStorage.getItem('token');
+                    if (!token) return;
+
+                    try {
+                        const response = await fetch(`${API_BASE_URL}/admin/mascotas/${record.id_mascota}`, {
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        const data = await response.json();
+                        if (response.ok && data.success) {
+                            setSelectedClientId(data.data.id_propietario.toString()); // Asegurar que sea string
+                        } else {
+                            console.error("No se pudo obtener el propietario de la mascota:", data.message);
+                        }
+                    } catch (error) {
+                        console.error("Error al obtener propietario de mascota:", error);
+                    }
                 };
+                fetchOwnerId();
+
+                // Formatear fechas para datetime-local
+                const formattedFechaRegistro = record.fecha_registro ? new Date(record.fecha_registro).toISOString().slice(0, 16) : '';
+                const formattedProximaCita = record.proxima_cita ? new Date(record.proxima_cita).toISOString().slice(0, 16) : '';
 
                 setFormData({
                     id_mascota: record.id_mascota || '',
-                    fecha_consulta: formatForInput(record.fecha_consulta),
+                    id_veterinario: record.id_veterinario || '',
+                    fecha_registro: formattedFechaRegistro,
                     diagnostico: record.diagnostico || '',
                     tratamiento: record.tratamiento || '',
                     observaciones: record.observaciones || '',
-                    veterinario: record.veterinario_id || '', // Usar veterinario_id si viene del backend
-                    peso_actual: record.peso_actual || '',
-                    temperatura: record.temperatura || '',
-                    proxima_cita: formatForInput(record.proxima_cita),
+                    proxima_cita: formattedProximaCita
                 });
             } else {
-                // Reset form for new record
+                // Resetear el formulario para nuevo historial
                 setFormData({
                     id_mascota: '',
-                    fecha_consulta: '',
+                    id_veterinario: '',
+                    fecha_registro: '',
                     diagnostico: '',
                     tratamiento: '',
                     observaciones: '',
-                    veterinario: '',
-                    peso_actual: '',
-                    temperatura: '',
-                    proxima_cita: '',
+                    proxima_cita: ''
                 });
+                setSelectedClientId(''); // Asegurarse de que el cliente también se resetee para un nuevo historial
             }
             setFormErrors({});
             setNotification(null);
         }
-    }, [record, isOpen]);
+    }, [isOpen, record, fetchClientes, fetchVeterinarios, API_BASE_URL]);
 
-    // Handle form changes
-    const handleChange = useCallback((e) => {
-        const { name, value } = e.target;
-        let newValue = value;
+    // === LÓGICA PARA CARGAR MASCOTAS SEGÚN EL CLIENTE SELECCIONADO ===
+    useEffect(() => {
+        if (isOpen && selectedClientId) {
+            const fetchMascotasForClient = async () => {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    setNotification({ message: 'No autorizado. Por favor, inicia sesión.', type: 'error' });
+                    setFilteredMascotas([]);
+                    return;
+                }
+                let result = { success: false, data: [] }; // Inicializar result aquí
 
-        // Convertir IDs numéricos si no están vacíos
-        if (['id_mascota', 'veterinario'].includes(name)) {
-            newValue = value !== '' ? parseInt(value, 10) : '';
+                try {
+                    const response = await fetch(`${API_BASE_URL}/mascotas/cliente/${selectedClientId}`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    if (!response.ok) {
+                        if (response.status === 404) {
+                            setNotification({ message: 'No se encontraron mascotas para el cliente seleccionado.', type: 'info' });
+                        } else {
+                            const errorData = await response.json();
+                            throw new Error(errorData.message || 'Error al obtener mascotas del cliente.');
+                        }
+                    } else {
+                        result = await response.json(); // Asignar result aquí
+                        if (result.success) {
+                            setFilteredMascotas(result.data);
+                        } else {
+                            setNotification({ message: result.message || 'No se pudieron cargar las mascotas del cliente.', type: 'error' });
+                        }
+                    }
+
+                    // Asegurarse de que filteredMascotas se actualiza en ambos casos (éxito y 404)
+                    setFilteredMascotas(result.data); // Esto asegura que si success es false o 404, se limpia la lista.
+
+                    // Si se está editando y la mascota existente no está en la lista filtrada, deseleccionar
+                    // O si se seleccionó un cliente y la mascota anterior no pertenece a él.
+                    if (record && record.id_mascota && !result.data.some(m => m.id_mascota === record.id_mascota)) {
+                         setFormData(prev => ({ ...prev, id_mascota: '' }));
+                    } else if (formData.id_mascota && !result.data.some(m => m.id_mascota === formData.id_mascota)) {
+                         setFormData(prev => ({ ...prev, id_mascota: '' }));
+                    }
+
+
+                } catch (error) {
+                    console.error("Error fetching mascotas for client:", error);
+                    setNotification({ message: error.message || 'Error del servidor al cargar mascotas.', type: 'error' });
+                    setFilteredMascotas([]); // En caso de error, siempre limpiar
+                }
+            };
+            fetchMascotasForClient();
+        } else if (!selectedClientId && isOpen) {
+            // Si no hay cliente seleccionado, limpia las mascotas filtradas
+            setFilteredMascotas([]);
+            setFormData(prev => ({ ...prev, id_mascota: '' }));
         }
-        // Para campos numéricos como peso y temperatura, asegúrate de que sean números
-        if (['peso_actual', 'temperatura'].includes(name)) {
-            newValue = value !== '' ? parseFloat(value) : '';
-        }
+    }, [selectedClientId, isOpen, API_BASE_URL, setNotification, record, formData.id_mascota]);
 
-        setFormData(prev => ({ ...prev, [name]: newValue }));
-
-        // Validate field in real-time
-        const validationError = validateField(name, newValue);
-        setFormErrors(prev => ({ ...prev, [name]: validationError }));
-    }, []);
-
-    // Handle blur to show errors when leaving a field
-    const handleBlur = useCallback((e) => {
-        const { name, value } = e.target;
-        let currentValue = value;
-        // Convertir IDs numéricos si no están vacíos para la validación onBlur
-        if (['id_mascota', 'veterinario'].includes(name)) {
-            currentValue = value !== '' ? parseInt(value, 10) : '';
-        }
-        if (['peso_actual', 'temperatura'].includes(name)) {
-            currentValue = value !== '' ? parseFloat(value) : '';
-        }
-        const validationError = validateField(name, currentValue);
-        setFormErrors(prev => ({ ...prev, [name]: validationError }));
-    }, []);
-
-    // Submit form (add or update)
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
+        setFormErrors({});
         setNotification(null);
 
-        // Validate all fields before submitting
-        let errors = {};
-        let hasErrors = false;
+        let valid = true;
+        let newErrors = {};
 
-        const fieldsToValidate = [
-            'id_mascota', 'fecha_consulta', 'diagnostico', 'tratamiento', 'veterinario'
-        ];
-
-        for (const field of fieldsToValidate) {
-            const errorMsg = validateField(field, formData[field]);
-            if (errorMsg) {
-                errors[field] = errorMsg;
-                hasErrors = true;
+        // Validar todos los campos
+        // AGREGAR 'id_cliente' a la validación
+        const fieldsToValidate = ['id_cliente', 'id_mascota', 'id_veterinario', 'fecha_registro', 'diagnostico', 'tratamiento'];
+        fieldsToValidate.forEach(field => {
+            let valueToValidate = formData[field];
+            if (field === 'id_cliente') {
+                valueToValidate = selectedClientId; // Validar directamente el estado selectedClientId
             }
+            const error = validateField(field, valueToValidate);
+            if (error) {
+                newErrors[field] = error;
+                valid = false;
+            }
+        });
+
+        if (!valid) {
+            setFormErrors(newErrors);
+            setIsSubmitting(false);
+            setNotification({ message: 'Por favor, corrige los errores del formulario.', type: 'error' });
+            return;
         }
 
-        setFormErrors(errors);
-
-        if (hasErrors) {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            setNotification({ message: 'No autorizado. Por favor, inicia sesión.', type: 'error' });
             setIsSubmitting(false);
-            setNotification({ message: 'Por favor, corrige los errores del formulario antes de enviar.', type: 'error' });
             return;
         }
 
         try {
-            const dataToSend = { ...formData };
+            const method = record ? 'PUT' : 'POST';
+            const url = record ? `${API_BASE_URL}/admin/historiales/${record.id_historial}` : `${API_BASE_URL}/admin/historiales`;
 
-            // Formatear fechas a ISO string antes de enviar al backend
-            if (dataToSend.fecha_consulta) {
-                const date = new Date(dataToSend.fecha_consulta);
-                dataToSend.fecha_consulta = isNaN(date.getTime()) ? null : date.toISOString();
-            } else {
-                dataToSend.fecha_consulta = null;
-            }
-            if (dataToSend.proxima_cita) {
-                const date = new Date(dataToSend.proxima_cita);
-                dataToSend.proxima_cita = isNaN(date.getTime()) ? null : date.toISOString();
-            } else {
-                dataToSend.proxima_cita = null;
-            }
+            const response = await fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(formData)
+            });
 
-            let responseData;
-            if (record) {
-                // Update medical record
-                const response = await authFetch(`${API_BASE_URL}/historial_medico/${record.id_historial}`, {
-                    method: 'PUT',
-                    body: JSON.stringify(dataToSend),
-                });
-                responseData = await response.json();
-            } else {
-                // Create new medical record
-                const response = await authFetch(`${API_BASE_URL}/historial_medico`, {
-                    method: 'POST',
-                    body: JSON.stringify(dataToSend),
-                });
-                responseData = await response.json();
+            const result = await response.json();
+
+            if (!response.ok) {
+                // Log the full error response from the server for better debugging
+                console.error("Server error response:", result);
+                throw new Error(result.message || 'Error al guardar el historial médico.');
             }
 
-            if (responseData.success) {
-                setNotification({ message: responseData.message, type: 'success' });
-                onSaveSuccess(); // Notify parent component to reload the list
-                onClose(); // Close the modal
-            } else {
-                setNotification({ message: responseData.message || 'Error al guardar el historial médico. Intenta de nuevo.', type: 'error' });
-            }
-        } catch (err) {
-            console.error('Error al enviar el formulario de historial médico:', err);
-            setNotification({ message: `Error al guardar el historial médico: ${err.message || 'Error desconocido'}`, type: 'error' });
+            setNotification({ message: result.message, type: 'success' });
+            onSaveSuccess();
+            onClose();
+        } catch (error) {
+            console.error("Error saving medical record:", error);
+            setNotification({ message: error.message || 'Error del servidor al guardar el historial médico.', type: 'error' });
         } finally {
             setIsSubmitting(false);
         }
     };
 
-    const getMascotaDisplay = (id) => {
-        const mascota = mascotas.find(m => m.id_mascota === parseInt(id));
-        return mascota ? `${mascota.nombre} (${mascota.especie})` : '';
-    };
-
-    const getVeterinarioDisplay = (id) => {
-        const veterinario = veterinarios.find(v => v.id === parseInt(id));
-        return veterinario ? `${veterinario.nombre} ${veterinario.apellido}` : '';
-    };
-
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title={record ? "Editar Historial Médico" : "Registrar Nuevo Historial Médico"}>
-            {notification && (
-                <Notification
-                    message={notification.message}
-                    type={notification.type}
-                    onClose={() => setNotification(null)}
-                />
-            )}
-            {isLoadingDependencies ? (
-                <div className="loading-state">
-                    <FaSpinner className="spinner" /> Cargando datos necesarios...
-                </div>
-            ) : (
-                <form onSubmit={handleSubmit} className="admin-form">
-                    <div className="form-grid">
-                        {/* Mascota */}
+        <Modal isOpen={isOpen} onClose={onClose} title={record ? "Editar Historial Médico" : "Registrar Historial Médico"}>
+            <Notification notification={notification} onClose={() => setNotification(null)} duration={5000} />
+            {isOpen && ( // Renderiza el formulario solo si el modal está abierto
+                <form onSubmit={handleSubmit} className="p-4 space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Cliente */}
+                        <div className="form-group">
+                            <label htmlFor="selectedClientId">Cliente:</label>
+                            <select
+                                id="selectedClientId"
+                                name="id_cliente"
+                                value={selectedClientId}
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                className={formErrors.id_cliente ? 'input-error' : ''}
+                                disabled={isSubmitting}
+                            >
+                                <option value="">-- Selecciona un cliente --</option>
+                                {clientes.map(cliente => (
+                                    <option key={cliente.id} value={cliente.id}>
+                                        {cliente.nombre} {cliente.apellido}
+                                    </option>
+                                ))}
+                            </select>
+                            {formErrors.id_cliente && <span className="error-text">{formErrors.id_cliente}</span>}
+                        </div>
+
+                        {/* Mascota - Usar filteredMascotas */}
                         <div className="form-group">
                             <label htmlFor="id_mascota">Mascota:</label>
-                            {record ? (
-                                <input
-                                    type="text"
-                                    id="mascota_display"
-                                    value={getMascotaDisplay(formData.id_mascota)}
-                                    className="input-disabled"
-                                    disabled
-                                />
-                            ) : (
-                                <select
-                                    id="id_mascota"
-                                    name="id_mascota"
-                                    value={formData.id_mascota}
-                                    onChange={handleChange}
-                                    onBlur={handleBlur}
-                                    className={formErrors.id_mascota ? 'input-error' : ''}
-                                    disabled={isSubmitting || isLoadingDependencies}
-                                >
-                                    <option value="">Selecciona una mascota</option>
-                                    {mascotas.map(mascota => (
+                            <select
+                                id="id_mascota"
+                                name="id_mascota"
+                                value={formData.id_mascota}
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                className={formErrors.id_mascota ? 'input-error' : ''}
+                                disabled={isSubmitting || !selectedClientId || filteredMascotas.length === 0}
+                            >
+                                <option value="">-- Selecciona una mascota --</option>
+                                {filteredMascotas.length > 0 ? (
+                                    filteredMascotas.map(mascota => (
                                         <option key={mascota.id_mascota} value={mascota.id_mascota}>
-                                            {mascota.nombre} ({mascota.especie}) - Propietario: {mascota.propietario_nombre}
+                                            {mascota.nombre} ({mascota.especie})
                                         </option>
-                                    ))}
-                                </select>
-                            )}
+                                    ))
+                                ) : (
+                                    selectedClientId && <option value="" disabled>No hay mascotas para este cliente</option>
+                                )}
+                            </select>
                             {formErrors.id_mascota && <span className="error-text">{formErrors.id_mascota}</span>}
                         </div>
 
-                        {/* Fecha de Consulta */}
+                        {/* Veterinario */}
                         <div className="form-group">
-                            <label htmlFor="fecha_consulta">Fecha de Consulta:</label>
-                            <input
-                                type="datetime-local"
-                                id="fecha_consulta"
-                                name="fecha_consulta"
-                                value={formData.fecha_consulta}
+                            <label htmlFor="id_veterinario">Veterinario:</label>
+                            <select
+                                id="id_veterinario"
+                                name="id_veterinario"
+                                value={formData.id_veterinario}
                                 onChange={handleChange}
                                 onBlur={handleBlur}
-                                className={formErrors.fecha_consulta ? 'input-error' : ''}
+                                className={formErrors.id_veterinario ? 'input-error' : ''}
+                                disabled={isSubmitting}
+                            >
+                                <option value="">-- Selecciona un veterinario --</option>
+                                {veterinarios.map(veterinario => (
+                                    <option key={veterinario.id} value={veterinario.id}>
+                                        {veterinario.nombre} {veterinario.apellido}
+                                    </option>
+                                ))}
+                            </select>
+                            {formErrors.id_veterinario && <span className="error-text">{formErrors.id_veterinario}</span>}
+                        </div>
+
+                        {/* Fecha de Registro */}
+                        <div className="form-group">
+                            <label htmlFor="fecha_registro">Fecha de Registro:</label>
+                            <input
+                                type="datetime-local"
+                                id="fecha_registro"
+                                name="fecha_registro"
+                                value={formData.fecha_registro}
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                className={formErrors.fecha_registro ? 'input-error' : ''}
                                 disabled={isSubmitting}
                             />
-                            {formErrors.fecha_consulta && <span className="error-text">{formErrors.fecha_consulta}</span>}
+                            {formErrors.fecha_registro && <span className="error-text">{formErrors.fecha_registro}</span>}
                         </div>
 
                         {/* Diagnóstico */}
-                        <div className="form-group full-width">
+                        <div className="form-group md:col-span-2">
                             <label htmlFor="diagnostico">Diagnóstico:</label>
                             <textarea
                                 id="diagnostico"
@@ -350,14 +380,14 @@ const AdminMedicalRecordForm = ({ isOpen, onClose, record, onSaveSuccess }) => {
                                 onChange={handleChange}
                                 onBlur={handleBlur}
                                 className={formErrors.diagnostico ? 'input-error' : ''}
-                                rows="3"
                                 disabled={isSubmitting}
+                                rows="3"
                             ></textarea>
                             {formErrors.diagnostico && <span className="error-text">{formErrors.diagnostico}</span>}
                         </div>
 
                         {/* Tratamiento */}
-                        <div className="form-group full-width">
+                        <div className="form-group md:col-span-2">
                             <label htmlFor="tratamiento">Tratamiento:</label>
                             <textarea
                                 id="tratamiento"
@@ -366,14 +396,14 @@ const AdminMedicalRecordForm = ({ isOpen, onClose, record, onSaveSuccess }) => {
                                 onChange={handleChange}
                                 onBlur={handleBlur}
                                 className={formErrors.tratamiento ? 'input-error' : ''}
-                                rows="3"
                                 disabled={isSubmitting}
+                                rows="3"
                             ></textarea>
                             {formErrors.tratamiento && <span className="error-text">{formErrors.tratamiento}</span>}
                         </div>
 
                         {/* Observaciones */}
-                        <div className="form-group full-width">
+                        <div className="form-group md:col-span-2">
                             <label htmlFor="observaciones">Observaciones:</label>
                             <textarea
                                 id="observaciones"
@@ -382,71 +412,15 @@ const AdminMedicalRecordForm = ({ isOpen, onClose, record, onSaveSuccess }) => {
                                 onChange={handleChange}
                                 onBlur={handleBlur}
                                 className={formErrors.observaciones ? 'input-error' : ''}
-                                rows="3"
                                 disabled={isSubmitting}
+                                rows="3"
                             ></textarea>
                             {formErrors.observaciones && <span className="error-text">{formErrors.observaciones}</span>}
                         </div>
 
-                        {/* Veterinario */}
+                        {/* Próxima Cita (Opcional) */}
                         <div className="form-group">
-                            <label htmlFor="veterinario">Veterinario:</label>
-                            <select
-                                id="veterinario"
-                                name="veterinario"
-                                value={formData.veterinario}
-                                onChange={handleChange}
-                                onBlur={handleBlur}
-                                className={formErrors.veterinario ? 'input-error' : ''}
-                                disabled={isSubmitting || isLoadingDependencies}
-                            >
-                                <option value="">Selecciona un veterinario</option>
-                                {veterinarios.map(vet => (
-                                    <option key={vet.id} value={vet.id}>
-                                        {vet.nombre} {vet.apellido}
-                                    </option>
-                                ))}
-                            </select>
-                            {formErrors.veterinario && <span className="error-text">{formErrors.veterinario}</span>}
-                        </div>
-
-                        {/* Peso Actual */}
-                        <div className="form-group">
-                            <label htmlFor="peso_actual">Peso Actual (kg):</label>
-                            <input
-                                type="number"
-                                id="peso_actual"
-                                name="peso_actual"
-                                value={formData.peso_actual}
-                                onChange={handleChange}
-                                onBlur={handleBlur}
-                                className={formErrors.peso_actual ? 'input-error' : ''}
-                                disabled={isSubmitting}
-                                step="0.01"
-                            />
-                            {formErrors.peso_actual && <span className="error-text">{formErrors.peso_actual}</span>}
-                        </div>
-
-                        {/* Temperatura */}
-                        <div className="form-group">
-                            <label htmlFor="temperatura">Temperatura (°C):</label>
-                            <input
-                                type="number"
-                                id="temperatura"
-                                name="temperatura"
-                                value={formData.temperatura}
-                                onChange={handleChange}
-                                onBlur={handleBlur}
-                                className={formErrors.temperatura ? 'input-error' : ''}
-                                disabled={isSubmitting}
-                                step="0.1"
-                            />
-                            {formErrors.temperatura && <span className="error-text">{formErrors.temperatura}</span>}
-                        </div>
-
-                        {/* Próxima Cita */}
-                        <div className="form-group">
-                            <label htmlFor="proxima_cita">Próxima Cita:</label>
+                            <label htmlFor="proxima_cita">Próxima Cita (Opcional):</label>
                             <input
                                 type="datetime-local"
                                 id="proxima_cita"
@@ -461,7 +435,7 @@ const AdminMedicalRecordForm = ({ isOpen, onClose, record, onSaveSuccess }) => {
                         </div>
                     </div>
 
-                    <div className="form-actions">
+                    <div className="form-actions mt-4 flex justify-end space-x-2">
                         <button type="submit" className="btn-primary" disabled={isSubmitting}>
                             {isSubmitting ? <FaSpinner className="spinner" /> : <FaSave />} {record ? 'Actualizar Historial' : 'Registrar Historial'}
                         </button>

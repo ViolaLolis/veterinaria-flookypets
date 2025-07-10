@@ -3272,32 +3272,553 @@ app.post("/citas/agendar", authenticateToken, authorizeRoles(['veterinario', 'ad
     }
 });
 // Ruta para crear una nueva cita (POST)
+// Ruta para crear una nueva cita
 app.post("/citas", authenticateToken, async (req, res) => {
     try {
-        const { id_cliente, id_servicio, id_veterinario, id_mascota, fecha, motivo, estado } = req.body;
+        console.log("[CREATE_APPOINTMENT] Received data:", req.body);
+        const {
+            id_cliente,
+            id_mascota,
+            id_servicio,
+            id_veterinario,
+            fecha_cita, // Esta es la cadena ISO del frontend
+            notas_adicionales,
+            estado
+        } = req.body;
 
-        // Basic validation (add more robust validation as needed)
-        if (!id_cliente || !id_servicio || !id_mascota || !fecha) {
-            return res.status(400).json({ success: false, message: "Faltan campos obligatorios para agendar la cita." });
+        // Validación básica (agrega validaciones más robustas según sea necesario)
+        if (!id_cliente || !id_mascota || !id_servicio || !id_veterinario || !fecha_cita || !estado) {
+            return res.status(400).json({ success: false, message: "Faltan campos obligatorios para registrar la cita." });
         }
 
+        // --- IMPORTANTE: Formatear fecha_cita para MySQL DATETIME ---
+        let formattedFechaCita = null;
+        if (fecha_cita) {
+            const date = new Date(fecha_cita);
+            // Formatear a YYYY-MM-DD HH:MM:SS
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            formattedFechaCita = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+        }
+        // --- FIN Formateo de Fecha ---
+
         const query = `
-            INSERT INTO citas (id_cliente, id_servicio, id_veterinario, id_mascota, fecha, servicios, estado)
+            INSERT INTO citas (id_cliente, id_mascota, id_servicio, id_veterinario, fecha, notas_adicionales, estado)
             VALUES (?, ?, ?, ?, ?, ?, ?)
         `;
-        const [result] = await pool.query(query, [id_cliente, id_servicio, id_veterinario, id_mascota, fecha, motivo, estado]);
+        const [result] = await pool.query(query, [
+            id_cliente,
+            id_mascota,
+            id_servicio,
+            id_veterinario,
+            formattedFechaCita, // Usar la fecha formateada
+            notas_adicionales,
+            estado
+        ]);
 
-        res.status(201).json({ success: true, message: "Cita agendada exitosamente.", citaId: result.insertId });
+        res.status(201).json({ success: true, message: "Cita registrada exitosamente.", id: result.insertId });
 
     } catch (error) {
-        console.error("Error al registrar la cita:", error);
-        // Handle specific MySQL errors, e.g., foreign key constraints
-        if (error.code === 'ER_NO_REFERENCED_ROW_2' || error.errno === 1452) { // MySQL error for foreign key constraint fail
+        console.error("Error al registrar cita:", error);
+        if (error.code === 'ER_NO_REFERENCED_ROW_2' || error.errno === 1452) {
             return res.status(400).json({ success: false, message: 'Error de datos: Cliente, servicio, veterinario o mascota no existen en la base de datos.' });
         }
         res.status(500).json({ success: false, message: "Error interno del servidor al registrar la cita.", error: process.env.NODE_ENV === 'development' ? error.stack : error.message });
     }
 });
+// Ruta para registrar un nuevo historial médico
+app.post("/historial_medico", authenticateToken, async (req, res) => {
+    try {
+        console.log("[CREATE_MEDICAL_RECORD] Received data:", req.body);
+        const {
+            id_mascota,
+            fecha_consulta, // Esta es la cadena ISO
+            diagnostico,
+            tratamiento,
+            observaciones,
+            veterinario,
+            peso_actual,
+            temperatura,
+            proxima_cita // Esta es la cadena ISO
+        } = req.body;
+
+        // Validación básica
+        if (!id_mascota || !fecha_consulta || !diagnostico || !tratamiento || !veterinario || peso_actual === undefined || temperatura === undefined) {
+            return res.status(400).json({ success: false, message: "Faltan campos obligatorios para registrar el historial médico." });
+        }
+
+        // --- IMPORTANTE: Formatear fechas para MySQL DATETIME ---
+        let formattedFechaConsulta = null;
+        if (fecha_consulta) {
+            const date = new Date(fecha_consulta);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            formattedFechaConsulta = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+        }
+
+        let formattedProximaCita = null;
+        if (proxima_cita) {
+            const date = new Date(proxima_cita);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            formattedProximaCita = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+        }
+        // --- FIN Formateo de Fechas ---
+
+        const query = `
+            INSERT INTO historial_medico (id_mascota, fecha_consulta, diagnostico, tratamiento, observaciones, veterinario, peso_actual, temperatura, proxima_cita)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `;
+        const [result] = await pool.query(query, [
+            id_mascota,
+            formattedFechaConsulta, // Usar la fecha formateada
+            diagnostico,
+            tratamiento,
+            observaciones,
+            veterinario,
+            peso_actual,
+            temperatura,
+            formattedProximaCita // Usar la fecha formateada
+        ]);
+
+        res.status(201).json({ success: true, message: "Historial médico registrado exitosamente.", id: result.insertId });
+
+    } catch (error) {
+        console.error("Error al registrar historial médico:", error);
+        if (error.code === 'ER_NO_REFERENCED_ROW_2' || error.errno === 1452) {
+            return res.status(400).json({ success: false, message: 'Error de datos: La mascota o el veterinario no existen.' });
+        }
+        res.status(500).json({ success: false, message: "Error interno del servidor al registrar el historial médico.", error: process.env.NODE_ENV === 'development' ? error.stack : error.message });
+    }
+});
+// =============================================================================
+// NUEVO PROCEDIMIENTO: REGISTRAR ENTRADA DE HISTORIAL MÉDICO
+// =============================================================================
+app.post("/medical-records/add-entry", authenticateToken, isVetOrAdmin, async (req, res) => {
+    const { 
+        id_mascota, 
+        fecha_consulta, 
+        veterinario, // id del veterinario o admin que registra
+        diagnostico, 
+        tratamiento, 
+        observaciones, 
+        peso_actual, 
+        temperatura, 
+        proxima_cita 
+    } = req.body;
+
+    // Validar campos requeridos
+    if (!id_mascota || !fecha_consulta || !veterinario || !diagnostico || !tratamiento) {
+        return res.status(400).json({ success: false, message: "Campos requeridos incompletos para el registro médico: mascota, fecha, veterinario, diagnóstico, tratamiento." });
+    }
+
+    try {
+        // Verificar que la mascota exista [cite: 360]
+        const [mascotaRows] = await pool.query("SELECT id_mascota FROM mascotas WHERE id_mascota = ?", [id_mascota]);
+        if (mascotaRows.length === 0) {
+            return res.status(400).json({ success: false, message: "ID de mascota no válido. La mascota no existe." });
+        }
+
+        // Verificar que el ID de 'veterinario' corresponda a un veterinario o administrador [cite: 361]
+        const [vetUserRows] = await pool.query("SELECT id FROM usuarios WHERE id = ? AND role IN ('veterinario', 'admin')", [veterinario]);
+        if (vetUserRows.length === 0) {
+            return res.status(400).json({ success: false, message: "ID de veterinario no válido o no autorizado para registrar historial." });
+        }
+
+        // Insertar el nuevo historial médico [cite: 363]
+        const [result] = await pool.query(
+            `INSERT INTO historial_medico (id_mascota, fecha_consulta, veterinario, diagnostico, tratamiento, observaciones, peso_actual, temperatura, proxima_cita)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [id_mascota, fecha_consulta, veterinario, diagnostico, tratamiento, 
+             observaciones || null, peso_actual || null, temperatura || null, proxima_cita || null]
+        );
+
+        // Obtener el registro recién creado para devolverlo en la respuesta [cite: 364]
+        const [newRecord] = await pool.query("SELECT * FROM historial_medico WHERE id_historial = ?", [result.insertId]);
+        
+        res.status(201).json({ success: true, message: "Entrada de historial médico registrada correctamente.", data: newRecord[0] });
+        console.log(`[MEDICAL_RECORD] Nuevo historial médico creado (ID: ${result.insertId}) para mascota ID: ${id_mascota}`);
+
+    } catch (error) {
+        console.error("Error al registrar entrada de historial médico:", error);
+        // Manejo específico para errores de clave foránea [cite: 515]
+        if (error.code === 'ER_NO_REFERENCED_ROW_2' || error.errno === 1452) {
+            return res.status(400).json({ success: false, message: 'Error de datos: La mascota o el usuario (veterinario) no existen.' });
+        }
+        res.status(500).json({ success: false, message: "Error interno del servidor al registrar el historial médico.", error: process.env.NODE_ENV === 'development' ? error.stack : error.message });
+    }
+});
+// =============================================================================
+// NUEVO PROCEDIMIENTO: PROGRAMAR CITA
+// =============================================================================
+app.post("/appointments/create-new", authenticateToken, async (req, res) => {
+    console.log("[NEW_APPOINTMENT] Datos recibidos:", req.body);
+    const { 
+        id_cliente, 
+        id_mascota, 
+        id_servicio, 
+        id_veterinario, 
+        fecha, // Usamos 'fecha' como en tu tabla 'citas' 
+        servicios, // Usamos 'servicios' como en tu tabla 'citas' 
+        estado // Opcional, por defecto 'pendiente'
+    } = req.body;
+
+    // Validación básica de campos requeridos
+    if (!id_cliente || !id_mascota || !id_servicio || !id_veterinario || !fecha || !servicios) {
+        return res.status(400).json({ success: false, message: "Faltan campos obligatorios para programar la cita: cliente, mascota, servicio, veterinario, fecha, servicios." });
+    }
+
+    // Convertir la fecha a un formato adecuado para MySQL si es necesario
+    // Asumimos que 'fecha' ya viene en un formato que MySQL puede interpretar directamente (ej. ISO 8601)
+    const fechaCitaMySQL = new Date(fecha);
+    if (isNaN(fechaCitaMySQL.getTime())) {
+        return res.status(400).json({ success: false, message: "Formato de fecha de cita no válido." });
+    }
+
+    try {
+        // Verificar que el cliente, mascota, servicio y veterinario existan
+        const [clientRows] = await pool.query("SELECT id FROM usuarios WHERE id = ? AND role = 'usuario'", [id_cliente]);
+        if (clientRows.length === 0) {
+            return res.status(400).json({ success: false, message: "ID de cliente no válido o no encontrado." });
+        }
+
+        const [vetRows] = await pool.query("SELECT id, nombre, apellido, email FROM usuarios WHERE id = ? AND role IN ('veterinario', 'admin')", [id_veterinario]);
+        if (vetRows.length === 0) {
+            return res.status(400).json({ success: false, message: "ID de veterinario no válido o no encontrado." });
+        }
+        const assignedVet = vetRows[0]; // Datos del veterinario asignado
+
+        const [serviceRows] = await pool.query("SELECT id_servicio, nombre FROM servicios WHERE id_servicio = ?", [id_servicio]);
+        if (serviceRows.length === 0) {
+            return res.status(400).json({ success: false, message: "ID de servicio no válido o no encontrado." });
+        }
+        const servicio_nombre = serviceRows[0].nombre; // Nombre del servicio
+
+        const [mascotaRows] = await pool.query("SELECT id_mascota, id_propietario, nombre FROM mascotas WHERE id_mascota = ?", [id_mascota]);
+        if (mascotaRows.length === 0) {
+            return res.status(400).json({ success: false, message: "ID de mascota no válido o no encontrado." });
+        }
+        const mascota_nombre = mascotaRows[0].nombre; // Nombre de la mascota
+
+        // Verificar que la mascota pertenezca al cliente especificado
+        if (mascotaRows[0].id_propietario !== id_cliente) {
+            return res.status(403).json({ success: false, message: "La mascota especificada no pertenece al cliente indicado." });
+        }
+
+        // Obtener el nombre del cliente para las notificaciones
+        const [clienteData] = await pool.query("SELECT nombre, apellido, email FROM usuarios WHERE id = ?", [id_cliente]);
+        const cliente_nombre = clienteData.length > 0 ? `${clienteData[0].nombre} ${clienteData[0].apellido}` : 'Cliente Desconocido';
+        const cliente_email = clienteData.length > 0 ? clienteData[0].email : null;
+
+        // Insertar la nueva cita 
+        const [result] = await pool.query(
+            `INSERT INTO citas (id_cliente, id_servicio, id_veterinario, id_mascota, fecha, servicios, estado)
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [id_cliente, id_servicio, id_veterinario, id_mascota, fechaCitaMySQL, servicios, estado || 'pendiente']
+        );
+
+        const newCitaId = result.insertId;
+        const [newCita] = await pool.query("SELECT * FROM citas WHERE id_cita = ?", [newCitaId]);
+
+        // Lógica de notificaciones [cite: 416, 420]
+        // Notificar al veterinario asignado sobre la nueva cita PENDIENTE
+        await pool.query(
+            `INSERT INTO notificaciones (id_usuario, tipo, mensaje, referencia_id) VALUES (?, ?, ?, ?)`,
+            [id_veterinario, 'cita_creada_vet', `Nueva cita PENDIENTE de ${cliente_nombre} para ${mascota_nombre} (${servicio_nombre}) el ${fecha}.`, newCitaId]
+        );
+        if (assignedVet.email) {
+            simulateSendEmail(
+                assignedVet.email,
+                `Nueva Cita Pendiente - Flooky Pets`,
+                `Hola Dr./Dra. ${assignedVet.nombre} ${assignedVet.apellido},\n\nSe ha solicitado una nueva cita pendiente:\n\nCliente: ${cliente_nombre}\nMascota: ${mascota_nombre}\nServicio: ${servicio_nombre}\nFecha y Hora: ${fecha}\n\nPor favor, revisa tu panel para ACEPTAR o RECHAZAR esta cita.\n\nSaludos,\nEl equipo de Flooky Pets`
+            );
+        }
+
+        // Notificar al cliente que su cita está PENDIENTE
+        await pool.query(
+            `INSERT INTO notificaciones (id_usuario, tipo, mensaje, referencia_id) VALUES (?, ?, ?, ?)`,
+            [id_cliente, 'cita_creada_user', `Tu cita para ${mascota_nombre} (${servicio_nombre}) el ${fecha} ha sido solicitada y está PENDIENTE de confirmación.`, newCitaId]
+        );
+        if (cliente_email) {
+            simulateSendEmail(
+                cliente_email,
+                `Confirmación de Solicitud de Cita - Flooky Pets`,
+                `Hola ${cliente_nombre},\n\nHemos recibido tu solicitud de cita para:\n\nMascota: ${mascota_nombre}\nServicio: ${servicio_nombre}\nFecha y Hora: ${fecha}\nEstado: PENDIENTE\n\nTe notificaremos tan pronto como tu cita sea ACEPTADA o RECHAZADA por el veterinario.\n\nGracias por elegir Flooky Pets.`
+            );
+        }
+        // Fin lógica de notificaciones
+
+        res.status(201).json({ success: true, message: "Cita programada correctamente y pendiente de confirmación.", data: newCita[0] });
+        console.log(`[NEW_APPOINTMENT] Nueva cita programada (ID: ${newCitaId}) para cliente ID: ${id_cliente}, mascota ID: ${id_mascota}`);
+
+    } catch (error) {
+        console.error("Error al programar nueva cita:", error);
+        // Manejo específico de errores de clave foránea [cite: 515]
+        if (error.code === 'ER_NO_REFERENCED_ROW_2' || error.errno === 1452) {
+            return res.status(400).json({ success: false, message: 'Error de datos: Cliente, servicio, veterinario o mascota no existen en la base de datos.' });
+        }
+        res.status(500).json({ success: false, message: "Error interno del servidor al programar la cita.", error: process.env.NODE_ENV === 'development' ? error.stack : error.message });
+    }
+});
+// =============================================================================
+// RUTA PARA OBTENER CLIENTES (ROLES 'usuario')
+// =============================================================================
+app.get("/admin/clientes", authenticateToken, isAdmin, async (req, res) => { // Added isAdmin for security
+    try {
+        const [rows] = await pool.query("SELECT id, nombre, apellido, email, telefono, direccion, active FROM usuarios WHERE role = 'usuario'");
+        res.status(200).json({ success: true, message: "Clientes obtenidos correctamente.", data: rows });
+    } catch (error) {
+        console.error("Error al obtener clientes:", error);
+        res.status(500).json({ success: false, message: "Error interno del servidor al obtener clientes." });
+    }
+});
+// =============================================================================
+// RUTA PARA OBTENER MASCOTAS POR ID DE CLIENTE
+// =============================================================================
+app.get("/mascotas/cliente/:id_cliente", authenticateToken, async (req, res) => {
+    const { id_cliente } = req.params;
+    try {
+        const [rows] = await pool.query(
+            "SELECT m.id_mascota, m.nombre, m.especie, m.raza, m.fecha_nacimiento, m.color, m.imagen_url, u.nombre AS nombre_propietario FROM mascotas m JOIN usuarios u ON m.id_propietario = u.id WHERE m.id_propietario = ?",
+            [id_cliente]
+        );
+
+        if (rows.length === 0) {
+            return res.status(404).json({ success: false, message: "No se encontraron mascotas para este cliente." });
+        }
+        res.status(200).json({ success: true, message: "Mascotas del cliente obtenidas correctamente.", data: rows });
+
+    } catch (error) {
+        console.error("Error al obtener mascotas por cliente:", error);
+        res.status(500).json({ success: false, message: "Error interno del servidor al obtener mascotas del cliente." });
+    }
+});
+// =============================================================================
+// RUTA PARA OBTENER TODOS LOS VETERINARIOS ACTIVOS
+// =============================================================================
+app.get("/veterinarios", authenticateToken, async (req, res) => {
+    try {
+        const [rows] = await pool.query(
+            "SELECT id, nombre, apellido, email, telefono, experiencia, universidad, horario, imagen_url FROM usuarios WHERE role = 'veterinario' AND active = 1"
+        );
+        res.status(200).json({ success: true, message: "Veterinarios obtenidos correctamente.", data: rows });
+    } catch (error) {
+        console.error("Error al obtener veterinarios:", error);
+        res.status(500).json({ success: false, message: "Error interno del servidor al obtener veterinarios." });
+    }
+});
+// =============================================================================
+// RUTA PARA CREAR UNA NUEVA CITA (ADMIN)
+// =============================================================================
+app.post("/admin/citas", authenticateToken, async (req, res) => {
+    // Los campos que el frontend enviará en el body de la petición
+    const {
+        id_cliente,
+        id_mascota,
+        id_servicio,
+        id_veterinario,
+        fecha_cita, // Del frontend, se mapea a 'fecha' en la DB
+        notas_adicionales, // Del frontend, se mapea a 'servicios' en la DB
+        estado
+    } = req.body;
+
+    try {
+        // Validación básica de los datos recibidos
+        if (!id_cliente || !id_mascota || !id_servicio || !id_veterinario || !fecha_cita) {
+            return res.status(400).json({ success: false, message: "Faltan campos obligatorios para crear la cita." });
+        }
+
+        // Mapeo de nombres de campos del frontend a la base de datos
+        const fechaDB = fecha_cita; // 'fecha_cita' del frontend es 'fecha' en la DB
+        const serviciosDB = notas_adicionales; // 'notas_adicionales' del frontend es 'servicios' en la DB
+
+        const [result] = await pool.query(
+            "INSERT INTO citas (id_cliente, id_servicio, id_veterinario, id_mascota, fecha, servicios, estado) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            [id_cliente, id_servicio, id_veterinario, id_mascota, fechaDB, serviciosDB, estado]
+        );
+
+        res.status(201).json({
+            success: true,
+            message: "Cita creada exitosamente.",
+            id_cita: result.insertId // Devuelve el ID de la nueva cita creada
+        });
+
+    } catch (error) {
+        console.error("Error al crear cita:", error);
+
+        // Mensaje de error más específico para FK (si mascota/veterinario/cliente no existen)
+        if (error.code === 'ER_NO_REFERENCED_ROW_2' || error.errno === 1452) {
+            return res.status(400).json({ success: false, message: 'Error de datos: El cliente, la mascota, el servicio o el veterinario especificado no existen.' });
+        }
+
+        res.status(500).json({ success: false, message: "Error interno del servidor al crear la cita." });
+    }
+});
+// =============================================================================
+// RUTA PARA REGISTRAR UN NUEVO HISTORIAL MÉDICO (ADMIN)
+// =============================================================================
+app.post("/admin/historial-medico", authenticateToken, async (req, res) => {
+    // Los campos que el frontend enviará en el body de la petición
+    const {
+        id_mascota,
+        id_veterinario,
+        fecha_visita,
+        diagnostico,
+        tratamiento,
+        notas_internas,
+        peso,
+        temperatura,
+        observaciones_generales,
+        proxima_cita
+    } = req.body;
+
+    try {
+        // Validación básica de los datos recibidos
+        if (!id_mascota || !id_veterinario || !fecha_visita) {
+            return res.status(400).json({ success: false, message: "Faltan campos obligatorios para registrar el historial médico (Mascota, Veterinario, Fecha de Visita)." });
+        }
+
+        const [result] = await pool.query(
+            "INSERT INTO historial_medico (id_mascota, id_veterinario, fecha_visita, diagnostico, tratamiento, notas_internas, peso, temperatura, observaciones_generales, proxima_cita) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            [id_mascota, id_veterinario, fecha_visita, diagnostico, tratamiento, notas_internas, peso, temperatura, observaciones_generales, proxima_cita]
+        );
+
+        res.status(201).json({
+            success: true,
+            message: "Historial médico registrado exitosamente.",
+            id_historial: result.insertId // Devuelve el ID del nuevo registro creado
+        });
+
+    } catch (error) {
+        console.error("Error al registrar historial médico:", error);
+
+        // Mensaje de error más específico para FK (si mascota/veterinario no existen)
+        if (error.code === 'ER_NO_REFERENCED_ROW_2' || error.errno === 1452) {
+            return res.status(400).json({ success: false, message: 'Error de datos: La mascota o el veterinario especificado no existen.' });
+        }
+
+        res.status(500).json({ success: false, message: "Error interno del servidor al registrar el historial médico." });
+    }
+});
+// Ruta para registrar un nuevo historial médico (para veterinarios o administradores)
+app.post("/admin/historiales", authenticateToken, isVetOrAdmin, async (req, res) => {
+    // ... (rest of your existing code for data extraction and validation)
+
+    try {
+        // ... (your existing Express-file-upload check if applicable)
+
+        console.log("Valores para INSERT en historial_medico:", {
+            id_mascota: id_mascota,
+            veterinario: id_veterinario, // Corrected from id_veterinario to veterinario
+            fechaVisitaDB: fecha_visita,
+            finalDiagnostico: diagnostico,
+            finalTratamiento: tratamiento,
+            finalObservaciones: observaciones_generales,
+            proximaCitaDB: proxima_cita
+        });
+
+        // Insertar el historial médico en la base de datos
+        const [result] = await pool.query(
+            `INSERT INTO historial_medico (id_mascota, veterinario, fecha_visita, diagnostico, tratamiento, observaciones_generales, proxima_cita) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [
+                id_mascota,
+                id_veterinario, // Use the variable holding the veterinarian ID
+                fecha_visita,
+                diagnostico,
+                tratamiento,
+                observaciones_generales,
+                proxima_cita
+            ]
+        );
+
+        // ... (rest of your existing code for success response and error handling)
+    } catch (error) {
+        console.error("Error al registrar historial médico:", error);
+        // ... (rest of your existing error handling)
+    }
+});
+
+
+// =============================================================================
+// RUTA PARA ACTUALIZAR UN HISTORIAL MÉDICO EXISTENTE (ADMIN)
+// =============================================================================
+app.put("/admin/historiales/:id_historial", authenticateToken, async (req, res) => {
+    const { id_historial } = req.params;
+    const {
+        id_mascota,
+        id_veterinario,
+        fecha_registro,
+        diagnostico,
+        tratamiento,
+        observaciones,
+        proxima_cita
+    } = req.body;
+
+    try {
+        // Validación de campos obligatorios.
+        if (!id_mascota || !id_veterinario || !fecha_registro || !diagnostico || !tratamiento) {
+            return res.status(400).json({ success: false, message: "Faltan campos obligatorios para actualizar el historial médico (Mascota, Veterinario, Fecha de Registro, Diagnóstico, Tratamiento)." });
+        }
+
+        const fechaVisitaDB = new Date(fecha_registro).toISOString().slice(0, 10);
+        const proximaCitaDB = proxima_cita ? new Date(proxima_cita).toISOString().slice(0, 19).replace('T', ' ') : null;
+
+        const finalObservaciones = observaciones || null;
+        const finalDiagnostico = diagnostico || null;
+        const finalTratamiento = tratamiento || null;
+
+        // *** IMPORTANTE: Revisa esta salida en la CONSOLA DE TU SERVIDOR cuando ocurra el error ***
+        console.log("Valores para UPDATE en historial_medico:", {
+            id_historial,
+            id_mascota,
+            id_veterinario,
+            fechaVisitaDB,
+            finalDiagnostico,
+            finalTratamiento,
+            finalObservaciones,
+            proximaCitaDB
+        });
+
+        const [result] = await pool.query(
+            "UPDATE historial_medico SET id_mascota = ?, id_veterinario = ?, fecha_visita = ?, diagnostico = ?, tratamiento = ?, observaciones_generales = ?, proxima_cita = ? WHERE id_historial = ?",
+            [id_mascota, id_veterinario, fechaVisitaDB, finalDiagnostico, finalTratamiento, finalObservaciones, proximaCitaDB, id_historial]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ success: false, message: "Historial médico no encontrado." });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Historial médico actualizado exitosamente."
+        });
+
+    } catch (error) {
+        // *** IMPORTANTE: Revisa esta salida en la CONSOLA DE TU SERVIDOR para el error detallado ***
+        console.error("Error al actualizar historial médico:", error);
+        if (error.code === 'ER_NO_REFERENCED_ROW_2' || error.errno === 1452) {
+            return res.status(400).json({ success: false, message: 'Error de datos: La mascota o el veterinario especificado no existen.' });
+        }
+        res.status(500).json({
+            success: false,
+            message: "Error interno del servidor al actualizar el historial médico.",
+            errorDetails: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
+    }
+});
+
 // =============================================================================
 // INICIO DEL SERVIDOR Y MANEJO DE ERRORES GLOBAL
 // =============================================================================
