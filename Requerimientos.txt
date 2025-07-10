@@ -4,6 +4,7 @@ npm install recharts
 npm install @emailjs/browser
 npm install react-dom
 npm install react-datepicker date-fns (nuevo paquete)
+npm install --save @fortawesome/fontawesome-svg-core @fortawesome/free-solid-svg-icons @fortawesome/react-fontawesome
 
 Usuarios de prueba
 Admin: admin@example.com | 1234

@@ -4,7 +4,7 @@ import Main from "./Pages/Inicio/Main";
 import Login from "./Pages/Login/Login.js";
 import Registro from "./Pages/Login/Registro.js";
 import ForgotPassword from "./Pages/Login/OlvideContraseña.js";
-import styles from './App.css';
+import styles from './App.css'; // Asegúrate de que este import sea correcto o que App.css exista y se use.
 
 
 // Componentes de Usuario
@@ -215,6 +215,11 @@ function App() {
         }
         return null;
     });
+
+    // --- ESTA ES LA MODIFICACIÓN PARA EL TÍTULO DE LA PESTAÑA ---
+    useEffect(() => {
+        document.title = "Flooky Pets"; // Esto cambiará el título de la pestaña del navegador a "Flooky Pets"
+    }, []); // El array vacío [] asegura que esto se ejecute solo una vez al montar el componente App
 
     // Efecto para sincronizar el estado 'user' con localStorage
     useEffect(() => {
