@@ -80,7 +80,7 @@ app.use(express.json()); // Habilita el parsing de JSON en el cuerpo de las peti
 const pool = mysql.createPool({
     host: process.env.DB_HOST || "127.0.0.1",       // Host de la base de datos
     user: process.env.DB_USER || "root",           // Usuario de la base de datos
-    password: process.env.DB_PASSWORD || "", // Contraseña de la base de datos
+    password: process.env.DB_PASSWORD || "12345678", // Contraseña de la base de datos
     database: process.env.DB_NAME || "veterinaria", // Nombre de la base de datos
     waitForConnections: true,                      // Esperar si no hay conexiones disponibles
     connectionLimit: 10,                           // Número máximo de conexiones en el pool
@@ -3265,6 +3265,33 @@ app.post("/citas/agendar", authenticateToken, authorizeRoles(['veterinario', 'ad
     } catch (error) {
         console.error("Error al registrar cita:", error);
         // Manejo específico de errores si es necesario (ej. clave foránea no encontrada)
+        if (error.code === 'ER_NO_REFERENCED_ROW_2' || error.errno === 1452) { // MySQL error for foreign key constraint fail
+            return res.status(400).json({ success: false, message: 'Error de datos: Cliente, servicio, veterinario o mascota no existen en la base de datos.' });
+        }
+        res.status(500).json({ success: false, message: "Error interno del servidor al registrar la cita.", error: process.env.NODE_ENV === 'development' ? error.stack : error.message });
+    }
+});
+// Ruta para crear una nueva cita (POST)
+app.post("/citas", authenticateToken, async (req, res) => {
+    try {
+        const { id_cliente, id_servicio, id_veterinario, id_mascota, fecha, motivo, estado } = req.body;
+
+        // Basic validation (add more robust validation as needed)
+        if (!id_cliente || !id_servicio || !id_mascota || !fecha) {
+            return res.status(400).json({ success: false, message: "Faltan campos obligatorios para agendar la cita." });
+        }
+
+        const query = `
+            INSERT INTO citas (id_cliente, id_servicio, id_veterinario, id_mascota, fecha, servicios, estado)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        `;
+        const [result] = await pool.query(query, [id_cliente, id_servicio, id_veterinario, id_mascota, fecha, motivo, estado]);
+
+        res.status(201).json({ success: true, message: "Cita agendada exitosamente.", citaId: result.insertId });
+
+    } catch (error) {
+        console.error("Error al registrar la cita:", error);
+        // Handle specific MySQL errors, e.g., foreign key constraints
         if (error.code === 'ER_NO_REFERENCED_ROW_2' || error.errno === 1452) { // MySQL error for foreign key constraint fail
             return res.status(400).json({ success: false, message: 'Error de datos: Cliente, servicio, veterinario o mascota no existen en la base de datos.' });
         }
