@@ -110,7 +110,7 @@ const ListaMascotasUsuario = () => {
             {/* Mensaje dinámico según si hay búsqueda o no */}
             {searchTerm
               ? `No se encontraron mascotas que coincidan con "${searchTerm}".`
-              : 'No tienes mascotas registradas. ¡Añade una ahora!'}
+              : 'No tienes mascotas registradas.'}
           </p>
           {searchTerm && allUserPets.length > 0 && (
             // Botón para limpiar la búsqueda si hay resultados filtrados pero no se encuentran
@@ -118,12 +118,8 @@ const ListaMascotasUsuario = () => {
               Ver todas las mascotas
             </button>
           )}
-          {/* El botón "Registrar Mascota" solo se muestra cuando NO hay mascotas registradas y NO hay término de búsqueda */}
-          {!searchTerm && allUserPets.length === 0 && (
-            <button className={styles.primaryButton} onClick={() => navigate('/usuario/mascotas/agregar')}>
-              <FaPlus /> Registrar Mascota
-            </button>
-          )}
+          
+
         </div>
       ) : (
         // Contenedor de la cuadrícula de mascotas

@@ -20,7 +20,6 @@ html, body, #root { /* Asume #root es el ID del div donde se monta tu app React 
   height: 100%;
   margin: 0;
   padding: 0;
-  overflow: hidden; /* Evita el scroll global del body */
   font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
